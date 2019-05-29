@@ -1,0 +1,24 @@
+language: java
+
+jdk:
+- oraclejdk11
+- openjdk11
+
+install:
+  - mvn install -q -Dmaven.test.skip -Dmaven.javadoc.skip -B -V
+
+script:
+- mvn verify -Dmanifeststore.s3.access_key="$AWS_ACCESS_KEY_ID" -Dmanifeststore.s3.secret_key="$AWS_SECRET_ACCESS_KEY"
+
+# We want all PRs built but only merges on master branch
+#  However, when we first create a new project, we need to comment this out
+branches:
+  only:
+  - master
+
+notifications:
+  email:
+    recipients:
+      - ksclarke@ksclarke.io
+    on_success: change
+    on_failure: change

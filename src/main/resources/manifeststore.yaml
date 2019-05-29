@@ -1,0 +1,15 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Manifest Store API
+  license:
+    name: The 3-Clause BSD License
+servers:
+  - url: http://manifeststore.library.edu/api
+paths:
+  /ping:
+    get:
+      operationId: getPing
+      responses:
+        '200':
+          description: OK
