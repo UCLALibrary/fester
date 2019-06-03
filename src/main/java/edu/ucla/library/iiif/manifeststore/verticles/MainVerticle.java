@@ -8,10 +8,15 @@ import info.freelibrary.util.LoggerFactory;
 
 import edu.ucla.library.iiif.manifeststore.Config;
 import edu.ucla.library.iiif.manifeststore.Op;
+import edu.ucla.library.iiif.manifeststore.handlers.DeleteManifestHandler;
+import edu.ucla.library.iiif.manifeststore.handlers.GetManifestHandler;
 import edu.ucla.library.iiif.manifeststore.handlers.GetPingHandler;
+import edu.ucla.library.iiif.manifeststore.handlers.PostManifestHandler;
+import edu.ucla.library.iiif.manifeststore.handlers.PutManifestHandler;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
+import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.api.contract.openapi3.OpenAPI3RouterFactory;
@@ -46,12 +51,18 @@ public class MainVerticle extends AbstractVerticle {
                 // We can use our OpenAPI specification file to configure our app's router
                 OpenAPI3RouterFactory.create(vertx, apiSpec, creation -> {
                     if (creation.succeeded()) {
-                        final OpenAPI3RouterFactory routerFactory = creation.result();
+                        final OpenAPI3RouterFactory factory = creation.result();
                         final int port = config.getInteger(Config.HTTP_PORT, DEFAULT_PORT);
+                        final Vertx vertx = getVertx();
 
                         // Next, we associate handlers with routes from our specification
-                        routerFactory.addHandlerByOperationId(Op.GET_PING, new GetPingHandler());
-                        server.requestHandler(routerFactory.getRouter()).listen(port);
+                        factory.addHandlerByOperationId(Op.GET_PING, new GetPingHandler());
+                        factory.addHandlerByOperationId(Op.GET_MANIFEST, new GetManifestHandler(vertx, config));
+                        factory.addHandlerByOperationId(Op.POST_MANIFEST, new PostManifestHandler(vertx, config));
+                        factory.addHandlerByOperationId(Op.PUT_MANIFEST, new PutManifestHandler(vertx, config));
+                        factory.addHandlerByOperationId(Op.DELETE_MANIFEST, new DeleteManifestHandler(vertx, config));
+
+                        server.requestHandler(factory.getRouter()).listen(port);
 
                         aFuture.complete();
                     } else {
