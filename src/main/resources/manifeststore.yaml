@@ -5,7 +5,7 @@ info:
   license:
     name: The 3-Clause BSD License
 servers:
-  - url: http://manifeststore.library.edu/api
+  - url: http://images.library.ucla.edu/api
 paths:
   /ping:
     get:
@@ -13,3 +13,72 @@ paths:
       responses:
         '200':
           description: OK
+  /manifests/{manifestId}:
+    get:
+      operationId: getManifest
+      responses:
+        '200':
+          description: The IIIF manifest for requested ID
+        '400':
+          description: Bad Request
+        '404':
+          description: Not Found
+    post:
+      operationId: postManifest
+      requestBody:
+        description: A IIIF manifest
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+      responses:
+        '201':
+          description: Created a new manifest using the supplied ID
+        '400':
+          description: Bad Request
+        '403':
+          description: Forbidden
+        '415':
+          description: Unsupported media type (i.e. not JSON)
+        '500':
+          description: Internal server error
+    put:
+      operationId: putManifest
+      requestBody:
+        description: A IIIF manifest
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+      responses:
+        '200':
+          description: Updated the manifest at the supplied ID
+        '201':
+          description: Created the manifest at the supplied ID
+        '400':
+          description: Bad request
+        '403':
+          description: Forbidden
+        '415':
+          description: Unsupported media type (i.e. not JSON)
+        '500':
+          description: Internal server error
+    delete:
+      operationId: deleteManifest
+      responses:
+        '200':
+          description: Deleted the manifest at the supplied ID
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+    parameters:
+       - in: path
+         name: manifestId
+         required: true
+         schema:
+           type: string
+         description: The manifest ID
+  
