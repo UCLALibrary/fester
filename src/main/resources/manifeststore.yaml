@@ -18,11 +18,11 @@ paths:
       operationId: getManifest
       responses:
         '200':
-          description: The IIIF manifest for requested ID
+          description: The IIIF manifest for the requested ID
         '400':
-          description: Bad Request
+          description: Bad request
         '404':
-          description: Not Found
+          description: Not found
     post:
       operationId: postManifest
       requestBody:
@@ -36,7 +36,7 @@ paths:
         '201':
           description: Created a new manifest using the supplied ID
         '400':
-          description: Bad Request
+          description: Bad request
         '403':
           description: Forbidden
         '415':
