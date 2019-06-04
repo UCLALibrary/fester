@@ -12,5 +12,6 @@
 
   <!-- Messages to be stored in the MessageCodes class -->
   <entry key="MFS-000">{}</entry>
+  <entry key="MFS-001">S3 Client configured for region: {}</entry>
 
 </properties>
