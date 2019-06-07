@@ -9,8 +9,14 @@ public final class HTTP {
     /** Success response */
     public static final int OK = 200;
 
+    /** Success with no content */
+    public static final int SUCCESS_NO_CONTENT = 204;
+
     /** Created response */
     public static final int CREATED = 201;
+
+    /** Permission denied */
+    public static final int FORBIDDEN = 403;
 
     /** Not found response */
     public static final int NOT_FOUND = 404;
