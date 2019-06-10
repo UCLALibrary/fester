@@ -62,8 +62,8 @@
     <main.verticle>edu.ucla.library.iiif.manifeststore.verticles.MainVerticle</main.verticle>
 
     <!-- AWS configuration properties -->
-    <manifeststore.s3.region>us-west-2</manifeststore.s3.region>
-    <manifeststore.s3.bucket>iiif-manifests</manifeststore.s3.bucket>
+    <manifeststore.s3.region>us-east-1</manifeststore.s3.region>
+    <manifeststore.s3.bucket>iiif-manifest-store</manifeststore.s3.bucket>
     <manifeststore.s3.access_key>YOUR_ACCESS_KEY</manifeststore.s3.access_key>
     <manifeststore.s3.secret_key>YOUR_SECRET_KEY</manifeststore.s3.secret_key>
   </properties>

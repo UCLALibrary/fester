@@ -68,7 +68,7 @@ paths:
     delete:
       operationId: deleteManifest
       responses:
-        '200':
+        '204':
           description: Deleted the manifest at the supplied ID
         '403':
           description: Forbidden

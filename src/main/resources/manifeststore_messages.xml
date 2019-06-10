@@ -2,10 +2,12 @@
 
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 
-<!--
+<!--<![CDATA[
   To process this file outside of a full build, run:
     mvn info.freelibrary:freelib-utils:generate-codes -DmessageFiles=src/main/resources/manifeststore_messages.xml
--->
+  Bash shell users can run the shorter form:
+    mvn info.freelibrary:freelib-utils:generate-codes -DmessageFiles=$(find src -name *_messages.xml)
+]]>-->
 
 <properties>
   <entry key="message-class-name">edu.ucla.library.iiif.manifeststore.MessageCodes</entry>
@@ -13,5 +15,23 @@
   <!-- Messages to be stored in the MessageCodes class -->
   <entry key="MFS-000">{}</entry>
   <entry key="MFS-001">S3 Client configured for region: {}</entry>
+  <entry key="MFS-002">Starting manifest-store test server on port: {}</entry>
+  <entry key="MFS-003">Creating S3 client for '{}' region</entry>
+  <entry key="MFS-004">Failed test should have returned '{}' response code instead of '{}'</entry>
+  <entry key="MFS-005">S3 client for testing created for '{}' region</entry>
+  <entry key="MFS-006">Putting '{}' (test object) into S3 bucket: {}</entry>
+  <entry key="MFS-007">S3 client credentials: {} | {}</entry>
+  <entry key="MFS-008">Test GetManifestHandler with a test manifest: {}</entry>
+  <entry key="MFS-009">Manifest not found: {}</entry>
+  <entry key="MFS-010">Internal server error while trying to retrieve manifest: {}</entry>
+  <entry key="MFS-011">Unexpected response code while trying to retrieve manifest: {}</entry>
+  <entry key="MFS-012">Test DeleteManifestHandler with a test manifest: {}</entry>
+  <entry key="MFS-013">Unexpected S3 response code: {} [manifest: {}]</entry>
+  <entry key="MFS-014">Internal server error while trying to delete manifest: {}</entry>
+  <entry key="MFS-015"></entry>
+  <entry key="MFS-016"></entry>
+  <entry key="MFS-017"></entry>
+  <entry key="MFS-018"></entry>
+  <entry key="MFS-019"></entry>
 
 </properties>

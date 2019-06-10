@@ -2,6 +2,17 @@
 
 A IIIF manifest storage microservice. It will provide full CRUD access to a collection of IIIF manifest files. This is a work in progress.
 
+## Configuring the Build
+
+The IIIF manifest store uses an S3 bucket for back-end storage. To be able to run the project's tests, several configuration values must be supplied:
+
+* manifeststore.s3.bucket
+* manifeststore.s3.access_key
+* manifeststore.s3.secret_key
+* manifeststore.s3.region
+
+These values can be set as properties in your system's Maven settings.xml file (or be supplied on the command line at build time).
+
 ## Building the Project
 
 The project builds an executable Jar that can be run to start the microservice. To build the project, run:
