@@ -1,9 +1,9 @@
 <configuration>
   <timestamp key="byDay" datePattern="yyyy-MM-dd" />
-
+  
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
-      <pattern>[%level] %logger{45} | %msg%n</pattern>
+      <pattern>[%level] %logger{45}:%X{line} | %msg%n</pattern>
     </encoder>
   </appender>
 
@@ -11,7 +11,7 @@
     <file>target/${project.artifactId}-${byDay}.log</file>
     <append>false</append>
     <encoder>
-      <pattern>[%level] %logger{45} | %msg%n</pattern>
+      <pattern>[%level] %logger{45}:%X{line} | %msg%n</pattern>
     </encoder>
   </appender>
 

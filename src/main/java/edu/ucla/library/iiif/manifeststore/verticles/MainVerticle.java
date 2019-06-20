@@ -7,11 +7,12 @@ import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
 import edu.ucla.library.iiif.manifeststore.Config;
+import edu.ucla.library.iiif.manifeststore.HTTP;
 import edu.ucla.library.iiif.manifeststore.Op;
 import edu.ucla.library.iiif.manifeststore.handlers.DeleteManifestHandler;
 import edu.ucla.library.iiif.manifeststore.handlers.GetManifestHandler;
 import edu.ucla.library.iiif.manifeststore.handlers.GetPingHandler;
-import edu.ucla.library.iiif.manifeststore.handlers.PostManifestHandler;
+import edu.ucla.library.iiif.manifeststore.handlers.MatchingOpNotFoundHandler;
 import edu.ucla.library.iiif.manifeststore.handlers.PutManifestHandler;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.AbstractVerticle;
@@ -19,6 +20,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.Router;
 import io.vertx.ext.web.api.contract.openapi3.OpenAPI3RouterFactory;
 
 /**
@@ -54,15 +56,23 @@ public class MainVerticle extends AbstractVerticle {
                         final OpenAPI3RouterFactory factory = creation.result();
                         final int port = config.getInteger(Config.HTTP_PORT, DEFAULT_PORT);
                         final Vertx vertx = getVertx();
+                        final Router router;
 
                         // Next, we associate handlers with routes from our specification
                         factory.addHandlerByOperationId(Op.GET_PING, new GetPingHandler());
                         factory.addHandlerByOperationId(Op.GET_MANIFEST, new GetManifestHandler(vertx, config));
-                        factory.addHandlerByOperationId(Op.POST_MANIFEST, new PostManifestHandler(vertx, config));
                         factory.addHandlerByOperationId(Op.PUT_MANIFEST, new PutManifestHandler(vertx, config));
                         factory.addHandlerByOperationId(Op.DELETE_MANIFEST, new DeleteManifestHandler(vertx, config));
 
-                        server.requestHandler(factory.getRouter()).listen(port);
+                        // After that, we can get a router that's been configured by our OpenAPI spec
+                        router = factory.getRouter();
+
+                        // If an incoming request doesn't match one of our spec operations, it's treated as a 404;
+                        // catch these generic 404s with the handler below and return more specific response codes
+                        router.errorHandler(HTTP.NOT_FOUND, new MatchingOpNotFoundHandler());
+
+                        // Start our server
+                        server.requestHandler(router).listen(port);
 
                         aFuture.complete();
                     } else {
