@@ -28,10 +28,13 @@
   <entry key="MFS-012">Test DeleteManifestHandler with a test manifest: {}</entry>
   <entry key="MFS-013">Unexpected S3 response code: {} [manifest: {}]</entry>
   <entry key="MFS-014">Internal server error while trying to delete manifest: {}</entry>
-  <entry key="MFS-015"></entry>
-  <entry key="MFS-016"></entry>
-  <entry key="MFS-017"></entry>
-  <entry key="MFS-018"></entry>
-  <entry key="MFS-019"></entry>
-
+  <entry key="MFS-015">Internal server error while trying to put manifest: {}</entry>
+  <entry key="MFS-016">Test PUTing a test manifest to: {}</entry>
+  <entry key="MFS-017">Test POSTing a test manifest to: {}</entry>
+  <entry key="MFS-018">Test failed to PUT test manifest: {} [{}]</entry>
+  <entry key="MFS-019">Failed PUT test's missing media type check; response: {}</entry>
+  <entry key="MFS-020">Missing media type; expected: application/json</entry>
+  <entry key="MFS-021">Incorrect media type; expected: application/json, found: {}</entry>
+  <entry key="MFS-022">Failed PUT test's unsupported media type check; response: {}</entry>
+  <entry key="MFS-023">Request to PUT manifest denied due to lack of permission: {}</entry>
 </properties>

@@ -15,17 +15,20 @@ public final class HTTP {
     /** Created response */
     public static final int CREATED = 201;
 
+    /** Bad request */
+    public static final int BAD_REQUEST = 400;
+
     /** Permission denied */
     public static final int FORBIDDEN = 403;
 
     /** Not found response */
     public static final int NOT_FOUND = 404;
 
+    /** An empty or other unsupported media type */
+    public static final int UNSUPPORTED_MEDIA_TYPE = 415;
+
     /** Generic internal server error */
     public static final int INTERNAL_SERVER_ERROR = 500;
-
-    /** Bad request */
-    public static final int BAD_REQUEST = 400;
 
     /**
      * A private constructor for the constants class.

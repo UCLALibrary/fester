@@ -46,7 +46,7 @@
   </developers>
 
   <properties>
-    <vertx.version>3.6.3</vertx.version>
+    <vertx.version>3.7.1</vertx.version>
     <aws.sdk.version>1.11.478</aws.sdk.version>
     <freelib.utils.version>0.8.10</freelib.utils.version>
     <maven.failsafe.plugin.version>2.18.1</maven.failsafe.plugin.version>
@@ -153,6 +153,8 @@
       <!--<![CDATA[
         To run the generate-codes plugin outside of a full build, run:
          mvn info.freelibrary:freelib-utils:generate-codes -DmessageFiles=src/main/resources/manifeststore_messages.xml
+        Bash shell users can run the shorter form:
+         mvn info.freelibrary:freelib-utils:generate-codes -DmessageFiles=$(find src -name *_messages.xml)
       ]]>-->
       <plugin>
         <groupId>info.freelibrary</groupId>
