@@ -8,6 +8,7 @@ import org.junit.runner.RunWith;
 
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
+import info.freelibrary.util.StringUtils;
 
 import edu.ucla.library.iiif.manifeststore.Config;
 import edu.ucla.library.iiif.manifeststore.Constants;
@@ -22,6 +23,8 @@ public class DeleteManifestHandlerTest extends AbstractManifestHandlerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DeleteManifestHandlerTest.class, Constants.MESSAGES);
 
+    private static final String MANIFEST_PATH = "/{}/manifest";
+
     /**
      * Test the DeleteManifestHandler.
      *
@@ -32,7 +35,7 @@ public class DeleteManifestHandlerTest extends AbstractManifestHandlerTest {
     public void testDeleteManifestHandler(final TestContext aContext) throws IOException {
         final Async asyncTask = aContext.async();
         final int port = aContext.get(Config.HTTP_PORT);
-        final String testIDPath = "/manifests/" + myManifestID;
+        final String testIDPath = StringUtils.format(MANIFEST_PATH, myManifestID);
 
         LOGGER.debug(MessageCodes.MFS_012, myManifestID);
 
@@ -59,7 +62,7 @@ public class DeleteManifestHandlerTest extends AbstractManifestHandlerTest {
     public void testGetManifestHandler404(final TestContext aContext) {
         final Async asyncTask = aContext.async();
         final int port = aContext.get(Config.HTTP_PORT);
-        final String testIDPath = "/testIdentifier"; // path should start with: /manifests
+        final String testIDPath = "/testIdentifier"; // path should be: /{id}/manifest
 
         myVertx.createHttpClient().delete(port, Constants.UNSPECIFIED_HOST, testIDPath, response -> {
             final int statusCode = response.statusCode();

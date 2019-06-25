@@ -12,6 +12,7 @@ import com.amazonaws.SdkClientException;
 
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
+import info.freelibrary.util.StringUtils;
 
 import edu.ucla.library.iiif.manifeststore.Config;
 import edu.ucla.library.iiif.manifeststore.Constants;
@@ -28,7 +29,7 @@ public class PutManifestHandlerTest extends AbstractManifestHandlerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PutManifestHandlerTest.class, Constants.MESSAGES);
 
-    private static final String MANIFEST_PATH = "/manifests/";
+    private static final String MANIFEST_PATH = "/{}/manifest";
 
     private String myPutManifestID;
 
@@ -77,7 +78,7 @@ public class PutManifestHandlerTest extends AbstractManifestHandlerTest {
         final Buffer manifest = myVertx.fileSystem().readFileBlocking(manifestPath);
         final Async asyncTask = aContext.async();
         final int port = aContext.get(Config.HTTP_PORT);
-        final String testIDPath = MANIFEST_PATH + myPutManifestID;
+        final String testIDPath = StringUtils.format(MANIFEST_PATH, myPutManifestID);
         final RequestOptions requestOpts = new RequestOptions();
 
         LOGGER.debug(MessageCodes.MFS_016, testIDPath);
@@ -112,7 +113,7 @@ public class PutManifestHandlerTest extends AbstractManifestHandlerTest {
         final Buffer manifest = myVertx.fileSystem().readFileBlocking(manifestPath);
         final Async asyncTask = aContext.async();
         final int port = aContext.get(Config.HTTP_PORT);
-        final String testIDPath = MANIFEST_PATH + myPutManifestID;
+        final String testIDPath = StringUtils.format(MANIFEST_PATH, myPutManifestID);
         final RequestOptions requestOpts = new RequestOptions();
 
         LOGGER.debug(MessageCodes.MFS_016, testIDPath);
@@ -148,7 +149,7 @@ public class PutManifestHandlerTest extends AbstractManifestHandlerTest {
         final Buffer manifest = myVertx.fileSystem().readFileBlocking(manifestPath);
         final Async asyncTask = aContext.async();
         final int port = aContext.get(Config.HTTP_PORT);
-        final String testIDPath = MANIFEST_PATH + myPutManifestID;
+        final String testIDPath = StringUtils.format(MANIFEST_PATH, myPutManifestID);
         final RequestOptions requestOpts = new RequestOptions();
 
         LOGGER.debug(MessageCodes.MFS_016, testIDPath);
