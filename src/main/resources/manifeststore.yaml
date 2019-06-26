@@ -5,7 +5,7 @@ info:
   license:
     name: The 3-Clause BSD License
 servers:
-  - url: http://images.library.ucla.edu/api
+  - url: http://iiif.library.ucla.edu/
 paths:
   /ping:
     get:
@@ -13,7 +13,61 @@ paths:
       responses:
         '200':
           description: OK
-  /manifests/{manifestId}:
+  # Not yet implemented
+  /collection/{collectionName}:
+    get:
+      operationId: getCollection
+      responses:
+        '200':
+          description: The IIIF collection for the requested ID
+        '404':
+          description: Not found
+    put:
+      operationId: putCollection
+      requestBody:
+        description: A IIIF collection
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Updated or created the collection with the supplied name
+        '400':
+          description: Bad request
+        '403':
+          description: Forbidden
+        '415':
+          description: Unsupported media type (i.e. not JSON)
+        '500':
+          description: Internal server error
+    delete:
+      operationId: deleteCollection
+      responses:
+        '204':
+          description: Deleted the collection with the supplied name
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+    parameters:
+       - in: path
+         name: collectionName
+         required: true
+         schema:
+           type: string
+         description: The collection name
+  # Not yet implemented
+  /docs/manifest-store:
+    get:
+      operationId: getDocs
+      responses:
+        '200':
+          description: HTML documentation generated from the OpenAPI spec
+        '404':
+          description: Not found
+  /{manifestId}/manifest:
     get:
       operationId: getManifest
       responses:
