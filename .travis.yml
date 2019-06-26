@@ -9,6 +9,11 @@ install:
 script:
 - mvn verify -Dmanifeststore.s3.access_key="$AWS_ACCESS_KEY_ID" -Dmanifeststore.s3.secret_key="$AWS_SECRET_ACCESS_KEY"
 
+# Cache the local Maven repo to save time
+cache:
+  directories:
+  - $HOME/.m2
+
 # We want all PRs built but only merges on master branch
 #  However, when we first create a new project, we need to comment this out
 branches:

@@ -24,6 +24,8 @@ public class GetManifestHandlerTest extends AbstractManifestHandlerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GetManifestHandlerTest.class, Constants.MESSAGES);
 
+    private static final String MANIFEST_PATH = "/{}/manifest";
+
     /**
      * Test the GetManifestHandler.
      *
@@ -35,7 +37,7 @@ public class GetManifestHandlerTest extends AbstractManifestHandlerTest {
         final String expectedManifest = StringUtils.read(MANIFEST_FILE);
         final Async asyncTask = aContext.async();
         final int port = aContext.get(Config.HTTP_PORT);
-        final String testIDPath = "/manifests/" + myManifestID;
+        final String testIDPath = StringUtils.format(MANIFEST_PATH, myManifestID);
 
         LOGGER.debug(MessageCodes.MFS_008, myManifestID);
 
@@ -67,7 +69,7 @@ public class GetManifestHandlerTest extends AbstractManifestHandlerTest {
     public void testGetManifestHandler404(final TestContext aContext) {
         final Async asyncTask = aContext.async();
         final int port = aContext.get(Config.HTTP_PORT);
-        final String testIDPath = "/testIdentifier"; // path should start with: /manifests
+        final String testIDPath = "/testIdentifier"; // path should be: /{id}/manifest
 
         myVertx.createHttpClient().getNow(port, Constants.UNSPECIFIED_HOST, testIDPath, response -> {
             final int statusCode = response.statusCode();
