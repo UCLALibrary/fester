@@ -1,24 +1,45 @@
-language: java
-
-jdk:
-- openjdk11
-
-install:
-  - mvn install -q -Dmaven.test.skip -Dmaven.javadoc.skip -B -V
-
-script:
-- mvn verify -Dmanifeststore.s3.access_key="$AWS_ACCESS_KEY_ID" -Dmanifeststore.s3.secret_key="$AWS_SECRET_ACCESS_KEY"
-
-# Cache the local Maven repo to save time
-cache:
-  directories:
-  - $HOME/.m2
-
-# We want all PRs built but only merges on master branch
-#  However, when we first create a new project, we need to comment this out
+# We want all PRs built but only merges on master branch and tags under semantic version scheme
 branches:
   only:
   - master
+  - /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*)?(\+[0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*)?$/
+
+jobs:
+  include:
+    - stage: Build and Test on OpenJDK11
+      name: Build and Test on OpenJDK11
+      language: java
+      jdk:
+        - openjdk11
+      install:
+        - mvn install -q -Dmaven.test.skip -Dmaven.javadoc.skip -B -V
+      script:
+        - mvn verify -Dmanifeststore.s3.access_key="${AWS_ACCESS_KEY_ID}" -Dmanifeststore.s3.secret_key="${AWS_SECRET_ACCESS_KEY}"
+      # Cache the local Maven repo to save time
+      cache:
+        directories:
+        - $HOME/.m2
+
+    - stage: Trigger Latest Build
+      name: Trigger Docker Latest Build
+      language: minimal
+      deploy:
+        - provider: script
+          script: |
+			echo "TRAVIS_BRANCH=$TRAVIS_BRANCH TRAVIS_PULL_REQUEST=$TRAVIS_PULL_REQUEST"
+			sh .travis/trigger-travis.sh uclalibrary docker-manifest-store $TRAVIS_ACCESS_TOKEN
+          on:
+            branch: master
+      if: (NOT type IN (pull_request)) AND (branch = master)
+    - stage: Trigger Tag Build
+      name: Trigger Docker Tag Build
+      language: minimal
+      deploy:
+        - provider: script
+          script: ./trigger-docker-build.sh
+          on:
+            tags: true
+      if: (NOT type IN (pull_request)) AND (branch =~ /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*)?(\+[0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*)?$/)
 
 notifications:
   email:
