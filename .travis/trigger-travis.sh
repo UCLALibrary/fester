@@ -54,6 +54,11 @@ fi
 body="{
 \"request\": {
   \"branch\":\"$BRANCH\"
+ \"config\": {
+   \"env\": {
+     \"matrix\": [\"MANIFESTSTORE_VERSION=$MANIFESTSTORE_VERSION\"]
+   },
+  }
   $MESSAGE
 }}"
 
