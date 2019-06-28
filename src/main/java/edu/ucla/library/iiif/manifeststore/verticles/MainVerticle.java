@@ -22,6 +22,7 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.api.contract.openapi3.OpenAPI3RouterFactory;
+import io.vertx.ext.web.handler.StaticHandler;
 
 /**
  * Main verticle that starts the application.
@@ -66,6 +67,9 @@ public class MainVerticle extends AbstractVerticle {
 
                         // After that, we can get a router that's been configured by our OpenAPI spec
                         router = factory.getRouter();
+
+                        // Serve Manifest Store documentation
+                        router.get("/docs/manifest-store/*").handler(StaticHandler.create().setWebRoot("webroot"));
 
                         // If an incoming request doesn't match one of our spec operations, it's treated as a 404;
                         // catch these generic 404s with the handler below and return more specific response codes
