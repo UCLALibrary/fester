@@ -47,6 +47,7 @@
 
   <properties>
     <vertx.version>3.7.1</vertx.version>
+    <slf4j.ext.version>1.7.26</slf4j.ext.version>
     <aws.sdk.version>1.11.478</aws.sdk.version>
     <freelib.utils.version>0.8.10</freelib.utils.version>
     <maven.failsafe.plugin.version>2.18.1</maven.failsafe.plugin.version>
@@ -87,6 +88,12 @@
       <groupId>io.vertx</groupId>
       <artifactId>vertx-web-api-contract</artifactId>
       <version>${vertx.version}</version>
+    </dependency>
+    <!-- Below is a dependency that needs updating due to security issue (may be able to remove in future) -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-ext</artifactId>
+      <version>${slf4j.ext.version}</version>
     </dependency>
 
     <!-- A Vert.x plug-in for more flexible configuration control -->
