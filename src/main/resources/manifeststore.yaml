@@ -1,6 +1,6 @@
 openapi: "3.0.0"
 info:
-  version: 1.0.0
+  version: 0.1.0
   title: Manifest Store API
   license:
     name: The 3-Clause BSD License
@@ -58,15 +58,6 @@ paths:
          schema:
            type: string
          description: The collection name
-  # Not yet implemented
-  /docs/manifest-store:
-    get:
-      operationId: getDocs
-      responses:
-        '200':
-          description: HTML documentation generated from the OpenAPI spec
-        '404':
-          description: Not found
   /{manifestId}/manifest:
     get:
       operationId: getManifest

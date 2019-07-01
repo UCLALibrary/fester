@@ -176,10 +176,38 @@
         </executions>
       </plugin>
 
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-web-resources</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/target/classes/webroot</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${basedir}/src/main/webroot</directory>
+                </resource>
+                <resource>
+                  <directory>${basedir}/src/main/resources</directory>
+                  <includes>
+                    <include>manifeststore.yaml</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
       <!-- PMD is an extensible cross-language static code analyzer -->
       <plugin>
         <artifactId>maven-pmd-plugin</artifactId>
       </plugin>
+
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
         <dependencies>
@@ -233,6 +261,21 @@
       <!-- Enforcer enforces some basic characteristics of the project -->
       <plugin>
         <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>enforce-java</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireJavaVersion>
+                  <version>[1.11.0,)</version>
+                </requireJavaVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
 
       <!-- Codacy runs automated code reviews and code analytics -->
