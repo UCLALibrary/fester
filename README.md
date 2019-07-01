@@ -1,4 +1,4 @@
-# Manifest Store &nbsp;[![Build Status](https://api.travis-ci.org/uclalibrary/manifest-store.svg?branch=master)](https://travis-ci.org/uclalibrary/manifest-store) [![Known Vulnerabilities](https://img.shields.io/snyk/vulnerabilities/github/uclalibrary/manifest-store.svg)](https://snyk.io/test/github/uclalibrary/manifest-store)
+# Manifest Store &nbsp;[![Build Status](https://api.travis-ci.com/uclalibrary/manifest-store.svg?branch=master)](https://travis-ci.com/uclalibrary/manifest-store) [![Known Vulnerabilities](https://img.shields.io/snyk/vulnerabilities/github/uclalibrary/manifest-store.svg)](https://snyk.io/test/github/uclalibrary/manifest-store)
 
 A IIIF manifest storage microservice. It will provide full CRUD access to a collection of IIIF manifest files. This is a work in progress.
 
