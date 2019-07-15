@@ -26,8 +26,8 @@ jobs:
       deploy:
         - provider: script
           script: |
-			echo "TRAVIS_BRANCH=$TRAVIS_BRANCH TRAVIS_PULL_REQUEST=$TRAVIS_PULL_REQUEST MANIFESTSTORE_VERSION=$MANIFESTSTORE_VERSION"
-			sh MANIFESTSTORE_VERSION=latest .travis/trigger-travis.sh uclalibrary docker-manifest-store $TRAVIS_ACCESS_TOKEN
+			echo "TRAVIS_BRANCH=$TRAVIS_BRANCH TRAVIS_PULL_REQUEST=$TRAVIS_PULL_REQUEST MANIFESTSTORE_TAG=$MANIFESTSTORE_TAG"
+			sh MANIFESTSTORE_TAG=latest .travis/trigger-travis.sh uclalibrary docker-manifest-store $TRAVIS_ACCESS_TOKEN
           on:
             branch: master
       if: (NOT type IN (pull_request)) AND (branch = master)
@@ -36,8 +36,8 @@ jobs:
       language: minimal
       deploy:
         - provider: script
-   			echo "TRAVIS_BRANCH=$TRAVIS_BRANCH TRAVIS_PULL_REQUEST=$TRAVIS_PULL_REQUEST MANIFESTSTORE_VERSION=$MANIFESTSTORE_VERSION"
-			sh MANIFESTSTORE_VERSION=$TRAVIS_BRANCH .travis/trigger-travis.sh uclalibrary docker-manifest-store $TRAVIS_ACCESS_TOKEN
+   			echo "TRAVIS_BRANCH=$TRAVIS_BRANCH TRAVIS_PULL_REQUEST=$TRAVIS_PULL_REQUEST MANIFESTSTORE_TAG=$MANIFESTSTORE_TAG"
+			sh MANIFESTSTORE_TAG=$TRAVIS_BRANCH .travis/trigger-travis.sh uclalibrary docker-manifest-store $TRAVIS_ACCESS_TOKEN
           on:
             tags: true
       if: (NOT type IN (pull_request)) AND (branch =~ /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*)?(\+[0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*)?$/)
