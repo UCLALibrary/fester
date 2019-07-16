@@ -32,7 +32,8 @@ jobs:
           on:
             # branch: master
             branch: IIIF-248-set-up-travis-to-travis-link-for-DockerHub-push
-      if: (NOT type IN (pull_request)) AND (branch = master)
+      # if: (NOT type IN (pull_request)) AND (branch = master)
+      if: (NOT type IN (pull_request)) AND (branch = IIIF-248-set-up-travis-to-travis-link-for-DockerHub-push)
     - stage: Trigger Tag Build
       name: Trigger Docker Tag Build
       language: minimal
