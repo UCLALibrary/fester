@@ -2,6 +2,7 @@
 branches:
   only:
   - master
+  - IIIF-248-set-up-travis-to-travis-link-for-DockerHub-push
   - /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*)?(\+[0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*)?$/
 
 jobs:
