@@ -3,7 +3,7 @@
 # Trigger.sh is from https://github.com/cirocosta/travis-triggerer
 # ...with modifications
 # for lots and lots of docs on this topic, look here: https://docs.travis-ci.com/user/triggering-builds/
-
+echo "starting trigger.sh..."
 set -o errexit
 
 readonly TRAVIS_API_ADDRESS="${TRAVIS_API_ADDRESS:-https://api.travis-ci.com}"
@@ -17,7 +17,8 @@ main() {
 }
 
 ensure_environment_variables_set() {
-  if [[ -z "$TRAVIS_ACCESS_TOKEN" ]]; then
+echo "ensuring environment variables are set..."
+if [[ -z "$TRAVIS_ACCESS_TOKEN" ]]; then
     echo "Error:
     An access token must be provided in the environment
     variable TRAVIS_ACCESS_TOKEN.
@@ -33,6 +34,8 @@ ensure_environment_variables_set() {
     Aborting.
     "
     exit 1
+  else
+    echo "TRAVIS_ACCESS_TOKEN is set"
   fi
 
   if [[ -z "$TRAVIS_REPO_SLUG" || -z "$TRAVIS_BUILD_ID"  || -z "$MANIFESTSTORE_TAG" ]]; then
@@ -67,10 +70,13 @@ ensure_repo_set() {
     Aborting.
     "
     exit 1
+  else
+    echo "repo is set"
   fi
 }
 
 trigger_build() {
+  echo "triggering the build..."
   local repo=$1
   local travis_repo=${repo/\//%2F}
   local body="{
