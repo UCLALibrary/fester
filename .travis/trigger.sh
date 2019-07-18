@@ -123,7 +123,7 @@ trigger_build() {
     echo "
     Success? Build for repository $repo requested, internal service error received, you better check on things. Poor Travis-CI.
     "
-    exit 1
+    exit 0
    else
     echo "Error: request_status_code=$request_status_code
     Something went wrong with the triggering of a build for repository [$repo].
