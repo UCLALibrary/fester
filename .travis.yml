@@ -26,9 +26,8 @@ jobs:
       language: minimal
       deploy:
         - provider: script
-          script: |
-            echo "TRAVIS_BRANCH=$TRAVIS_BRANCH TRAVIS_PULL_REQUEST=$TRAVIS_PULL_REQUEST"
-            MANIFESTSTORE_TAG=latest .travis/trigger.sh uclalibrary/docker-manifest-store
+          script:
+            - MANIFESTSTORE_TAG=latest .travis/trigger.sh uclalibrary/docker-manifest-store
           on:
             # branch: master
             branch: IIIF-248-set-up-travis-to-travis-link-for-DockerHub-push
@@ -40,9 +39,8 @@ jobs:
       language: minimal
       deploy:
         - provider: script
-          script: |
-            echo "TRAVIS_BRANCH=$TRAVIS_BRANCH TRAVIS_PULL_REQUEST=$TRAVIS_PULL_REQUEST"
-            MANIFESTSTORE_TAG=$TRAVIS_TAG .travis/trigger.sh uclalibrary/docker-manifest-store
+          script:
+            - MANIFESTSTORE_TAG=$TRAVIS_TAG .travis/trigger.sh uclalibrary/docker-manifest-store
           on:
             tags: true
       if: (NOT type IN (pull_request)) AND (branch =~ /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*)?(\+[0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*)?$/)
