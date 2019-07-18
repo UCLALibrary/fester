@@ -32,7 +32,8 @@ jobs:
           on:
             # branch: master
             branch: IIIF-248-set-up-travis-to-travis-link-for-DockerHub-push
-      # if: (NOT type IN (pull_request)) AND (branch = master)
+    # uncomment the following line as soon as testing for IIIF-248 is complete, and delete the line after
+    # if: (NOT type IN (pull_request)) AND (branch = master)
       if: (NOT type IN (pull_request)) AND (branch = IIIF-248-set-up-travis-to-travis-link-for-DockerHub-push)
     - stage: Trigger Tag Push
       name: Trigger DockerHub Push > Tag
