@@ -112,10 +112,12 @@ trigger_build() {
     echo "
     Success! Build for repository $repo triggered.
     "
+    exit 0
    elif [[ "$request_status_code" == "500" ]]; then
     echo "
     Success? Build for repository $repo requested, internal service error received, you better check on things. Poor Travis-CI.
     "
+    exit 1
    else
     echo "Error: request_status_code=$request_status_code
     Something went wrong with the triggering of a build for repository [$repo].
