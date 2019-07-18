@@ -81,7 +81,7 @@ trigger_build() {
   local travis_repo=${repo/\//%2F}
   local body="{
   \"request\": {
-    \"message\": \"(AUTO) Triggered by Travis [repo=$TRAVIS_REPO_SLUG],build=$TRAVIS_BUILD_ID] avuong\",
+    \"message\": \"(AUTO) Triggered by Travis [repo=$TRAVIS_REPO_SLUG],build=$TRAVIS_BUILD_ID]\",
     \"branch\": \"master\",
     \"config\": {
         \"env\": {
@@ -112,8 +112,6 @@ trigger_build() {
       --data "$body" \
       "${TRAVIS_API_ADDRESS}/repo/$travis_repo/requests"
   )
-
-echo "$body"
 
   if [[ "$request_status_code" == "200" ]]; then
     echo "
