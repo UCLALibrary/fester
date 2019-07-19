@@ -120,7 +120,7 @@ trigger_build() {
     exit 0
    elif [[ "$request_status_code" == "500" ]]; then
     echo "
-    Success? Build for repository $repo requested, internal service error received, you better check on things. Poor Travis-CI.
+    Build for repository $repo requested, internal service error 500 received, this usually means the request was malformed. Debug time!
     "
     exit 0
    else
