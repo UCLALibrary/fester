@@ -62,10 +62,10 @@ ensure_repo_set() {
     argument but an empty string was received.
 
     Usage:
-      ./travis-trigger.sh <repo>
+      ./trigger.sh <repo>
 
     Example:
-      ./travis-trigger.sh wedeploy/images
+      ./trigger.sh wedeploy/images
 
     Aborting.
     "
@@ -122,7 +122,7 @@ trigger_build() {
     echo "
     Build for repository $repo requested, internal service error 500 received, this usually means the request was malformed. Debug time!
     "
-    exit 0
+    exit 1
    else
     echo "Error: request_status_code=$request_status_code
     Something went wrong with the triggering of a build for repository [$repo].
