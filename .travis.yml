@@ -2,7 +2,6 @@
 branches:
   only:
   - master
-  - IIIF-248-set-up-travis-to-travis-link-for-DockerHub-push
   - /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*)?(\+[0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*)?$/
 
 jobs:
@@ -29,11 +28,8 @@ jobs:
           script:
             - MANIFESTSTORE_TAG=latest .travis/trigger.sh uclalibrary/docker-manifest-store
           on:
-            # branch: master
-            branch: IIIF-248-set-up-travis-to-travis-link-for-DockerHub-push
-    # uncomment the following line as soon as testing for IIIF-248 is complete, and delete the line after
-    # if: (NOT type IN (pull_request)) AND (branch = master)
-      if: (NOT type IN (pull_request)) AND (branch = IIIF-248-set-up-travis-to-travis-link-for-DockerHub-push)
+            branch: master
+      if: (NOT type IN (pull_request)) AND (branch = master)
     - stage: Trigger Tag Push
       name: Trigger DockerHub Push > Tag
       language: minimal
