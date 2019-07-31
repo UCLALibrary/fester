@@ -54,6 +54,7 @@
 
     <!-- Build plug-in versions -->
     <shade.plugin.version>2.4.3</shade.plugin.version>
+    <netty.epoll.version>4.1.37.Final</netty.epoll.version>
     <vertx.plugin.version>1.0.18</vertx.plugin.version>
     <codacy.plugin.version>1.0.2</codacy.plugin.version>
     <vertx.super.s3.version>1.0.0</vertx.super.s3.version>
@@ -474,6 +475,8 @@
                   <exclude>io.netty:netty-resolver-dns</exclude>
                   <exclude>io.netty:netty-resolver</exclude>
                   <exclude>io.netty:netty-transport</exclude>
+                  <exclude>io.netty:netty-transport-native-epoll</exclude>
+                  <exclude>io.netty:netty-transport-native-unix-common</exclude>
                   <exclude>io.swagger.core.v3:swagger-annotations</exclude>
                   <exclude>io.swagger.core.v3:swagger-core</exclude>
                   <exclude>io.swagger.core.v3:swagger-models</exclude>
@@ -588,6 +591,103 @@
       </plugin>
     </plugins>
   </build>
+
+  <!-- A live testing mode that will spin up the server locally when the following is run: mvn -Plive test -->
+  <profiles>
+    <profile>
+      <id>linux-os</id>
+      <activation>
+        <os>
+          <family>unix</family>
+          <arch>amd64</arch>
+        </os>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>io.netty</groupId>
+          <artifactId>netty-transport-native-epoll</artifactId>
+          <version>${netty.epoll.version}</version>
+          <classifier>linux-x86_64</classifier>
+        </dependency>
+      </dependencies>
+    </profile>
+    <profile>
+      <id>live</id>
+      <properties>
+        <maven.test.skip>true</maven.test.skip>
+        <jacoco.skip>true</jacoco.skip>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-resources-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>copy-logging-config-for-testing</id>
+                <phase>test</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <configuration>
+                  <outputDirectory>${basedir}/target/classes/</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>${basedir}/src/main/resources</directory>
+                      <filtering>true</filtering>
+                      <includes>
+                        <include>logback.xml</include>
+                      </includes>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+              <execution>
+                <id>copy-application-config-for-testing</id>
+                <phase>test</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <configuration>
+                  <outputDirectory>${basedir}/target/test-classes/</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>${basedir}/src/test/resources</directory>
+                      <filtering>true</filtering>
+                      <includes>
+                        <include>test-config.properties</include>
+                      </includes>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>io.reactiverse</groupId>
+            <artifactId>vertx-maven-plugin</artifactId>
+            <version>${vertx.plugin.version}</version>
+            <executions>
+              <execution>
+                <id>vertx-plugin</id>
+                <phase>test</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <verticle>${main.verticle}</verticle>
+              <redeploy>${live.test.reloads}</redeploy>
+              <runArgs>
+                <runArg>-Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.SLF4JLogDelegateFactory</runArg>
+                <runArg>-Dvertx-config-path=target/test-classes/test-config.properties</runArg>
+              </runArgs>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
   <!-- Enables pushing project documentation up to an S3 bucket -->
   <distributionManagement>
