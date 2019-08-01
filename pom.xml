@@ -63,6 +63,9 @@
     <!-- Name of the main Vert.x verticle -->
     <main.verticle>edu.ucla.library.iiif.manifeststore.verticles.MainVerticle</main.verticle>
 
+    <!-- Whether the test instances started with the 'live' profile reloads code automatically -->
+    <live.test.reloads>false</live.test.reloads>
+
     <!-- AWS configuration properties -->
     <manifeststore.s3.region>us-east-1</manifeststore.s3.region>
     <manifeststore.s3.bucket>iiif-manifest-store</manifeststore.s3.bucket>

@@ -34,9 +34,13 @@ public class GetManifestHandler extends AbstractManifestHandler {
     public void handle(final RoutingContext aContext) {
         final HttpServerResponse response = aContext.response();
         final HttpServerRequest request = aContext.request();
-        final String manifestID = request.getParam(Constants.MANIFEST_ID);
+        final String idParam = request.getParam(Constants.MANIFEST_ID);
+        final String manifestId;
 
-        myS3Client.get(myS3Bucket, manifestID, getResponse -> {
+        // If our manifest ID doesn't end with '.json' add it for third party tool convenience
+        manifestId = !idParam.endsWith(Constants.JSON_EXT) ? idParam + Constants.JSON_EXT : idParam;
+
+        myS3Client.get(myS3Bucket, manifestId, getResponse -> {
             final int statusCode = getResponse.statusCode();
 
             switch (statusCode) {
@@ -51,17 +55,17 @@ public class GetManifestHandler extends AbstractManifestHandler {
                     break;
                 case HTTP.NOT_FOUND:
                     response.setStatusCode(HTTP.NOT_FOUND);
-                    response.setStatusMessage(LOGGER.getMessage(MessageCodes.MFS_009, manifestID));
+                    response.setStatusMessage(LOGGER.getMessage(MessageCodes.MFS_009, manifestId));
 
                     break;
                 case HTTP.INTERNAL_SERVER_ERROR:
                     response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
-                    response.setStatusMessage(LOGGER.getMessage(MessageCodes.MFS_010, manifestID));
+                    response.setStatusMessage(LOGGER.getMessage(MessageCodes.MFS_010, manifestId));
 
                     break;
                 default:
                     response.setStatusCode(statusCode);
-                    response.setStatusMessage(LOGGER.getMessage(MessageCodes.MFS_011, manifestID));
+                    response.setStatusMessage(LOGGER.getMessage(MessageCodes.MFS_011, manifestId));
             }
         });
     }

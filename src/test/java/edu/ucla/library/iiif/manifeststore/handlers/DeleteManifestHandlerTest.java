@@ -53,6 +53,35 @@ public class DeleteManifestHandlerTest extends AbstractManifestHandlerTest {
     }
 
     /**
+     * Test the DeleteManifestHandler with .json-less ID.
+     *
+     * @param aContext A testing context
+     */
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testDeleteManifestHandlerJsonless(final TestContext aContext) throws IOException {
+        final Async asyncTask = aContext.async();
+        final int port = aContext.get(Config.HTTP_PORT);
+        final String testIDPath = StringUtils.format(MANIFEST_PATH, myJsonlessManifestID);
+
+        LOGGER.debug(MessageCodes.MFS_012, myJsonlessManifestID);
+
+        myVertx.createHttpClient().delete(port, Constants.UNSPECIFIED_HOST, testIDPath, response -> {
+            final int statusCode = response.statusCode();
+
+            if (response.statusCode() == HTTP.SUCCESS_NO_CONTENT) {
+                final String jsonlessId = myJsonlessManifestID + Constants.JSON_EXT;
+
+                aContext.assertFalse(myS3Client.doesObjectExist(myS3Bucket, jsonlessId));
+                asyncTask.complete();
+            } else {
+                aContext.fail(LOGGER.getMessage(MessageCodes.MFS_004, HTTP.SUCCESS_NO_CONTENT, statusCode));
+                asyncTask.complete();
+            }
+        }).end();
+    }
+
+    /**
      * Confirm that a bad path request returns a 404 response.
      *
      * @param aContext A testing context

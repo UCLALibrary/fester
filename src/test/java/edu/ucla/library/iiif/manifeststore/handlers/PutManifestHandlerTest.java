@@ -33,6 +33,8 @@ public class PutManifestHandlerTest extends AbstractManifestHandlerTest {
 
     private String myPutManifestID;
 
+    private String myJsonlessPutManifestID;
+
     /**
      * Test set up.
      *
@@ -43,7 +45,10 @@ public class PutManifestHandlerTest extends AbstractManifestHandlerTest {
     public void setUp(final TestContext aContext) throws IOException {
         super.setUp(aContext);
 
-        myPutManifestID = "PUT_" + myManifestID;
+        final String putPrefix = "PUT_";
+
+        myPutManifestID = putPrefix + myManifestID;
+        myJsonlessPutManifestID = putPrefix + myJsonlessManifestID;
     }
 
     /**
@@ -59,6 +64,13 @@ public class PutManifestHandlerTest extends AbstractManifestHandlerTest {
         try {
             // If object doesn't exist, this still completes successfully
             myS3Client.deleteObject(myS3Bucket, myPutManifestID);
+        } catch (final SdkClientException details) {
+            aContext.fail(details);
+        }
+
+        try {
+            // If object doesn't exist, this still completes successfully
+            myS3Client.deleteObject(myS3Bucket, myJsonlessPutManifestID);
         } catch (final SdkClientException details) {
             aContext.fail(details);
         }
@@ -92,6 +104,42 @@ public class PutManifestHandlerTest extends AbstractManifestHandlerTest {
             switch (statusCode) {
                 case HTTP.OK:
                     aContext.assertTrue(myS3Client.doesObjectExist(myS3Bucket, myPutManifestID));
+                    asyncTask.complete();
+
+                    break;
+                default:
+                    aContext.fail(LOGGER.getMessage(MessageCodes.MFS_018, manifestPath, statusCode));
+            }
+        }).end(manifest);
+    }
+
+    /**
+     * Test the PutManifestHandler with .json-less ID.
+     *
+     * @param aContext A testing context
+     */
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testPutManifestHandlerJson(final TestContext aContext) throws IOException {
+        final String manifestPath = MANIFEST_FILE.getAbsolutePath();
+        final Buffer manifest = myVertx.fileSystem().readFileBlocking(manifestPath);
+        final Async asyncTask = aContext.async();
+        final int port = aContext.get(Config.HTTP_PORT);
+        final String testIDPath = StringUtils.format(MANIFEST_PATH, myJsonlessPutManifestID);
+        final RequestOptions requestOpts = new RequestOptions();
+
+        LOGGER.debug(MessageCodes.MFS_016, testIDPath);
+
+        requestOpts.setPort(port).setHost(Constants.UNSPECIFIED_HOST).setURI(testIDPath);
+        requestOpts.addHeader(Constants.CONTENT_TYPE, Constants.JSON_MEDIA_TYPE);
+
+        myVertx.createHttpClient().put(requestOpts, response -> {
+            final int statusCode = response.statusCode();
+
+            switch (statusCode) {
+                case HTTP.OK:
+                    aContext.assertTrue(myS3Client.doesObjectExist(myS3Bucket, myJsonlessPutManifestID +
+                            Constants.JSON_EXT));
                     asyncTask.complete();
 
                     break;

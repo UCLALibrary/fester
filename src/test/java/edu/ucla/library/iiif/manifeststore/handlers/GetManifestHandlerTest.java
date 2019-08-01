@@ -60,6 +60,39 @@ public class GetManifestHandlerTest extends AbstractManifestHandlerTest {
     }
 
     /**
+     * Test the GetManifestHandler with .json-less ID.
+     *
+     * @param aContext A testing context
+     */
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testGetManifestHandlerJson(final TestContext aContext) throws IOException {
+        final String expectedManifest = StringUtils.read(MANIFEST_FILE);
+        final Async asyncTask = aContext.async();
+        final int port = aContext.get(Config.HTTP_PORT);
+        final String testIDPath = StringUtils.format(MANIFEST_PATH, myJsonlessManifestID);
+
+        LOGGER.debug(MessageCodes.MFS_008, myJsonlessManifestID);
+
+        myVertx.createHttpClient().getNow(port, Constants.UNSPECIFIED_HOST, testIDPath, response -> {
+            final int statusCode = response.statusCode();
+
+            if (response.statusCode() == HTTP.OK) {
+                response.bodyHandler(body -> {
+                    final String foundManifest = body.toString(StandardCharsets.UTF_8);
+
+                    // Check that what we retrieve is the same as what we stored
+                    aContext.assertEquals(expectedManifest, foundManifest);
+                    asyncTask.complete();
+                });
+            } else {
+                aContext.fail(LOGGER.getMessage(MessageCodes.MFS_003, HTTP.OK, statusCode));
+                asyncTask.complete();
+            }
+        });
+    }
+
+    /**
      * Confirm that a bad path request returns a 404 response.
      *
      * @param aContext A testing context

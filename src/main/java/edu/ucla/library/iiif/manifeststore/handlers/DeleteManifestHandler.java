@@ -34,9 +34,13 @@ public class DeleteManifestHandler extends AbstractManifestHandler {
     public void handle(final RoutingContext aContext) {
         final HttpServerResponse response = aContext.response();
         final HttpServerRequest request = aContext.request();
-        final String manifestID = request.getParam(Constants.MANIFEST_ID);
+        final String idParam = request.getParam(Constants.MANIFEST_ID);
+        final String manifestId;
 
-        myS3Client.delete(myS3Bucket, manifestID, deleteResponse -> {
+        // If our manifest ID doesn't end with '.json' add it for third party tool convenience
+        manifestId = !idParam.endsWith(Constants.JSON_EXT) ? idParam + Constants.JSON_EXT : idParam;
+
+        myS3Client.delete(myS3Bucket, manifestId, deleteResponse -> {
             final int statusCode = deleteResponse.statusCode();
 
             switch (statusCode) {
@@ -51,14 +55,14 @@ public class DeleteManifestHandler extends AbstractManifestHandler {
 
                     break;
                 case HTTP.INTERNAL_SERVER_ERROR:
-                    LOGGER.error(MessageCodes.MFS_014, manifestID);
+                    LOGGER.error(MessageCodes.MFS_014, manifestId);
 
                     response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
                     response.end();
 
                     break;
                 default:
-                    LOGGER.warn(MessageCodes.MFS_013, statusCode, manifestID);
+                    LOGGER.warn(MessageCodes.MFS_013, statusCode, manifestId);
 
                     response.setStatusCode(statusCode);
                     response.end();
