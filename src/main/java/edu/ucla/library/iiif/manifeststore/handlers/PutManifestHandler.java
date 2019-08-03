@@ -34,11 +34,15 @@ public class PutManifestHandler extends AbstractManifestHandler {
     public void handle(final RoutingContext aContext) {
         final HttpServerResponse response = aContext.response();
         final HttpServerRequest request = aContext.request();
-        final String manifestID = request.getParam(Constants.MANIFEST_ID);
         final JsonObject body = aContext.getBodyAsJson();
+        final String idParam = request.getParam(Constants.MANIFEST_ID);
+        final String manifestId;
+
+        // If our manifest ID doesn't end with '.json' add it for third party tool convenience
+        manifestId = !idParam.endsWith(Constants.JSON_EXT) ? idParam + Constants.JSON_EXT : idParam;
 
         // For now we're not going to check if it exists before we overwrite it
-        myS3Client.put(myS3Bucket, manifestID, body.toBuffer(), put -> {
+        myS3Client.put(myS3Bucket, manifestId, body.toBuffer(), put -> {
             final int statusCode = put.statusCode();
 
             switch (statusCode) {
@@ -48,21 +52,21 @@ public class PutManifestHandler extends AbstractManifestHandler {
 
                     break;
                 case HTTP.FORBIDDEN:
-                    LOGGER.debug(MessageCodes.MFS_023, manifestID);
+                    LOGGER.debug(MessageCodes.MFS_023, manifestId);
 
                     response.setStatusCode(HTTP.FORBIDDEN);
                     response.end();
 
                     break;
                 case HTTP.INTERNAL_SERVER_ERROR:
-                    LOGGER.error(MessageCodes.MFS_015, manifestID);
+                    LOGGER.error(MessageCodes.MFS_015, manifestId);
 
                     response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
                     response.end();
 
                     break;
                 default:
-                    LOGGER.warn(MessageCodes.MFS_013, statusCode, manifestID);
+                    LOGGER.warn(MessageCodes.MFS_013, statusCode, manifestId);
 
                     response.setStatusCode(statusCode);
                     response.end();

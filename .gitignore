@@ -1,4 +1,5 @@
 target/
+file-uploads/
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
@@ -12,3 +13,4 @@ buildNumber.properties
 src/main/tools
 src/main/generated
 src/main/jbake/
+

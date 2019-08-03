@@ -49,6 +49,8 @@ abstract class AbstractManifestHandlerTest {
 
     protected String myManifestID;
 
+    protected String myJsonlessManifestID;
+
     /**
      * Test set up.
      *
@@ -68,7 +70,8 @@ abstract class AbstractManifestHandlerTest {
         options.setConfig(new JsonObject().put(Config.HTTP_PORT, port));
         socket.close();
 
-        myManifestID = UUID.randomUUID().toString() + ".json";
+        myJsonlessManifestID = UUID.randomUUID().toString();
+        myManifestID = myJsonlessManifestID + ".json";
 
         // We only need to initialize our testing tools once; if done, skip
         if (myVertx == null) {
@@ -103,6 +106,13 @@ abstract class AbstractManifestHandlerTest {
             aContext.fail(details);
         }
 
+        try {
+            // If object doesn't exist, this still completes successfully
+            myS3Client.deleteObject(myS3Bucket, myJsonlessManifestID);
+        } catch (final SdkClientException details) {
+            aContext.fail(details);
+        }
+
         myVertx.close(aContext.asyncAssertSuccess());
     }
 
@@ -127,8 +137,13 @@ abstract class AbstractManifestHandlerTest {
                 try {
                     final String testManifest = StringUtils.read(MANIFEST_FILE);
 
+                    // Store a manifest whose ID that has a '.json' extension
                     getLogger().debug(MessageCodes.MFS_006, myManifestID, myS3Bucket);
                     myS3Client.putObject(myS3Bucket, myManifestID, testManifest);
+
+                    // Store a manifest whose ID that doesn't have a '.json' extension
+                    getLogger().debug(MessageCodes.MFS_006, myJsonlessManifestID, myS3Bucket);
+                    myS3Client.putObject(myS3Bucket, myJsonlessManifestID, testManifest);
 
                     aAsyncTask.complete();
                 } catch (final IOException | SdkClientException details) {

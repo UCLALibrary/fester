@@ -35,9 +35,9 @@ This will generate the documentation in the `target/site` directory.
 
 You can run a development instance of Manifest-Store by typing the following within the project root:
 
-    mvn vertx:initialize vertx:run
+    mvn -Plive test
 
-This instance will be refreshed when the code changes so it will reflect the current state of the code. The service can be accessed at [http://localhost:8888](http://localhost:8888).
+Once run, the service can be verified/accessed at [http://localhost:8888/ping](http://localhost:8888/ping). The API documentation can be accessed at [http://localhost:8888/docs/manifest-store](http://localhost:8888/docs/manifest-store)
 
 ## Contact
 

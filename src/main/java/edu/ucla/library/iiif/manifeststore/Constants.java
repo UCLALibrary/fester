@@ -32,6 +32,11 @@ public final class Constants {
     public static final String JSON_MEDIA_TYPE = "application/json";
 
     /**
+     * The file extension for JSON files
+     */
+    public static final String JSON_EXT = ".json";
+
+    /**
      * Private constructor for Constants class.
      */
     private Constants() {
