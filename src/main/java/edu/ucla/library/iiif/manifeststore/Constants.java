@@ -32,6 +32,16 @@ public final class Constants {
     public static final String JSON_MEDIA_TYPE = "application/json";
 
     /**
+     * COR header for allowing access to our manifests to the world
+     */
+    public static final String COR_HEADER = "Access-Control-Allow-Origin";
+
+    /**
+     * an asterisk/star, comes in handy
+     */
+    public static final String STAR = "*";
+
+    /**
      * The file extension for JSON files
      */
     public static final String JSON_EXT = ".json";

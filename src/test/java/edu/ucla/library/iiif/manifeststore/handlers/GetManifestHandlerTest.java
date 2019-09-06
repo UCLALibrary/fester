@@ -48,6 +48,9 @@ public class GetManifestHandlerTest extends AbstractManifestHandlerTest {
                 response.bodyHandler(body -> {
                     final String foundManifest = body.toString(StandardCharsets.UTF_8);
 
+                    // Verify that the COR header is permissive
+                    aContext.assertEquals(Constants.STAR, response.getHeader(Constants.COR_HEADER));
+
                     // Check that what we retrieve is the same as what we stored
                     aContext.assertEquals(expectedManifest, foundManifest);
                     asyncTask.complete();
