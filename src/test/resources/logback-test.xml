@@ -1,12 +1,10 @@
 <configuration>
   <timestamp key="byDay" datePattern="yyyy-MM-dd" />
-  
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
       <pattern>[%level] %logger{45}:%X{line} | %msg%n</pattern>
     </encoder>
   </appender>
-
   <appender name="FILE" class="ch.qos.logback.core.FileAppender">
     <file>target/${project.artifactId}-${byDay}.log</file>
     <append>false</append>
@@ -14,7 +12,6 @@
       <pattern>[%level] %logger{45}:%X{line} | %msg%n</pattern>
     </encoder>
   </appender>
-
   <logger name="io.netty" level="ERROR" additivity="false">
     <appender-ref ref="STDOUT" />
   </logger>
@@ -24,9 +21,7 @@
   <logger name="edu.ucla.library.iiif.manifeststore" level="DEBUG" additivity="false">
     <appender-ref ref="STDOUT" />
   </logger>
-
   <root level="INFO">
     <appender-ref ref="STDOUT" />
   </root>
-
 </configuration>

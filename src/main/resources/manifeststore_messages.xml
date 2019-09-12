@@ -37,4 +37,17 @@
   <entry key="MFS-021">Incorrect media type; expected: application/json, found: {}</entry>
   <entry key="MFS-022">Failed PUT test's unsupported media type check; response: {}</entry>
   <entry key="MFS-023">Request to PUT manifest denied due to lack of permission: {}</entry>
+  <entry key="MFS-024">Manifest Load Request: {}</entry>
+  <entry key="MFS-025">defaultTestFilename: {}</entry>
+  <entry key="MFS-026">Running '{}' test on port: {}</entry>
+  <entry key="MFS-027">Test GETing a test manifest from: {}</entry>
+  <entry key="MFS-028">Test DELETing a test manifest at: {}</entry>
+  <entry key="MFS-029">Confirming test manifest has been deleted from: {}</entry>
+  <entry key="MFS-030">Manifest-store service confirmed to be available.</entry>
+  <entry key="MFS-031">FAIL--manifest-store service is unavailable.</entry>
+  <entry key="MFS-032">FAIL--unable to put manifest</entry>
+  <entry key="MFS-033">FAIL--found manifest does not match expected manifest</entry>
+  <entry key="MFS-034">FAIL--manifest not found</entry>
+  <entry key="MFS-035">FAIL--unable to DELETE manifest</entry>
+  <entry key="MFS-036">FAIL--manifest found when it should have been deleted</entry>
 </properties>
