@@ -45,8 +45,7 @@ public class GetManifestHandler extends AbstractManifestHandler {
 
         myS3Client.get(myS3Bucket, manifestId, getResponse -> {
             final int statusCode = getResponse.statusCode();
-
-            String statusMessage;
+            final String statusMessage;
 
             switch (statusCode) {
                 case HTTP.OK:
