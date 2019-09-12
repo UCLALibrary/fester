@@ -57,7 +57,7 @@
     <netty.epoll.version>4.1.37.Final</netty.epoll.version>
     <vertx.plugin.version>1.0.18</vertx.plugin.version>
     <codacy.plugin.version>1.0.2</codacy.plugin.version>
-    <vertx.super.s3.version>1.0.0</vertx.super.s3.version>
+    <vertx.super.s3.version>1.1.0</vertx.super.s3.version>
     <jcip.annotations.version>1.0-1</jcip.annotations.version>
 
     <!-- Name of the main Vert.x verticle -->
