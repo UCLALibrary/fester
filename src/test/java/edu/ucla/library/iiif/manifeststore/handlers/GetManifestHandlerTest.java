@@ -15,6 +15,7 @@ import edu.ucla.library.iiif.manifeststore.Config;
 import edu.ucla.library.iiif.manifeststore.Constants;
 import edu.ucla.library.iiif.manifeststore.HTTP;
 import edu.ucla.library.iiif.manifeststore.MessageCodes;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -52,7 +53,7 @@ public class GetManifestHandlerTest extends AbstractManifestHandlerTest {
                     aContext.assertEquals(Constants.STAR, response.getHeader(Constants.COR_HEADER));
 
                     // Check that what we retrieve is the same as what we stored
-                    aContext.assertEquals(expectedManifest, foundManifest);
+                    aContext.assertEquals(new JsonObject(expectedManifest), new JsonObject(foundManifest));
                     asyncTask.complete();
                 });
             } else {
