@@ -45,6 +45,7 @@ public class GetManifestHandler extends AbstractManifestHandler {
 
         myS3Client.get(myS3Bucket, manifestId, getResponse -> {
             final int statusCode = getResponse.statusCode();
+            final String statusMessage;
 
             switch (statusCode) {
                 case HTTP.OK:
@@ -52,23 +53,30 @@ public class GetManifestHandler extends AbstractManifestHandler {
                         final String manifest = bodyHandler.getString(0, bodyHandler.length());
 
                         response.setStatusCode(HTTP.OK);
-                        response.putHeader(Constants.CONTENT_TYPE, Constants.JSON_MEDIA_TYPE).end(manifest);
+                        response.putHeader(Constants.CONTENT_TYPE, Constants.JSON_MEDIA_TYPE);
+                        response.end(manifest);
                     });
 
                     break;
                 case HTTP.NOT_FOUND:
+                    statusMessage = LOGGER.getMessage(MessageCodes.MFS_009, manifestId);
                     response.setStatusCode(HTTP.NOT_FOUND);
-                    response.setStatusMessage(LOGGER.getMessage(MessageCodes.MFS_009, manifestId));
+                    response.setStatusMessage(statusMessage);
+                    response.end(statusMessage);
 
                     break;
                 case HTTP.INTERNAL_SERVER_ERROR:
+                    statusMessage = LOGGER.getMessage(MessageCodes.MFS_010, manifestId);
                     response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
-                    response.setStatusMessage(LOGGER.getMessage(MessageCodes.MFS_010, manifestId));
+                    response.setStatusMessage(statusMessage);
+                    response.end(statusMessage);
 
                     break;
                 default:
+                    statusMessage = LOGGER.getMessage(MessageCodes.MFS_011, manifestId);
                     response.setStatusCode(statusCode);
-                    response.setStatusMessage(LOGGER.getMessage(MessageCodes.MFS_011, manifestId));
+                    response.setStatusMessage(statusMessage);
+                    response.end(statusMessage);
             }
         });
     }
