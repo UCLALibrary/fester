@@ -75,13 +75,13 @@ public class ManifestUploadIT {
                 response.bodyHandler(body -> {
                     aContext.assertEquals(body.getString(0, body.length()), HELLO);
                     LOGGER.info(MessageCodes.MFS_030);
-                    asyncTask.complete();
                 });
+                asyncTask.complete();
             } else {
-                aContext.fail(MessageCodes.MFS_031);
+                aContext.fail(LOGGER.getMessage(MessageCodes.MFS_031));
             }
 
-        });
+        }); // end HttpClient.getNow
     } // end method
 
     /**
@@ -109,9 +109,8 @@ public class ManifestUploadIT {
                 asyncTask.complete();
             } else {
                 aContext.fail(MessageCodes.MFS_032);
-                asyncTask.complete();
             }
-        }).end(myManifest);
+        }).end(myManifest); // end HttpClient.put
     } // end method
 
     /**
@@ -144,17 +143,16 @@ public class ManifestUploadIT {
                 }); // end bodyHandler
             } else {
                 aContext.fail(MessageCodes.MFS_034);
-                asyncTask.complete();
             } // end if
 
-        }); // end response
+        }); // end HttpClient.get
     } // end method
 
     /**
      * confirm that it's possible to DELETE a manifest
      */
     @SuppressWarnings("deprecation")
-    @Test(timeout = 400)
+    @Test
     public final void TestDcheckThatDELETEmanifestWorks(final TestContext aContext) {
         final Async asyncTask = aContext.async();
         /************ DELETE TEST *********************************************/
@@ -167,10 +165,9 @@ public class ManifestUploadIT {
             if (statusCode == HTTP.SUCCESS_NO_CONTENT) {
                 asyncTask.complete();
             } else {
-                aContext.fail(MessageCodes.MFS_035);
-                asyncTask.complete();
+                aContext.fail(LOGGER.getMessage(MessageCodes.MFS_035));
             } // end if/else
-        }).end(); // end response
+        }).end(); // end HttpClient.delete
     } // end method
 
     /**
@@ -185,14 +182,14 @@ public class ManifestUploadIT {
         final String testIDPath = StringUtils.format(MANIFEST_PATH, myDotJsonPutManifestID);
         LOGGER.info(MessageCodes.MFS_029, testIDPath); // Confirming test manifest has been deleted from: {}
         vertx.createHttpClient().getNow(PORT, Constants.UNSPECIFIED_HOST, testIDPath, response -> {
+            LOGGER.info("HERE!");
             final int statusCode = response.statusCode();
             if (statusCode == HTTP.OK) {
                 // aw man, this shouldn't be here still
-                aContext.fail(MessageCodes.MFS_036);
+                aContext.fail(LOGGER.getMessage(MessageCodes.MFS_036));
             } else {
                 asyncTask.complete();
             } // end if/else
-        }); // end response
-        asyncTask.complete();
+        }); // end HttpClient.getNow
     } // end method
 } // end class
