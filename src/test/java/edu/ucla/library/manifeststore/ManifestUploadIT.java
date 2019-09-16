@@ -182,7 +182,6 @@ public class ManifestUploadIT {
         final String testIDPath = StringUtils.format(MANIFEST_PATH, myDotJsonPutManifestID);
         LOGGER.info(MessageCodes.MFS_029, testIDPath); // Confirming test manifest has been deleted from: {}
         vertx.createHttpClient().getNow(PORT, Constants.UNSPECIFIED_HOST, testIDPath, response -> {
-            LOGGER.info("HERE!");
             final int statusCode = response.statusCode();
             if (statusCode == HTTP.OK) {
                 // aw man, this shouldn't be here still
