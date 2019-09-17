@@ -108,7 +108,7 @@ public class ManifestUploadIT {
             if (statusCode == HTTP.OK) {
                 asyncTask.complete();
             } else {
-                aContext.fail(MessageCodes.MFS_032);
+                aContext.fail(LOGGER.getMessage(MessageCodes.MFS_032));
             }
         }).end(myManifest); // end HttpClient.put
     } // end method
@@ -136,13 +136,13 @@ public class ManifestUploadIT {
                     final String foundManifest = body.toString(StandardCharsets.UTF_8);
                     // Check that what we retrieve is the same as what we stored
                     if (new JsonObject(expectedManifest).equals(new JsonObject(foundManifest))) {
+                        asyncTask.complete();
                     } else {
-                        aContext.fail(MessageCodes.MFS_033);
+                        aContext.fail(LOGGER.getMessage(MessageCodes.MFS_033));
                     }
-                    asyncTask.complete();
                 }); // end bodyHandler
             } else {
-                aContext.fail(MessageCodes.MFS_034);
+                aContext.fail(LOGGER.getMessage(MessageCodes.MFS_034));
             } // end if
 
         }); // end HttpClient.get

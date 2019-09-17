@@ -104,3 +104,4 @@ paths:
          schema:
            type: string
          description: The manifest ID
+
