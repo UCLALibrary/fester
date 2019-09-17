@@ -38,7 +38,7 @@ public class GetManifestHandler extends AbstractManifestHandler {
         final String manifestId;
 
         // set a very permissive COR response header
-        response.headers().set(Constants.COR_HEADER, Constants.STAR);
+        response.headers().set(Constants.CORS_HEADER, Constants.STAR);
 
         // If our manifest ID doesn't end with '.json' add it for third party tool convenience
         manifestId = !idParam.endsWith(Constants.JSON_EXT) ? idParam + Constants.JSON_EXT : idParam;
