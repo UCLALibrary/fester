@@ -34,7 +34,7 @@ public final class Constants {
     /**
      * COR header for allowing access to our manifests to the world
      */
-    public static final String COR_HEADER = "Access-Control-Allow-Origin";
+    public static final String CORS_HEADER = "Access-Control-Allow-Origin";
 
     /**
      * an asterisk/star, comes in handy
