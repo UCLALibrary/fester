@@ -47,6 +47,11 @@ public final class Constants {
     public static final String JSON_EXT = ".json";
 
     /**
+     * ID Prefix to use for all PUT tests
+     */
+    public static final String PUT_TEST_ID_PREFIX = "PUT_";
+
+    /**
      * Private constructor for Constants class.
      */
     private Constants() {
