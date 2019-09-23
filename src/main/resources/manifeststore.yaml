@@ -1,4 +1,6 @@
 openapi: "3.0.0"
+tags:
+  - name: manifest, collection, utility, proposed
 info:
   version: 0.1.0
   title: Manifest Store API
@@ -10,19 +12,23 @@ info:
     name: UCLA Library Services Team
     email: lib_softwaredev-services@library.ucla.edu
 servers:
-  - url: http://iiif.library.ucla.edu/
+  - url: http://iiif.library.ucla.edu
 paths:
   /ping:
     get:
+        tags: [utility]
         summary: Ping
-        description: Requests the application to acknowledge a simple request.
+        description: Requests the application to acknowledge a simple request. Useful for testing the availability of the service.
         operationId: getPing
         responses:
           '200':
             description: OK
-  # Not yet implemented
+  # Collection operations are proposed, not yet implemented
   /collection/{collectionName}:
     get:
+      tags: [collection, proposed]
+      summary: Get a collection
+      description: Gets a specified collection.
       operationId: getCollection
       responses:
         '200':
@@ -30,6 +36,9 @@ paths:
         '404':
           description: Not found
     put:
+      tags: [collection, proposed]
+      summary: Put a collection
+      description: Puts a provided IIIF collection.
       operationId: putCollection
       requestBody:
         description: A IIIF collection
@@ -50,6 +59,9 @@ paths:
         '500':
           description: Internal server error
     delete:
+      tags: [collection, proposed]
+      summary: Delete a collection
+      description: Deletes a specified collection.
       operationId: deleteCollection
       responses:
         '204':
@@ -67,6 +79,9 @@ paths:
          description: The collection name
   /{manifestId}/manifest:
     get:
+      tags: [manifest]
+      summary: Get a manifest
+      description: Gets a specified manifest from the store.
       operationId: getManifest
       responses:
         '200':
@@ -76,6 +91,9 @@ paths:
         '404':
           description: Not found
     put:
+      tags: [manifest]
+      summary: Put a manifest
+      description: Puts a provided manifest in the store.
       operationId: putManifest
       requestBody:
         description: A IIIF manifest
@@ -96,6 +114,9 @@ paths:
         '500':
           description: Internal server error
     delete:
+      tags: [manifest]
+      summary: Delete a manifest
+      description: Delete the specified manifest.
       operationId: deleteManifest
       responses:
         '204':
