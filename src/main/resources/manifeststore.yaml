@@ -1,6 +1,6 @@
 openapi: "3.0.0"
 tags:
-  - name: manifest, collection, utility, proposed
+  - name: manifest-store operations
 info:
   version: 0.1.0
   title: Manifest Store API
