@@ -15,11 +15,11 @@ paths:
   /ping:
     get:
         summary: Ping
-      description: Requests the application to acknowledge a simple request
-      operationId: getPing
-      responses:
-        '200':
-          description: OK
+        description: Requests the application to acknowledge a simple request.
+        operationId: getPing
+        responses:
+          '200':
+            description: OK
   # Not yet implemented
   /collection/{collectionName}:
     get:
@@ -111,4 +111,3 @@ paths:
          schema:
            type: string
          description: The manifest ID
-

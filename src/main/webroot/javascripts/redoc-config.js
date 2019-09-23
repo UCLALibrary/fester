@@ -11,7 +11,7 @@
  *  #FF00A5 (pink)
  */
 
-Redoc.init('/docs/manifeststore.yaml', {
+Redoc.init('/docs/manifest-store/manifeststore.yaml', {
   theme : {
     colors : {
       primary : {
