@@ -1,0 +1,29 @@
+.container-fluid p {
+  padding-top: 15px;
+}
+
+body {
+  padding-top: 80px;
+  font-family: Montserrat, sans-serif !important;
+}
+
+h1 {
+  font-weight: 400;
+  color: #003B5C;
+  font-size: 1.85714em;
+}
+
+dd {
+  display: block;
+  margin-left: 40px;
+}
+
+.highlighted {
+  background-color: #8bb8e8;
+  margin: 40px 50px 40px 50px;
+  padding: 20px;
+}
+
+a {
+  color: #003b5c;
+}

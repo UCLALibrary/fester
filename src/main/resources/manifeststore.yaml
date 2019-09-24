@@ -1,21 +1,54 @@
 openapi: "3.0.0"
+tags:
+  - name: Manifest-Store Operations
+x-tagGroups:
+  - name: Implemented
+    tags:
+      - Manifest
+      - Utility
+  - name: Proposed
+    tags:
+      - Collection
 info:
   version: 0.1.0
   title: Manifest Store API
+  description: "Manifest-Store, a IIIF manifest
+    storage microservice, provides a simple storage and retrieval system 
+    for IIIF manifests. Amazon S3 is required for document storage. For more
+    details on how to construct a IIIF manifest, consult these resources:
+    https://iiif.io/api/presentation/2.1/#manifest and https://iiif.io/api/cookbook/mvm-image/#use-case"
   license:
     name: The 3-Clause BSD License
+    url: https://opensource.org/licenses/BSD-3-Clause
+  contact:
+    name: UCLA Library Services Team
+    email: lib_softwaredev-services@library.ucla.edu
 servers:
-  - url: http://iiif.library.ucla.edu/
+  - url: http://iiif.library.ucla.edu/manifest-store
 paths:
   /ping:
     get:
-      operationId: getPing
-      responses:
-        '200':
-          description: OK
-  # Not yet implemented
+        tags: [Utility]
+        summary: Ping
+        description: "Requests the application to acknowledge a simple 
+          request. Useful for testing the availability of the service."
+        operationId: getPing
+        responses:
+          '200':
+            description: OK
+            content:
+              text/plain:
+                schema:
+                  type: string
+                example: Hello
+          '500':
+            description: There was an internal server error
+  # Collection operations are proposed, not yet implemented
   /collection/{collectionName}:
     get:
+      tags: [Collection, Proposed]
+      summary: Get a collection
+      description: Gets a specified collection.
       operationId: getCollection
       responses:
         '200':
@@ -23,6 +56,9 @@ paths:
         '404':
           description: Not found
     put:
+      tags: [Collection, Proposed]
+      summary: Put a collection
+      description: Puts a provided IIIF collection.
       operationId: putCollection
       requestBody:
         description: A IIIF collection
@@ -43,6 +79,9 @@ paths:
         '500':
           description: Internal server error
     delete:
+      tags: [Collection, Proposed]
+      summary: Delete a collection
+      description: Deletes a specified collection.
       operationId: deleteCollection
       responses:
         '204':
@@ -60,6 +99,9 @@ paths:
          description: The collection name
   /{manifestId}/manifest:
     get:
+      tags: [Manifest]
+      summary: Get a manifest
+      description: Gets a specified manifest from the store.
       operationId: getManifest
       responses:
         '200':
@@ -69,6 +111,9 @@ paths:
         '404':
           description: Not found
     put:
+      tags: [Manifest]
+      summary: Put a manifest
+      description: Puts a provided manifest in the store.
       operationId: putManifest
       requestBody:
         description: A IIIF manifest
@@ -77,6 +122,10 @@ paths:
           application/json:
             schema:
               type: object
+            examples:
+              jsonObject:
+                summary: A sample manifest
+                externalValue: 'https://californica.library.ucla.edu/concern/works/2gqn2000zz-89112/manifest'
       responses:
         '200':
           description: Updated or created the manifest at the supplied ID
@@ -89,6 +138,9 @@ paths:
         '500':
           description: Internal server error
     delete:
+      tags: [Manifest]
+      summary: Delete a manifest
+      description: Delete the specified manifest.
       operationId: deleteManifest
       responses:
         '204':
@@ -104,4 +156,4 @@ paths:
          schema:
            type: string
          description: The manifest ID
-
+         example: "ark:/21198/zz00090p17"

@@ -1,0 +1,48 @@
+
+body {
+  margin: 0;
+  padding: 0;
+  padding-top: 56px;
+}
+
+
+.dpMbau {
+    top: -19px !important;
+}
+
+.bCXegy {
+  color: #FFD100 !important;
+}
+
+.api-info > div:nth-child(4) {
+  padding-top: 2em;
+}
+
+.sc-jAaTju, .sc-cMljjf > div:nth-child(1) > span:nth-child(1) > div:nth-child(1) {
+  color: white !important;
+}
+
+.sc-cMljjfi, .sc-jWBwVP {
+  padding: 5px;
+}
+
+span.property.token.string {
+  color: #FFD100 !important;
+}
+
+span.token.boolean {
+  color: white !important;
+}
+
+span.token.string {
+  color: #6BBD5B !important;
+}
+
+.container-fluid {
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+.menu-content {
+  padding-top: 10px;
+}
