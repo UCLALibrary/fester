@@ -1,6 +1,14 @@
 openapi: "3.0.0"
 tags:
   - name: Manifest-Store Operations
+x-tagGroups:
+  - name: Implemented
+    tags:
+      - Manifest
+      - Utility
+  - name: Proposed
+    tags:
+      - Collection
 info:
   version: 0.1.0
   title: Manifest Store API
@@ -8,8 +16,7 @@ info:
     storage microservice, provides a simple storage and retrieval system 
     for IIIF manifests. Amazon S3 is required for document storage. For more
     details on how to construct a IIIF manifest, consult these resources:
-      * https://iiif.io/api/presentation/2.1/#manifest
-      * https://iiif.io/api/cookbook/mvm-image/#use-case"
+    https://iiif.io/api/presentation/2.1/#manifest and https://iiif.io/api/cookbook/mvm-image/#use-case"
   license:
     name: The 3-Clause BSD License
     url: https://opensource.org/licenses/BSD-3-Clause

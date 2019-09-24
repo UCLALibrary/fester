@@ -31,7 +31,7 @@ Redoc.init('/docs/manifest-store/manifeststore.yaml', {
     },
     typography : {
       code : {
-        color : '#FFD100',
+        color : '#000',
         backgroundColor : '#FFD100'
       }
     },
