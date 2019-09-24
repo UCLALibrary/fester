@@ -6,7 +6,10 @@ info:
   title: Manifest Store API
   description: "Manifest-Store, a IIIF manifest
     storage microservice, provides a simple storage and retrieval system 
-    for IIIF manifests. Amazon S3 is required for document storage."
+    for IIIF manifests. Amazon S3 is required for document storage. For more
+    details on how to construct a IIIF manifest, consult these resources:
+      * https://iiif.io/api/presentation/2.1/#manifest
+      * https://iiif.io/api/cookbook/mvm-image/#use-case"
   license:
     name: The 3-Clause BSD License
     url: https://opensource.org/licenses/BSD-3-Clause
@@ -112,6 +115,10 @@ paths:
           application/json:
             schema:
               type: object
+            examples:
+              jsonObject:
+                summary: A sample manifest
+                externalValue: 'https://californica.library.ucla.edu/concern/works/2gqn2000zz-89112/manifest'
       responses:
         '200':
           description: Updated or created the manifest at the supplied ID
