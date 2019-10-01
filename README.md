@@ -39,6 +39,16 @@ You can run a development instance of Manifest-Store by typing the following wit
 
 Once run, the service can be verified/accessed at [http://localhost:8888/ping](http://localhost:8888/ping). The API documentation can be accessed at [http://localhost:8888/docs/manifest-store](http://localhost:8888/docs/manifest-store)
 
+## Load Testing
+
+A [Locust](https://docs.locust.io/en/stable/index.html) test file is included, it only tests PUTs of manifests. If you wish to run the test, you need to have Locust installed, and then run the following command from the src/test/scripts/locust folder:
+
+    locust --host=url-of-the-server-you-are-testing
+
+For example, if you wish to run a Locust test against a dev instance on your own machine, you would enter:
+
+    locust --host=http://localhost:8888
+
 ## Contact
 
 We use an internal ticketing system, but we've left the GitHub [issues](https://github.com/UCLALibrary/manifest-store/issues) open in case you'd like to file a ticket or make a suggestion. You can also contact Kevin S. Clarke at <a href="mailto:ksclarke@ksclarke.io">ksclarke@ksclarke.io</a> if you have a question about the project.
