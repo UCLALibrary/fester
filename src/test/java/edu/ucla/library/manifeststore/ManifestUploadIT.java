@@ -45,7 +45,7 @@ public class ManifestUploadIT {
 
     private static final String MANIFEST_PATH = "/{}/manifest";
 
-    private static final String PING = "/ping";
+    private static final String STATUS = "/status/manifest-store";
 
     private static final String HELLO = "Hello";
 
@@ -66,8 +66,8 @@ public class ManifestUploadIT {
     @Test
     public final void TestAcheckThatServiceIsUp(final TestContext aContext) {
         final Async asyncTask = aContext.async();
-        // first, let's sanity-check our service ping endpoint before we do anything real
-        vertx.createHttpClient().getNow(PORT, Constants.UNSPECIFIED_HOST, PING, response -> {
+        // first, let's sanity-check our service status endpoint before we do anything real
+        vertx.createHttpClient().getNow(PORT, Constants.UNSPECIFIED_HOST, STATUS, response -> {
             // validate the response
 
             final int statusCode = response.statusCode();
