@@ -26,13 +26,14 @@ info:
 servers:
   - url: http://iiif.library.ucla.edu/manifest-store
 paths:
-  /ping:
+  /status/manifest-store:
     get:
         tags: [Utility]
-        summary: Ping
-        description: "Requests the application to acknowledge a simple 
-          request. Useful for testing the availability of the service."
-        operationId: getPing
+        summary: Get Application Status
+        description: "This is a query of the application's status. Right now, this just responds with the string 'Hello'
+          to indicate that the application is alive and functioning as expected. This response will be expanded in the
+          future."
+        operationId: getStatus
         responses:
           '200':
             description: OK

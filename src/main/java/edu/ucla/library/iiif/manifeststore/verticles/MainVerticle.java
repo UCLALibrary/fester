@@ -11,7 +11,7 @@ import edu.ucla.library.iiif.manifeststore.HTTP;
 import edu.ucla.library.iiif.manifeststore.Op;
 import edu.ucla.library.iiif.manifeststore.handlers.DeleteManifestHandler;
 import edu.ucla.library.iiif.manifeststore.handlers.GetManifestHandler;
-import edu.ucla.library.iiif.manifeststore.handlers.GetPingHandler;
+import edu.ucla.library.iiif.manifeststore.handlers.GetStatusHandler;
 import edu.ucla.library.iiif.manifeststore.handlers.MatchingOpNotFoundHandler;
 import edu.ucla.library.iiif.manifeststore.handlers.PutManifestHandler;
 import io.vertx.config.ConfigRetriever;
@@ -60,7 +60,7 @@ public class MainVerticle extends AbstractVerticle {
                         final Router router;
 
                         // Next, we associate handlers with routes from our specification
-                        factory.addHandlerByOperationId(Op.GET_PING, new GetPingHandler());
+                        factory.addHandlerByOperationId(Op.GET_STATUS, new GetStatusHandler());
                         factory.addHandlerByOperationId(Op.GET_MANIFEST, new GetManifestHandler(vertx, config));
                         factory.addHandlerByOperationId(Op.PUT_MANIFEST, new PutManifestHandler(vertx, config));
                         factory.addHandlerByOperationId(Op.DELETE_MANIFEST, new DeleteManifestHandler(vertx, config));

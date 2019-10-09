@@ -37,7 +37,7 @@ You can run a development instance of Manifest-Store by typing the following wit
 
     mvn -Plive test
 
-Once run, the service can be verified/accessed at [http://localhost:8888/ping](http://localhost:8888/ping). The API documentation can be accessed at [http://localhost:8888/docs/manifest-store](http://localhost:8888/docs/manifest-store)
+Once run, the service can be verified/accessed at [http://localhost:8888/status/manifest-store](http://localhost:8888/status/manifest-store). The API documentation can be accessed at [http://localhost:8888/docs/manifest-store](http://localhost:8888/docs/manifest-store)
 
 ## Load Testing
 

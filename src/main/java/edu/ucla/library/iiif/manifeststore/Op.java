@@ -3,7 +3,7 @@ package edu.ucla.library.iiif.manifeststore;
 
 public final class Op {
 
-    public static final String GET_PING = "getPing";
+    public static final String GET_STATUS = "getStatus";
 
     public static final String GET_MANIFEST = "getManifest";
 

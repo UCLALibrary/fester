@@ -5,7 +5,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
 
-public class GetPingHandler implements Handler<RoutingContext> {
+public class GetStatusHandler implements Handler<RoutingContext> {
 
     @Override
     public void handle(final RoutingContext aContext) {

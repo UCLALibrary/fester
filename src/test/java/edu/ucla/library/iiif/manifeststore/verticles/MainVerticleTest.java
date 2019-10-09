@@ -64,7 +64,7 @@ public class MainVerticleTest {
         final int port = aContext.get(Config.HTTP_PORT);
 
         // Testing the path defined in our OpenAPI YAML file
-        myVertx.createHttpClient().getNow(port, "0.0.0.0", "/ping", response -> {
+        myVertx.createHttpClient().getNow(port, "0.0.0.0", "/status/manifest-store", response -> {
             final int statusCode = response.statusCode();
 
             if (statusCode == 200) {
