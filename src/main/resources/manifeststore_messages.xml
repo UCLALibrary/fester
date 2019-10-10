@@ -50,4 +50,7 @@
   <entry key="MFS-034">FAIL--manifest not found</entry>
   <entry key="MFS-035">FAIL--unable to DELETE manifest</entry>
   <entry key="MFS-036">FAIL--manifest found when it should have been deleted</entry>
+  <entry key="MFS-037">Not processed. The submission is missing a CSV file.</entry>
+  <entry key="MFS-038">Uploaded CSV file received: {} [{}]</entry>
+  <entry key="MFS-039">Unexpected POST response: [{}] {}</entry>
 </properties>
