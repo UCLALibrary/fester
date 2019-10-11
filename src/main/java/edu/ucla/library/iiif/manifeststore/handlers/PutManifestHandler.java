@@ -1,12 +1,12 @@
 
-package edu.ucla.library.iiif.manifeststore.handlers;
+package edu.ucla.library.iiif.fester.handlers;
 
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
-import edu.ucla.library.iiif.manifeststore.Constants;
-import edu.ucla.library.iiif.manifeststore.HTTP;
-import edu.ucla.library.iiif.manifeststore.MessageCodes;
+import edu.ucla.library.iiif.fester.Constants;
+import edu.ucla.library.iiif.fester.HTTP;
+import edu.ucla.library.iiif.fester.MessageCodes;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
@@ -21,7 +21,7 @@ public class PutManifestHandler extends AbstractManifestHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(PutManifestHandler.class, Constants.MESSAGES);
 
     /**
-     * Creates a handler that creates IIIF manifests in the manifest store.
+     * Creates a handler that creates IIIF manifests in Fester.
      *
      * @param aVertx A Vert.x instance
      * @param aConfig A JSON configuration

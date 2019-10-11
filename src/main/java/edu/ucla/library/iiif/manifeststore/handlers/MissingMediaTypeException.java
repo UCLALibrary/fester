@@ -1,10 +1,10 @@
 
-package edu.ucla.library.iiif.manifeststore.handlers;
+package edu.ucla.library.iiif.fester.handlers;
 
 import info.freelibrary.util.I18nException;
 
-import edu.ucla.library.iiif.manifeststore.Constants;
-import edu.ucla.library.iiif.manifeststore.MessageCodes;
+import edu.ucla.library.iiif.fester.Constants;
+import edu.ucla.library.iiif.fester.MessageCodes;
 
 /**
  * Exception thrown when a request is missing a required media-type

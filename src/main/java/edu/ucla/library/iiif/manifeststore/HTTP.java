@@ -1,5 +1,5 @@
 
-package edu.ucla.library.iiif.manifeststore;
+package edu.ucla.library.iiif.fester;
 
 /**
  * A set of HTTP related constants.

@@ -1,5 +1,5 @@
 
-package edu.ucla.library.iiif.manifeststore.handlers;
+package edu.ucla.library.iiif.fester.handlers;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,9 +21,9 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.StringUtils;
 
-import edu.ucla.library.iiif.manifeststore.Config;
-import edu.ucla.library.iiif.manifeststore.MessageCodes;
-import edu.ucla.library.iiif.manifeststore.verticles.MainVerticle;
+import edu.ucla.library.iiif.fester.Config;
+import edu.ucla.library.iiif.fester.MessageCodes;
+import edu.ucla.library.iiif.fester.verticles.MainVerticle;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.DeploymentOptions;
@@ -80,10 +80,10 @@ abstract class AbstractManifestHandlerTest {
             future.complete();
         }
 
-        // If our testing tools have been initialized, start up our manifest store
+        // If our testing tools have been initialized, start up our Fester
         future.setHandler(initialization -> {
             if (initialization.succeeded()) {
-                deployManifestStore(aContext, asyncResult, options);
+                deployFester(aContext, asyncResult, options);
             } else if (initialization.cause() != null) {
                 aContext.fail(initialization.cause());
             } else {
@@ -124,13 +124,13 @@ abstract class AbstractManifestHandlerTest {
     protected abstract Logger getLogger();
 
     /**
-     * Deploy the manifest store to test against.
+     * Deploy Fester to test against.
      *
      * @param aContext A test context
      * @param aAsyncTask An asynchronous task that completes the setup
-     * @param aOpts Deployment options used to configure the manifest store
+     * @param aOpts Deployment options used to configure Fester
      */
-    private void deployManifestStore(final TestContext aContext, final Async aAsyncTask,
+    private void deployFester(final TestContext aContext, final Async aAsyncTask,
             final DeploymentOptions aOpts) {
         myVertx.deployVerticle(MainVerticle.class.getName(), aOpts, deployment -> {
             if (deployment.succeeded()) {

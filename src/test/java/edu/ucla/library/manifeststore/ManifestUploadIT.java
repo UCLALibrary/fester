@@ -1,5 +1,5 @@
 
-package edu.ucla.library.manifeststore;
+package edu.ucla.library.fester;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,9 +15,9 @@ import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 import info.freelibrary.util.StringUtils;
 
-import edu.ucla.library.iiif.manifeststore.Constants;
-import edu.ucla.library.iiif.manifeststore.HTTP;
-import edu.ucla.library.iiif.manifeststore.MessageCodes;
+import edu.ucla.library.iiif.fester.Constants;
+import edu.ucla.library.iiif.fester.HTTP;
+import edu.ucla.library.iiif.fester.MessageCodes;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.RequestOptions;

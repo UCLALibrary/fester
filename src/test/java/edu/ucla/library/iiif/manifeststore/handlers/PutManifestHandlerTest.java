@@ -1,5 +1,5 @@
 
-package edu.ucla.library.iiif.manifeststore.handlers;
+package edu.ucla.library.iiif.fester.handlers;
 
 import java.io.IOException;
 
@@ -14,10 +14,10 @@ import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 import info.freelibrary.util.StringUtils;
 
-import edu.ucla.library.iiif.manifeststore.Config;
-import edu.ucla.library.iiif.manifeststore.Constants;
-import edu.ucla.library.iiif.manifeststore.HTTP;
-import edu.ucla.library.iiif.manifeststore.MessageCodes;
+import edu.ucla.library.iiif.fester.Config;
+import edu.ucla.library.iiif.fester.Constants;
+import edu.ucla.library.iiif.fester.HTTP;
+import edu.ucla.library.iiif.fester.MessageCodes;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.RequestOptions;
 import io.vertx.ext.unit.Async;

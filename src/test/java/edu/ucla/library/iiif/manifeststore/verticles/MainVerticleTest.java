@@ -1,5 +1,5 @@
 
-package edu.ucla.library.iiif.manifeststore.verticles;
+package edu.ucla.library.iiif.fester.verticles;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -9,7 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import edu.ucla.library.iiif.manifeststore.Config;
+import edu.ucla.library.iiif.fester.Config;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;

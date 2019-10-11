@@ -1,5 +1,5 @@
 
-package edu.ucla.library.iiif.manifeststore.handlers;
+package edu.ucla.library.iiif.fester.handlers;
 
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerResponse;

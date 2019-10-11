@@ -1,5 +1,5 @@
 
-package edu.ucla.library.iiif.manifeststore;
+package edu.ucla.library.iiif.fester;
 
 public final class Op {
 

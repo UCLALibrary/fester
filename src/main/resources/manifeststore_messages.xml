@@ -4,13 +4,13 @@
 
 <!--<![CDATA[
   To process this file outside of a full build, run:
-    mvn info.freelibrary:freelib-utils:generate-codes -DmessageFiles=src/main/resources/manifeststore_messages.xml
+    mvn info.freelibrary:freelib-utils:generate-codes -DmessageFiles=src/main/resources/fester_messages.xml
   Bash shell users can run the shorter form:
     mvn info.freelibrary:freelib-utils:generate-codes -DmessageFiles=$(find src -name *_messages.xml)
 ]]>-->
 
 <properties>
-  <entry key="message-class-name">edu.ucla.library.iiif.manifeststore.MessageCodes</entry>
+  <entry key="message-class-name">edu.ucla.library.iiif.fester.MessageCodes</entry>
 
   <!-- Messages to be stored in the MessageCodes class -->
   <entry key="MFS-000">{}</entry>
