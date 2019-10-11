@@ -21,7 +21,7 @@
   <logger name="io.vertx" level="ERROR" additivity="false">
     <appender-ref ref="STDOUT" />
   </logger>
-  <logger name="edu.ucla.library.iiif.manifeststore" level="DEBUG" additivity="false">
+  <logger name="edu.ucla.library.iiif.fester" level="DEBUG" additivity="false">
     <appender-ref ref="STDOUT" />
   </logger>
 

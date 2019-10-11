@@ -1,15 +1,15 @@
-# Manifest Store &nbsp;[![Build Status](https://api.travis-ci.com/uclalibrary/manifest-store.svg?branch=master)](https://travis-ci.com/uclalibrary/manifest-store) [![Known Vulnerabilities](https://img.shields.io/snyk/vulnerabilities/github/uclalibrary/manifest-store.svg)](https://snyk.io/test/github/uclalibrary/manifest-store)
+# Fester &nbsp;[![Build Status](https://api.travis-ci.com/uclalibrary/fester.svg?branch=master)](https://travis-ci.com/uclalibrary/fester) [![Known Vulnerabilities](https://img.shields.io/snyk/vulnerabilities/github/uclalibrary/fester.svg)](https://snyk.io/test/github/uclalibrary/fester)
 
 A IIIF manifest storage microservice. It will provide almost-full CRUD access (currently there is no Update) to a collection of IIIF manifest files. This is a work in progress.
 
 ## Configuring the Build
 
-The IIIF manifest store uses an S3 bucket for back-end storage. To be able to run the project's tests, several configuration values must be supplied:
+Fester uses an S3 bucket for back-end storage. To be able to run the project's tests, several configuration values must be supplied:
 
-* manifeststore.s3.bucket
-* manifeststore.s3.access_key
-* manifeststore.s3.secret_key
-* manifeststore.s3.region
+* fester.s3.bucket
+* fester.s3.access_key
+* fester.s3.secret_key
+* fester.s3.region
 
 These values can be set as properties in your system's Maven settings.xml file (or be supplied on the command line at build time).
 
@@ -23,7 +23,7 @@ This will put the executable Jar in the `target/build-artifact` directory.
 
 The application, in its simplest form, can be run with the following command:
 
-    java -jar target/build-artifact/manifest-store-*.jar
+    java -jar target/build-artifact/fester-*.jar
 
 To generate the site's documentation, run:
 
@@ -33,11 +33,11 @@ This will generate the documentation in the `target/site` directory.
 
 ## Running the Application for Development
 
-You can run a development instance of Manifest-Store by typing the following within the project root:
+You can run a development instance of Fester by typing the following within the project root:
 
     mvn -Plive test
 
-Once run, the service can be verified/accessed at [http://localhost:8888/status/manifest-store](http://localhost:8888/status/manifest-store). The API documentation can be accessed at [http://localhost:8888/docs/manifest-store](http://localhost:8888/docs/manifest-store)
+Once run, the service can be verified/accessed at [http://localhost:8888/status/fester](http://localhost:8888/status/fester). The API documentation can be accessed at [http://localhost:8888/docs/fester](http://localhost:8888/docs/fester)
 
 ## Load Testing
 
@@ -51,4 +51,4 @@ For example, if you wish to run a Locust test against a dev instance on your own
 
 ## Contact
 
-We use an internal ticketing system, but we've left the GitHub [issues](https://github.com/UCLALibrary/manifest-store/issues) open in case you'd like to file a ticket or make a suggestion. You can also contact Kevin S. Clarke at <a href="mailto:ksclarke@ksclarke.io">ksclarke@ksclarke.io</a> if you have a question about the project.
+We use an internal ticketing system, but we've left the GitHub [issues](https://github.com/UCLALibrary/fester/issues) open in case you'd like to file a ticket or make a suggestion. You can also contact Kevin S. Clarke at <a href="mailto:ksclarke@ksclarke.io">ksclarke@ksclarke.io</a> if you have a question about the project.

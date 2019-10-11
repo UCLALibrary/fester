@@ -3,11 +3,11 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>manifest-store</artifactId>
+  <artifactId>fester</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>IIIF Manifest Store</name>
+  <name>IIIF Fester</name>
   <description>A read/write interface for storing and retrieving IIIF manifests</description>
-  <url>https://github.com/uclalibrary/manifest-store</url>
+  <url>https://github.com/uclalibrary/fester</url>
 
   <licenses>
     <license>
@@ -17,14 +17,14 @@
   </licenses>
 
   <scm>
-    <connection>scm:git:git@github.com:uclalibrary/manifest-store.git</connection>
-    <developerConnection>scm:git:git@github.com:uclalibrary/manifest-store.git</developerConnection>
-    <url>git@github.com:uclalibrary/manifest-store.git</url>
+    <connection>scm:git:git@github.com:uclalibrary/fester.git</connection>
+    <developerConnection>scm:git:git@github.com:uclalibrary/fester.git</developerConnection>
+    <url>git@github.com:uclalibrary/fester.git</url>
   </scm>
 
   <issueManagement>
     <system>GitHub</system>
-    <url>https://github.com/uclalibrary/manifest-store/issues</url>
+    <url>https://github.com/uclalibrary/fester/issues</url>
   </issueManagement>
 
   <developers>
@@ -61,16 +61,16 @@
     <jcip.annotations.version>1.0-1</jcip.annotations.version>
 
     <!-- Name of the main Vert.x verticle -->
-    <main.verticle>edu.ucla.library.iiif.manifeststore.verticles.MainVerticle</main.verticle>
+    <main.verticle>edu.ucla.library.iiif.fester.verticles.MainVerticle</main.verticle>
 
     <!-- Whether the test instances started with the 'live' profile reloads code automatically -->
     <live.test.reloads>false</live.test.reloads>
 
     <!-- AWS configuration properties -->
-    <manifeststore.s3.region>us-east-1</manifeststore.s3.region>
-    <manifeststore.s3.bucket>iiif-manifest-store</manifeststore.s3.bucket>
-    <manifeststore.s3.access_key>YOUR_ACCESS_KEY</manifeststore.s3.access_key>
-    <manifeststore.s3.secret_key>YOUR_SECRET_KEY</manifeststore.s3.secret_key>
+    <fester.s3.region>us-east-1</fester.s3.region>
+    <fester.s3.bucket>iiif-fester</fester.s3.bucket>
+    <fester.s3.access_key>YOUR_ACCESS_KEY</fester.s3.access_key>
+    <fester.s3.secret_key>YOUR_SECRET_KEY</fester.s3.secret_key>
   </properties>
 
   <dependencies>
@@ -169,7 +169,7 @@
       </plugin>
       <!--<![CDATA[
         To run the generate-codes plugin outside of a full build, run:
-         mvn info.freelibrary:freelib-utils:generate-codes -DmessageFiles=src/main/resources/manifeststore_messages.xml
+         mvn info.freelibrary:freelib-utils:generate-codes -DmessageFiles=src/main/resources/fester_messages.xml
         Bash shell users can run the shorter form:
          mvn info.freelibrary:freelib-utils:generate-codes -DmessageFiles=$(find src -name *_messages.xml)
       ]]>-->
@@ -186,7 +186,7 @@
             <configuration>
               <generatedSourcesDirectory>${project.basedir}/src/main/generated</generatedSourcesDirectory>
               <messageFiles>
-                <messageFile>${project.basedir}/src/main/resources/manifeststore_messages.xml</messageFile>
+                <messageFile>${project.basedir}/src/main/resources/fester_messages.xml</messageFile>
               </messageFiles>
             </configuration>
           </execution>
@@ -211,7 +211,7 @@
                 <resource>
                   <directory>${basedir}/src/main/resources</directory>
                   <includes>
-                    <include>manifeststore.yaml</include>
+                    <include>fester.yaml</include>
                   </includes>
                 </resource>
               </resources>
@@ -568,7 +568,7 @@
         <artifactId>exec-maven-plugin</artifactId>
         <executions>
           <execution>
-            <id>start-manifest-store</id>
+            <id>start-fester</id>
             <phase>pre-integration-test</phase>
             <goals>
               <goal>exec</goal>
@@ -586,7 +586,7 @@
             </configuration>
           </execution>
           <execution>
-            <id>stop-manifest-store</id>
+            <id>stop-fester</id>
             <phase>post-integration-test</phase>
             <goals>
               <goal>exec</goal>

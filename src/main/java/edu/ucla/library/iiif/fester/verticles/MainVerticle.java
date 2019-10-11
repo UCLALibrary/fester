@@ -1,22 +1,22 @@
 
-package edu.ucla.library.iiif.manifeststore.verticles;
+package edu.ucla.library.iiif.fester.verticles;
 
-import static edu.ucla.library.iiif.manifeststore.Constants.MESSAGES;
+import static edu.ucla.library.iiif.fester.Constants.MESSAGES;
 
 import java.io.IOException;
 
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
-import edu.ucla.library.iiif.manifeststore.Config;
-import edu.ucla.library.iiif.manifeststore.HTTP;
-import edu.ucla.library.iiif.manifeststore.Op;
-import edu.ucla.library.iiif.manifeststore.handlers.DeleteManifestHandler;
-import edu.ucla.library.iiif.manifeststore.handlers.GetManifestHandler;
-import edu.ucla.library.iiif.manifeststore.handlers.GetStatusHandler;
-import edu.ucla.library.iiif.manifeststore.handlers.MatchingOpNotFoundHandler;
-import edu.ucla.library.iiif.manifeststore.handlers.PostCollectionHandler;
-import edu.ucla.library.iiif.manifeststore.handlers.PutManifestHandler;
+import edu.ucla.library.iiif.fester.Config;
+import edu.ucla.library.iiif.fester.HTTP;
+import edu.ucla.library.iiif.fester.Op;
+import edu.ucla.library.iiif.fester.handlers.DeleteManifestHandler;
+import edu.ucla.library.iiif.fester.handlers.GetManifestHandler;
+import edu.ucla.library.iiif.fester.handlers.GetStatusHandler;
+import edu.ucla.library.iiif.fester.handlers.MatchingOpNotFoundHandler;
+import edu.ucla.library.iiif.fester.handlers.PostCollectionHandler;
+import edu.ucla.library.iiif.fester.handlers.PutManifestHandler;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
@@ -34,7 +34,7 @@ public class MainVerticle extends AbstractVerticle {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MainVerticle.class, MESSAGES);
 
-    private static final String DEFAULT_SPEC = "manifeststore.yaml";
+    private static final String DEFAULT_SPEC = "fester.yaml";
 
     private static final int DEFAULT_PORT = 8888;
 
@@ -75,9 +75,8 @@ public class MainVerticle extends AbstractVerticle {
                             // After that, we can get a router that's been configured by our OpenAPI spec
                             router = factory.getRouter();
 
-                            // Serve Manifest Store documentation
-                            router.get("/docs/manifest-store/*").handler(StaticHandler.create().setWebRoot(
-                                    "webroot"));
+                            // Serve Fester documentation
+                            router.get("/docs/fester/*").handler(StaticHandler.create().setWebRoot("webroot"));
 
                             // If an incoming request doesn't match one of our spec operations, it's treated as a 404;
                             // catch these generic 404s with the handler below and return more specific response codes

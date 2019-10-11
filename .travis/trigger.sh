@@ -38,9 +38,9 @@ if [[ -z "$TRAVIS_ACCESS_TOKEN" ]]; then
     echo "TRAVIS_ACCESS_TOKEN is set"
   fi
 
-  if [[ -z "$TRAVIS_REPO_SLUG" || -z "$TRAVIS_BUILD_ID"  || -z "$MANIFESTSTORE_TAG" ]]; then
+  if [[ -z "$TRAVIS_REPO_SLUG" || -z "$TRAVIS_BUILD_ID"  || -z "$FESTER_TAG" ]]; then
     echo "Error:
-    Required environment variables TRAVIS_REPO_SLUG and/or TRAVIS_BUILD_ID and/or MANIFESTSTORE_TAG
+    Required environment variables TRAVIS_REPO_SLUG and/or TRAVIS_BUILD_ID and/or FESTER_TAG
     not set.
 
     This might be due to not issuing the command from a Travis build.
@@ -86,7 +86,7 @@ trigger_build() {
     \"message\": \"(AUTO) Triggered by Travis [repo=$TRAVIS_REPO_SLUG,build=$TRAVIS_BUILD_ID]\",
     \"config\": {
       \"env\": {
-        \"MANIFESTSTORE_TAG\": \"$MANIFESTSTORE_TAG\"
+        \"FESTER_TAG\": \"$FESTER_TAG\"
       }
     }
   }

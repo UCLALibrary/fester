@@ -1,12 +1,12 @@
 
-package edu.ucla.library.iiif.manifeststore.handlers;
+package edu.ucla.library.iiif.fester.handlers;
 
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
-import edu.ucla.library.iiif.manifeststore.Constants;
-import edu.ucla.library.iiif.manifeststore.HTTP;
-import edu.ucla.library.iiif.manifeststore.MessageCodes;
+import edu.ucla.library.iiif.fester.Constants;
+import edu.ucla.library.iiif.fester.HTTP;
+import edu.ucla.library.iiif.fester.MessageCodes;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
@@ -14,19 +14,19 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 
 /**
- * A IIIF manifest deleter.
+ * A IIIF manifest creator.
  */
-public class DeleteManifestHandler extends AbstractManifestHandler {
+public class PutManifestHandler extends AbstractManifestHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DeleteManifestHandler.class, Constants.MESSAGES);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PutManifestHandler.class, Constants.MESSAGES);
 
     /**
-     * Creates a handler that deletes IIIF manifests from the manifest store.
+     * Creates a handler that creates IIIF manifests in Fester.
      *
      * @param aVertx A Vert.x instance
      * @param aConfig A JSON configuration
      */
-    public DeleteManifestHandler(final Vertx aVertx, final JsonObject aConfig) {
+    public PutManifestHandler(final Vertx aVertx, final JsonObject aConfig) {
         super(aVertx, aConfig);
     }
 
@@ -34,28 +34,32 @@ public class DeleteManifestHandler extends AbstractManifestHandler {
     public void handle(final RoutingContext aContext) {
         final HttpServerResponse response = aContext.response();
         final HttpServerRequest request = aContext.request();
+        final JsonObject body = aContext.getBodyAsJson();
         final String idParam = request.getParam(Constants.MANIFEST_ID);
         final String manifestId;
 
         // If our manifest ID doesn't end with '.json' add it for third party tool convenience
         manifestId = !idParam.endsWith(Constants.JSON_EXT) ? idParam + Constants.JSON_EXT : idParam;
 
-        myS3Client.delete(myS3Bucket, manifestId, deleteResponse -> {
-            final int statusCode = deleteResponse.statusCode();
+        // For now we're not going to check if it exists before we overwrite it
+        myS3Client.put(myS3Bucket, manifestId, body.toBuffer(), put -> {
+            final int statusCode = put.statusCode();
 
             switch (statusCode) {
-                case HTTP.SUCCESS_NO_CONTENT:
-                    response.setStatusCode(HTTP.SUCCESS_NO_CONTENT);
+                case HTTP.OK:
+                    response.setStatusCode(HTTP.OK);
                     response.end();
 
                     break;
                 case HTTP.FORBIDDEN:
+                    LOGGER.debug(MessageCodes.MFS_023, manifestId);
+
                     response.setStatusCode(HTTP.FORBIDDEN);
                     response.end();
 
                     break;
                 case HTTP.INTERNAL_SERVER_ERROR:
-                    LOGGER.error(MessageCodes.MFS_014, manifestId);
+                    LOGGER.error(MessageCodes.MFS_015, manifestId);
 
                     response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
                     response.end();

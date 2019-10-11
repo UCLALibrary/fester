@@ -4,18 +4,18 @@
 
 <!--<![CDATA[
   To process this file outside of a full build, run:
-    mvn info.freelibrary:freelib-utils:generate-codes -DmessageFiles=src/main/resources/manifeststore_messages.xml
+    mvn info.freelibrary:freelib-utils:generate-codes -DmessageFiles=src/main/resources/fester_messages.xml
   Bash shell users can run the shorter form:
     mvn info.freelibrary:freelib-utils:generate-codes -DmessageFiles=$(find src -name *_messages.xml)
 ]]>-->
 
 <properties>
-  <entry key="message-class-name">edu.ucla.library.iiif.manifeststore.MessageCodes</entry>
+  <entry key="message-class-name">edu.ucla.library.iiif.fester.MessageCodes</entry>
 
   <!-- Messages to be stored in the MessageCodes class -->
   <entry key="MFS-000">{}</entry>
   <entry key="MFS-001">S3 Client configured for region: {}</entry>
-  <entry key="MFS-002">Starting manifest-store test server on port: {}</entry>
+  <entry key="MFS-002">Starting fester test server on port: {}</entry>
   <entry key="MFS-003">Creating S3 client for '{}' region</entry>
   <entry key="MFS-004">Failed test should have returned '{}' response code instead of '{}'</entry>
   <entry key="MFS-005">S3 client for testing created for '{}' region</entry>
@@ -43,8 +43,8 @@
   <entry key="MFS-027">Test GETing a test manifest from: {}</entry>
   <entry key="MFS-028">Test DELETing a test manifest at: {}</entry>
   <entry key="MFS-029">Confirming test manifest has been deleted from: {}</entry>
-  <entry key="MFS-030">Manifest-store service confirmed to be available.</entry>
-  <entry key="MFS-031">FAIL--manifest-store service is unavailable.</entry>
+  <entry key="MFS-030">Fester service confirmed to be available.</entry>
+  <entry key="MFS-031">FAIL--fester service is unavailable.</entry>
   <entry key="MFS-032">FAIL--unable to put manifest</entry>
   <entry key="MFS-033">FAIL--found manifest does not match expected manifest</entry>
   <entry key="MFS-034">FAIL--manifest not found</entry>

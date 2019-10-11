@@ -11,7 +11,7 @@
  *  #FF00A5 (pink)
  */
 
-Redoc.init('/docs/manifest-store/manifeststore.yaml', {
+Redoc.init('/docs/fester/fester.yaml', {
   theme : {
     colors : {
       primary : {
@@ -43,4 +43,4 @@ Redoc.init('/docs/manifest-store/manifeststore.yaml', {
       backgroundColor : '#003B5C'
     }
   }
-}, document.getElementById('manifest-store-docs'))
+}, document.getElementById('fester-docs'))
