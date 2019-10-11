@@ -13,6 +13,8 @@ public final class Op {
 
     public static final String DELETE_MANIFEST = "deleteManifest";
 
+    public static final String POST_COLLECTION = "postCollection";
+
     public static final String SUCCESS = "success";
 
     public static final String FAILURE = "failure";

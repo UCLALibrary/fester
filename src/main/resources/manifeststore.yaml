@@ -12,11 +12,9 @@ x-tagGroups:
 info:
   version: 0.1.0
   title: Manifest Store API
-  description: "Manifest-Store, a IIIF manifest
-    storage microservice, provides a simple storage and retrieval system 
-    for IIIF manifests. Amazon S3 is required for document storage. For more
-    details on how to construct a IIIF manifest, consult these resources:
-    https://iiif.io/api/presentation/2.1/#manifest and https://iiif.io/api/cookbook/mvm-image/#use-case"
+  description: "Manifest-Store, a IIIF manifest storage microservice, provides a simple storage and retrieval system
+    for IIIF manifests. Amazon S3 is required. For more details on how to construct a IIIF manifest, consult these
+    resources: https://iiif.io/api/presentation/2.1/#manifest and https://iiif.io/api/cookbook/mvm-image/#use-case"
   license:
     name: The 3-Clause BSD License
     url: https://opensource.org/licenses/BSD-3-Clause
@@ -44,8 +42,61 @@ paths:
                 example: Hello
           '500':
             description: There was an internal server error
-  # Collection operations are proposed, not yet implemented
-  /collection/{collectionName}:
+  /collections:
+    post:
+      tags: [Collection]
+      summary: Post a Collection
+      description: "This endpoint accepts CSV data to use in the creation of IIIF manifests. There are a few columns
+        that the uploaded CSV file is required to have: 'Project Name' (for collection rows), 'Title' (for work rows),
+        'Item ARK', 'Parent ARK', 'Item Sequence', 'Object Type', and 'IIIF Access URL'. These are used to create the
+        structure of the manifest. The location of the resulting collection manifest is returned in the 'Location'
+        response header."
+      operationId: postCollection
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                csv-file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: An HTML page with a link to the created manifest
+          headers:
+            Location:
+              schema:
+                type: string
+                example: 'http://iiif.library.ucla.edu/collections/123456'
+          content:
+            text/html:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Bad request (e.g., missing or invalid CSV file)
+          content:
+            text/html:
+              schema:
+                type: string
+                format: binary
+        '415':
+          description: Unsupported media type (i.e. not a CSV file)
+          content:
+            text/html:
+              schema:
+                type: string
+                format: binary
+        '500':
+          description: There was an internal server error
+          content:
+            text/html:
+              schema:
+                type: string
+                format: binary
+  /collections/{collectionName}:
     get:
       tags: [Collection, Proposed]
       summary: Get a collection

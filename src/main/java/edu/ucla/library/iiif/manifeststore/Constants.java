@@ -32,6 +32,16 @@ public final class Constants {
     public static final String JSON_MEDIA_TYPE = "application/json";
 
     /**
+     * The media type for HTML.
+     */
+    public static final String HTML_MEDIA_TYPE = "text/html";
+
+    /**
+     * The media type for CSV.
+     */
+    public static final String CSV_MEDIA_TYPE = "text/csv";
+
+    /**
      * COR header for allowing access to our manifests to the world
      */
     public static final String CORS_HEADER = "Access-Control-Allow-Origin";

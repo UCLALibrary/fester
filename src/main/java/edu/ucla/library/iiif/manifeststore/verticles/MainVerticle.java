@@ -3,6 +3,8 @@ package edu.ucla.library.iiif.manifeststore.verticles;
 
 import static edu.ucla.library.iiif.manifeststore.Constants.MESSAGES;
 
+import java.io.IOException;
+
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
@@ -13,6 +15,7 @@ import edu.ucla.library.iiif.manifeststore.handlers.DeleteManifestHandler;
 import edu.ucla.library.iiif.manifeststore.handlers.GetManifestHandler;
 import edu.ucla.library.iiif.manifeststore.handlers.GetStatusHandler;
 import edu.ucla.library.iiif.manifeststore.handlers.MatchingOpNotFoundHandler;
+import edu.ucla.library.iiif.manifeststore.handlers.PostCollectionHandler;
 import edu.ucla.library.iiif.manifeststore.handlers.PutManifestHandler;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.AbstractVerticle;
@@ -65,22 +68,34 @@ public class MainVerticle extends AbstractVerticle {
                         factory.addHandlerByOperationId(Op.PUT_MANIFEST, new PutManifestHandler(vertx, config));
                         factory.addHandlerByOperationId(Op.DELETE_MANIFEST, new DeleteManifestHandler(vertx, config));
 
-                        // After that, we can get a router that's been configured by our OpenAPI spec
-                        router = factory.getRouter();
+                        try {
+                            factory.addHandlerByOperationId(Op.POST_COLLECTION, new PostCollectionHandler(vertx,
+                                    config));
 
-                        // Serve Manifest Store documentation
-                        router.get("/docs/manifest-store/*").handler(StaticHandler.create().setWebRoot("webroot"));
+                            // After that, we can get a router that's been configured by our OpenAPI spec
+                            router = factory.getRouter();
 
-                        // If an incoming request doesn't match one of our spec operations, it's treated as a 404;
-                        // catch these generic 404s with the handler below and return more specific response codes
-                        router.errorHandler(HTTP.NOT_FOUND, new MatchingOpNotFoundHandler());
+                            // Serve Manifest Store documentation
+                            router.get("/docs/manifest-store/*").handler(StaticHandler.create().setWebRoot(
+                                    "webroot"));
 
-                        // Start our server
-                        server.requestHandler(router).listen(port);
+                            // If an incoming request doesn't match one of our spec operations, it's treated as a 404;
+                            // catch these generic 404s with the handler below and return more specific response codes
+                            router.errorHandler(HTTP.NOT_FOUND, new MatchingOpNotFoundHandler());
 
-                        aFuture.complete();
+                            // Start our server
+                            server.requestHandler(router).listen(port);
+
+                            aFuture.complete();
+                        } catch (final IOException details) {
+                            LOGGER.error(details, details.getMessage());
+                            aFuture.fail(details);
+                        }
                     } else {
-                        aFuture.fail(creation.cause());
+                        final Throwable exception = creation.cause();
+
+                        LOGGER.error(exception, exception.getMessage());
+                        aFuture.fail(exception);
                     }
                 });
             }
