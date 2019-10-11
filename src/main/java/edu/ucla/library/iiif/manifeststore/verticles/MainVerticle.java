@@ -75,9 +75,8 @@ public class MainVerticle extends AbstractVerticle {
                             // After that, we can get a router that's been configured by our OpenAPI spec
                             router = factory.getRouter();
 
-                            // Serve Manifest Store documentation
-                            router.get("/docs/manifest-store/*").handler(StaticHandler.create().setWebRoot(
-                                    "webroot"));
+                        // Serve Fester documentation
+                        router.get("/docs/fester/*").handler(StaticHandler.create().setWebRoot("webroot"));
 
                             // If an incoming request doesn't match one of our spec operations, it's treated as a 404;
                             // catch these generic 404s with the handler below and return more specific response codes

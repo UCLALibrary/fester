@@ -45,7 +45,7 @@ public class ManifestUploadIT {
 
     private static final String MANIFEST_PATH = "/{}/manifest";
 
-    private static final String STATUS = "/status/manifest-store";
+    private static final String STATUS = "/status/fester";
 
     private static final String HELLO = "Hello";
 
