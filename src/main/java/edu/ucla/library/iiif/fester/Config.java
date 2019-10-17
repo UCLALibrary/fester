@@ -7,7 +7,7 @@ package edu.ucla.library.iiif.fester;
 public final class Config {
 
     // The HTTP port configuration parameter
-    public static final String HTTP_PORT = "http.port";
+    public static final String HTTP_PORT = "fester.http.port";
 
     // The OpenAPI specification configuration parameter
     public static final String OPENAPI_SPEC_PATH = "openapi.spec.path";

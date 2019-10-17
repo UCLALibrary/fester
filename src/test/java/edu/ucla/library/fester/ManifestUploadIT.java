@@ -15,6 +15,7 @@ import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 import info.freelibrary.util.StringUtils;
 
+import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
@@ -37,7 +38,7 @@ public class ManifestUploadIT {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ManifestUploadIT.class, Constants.MESSAGES);
 
-    private static final int PORT = Integer.parseInt(System.getProperty("http.port"));
+    private static final int PORT = Integer.parseInt(System.getProperty(Config.HTTP_PORT));
 
     private static final String MANIFEST_FILE_NAME = "testManifest.json";
 

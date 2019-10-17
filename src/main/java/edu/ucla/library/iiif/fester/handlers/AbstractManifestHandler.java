@@ -1,6 +1,7 @@
 
 package edu.ucla.library.iiif.fester.handlers;
 
+import com.amazonaws.regions.Region;
 import com.amazonaws.regions.RegionUtils;
 
 import info.freelibrary.util.Logger;
@@ -33,11 +34,16 @@ abstract class AbstractManifestHandler implements Handler<RoutingContext> {
             final String s3AccessKey = aConfig.getString(Config.S3_ACCESS_KEY);
             final String s3SecretKey = aConfig.getString(Config.S3_SECRET_KEY);
             final String s3RegionName = aConfig.getString(Config.S3_REGION);
-            final String s3Region = RegionUtils.getRegion(s3RegionName).getServiceEndpoint("s3");
+            final Region s3Region = RegionUtils.getRegion(s3RegionName);
 
             getLogger().debug(MessageCodes.MFS_003, s3RegionName);
 
-            myS3Client = new S3Client(aVertx, s3AccessKey, s3SecretKey, s3Region);
+            if (s3Region != null) {
+                myS3Client = new S3Client(aVertx, s3AccessKey, s3SecretKey, s3Region.getServiceEndpoint("s3"));
+            } else {
+                myS3Client = new S3Client(aVertx, s3AccessKey, s3SecretKey);
+            }
+
             myS3Bucket = aConfig.getString(Config.S3_BUCKET);
         }
     }
