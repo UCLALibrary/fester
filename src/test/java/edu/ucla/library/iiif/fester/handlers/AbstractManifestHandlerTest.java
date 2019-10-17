@@ -130,8 +130,7 @@ abstract class AbstractManifestHandlerTest {
      * @param aAsyncTask An asynchronous task that completes the setup
      * @param aOpts Deployment options used to configure Fester
      */
-    private void deployFester(final TestContext aContext, final Async aAsyncTask,
-            final DeploymentOptions aOpts) {
+    private void deployFester(final TestContext aContext, final Async aAsyncTask, final DeploymentOptions aOpts) {
         myVertx.deployVerticle(MainVerticle.class.getName(), aOpts, deployment -> {
             if (deployment.succeeded()) {
                 try {

@@ -71,6 +71,9 @@
     <fester.s3.bucket>iiif-fester</fester.s3.bucket>
     <fester.s3.access_key>YOUR_ACCESS_KEY</fester.s3.access_key>
     <fester.s3.secret_key>YOUR_SECRET_KEY</fester.s3.secret_key>
+
+    <!-- The port Fester listens on -->
+    <fester.http.port>8888</fester.http.port>
   </properties>
 
   <dependencies>
@@ -352,7 +355,7 @@
           </excludes>
           <systemPropertyVariables>
             <vertx.logger-delegate-factory-class-name>io.vertx.core.logging.SLF4JLogDelegateFactory</vertx.logger-delegate-factory-class-name>
-            <vertx.test.port>${http.port}</vertx.test.port>
+            <fester.http.port>${http.port}</fester.http.port>
             <vertx-config-path>${project.basedir}/target/test-classes/test-config.properties</vertx-config-path>
           </systemPropertyVariables>
           <argLine>${jacoco.agent.arg}</argLine>
@@ -374,7 +377,7 @@
           </excludes>
           <systemPropertyVariables>
             <vertx.logger-delegate-factory-class-name>io.vertx.core.logging.SLF4JLogDelegateFactory</vertx.logger-delegate-factory-class-name>
-            <http.port>${http.port}</http.port>
+            <fester.http.port>${http.port}</fester.http.port>
             <vertx-config-path>${project.basedir}/target/test-classes/test-config.properties</vertx-config-path>
           </systemPropertyVariables>
         </configuration>
@@ -410,8 +413,11 @@
         </executions>
         <configuration>
           <verticle>${main.verticle}</verticle>
-          <redeploy>true</redeploy>
-          <runArgs>-Dvertx-config-path=target/test-classes/test-config.properties</runArgs>
+          <redeploy>${live.test.reloads}</redeploy>
+          <runArgs>
+            <runArg>-Dvertx-config-path=${project.basedir}/target/test-classes/test-config.properties</runArg>
+            <runArg>-Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.SLF4JLogDelegateFactory</runArg>
+          </runArgs>
         </configuration>
       </plugin>
 
@@ -579,7 +585,7 @@
               <arguments>
                 <argument>java</argument>
                 <argument>-Dvertx-config-path=${project.build.directory}/test-classes/test-config.properties</argument>
-                <argument>-Dhttp.port=${http.port}</argument>
+                <argument>-Dfester.http.port=${http.port}</argument>
                 <argument>-jar</argument>
                 <argument>${project.build.directory}/build-artifact/${project.artifactId}-${project.version}.jar</argument>
               </arguments>

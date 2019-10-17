@@ -53,4 +53,6 @@
   <entry key="MFS-037">Not processed. The submission is missing a CSV file.</entry>
   <entry key="MFS-038">Uploaded CSV file received: {} [{}]</entry>
   <entry key="MFS-039">Unexpected POST response: [{}] {}</entry>
+  <entry key="MFS-040">Configuration file not found</entry>
+  <entry key="MFS-041">Starting the Fester service on port: {}</entry>
 </properties>
