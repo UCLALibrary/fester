@@ -43,14 +43,21 @@
       <organization>UCLA Library</organization>
       <organizationUrl>http://github.com/uclalibrary</organizationUrl>
     </developer>
+    <developer>
+      <id>cachemeoutside</id>
+      <name>Anthony Vuong</name>
+      <email>avuong@cachemeoutside.io</email>
+      <organization>UCLA Library</organization>
+      <organizationUrl>http://github.com/uclalibrary</organizationUrl>
+    </developer>
   </developers>
 
   <properties>
-    <vertx.version>3.7.1</vertx.version>
+    <vertx.version>3.8.3</vertx.version>
     <slf4j.ext.version>1.7.26</slf4j.ext.version>
     <aws.sdk.version>1.11.478</aws.sdk.version>
     <freelib.utils.version>0.8.10</freelib.utils.version>
-    <maven.failsafe.plugin.version>2.18.1</maven.failsafe.plugin.version>
+    <jiiify.presentation.version>0.1.0</jiiify.presentation.version>
 
     <!-- Build plug-in versions -->
     <shade.plugin.version>2.4.3</shade.plugin.version>
@@ -59,6 +66,7 @@
     <codacy.plugin.version>1.0.2</codacy.plugin.version>
     <vertx.super.s3.version>1.1.0</vertx.super.s3.version>
     <jcip.annotations.version>1.0-1</jcip.annotations.version>
+    <maven.failsafe.plugin.version>2.18.1</maven.failsafe.plugin.version>
 
     <!-- Name of the main Vert.x verticle -->
     <main.verticle>edu.ucla.library.iiif.fester.verticles.MainVerticle</main.verticle>
@@ -88,6 +96,13 @@
       <groupId>io.vertx</groupId>
       <artifactId>vertx-web</artifactId>
       <version>${vertx.version}</version>
+    </dependency>
+
+    <!-- Library for working with v.2 IIIF manifests -->
+    <dependency>
+      <groupId>info.freelibrary</groupId>
+      <artifactId>jiiify-presentation</artifactId>
+      <version>${jiiify.presentation.version}</version>
     </dependency>
 
     <!-- OpenAPI for Vert.x - https://vertx.io/docs/vertx-web-api-contract/java/ -->
@@ -461,6 +476,7 @@
                   <exclude>com.fasterxml.jackson.core:jackson-databind</exclude>
                   <exclude>com.fasterxml.jackson.dataformat:jackson-dataformat-cbor</exclude>
                   <exclude>com.fasterxml.jackson.dataformat:jackson-dataformat-yaml</exclude>
+                  <exclude>com.fasterxml.jackson.datatype:jackson-datatype-jdk8</exclude>
                   <exclude>com.github.dblock:oshi-core</exclude>
                   <exclude>com.github.fge:btf</exclude>
                   <exclude>com.github.fge:jackson-coreutils</exclude>
@@ -469,14 +485,19 @@
                   <exclude>com.github.fge:uri-template</exclude>
                   <exclude>com.github.java-json-tools:json-schema-core</exclude>
                   <exclude>com.github.java-json-tools:json-schema-validator</exclude>
+                  <exclude>com.google.code.findbugs:jsr305</exclude>
+                  <exclude>com.google.errorprone:error_prone_annotations</exclude>
+                  <exclude>com.google.guava:failureaccess</exclude>
                   <exclude>com.google.guava:guava</exclude>
                   <exclude>com.google.inject:guice</exclude>
+                  <exclude>com.google.j2objc:j2objc-annotations</exclude>
                   <exclude>com.googlecode.libphonenumber:libphonenumber</exclude>
                   <exclude>com.networknt:json-schema-validator</exclude>
                   <exclude>commons-codec:commons-codec</exclude>
                   <exclude>commons-io:commons-io</exclude>
                   <exclude>commons-logging:commons-logging</exclude>
                   <exclude>info.freelibrary:freelib-utils</exclude>
+                  <exclude>info.freelibrary:jiiify-presentation</exclude>
                   <exclude>info.freelibrary:vertx-pairtree</exclude>
                   <exclude>io.netty:netty-buffer</exclude>
                   <exclude>io.netty:netty-codec-dns</exclude>
@@ -542,6 +563,8 @@
                   <exclude>org.apache.maven:maven-resolver-provider</exclude>
                   <exclude>org.apache.maven:maven-settings-builder</exclude>
                   <exclude>org.apache.maven:maven-settings</exclude>
+                  <exclude>org.checkerframework:checker-qual</exclude>
+                  <exclude>org.codehaus.mojo:animal-sniffer-annotations</exclude>
                   <exclude>org.codehaus.plexus:plexus-classworlds</exclude>
                   <exclude>org.codehaus.plexus:plexus-component-annotations</exclude>
                   <exclude>org.codehaus.plexus:plexus-interpolation</exclude>
