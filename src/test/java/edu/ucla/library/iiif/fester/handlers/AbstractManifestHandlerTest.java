@@ -62,6 +62,7 @@ abstract class AbstractManifestHandlerTest {
      * @param aContext A testing context
      */
     @Before
+    @SuppressWarnings({ "rawtypes", "deprecation" })
     public void setUp(final TestContext aContext) throws IOException {
         final DeploymentOptions options = new DeploymentOptions();
         final ServerSocket socket = new ServerSocket(0);
@@ -158,6 +159,7 @@ abstract class AbstractManifestHandlerTest {
      * @param aFuture A future to capture when the initialization is completed
      * @throws IOException If there is trouble reading from the configuration file
      */
+    @SuppressWarnings({ "rawtypes", "deprecation" })
     private void initialize(final Future aFuture) throws IOException {
         final ConfigRetriever configRetriever;
 

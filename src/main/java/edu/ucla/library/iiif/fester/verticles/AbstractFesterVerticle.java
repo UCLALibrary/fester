@@ -19,6 +19,7 @@ public abstract class AbstractFesterVerticle extends AbstractVerticle {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFesterVerticle.class, Constants.MESSAGES);
 
+    @SuppressWarnings({ "deprecation" })
     @Override
     public void start(final Future<Void> aFuture) throws Exception {
         LOGGER.debug(MessageCodes.MFS_110, getClass().getName(), deploymentID());
