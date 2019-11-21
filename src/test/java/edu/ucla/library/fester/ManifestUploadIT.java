@@ -94,7 +94,7 @@ public class ManifestUploadIT {
         final Async asyncTask = aContext.async();
 
         /************ PUT TEST ************************************************/
-        final String myDotJsonPutManifestID = Constants.PUT_TEST_ID_PREFIX + MANIFEST_ID_WITH_EXT;
+        final String myDotJsonPutManifestID = TestConstants.PUT_TEST_ID_PREFIX + MANIFEST_ID_WITH_EXT;
         final String testIDPath = StringUtils.format(MANIFEST_PATH, myDotJsonPutManifestID);
         LOGGER.info(MessageCodes.MFS_016, testIDPath); // Test PUTing a test manifest to: {}
         final Buffer myManifest = vertx.fileSystem().readFileBlocking(myManifestFilePath);
@@ -124,7 +124,7 @@ public class ManifestUploadIT {
     public final void TestCcheckThatGETmanifestWorks(final TestContext aContext) throws IOException {
         final Async asyncTask = aContext.async();
         /************ GET TEST ************************************************/
-        final String myDotJsonPutManifestID = Constants.PUT_TEST_ID_PREFIX + MANIFEST_ID_WITH_EXT;
+        final String myDotJsonPutManifestID = TestConstants.PUT_TEST_ID_PREFIX + MANIFEST_ID_WITH_EXT;
         final String testIDPath = StringUtils.format(MANIFEST_PATH, myDotJsonPutManifestID);
         final String expectedManifest = StringUtils.read(MANIFEST_FILE);
 
@@ -157,7 +157,7 @@ public class ManifestUploadIT {
     public final void TestDcheckThatDELETEmanifestWorks(final TestContext aContext) {
         final Async asyncTask = aContext.async();
         /************ DELETE TEST *********************************************/
-        final String myDotJsonPutManifestID = Constants.PUT_TEST_ID_PREFIX + MANIFEST_ID_WITH_EXT;
+        final String myDotJsonPutManifestID = TestConstants.PUT_TEST_ID_PREFIX + MANIFEST_ID_WITH_EXT;
         final String testIDPath = StringUtils.format(MANIFEST_PATH, myDotJsonPutManifestID);
         LOGGER.info(MessageCodes.MFS_028, testIDPath); // Test DELETing a test manifest at: {}
 
@@ -179,7 +179,7 @@ public class ManifestUploadIT {
     public final void TestEcheckThatOurManifestIsNotStored(final TestContext aContext) {
         final Async asyncTask = aContext.async();
         /************ ANOTHER GET TEST, HOPE WE DON'T FIND IT AFTER A DELETE **/
-        final String myDotJsonPutManifestID = Constants.PUT_TEST_ID_PREFIX + MANIFEST_ID_WITH_EXT;
+        final String myDotJsonPutManifestID = TestConstants.PUT_TEST_ID_PREFIX + MANIFEST_ID_WITH_EXT;
         final String testIDPath = StringUtils.format(MANIFEST_PATH, myDotJsonPutManifestID);
         LOGGER.info(MessageCodes.MFS_029, testIDPath); // Confirming test manifest has been deleted from: {}
         vertx.createHttpClient().getNow(PORT, Constants.UNSPECIFIED_HOST, testIDPath, response -> {

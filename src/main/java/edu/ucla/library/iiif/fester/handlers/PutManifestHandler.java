@@ -74,9 +74,4 @@ public class PutManifestHandler extends AbstractManifestHandler {
         });
     }
 
-    @Override
-    protected Logger getLogger() {
-        return LOGGER;
-    }
-
 }

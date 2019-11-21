@@ -174,6 +174,7 @@ public class PutManifestHandlerTest extends AbstractManifestHandlerTest {
 
             switch (statusCode) {
                 case HTTP.UNSUPPORTED_MEDIA_TYPE:
+                case HTTP.METHOD_NOT_ALLOWED:
                     aContext.assertFalse(myS3Client.doesObjectExist(myS3Bucket, myPutManifestID));
                     asyncTask.complete();
 
@@ -210,6 +211,7 @@ public class PutManifestHandlerTest extends AbstractManifestHandlerTest {
 
             switch (statusCode) {
                 case HTTP.UNSUPPORTED_MEDIA_TYPE:
+                case HTTP.METHOD_NOT_ALLOWED:
                     aContext.assertFalse(myS3Client.doesObjectExist(myS3Bucket, myPutManifestID));
                     asyncTask.complete();
 
@@ -218,11 +220,6 @@ public class PutManifestHandlerTest extends AbstractManifestHandlerTest {
                     aContext.fail(LOGGER.getMessage(MessageCodes.MFS_022, statusCode));
             }
         }).end(manifest);
-    }
-
-    @Override
-    protected Logger getLogger() {
-        return LOGGER;
     }
 
 }

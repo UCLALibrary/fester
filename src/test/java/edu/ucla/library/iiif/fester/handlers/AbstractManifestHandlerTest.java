@@ -19,9 +19,11 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
 import info.freelibrary.util.Logger;
+import info.freelibrary.util.LoggerFactory;
 import info.freelibrary.util.StringUtils;
 
 import edu.ucla.library.iiif.fester.Config;
+import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.verticles.MainVerticle;
 import io.vertx.config.ConfigRetriever;
@@ -36,6 +38,9 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 
 @RunWith(VertxUnitRunner.class)
 abstract class AbstractManifestHandlerTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractManifestHandlerTest.class,
+            Constants.MESSAGES);
 
     private static final String MANIFEST_FILE_NAME = "testManifest.json";
 
@@ -64,7 +69,7 @@ abstract class AbstractManifestHandlerTest {
         final Future<AsyncResult> future = Future.future();
         final Async asyncResult = aContext.async();
 
-        getLogger().debug(MessageCodes.MFS_002, port);
+        LOGGER.debug(MessageCodes.MFS_002, port);
 
         aContext.put(Config.HTTP_PORT, port);
         options.setConfig(new JsonObject().put(Config.HTTP_PORT, port));
@@ -117,13 +122,6 @@ abstract class AbstractManifestHandlerTest {
     }
 
     /**
-     * Gets logger specific to the handler test.
-     *
-     * @return Logger A logger
-     */
-    protected abstract Logger getLogger();
-
-    /**
      * Deploy Fester to test against.
      *
      * @param aContext A test context
@@ -137,11 +135,11 @@ abstract class AbstractManifestHandlerTest {
                     final String testManifest = StringUtils.read(MANIFEST_FILE);
 
                     // Store a manifest whose ID that has a '.json' extension
-                    getLogger().debug(MessageCodes.MFS_006, myManifestID, myS3Bucket);
+                    LOGGER.debug(MessageCodes.MFS_006, myManifestID, myS3Bucket);
                     myS3Client.putObject(myS3Bucket, myManifestID, testManifest);
 
                     // Store a manifest whose ID that doesn't have a '.json' extension
-                    getLogger().debug(MessageCodes.MFS_006, myJsonlessManifestID, myS3Bucket);
+                    LOGGER.debug(MessageCodes.MFS_006, myJsonlessManifestID, myS3Bucket);
                     myS3Client.putObject(myS3Bucket, myJsonlessManifestID, testManifest);
 
                     aAsyncTask.complete();
@@ -178,7 +176,7 @@ abstract class AbstractManifestHandlerTest {
                 final String s3Region = config.getString(Config.S3_REGION);
 
                 // Output access and secret key only if logging level is set to the lowest level
-                getLogger().trace(MessageCodes.MFS_007, s3AccessKey, s3SecretKey);
+                LOGGER.trace(MessageCodes.MFS_007, s3AccessKey, s3SecretKey);
 
                 // Configure AWS credentials
                 final AWSCredentials awsCreds = new BasicAWSCredentials(s3AccessKey, s3SecretKey);
@@ -191,7 +189,7 @@ abstract class AbstractManifestHandlerTest {
                 myS3Client = s3ClientBuilder.build();
                 myS3Bucket = config.getString(Config.S3_BUCKET);
 
-                getLogger().debug(MessageCodes.MFS_005, s3Region);
+                LOGGER.debug(MessageCodes.MFS_005, s3Region);
 
                 aFuture.complete();
             }

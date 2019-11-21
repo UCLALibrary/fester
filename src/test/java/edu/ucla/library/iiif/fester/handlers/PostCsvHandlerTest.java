@@ -26,11 +26,11 @@ import io.vertx.ext.web.multipart.MultipartForm;
 /**
  * A test of the PostCollectionHandler.
  */
-public class PostCollectionHandlerTest extends AbstractManifestHandlerTest {
+public class PostCsvHandlerTest extends AbstractManifestHandlerTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PostCollectionHandlerTest.class, Constants.MESSAGES);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PostCsvHandlerTest.class, Constants.MESSAGES);
 
-    private static final File CSV_FILE = new File("src/test/resources/csv/capostcards.csv");
+    private static final File CSV_FILE = new File("src/test/resources/csv/hathaway.csv");
 
     private static final String ENDPOINT = "/collections";
 
@@ -92,8 +92,4 @@ public class PostCollectionHandlerTest extends AbstractManifestHandlerTest {
         });
     }
 
-    @Override
-    protected Logger getLogger() {
-        return LOGGER;
-    }
 }

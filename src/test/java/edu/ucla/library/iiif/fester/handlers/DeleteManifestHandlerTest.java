@@ -104,9 +104,4 @@ public class DeleteManifestHandlerTest extends AbstractManifestHandlerTest {
         }).end();
     }
 
-    @Override
-    protected Logger getLogger() {
-        return LOGGER;
-    }
-
 }

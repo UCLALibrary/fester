@@ -118,9 +118,4 @@ public class GetManifestHandlerTest extends AbstractManifestHandlerTest {
         });
     }
 
-    @Override
-    protected Logger getLogger() {
-        return LOGGER;
-    }
-
 }

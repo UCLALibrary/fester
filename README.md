@@ -1,4 +1,4 @@
-# Fester &nbsp;[![Build Status](https://api.travis-ci.com/uclalibrary/fester.svg?branch=master)](https://travis-ci.com/uclalibrary/fester) [![Known Vulnerabilities](https://img.shields.io/snyk/vulnerabilities/github/uclalibrary/fester.svg)](https://snyk.io/test/github/uclalibrary/fester)
+# Fester &nbsp;[![Build Status](https://api.travis-ci.com/uclalibrary/fester.svg?branch=master)](https://travis-ci.com/uclalibrary/fester) [![Known Vulnerabilities](https://snyk.io/test/github/UCLALibrary/fester/badge.svg?targetFile=pom.xml)](https://snyk.io/test/github/UCLALibrary/fester?targetFile=pom.xml)
 
 A IIIF manifest storage microservice. It will provide almost-full CRUD access (currently there is no Update) to a collection of IIIF manifest files. This is a work in progress.
 

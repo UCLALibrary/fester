@@ -70,9 +70,4 @@ public class DeleteManifestHandler extends AbstractManifestHandler {
         });
     }
 
-    @Override
-    protected Logger getLogger() {
-        return LOGGER;
-    }
-
 }

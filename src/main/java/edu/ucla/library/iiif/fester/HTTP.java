@@ -24,6 +24,9 @@ public final class HTTP {
     /** Not found response */
     public static final int NOT_FOUND = 404;
 
+    /** Method not allowed */
+    public static final int METHOD_NOT_ALLOWED = 405;
+
     /** An empty or other unsupported media type */
     public static final int UNSUPPORTED_MEDIA_TYPE = 415;
 
