@@ -14,7 +14,9 @@ import info.freelibrary.util.StringUtils;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
+import edu.ucla.library.iiif.fester.verticles.ManifestVerticle;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.FileUpload;
@@ -23,9 +25,9 @@ import io.vertx.ext.web.RoutingContext;
 /**
  * A handler that handles POSTs wanting to generate collection manifests.
  */
-public class PostCollectionHandler extends AbstractManifestHandler {
+public class PostCsvHandler extends AbstractManifestHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PostCollectionHandler.class, Constants.MESSAGES);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PostCsvHandler.class, Constants.MESSAGES);
 
     private final String myExceptionPage;
 
@@ -38,7 +40,7 @@ public class PostCollectionHandler extends AbstractManifestHandler {
      * @param aConfig A application configuration
      * @throws IOException If there is trouble reading the HTML template files
      */
-    public PostCollectionHandler(final Vertx aVertx, final JsonObject aConfig) throws IOException {
+    public PostCsvHandler(final Vertx aVertx, final JsonObject aConfig) throws IOException {
         super(aVertx, aConfig);
 
         final StringBuilder templateBuilder = new StringBuilder();
@@ -83,18 +85,39 @@ public class PostCollectionHandler extends AbstractManifestHandler {
             final FileUpload csvFile = csvUploads.iterator().next();
             final String filePath = csvFile.uploadedFileName();
             final String fileName = csvFile.fileName();
-            final String message = LOGGER.getMessage(MessageCodes.MFS_038, fileName, filePath);
+            final JsonObject message = new JsonObject();
+            final HttpServerRequest request = aContext.request();
+            final String path = aContext.currentRoute().getPath();
+            final String protocol = request.connection().isSsl() ? "https://" : "http://";
 
-            response.setStatusCode(HTTP.CREATED);
-            response.setStatusMessage(message);
-            response.putHeader(Constants.CONTENT_TYPE, Constants.HTML_MEDIA_TYPE);
-            response.end(StringUtils.format(mySuccessPage, message));
+            // Store the information that the manifest generator will need
+            message.put(Constants.CSV_FILE_NAME, fileName).put(Constants.CSV_FILE_PATH, filePath);
+            message.put(Constants.FESTER_HOST, protocol + request.host()).put(Constants.COLLECTIONS_PATH, path);
+
+            // Send a message to the manifest generator
+            sendMessage(ManifestVerticle.class.getName(), message, send -> {
+                if (send.succeeded()) {
+                    final String responseMessage = LOGGER.getMessage(MessageCodes.MFS_038, fileName, filePath);
+
+                    LOGGER.debug(responseMessage);
+
+                    response.setStatusCode(HTTP.CREATED);
+                    response.setStatusMessage(responseMessage);
+                    response.putHeader(Constants.CONTENT_TYPE, Constants.HTML_MEDIA_TYPE);
+                    response.end(StringUtils.format(mySuccessPage, responseMessage));
+                } else {
+                    final String exceptionMessage = send.cause().getMessage();
+                    final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_103, exceptionMessage);
+
+                    LOGGER.error(errorMessage);
+
+                    response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
+                    response.setStatusMessage(exceptionMessage);
+                    response.putHeader(Constants.CONTENT_TYPE, Constants.HTML_MEDIA_TYPE);
+                    response.end(StringUtils.format(myExceptionPage, errorMessage));
+                }
+            });
         }
-    }
-
-    @Override
-    protected Logger getLogger() {
-        return LOGGER;
     }
 
 }

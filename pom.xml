@@ -54,10 +54,11 @@
 
   <properties>
     <vertx.version>3.8.3</vertx.version>
+    <opencsv.version>4.6</opencsv.version>
     <slf4j.ext.version>1.7.26</slf4j.ext.version>
     <aws.sdk.version>1.11.478</aws.sdk.version>
     <freelib.utils.version>0.8.10</freelib.utils.version>
-    <jiiify.presentation.version>0.1.0</jiiify.presentation.version>
+    <jiiify.presentation.version>0.1.1</jiiify.presentation.version>
 
     <!-- Build plug-in versions -->
     <shade.plugin.version>2.4.3</shade.plugin.version>
@@ -143,6 +144,11 @@
       <groupId>info.freelibrary</groupId>
       <artifactId>vertx-super-s3</artifactId>
       <version>${vertx.super.s3.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.opencsv</groupId>
+      <artifactId>opencsv</artifactId>
+      <version>${opencsv.version}</version>
     </dependency>
 
     <!-- Below dependencies only used for testing -->
@@ -493,6 +499,8 @@
                   <exclude>com.google.j2objc:j2objc-annotations</exclude>
                   <exclude>com.googlecode.libphonenumber:libphonenumber</exclude>
                   <exclude>com.networknt:json-schema-validator</exclude>
+                  <exclude>commons-beanutils:commons-beanutils</exclude>
+                  <exclude>commons-collections:commons-collections</exclude>
                   <exclude>commons-codec:commons-codec</exclude>
                   <exclude>commons-io:commons-io</exclude>
                   <exclude>commons-logging:commons-logging</exclude>
@@ -544,7 +552,9 @@
                   <exclude>net.java.dev.jna:jna-platform</exclude>
                   <exclude>net.java.dev.jna:jna</exclude>
                   <exclude>net.sf.jopt-simple:jopt-simple</exclude>
+                  <exclude>org.apache.commons:commons-collections4</exclude>
                   <exclude>org.apache.commons:commons-lang3</exclude>
+                  <exclude>org.apache.commons:commons-text</exclude>
                   <exclude>org.apache.httpcomponents:httpclient</exclude>
                   <exclude>org.apache.httpcomponents:httpcore</exclude>
                   <exclude>org.apache.maven.resolver:maven-resolver-api</exclude>
@@ -576,6 +586,7 @@
                   <exclude>org.jboss.forge.roaster:roaster-api</exclude>
                   <exclude>org.jboss.forge.roaster:roaster-jdt</exclude>
                   <exclude>org.mozilla:rhino</exclude>
+                  <exclude>com.opencsv:opencsv</exclude>
                   <exclude>org.slf4j:slf4j-api</exclude>
                   <exclude>org.slf4j:slf4j-ext</exclude>
                   <exclude>org.sonatype.plexus:plexus-cipher</exclude>

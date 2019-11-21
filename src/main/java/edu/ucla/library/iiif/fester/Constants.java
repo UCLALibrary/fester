@@ -47,9 +47,14 @@ public final class Constants {
     public static final String CORS_HEADER = "Access-Control-Allow-Origin";
 
     /**
-     * an asterisk/star, comes in handy
+     * An asterisk/star for use as a wildcard.
      */
     public static final String STAR = "*";
+
+    /**
+     * A slash for constructing URL paths.
+     */
+    public static final String SLASH = "/";
 
     /**
      * The file extension for JSON files
@@ -57,9 +62,29 @@ public final class Constants {
     public static final String JSON_EXT = ".json";
 
     /**
-     * ID Prefix to use for all PUT tests
+     * The file path of the CSV collection file being processed.
      */
-    public static final String PUT_TEST_ID_PREFIX = "PUT_";
+    public static final String CSV_FILE_PATH = "csv-file-path";
+
+    /**
+     * The name of the CSV collection file being processed.
+     */
+    public static final String CSV_FILE_NAME = "csv-file-name";
+
+    /**
+     * The host at which we're serving content.
+     */
+    public static final String FESTER_HOST = "fester-host";
+
+    /**
+     * The path at which we can find the collection manifests.
+     */
+    public static final String COLLECTIONS_PATH = "collections-path";
+
+    /**
+     * The path that distinguishes a work manifest at which work manifests.
+     */
+    public static final String MANIFEST = "manifest";
 
     /**
      * Private constructor for Constants class.

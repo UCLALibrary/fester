@@ -4,6 +4,8 @@ package edu.ucla.library.iiif.fester.verticles;
 import static edu.ucla.library.iiif.fester.Constants.MESSAGES;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
@@ -17,12 +19,14 @@ import edu.ucla.library.iiif.fester.handlers.DeleteManifestHandler;
 import edu.ucla.library.iiif.fester.handlers.GetManifestHandler;
 import edu.ucla.library.iiif.fester.handlers.GetStatusHandler;
 import edu.ucla.library.iiif.fester.handlers.MatchingOpNotFoundHandler;
-import edu.ucla.library.iiif.fester.handlers.PostCollectionHandler;
+import edu.ucla.library.iiif.fester.handlers.PostCsvHandler;
 import edu.ucla.library.iiif.fester.handlers.PutManifestHandler;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.CompositeFuture;
+import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
@@ -76,7 +80,7 @@ public class MainVerticle extends AbstractVerticle {
 
                         try {
                             final int port = config.getInteger(Config.HTTP_PORT, DEFAULT_PORT);
-                            final PostCollectionHandler postHandler = new PostCollectionHandler(vertx, config);
+                            final PostCsvHandler postHandler = new PostCsvHandler(vertx, config);
 
                             factory.addHandlerByOperationId(Op.POST_COLLECTION, postHandler);
 
@@ -95,7 +99,8 @@ public class MainVerticle extends AbstractVerticle {
                             // Start our server
                             server.requestHandler(router).listen(port);
 
-                            aFuture.complete();
+                            // Start up our Fester verticles
+                            startVerticles(aFuture);
                         } catch (final IOException details) {
                             LOGGER.error(details, details.getMessage());
                             aFuture.fail(details);
@@ -109,6 +114,51 @@ public class MainVerticle extends AbstractVerticle {
                 });
             }
         });
+    }
+
+    // Start verticles -- this is where to add any new verticles that we create and want to load
+    private void startVerticles(final Future<Void> aFuture) {
+        final DeploymentOptions options = new DeploymentOptions();
+        final List<Future> futures = new ArrayList<>();
+
+        // Start up any necessary Fester verticles
+        futures.add(deployVerticle(ManifestVerticle.class.getName(), options, Future.future()));
+
+        // Confirm all our verticles were successfully deployed
+        CompositeFuture.all(futures).setHandler(handler -> {
+            if (handler.succeeded()) {
+                aFuture.complete();
+            } else {
+                aFuture.fail(handler.cause());
+            }
+        });
+    }
+
+    /**
+     * Deploys a particular verticle.
+     *
+     * @param aVerticleName The name of the verticle to deploy
+     * @param aOptions Any deployment options that should be considered
+     */
+    private Future<Void> deployVerticle(final String aVerticleName, final DeploymentOptions aOptions,
+            final Future<Void> aFuture) {
+        vertx.deployVerticle(aVerticleName, aOptions, response -> {
+            try {
+                final String verticleName = Class.forName(aVerticleName).getSimpleName();
+
+                if (response.succeeded()) {
+                    LOGGER.debug(MessageCodes.MFS_116, verticleName, response.result());
+                    aFuture.complete();
+                } else {
+                    LOGGER.error(MessageCodes.MFS_117, verticleName, response.cause());
+                    aFuture.fail(response.cause());
+                }
+            } catch (final ClassNotFoundException details) {
+                aFuture.fail(details);
+            }
+        });
+
+        return aFuture;
     }
 
     /**

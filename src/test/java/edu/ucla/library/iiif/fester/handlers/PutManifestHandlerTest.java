@@ -222,9 +222,4 @@ public class PutManifestHandlerTest extends AbstractManifestHandlerTest {
         }).end(manifest);
     }
 
-    @Override
-    protected Logger getLogger() {
-        return LOGGER;
-    }
-
 }

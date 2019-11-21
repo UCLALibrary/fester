@@ -81,9 +81,4 @@ public class GetManifestHandler extends AbstractManifestHandler {
         });
     }
 
-    @Override
-    protected Logger getLogger() {
-        return LOGGER;
-    }
-
 }
