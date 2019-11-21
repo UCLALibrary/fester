@@ -2,7 +2,7 @@
 package edu.ucla.library.iiif.fester;
 
 /**
- * CSV headers that we can about for our manifest generation.
+ * CSV headers that we care about for our manifest generation.
  */
 public final class CSV {
 
