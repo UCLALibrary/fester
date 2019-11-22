@@ -54,7 +54,7 @@
 
   <properties>
     <vertx.version>3.8.3</vertx.version>
-    <opencsv.version>4.6</opencsv.version>
+    <opencsv.version>5.0</opencsv.version>
     <slf4j.ext.version>1.7.26</slf4j.ext.version>
     <aws.sdk.version>1.11.478</aws.sdk.version>
     <freelib.utils.version>0.8.10</freelib.utils.version>
@@ -455,8 +455,7 @@
             </goals>
             <configuration>
               <transformers>
-                <transformer
-                  implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                   <manifestEntries>
                     <Main-Class>io.vertx.core.Launcher</Main-Class>
                     <Main-Verticle>${main.verticle}</Main-Verticle>
