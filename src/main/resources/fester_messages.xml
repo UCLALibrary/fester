@@ -63,7 +63,7 @@
   <entry key="MFS-105">Uploaded CSV's &quot;Project Name&quot; header could not be found</entry>
   <entry key="MFS-106">Uploaded CSV doesn't have an &quot;Item ARK&quot; to use as a collection ID</entry>
   <entry key="MFS-107">Work row in the CSV is missing its &quot;Parent ARK&quot; value</entry>
-  <entry key="MFS-108">Work row is missing an &qout;Item ARK&quot; or &quot;Title&quot; value</entry>
+  <entry key="MFS-108">Work row is missing an &quot;Item ARK&quot; or &quot;Title&quot; value</entry>
   <entry key="MFS-109">The supplied string isn't a MessageCode: {}</entry>
   <entry key="MFS-110">Starting the {} verticle [id: {}]</entry>
   <entry key="MFS-111">Uploaded CSV's &quot;Title&quot; header could not be found</entry>
