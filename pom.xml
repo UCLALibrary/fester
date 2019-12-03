@@ -68,6 +68,7 @@
     <vertx.super.s3.version>1.1.0</vertx.super.s3.version>
     <jcip.annotations.version>1.0-1</jcip.annotations.version>
     <maven.failsafe.plugin.version>2.18.1</maven.failsafe.plugin.version>
+    <xml.maven.plugin.version>0.9.2</xml.maven.plugin.version>
 
     <!-- Name of the main Vert.x verticle -->
     <main.verticle>edu.ucla.library.iiif.fester.verticles.MainVerticle</main.verticle>
@@ -638,6 +639,27 @@
           </execution>
         </executions>
       </plugin>
+      
+      <!--  Validate all XML and XSL in the project during the validate phase -->
+      <plugin>
+        <groupId>org.openjax.xml</groupId>
+        <artifactId>xml-maven-plugin</artifactId>
+        <version>${xml.maven.plugin.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>validate</goal>
+            </goals>
+            <configuration>
+              <includes>
+                <include>**/*.xsd</include>
+                <include>**/*.xml</include>
+              </includes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      
     </plugins>
   </build>
 
