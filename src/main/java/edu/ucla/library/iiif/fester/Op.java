@@ -17,8 +17,6 @@ public final class Op {
 
     public static final String SUCCESS = "success";
 
-    public static final String RETRY = "retry";
-
     public static final String FAILURE = "failure";
 
     private Op() {

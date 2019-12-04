@@ -57,11 +57,6 @@ public final class Constants {
     public static final String SLASH = "/";
 
     /**
-     * Just a empty string, useful
-     */
-    public static final String EMPTY = "";
-
-    /**
      * The file extension for JSON files
      */
     public static final String JSON_EXT = ".json";
@@ -90,26 +85,6 @@ public final class Constants {
      * The path that distinguishes a work manifest at which work manifests.
      */
     public static final String MANIFEST = "manifest";
-
-    /**
-     * The record of completed S3 uploads.
-     */
-    public static final String RESULTS_MAP = "s3-uploads";
-
-    /**
-     * A name for wait counters.
-     */
-    public static final String WAIT_COUNT = "wait-count";
-
-    /**
-     * A name for the S3 request counter.
-     */
-    public static final String S3_REQUEST_COUNT = "s3-request-count";
-
-    /**
-     * Manifest content, stored as a JSON object
-     */
-    public static final String MANIFEST_CONTENT = "manifest-content";
 
     /**
      * Private constructor for Constants class.
