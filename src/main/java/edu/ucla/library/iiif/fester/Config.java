@@ -20,6 +20,9 @@ public final class Config {
 
     public static final String S3_BUCKET = "fester.s3.bucket";
 
+    // Configuration options for the S3 upload verticle(s)
+    public static final String S3_MAX_REQUESTS = "s3.max.requests";
+
     /**
      * Private constructor for the Constants class.
      */

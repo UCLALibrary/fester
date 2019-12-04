@@ -55,6 +55,33 @@
   <entry key="MFS-039">Unexpected POST response: [{}] {}</entry>
   <entry key="MFS-040">Configuration file not found</entry>
   <entry key="MFS-041">Starting the Fester service on port: {}</entry>
+
+  <entry key="MFS-044">Configuring S3 uploader: {} instance(s) and {} thread(s) per instance</entry>
+  <entry key="MFS-045">{} starting in thread: {}</entry>
+  <entry key="MFS-046">AWS S3 access / secret keys: {} / {}</entry>
+  <entry key="MFS-047">S3 Client configured for region: {}</entry>
+  <entry key="MFS-048">Failed to increment S3 upload counter</entry>
+  <entry key="MFS-049">Failed to get S3 upload counter</entry>
+  <entry key="MFS-050">Preparing to send '{}' to S3 bucket: {}</entry>
+  <entry key="MFS-051">Sending '{}' to S3 bucket: {}</entry>
+  <entry key="MFS-052">{}</entry>
+  <entry key="MFS-053">Image file '{}' successfully uploaded to S3</entry>
+  <entry key="MFS-054">S3 bucket upload failed: {} -&gt; {}</entry>
+  <entry key="MFS-055">Error triggering S3 upload retry: {}</entry>
+  <entry key="MFS-056">S3 connection pool is full; re-queuing the request: {}</entry>
+  <entry key="MFS-057">Failed to read file: {}</entry>
+  <entry key="MFS-058">Stopped retrying S3 upload; maximum number of retries allowed reached: {}</entry>
+  <entry key="MFS-059">Failed to get S3 upload counter</entry>
+  <entry key="MFS-060">Failed to reset S3 upload retry counter for: {}</entry>
+  <entry key="MFS-061">Failed to close the image file after trying to upload it to S3: {}</entry>
+  <entry key="MFS-062">Failed to decrement the S3 request counter</entry>
+  <entry key="MFS-063">Couldn't retrieve the S3 request counter</entry>
+  <entry key="MFS-064">Error: Missing MANIFEST_CONTENT from S3 upload request for: {}</entry>
+  <entry key="MFS-065">Skipping test because we don't have a valid S3 configuration</entry>
+  <entry key="MFS-066">Failed to close Vert.x test instance</entry>
+  <entry key="MFS-067">Test server for {} started...</entry>
+  
+
   <entry key="MFS-100">Stopping the {} verticle [id: {}]</entry>
   <entry key="MFS-101">Getting message consumer for: {}</entry>
   <entry key="MFS-102">Sending message to {}: {}</entry>

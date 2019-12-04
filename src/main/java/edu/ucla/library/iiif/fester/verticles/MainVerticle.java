@@ -123,6 +123,7 @@ public class MainVerticle extends AbstractVerticle {
 
         // Start up any necessary Fester verticles
         futures.add(deployVerticle(ManifestVerticle.class.getName(), options, Future.future()));
+        futures.add(deployVerticle(S3BucketVerticle.class.getName(), options, Future.future()));
 
         // Confirm all our verticles were successfully deployed
         CompositeFuture.all(futures).setHandler(handler -> {
