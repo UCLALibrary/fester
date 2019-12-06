@@ -65,7 +65,7 @@
     <netty.epoll.version>4.1.37.Final</netty.epoll.version>
     <vertx.plugin.version>1.0.18</vertx.plugin.version>
     <codacy.plugin.version>1.0.2</codacy.plugin.version>
-    <vertx.super.s3.version>1.1.0</vertx.super.s3.version>
+    <vertx.super.s3.version>1.2.1</vertx.super.s3.version>
     <jcip.annotations.version>1.0-1</jcip.annotations.version>
     <maven.failsafe.plugin.version>2.18.1</maven.failsafe.plugin.version>
     <xml.maven.plugin.version>0.9.2</xml.maven.plugin.version>
@@ -659,7 +659,6 @@
           </execution>
         </executions>
       </plugin>
-      
     </plugins>
   </build>
 
