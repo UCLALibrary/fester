@@ -44,30 +44,31 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
     @Override
     @SuppressWarnings({ "deprecation" })
     public void start(final Future<Void> aFuture) {
+
+        // grab the Fester configuration
+        final JsonObject config = config();
+
+        // Initialize the S3BucketVerticle by getting our s3 configs and setting up the S3 client
+        if (myS3Client == null) {
+            final String s3AccessKey = config.getString(Config.S3_ACCESS_KEY);
+            final String s3SecretKey = config.getString(Config.S3_SECRET_KEY);
+            final String s3RegionName = config.getString(Config.S3_REGION);
+            final String s3Region = RegionUtils.getRegion(s3RegionName).getServiceEndpoint("s3");
+
+            final HttpClientOptions options = new HttpClientOptions();
+
+            // Set the S3 client options
+            options.setDefaultHost(s3Region);
+
+            myS3Client = new S3Client(getVertx(), s3AccessKey, s3SecretKey, options);
+
+            // Trace is only for developer use; don't turn on when running on a server
+            LOGGER.trace(MessageCodes.MFS_046, s3AccessKey, s3SecretKey); // AWS S3 access / secret keys: {} / {}
+
+            LOGGER.debug(MessageCodes.MFS_047, s3RegionName); // S3 Client configured for region: {}
+        }
+
         getJsonConsumer().handler(message -> {
-
-            // grab the Fester configuration
-            final JsonObject config = config();
-
-            // Initialize the S3BucketVerticle by getting our s3 configs and setting up the S3 client
-            if (myS3Client == null) {
-                final String s3AccessKey = config.getString(Config.S3_ACCESS_KEY);
-                final String s3SecretKey = config.getString(Config.S3_SECRET_KEY);
-                final String s3RegionName = config.getString(Config.S3_REGION);
-                final String s3Region = RegionUtils.getRegion(s3RegionName).getServiceEndpoint("s3");
-
-                final HttpClientOptions options = new HttpClientOptions();
-
-                // Set the S3 client options
-                options.setDefaultHost(s3Region);
-
-                myS3Client = new S3Client(getVertx(), s3AccessKey, s3SecretKey, options);
-
-                // Trace is only for developer use; don't turn on when running on a server
-                LOGGER.trace(MessageCodes.MFS_046, s3AccessKey, s3SecretKey); // AWS S3 access / secret keys: {} / {}
-
-                LOGGER.debug(MessageCodes.MFS_047, s3RegionName); // S3 Client configured for region: {}
-            }
 
             // handle S3 upload requests
             upload(message, config);
