@@ -18,6 +18,8 @@ public class CsvHeaders {
 
     private int myFileNameIndex;
 
+    private int myItemSequence;
+
     /**
      * Gets the Item ARK index position.
      *
@@ -32,8 +34,9 @@ public class CsvHeaders {
      *
      * @param aItemArkIndex The position of the Item ARK header.
      */
-    public void setItemArkIndex(final int aItemArkIndex) {
+    public CsvHeaders setItemArkIndex(final int aItemArkIndex) {
         myItemArkIndex = aItemArkIndex;
+        return this;
     }
 
     /**
@@ -59,8 +62,9 @@ public class CsvHeaders {
      *
      * @param aParentArkIndex The index position of the Parent ARK
      */
-    public void setParentArkIndex(final int aParentArkIndex) {
+    public CsvHeaders setParentArkIndex(final int aParentArkIndex) {
         myParentArkIndex = aParentArkIndex;
+        return this;
     }
 
     /**
@@ -86,8 +90,9 @@ public class CsvHeaders {
      *
      * @param aTitleIndex The index position of the Title
      */
-    public void setTitleIndex(final int aTitleIndex) {
+    public CsvHeaders setTitleIndex(final int aTitleIndex) {
         myTitleIndex = aTitleIndex;
+        return this;
     }
 
     /**
@@ -113,8 +118,9 @@ public class CsvHeaders {
      *
      * @param aProjectNameIndex The index position of the Project Name
      */
-    public void setProjectNameIndex(final int aProjectNameIndex) {
+    public CsvHeaders setProjectNameIndex(final int aProjectNameIndex) {
         myProjectNameIndex = aProjectNameIndex;
+        return this;
     }
 
     /**
@@ -140,8 +146,9 @@ public class CsvHeaders {
      *
      * @param aObjectTypeIndex The index position of the Object Type
      */
-    public void setObjectTypeIndex(final int aObjectTypeIndex) {
+    public CsvHeaders setObjectTypeIndex(final int aObjectTypeIndex) {
         myObjectTypeIndex = aObjectTypeIndex;
+        return this;
     }
 
     /**
@@ -167,8 +174,9 @@ public class CsvHeaders {
      *
      * @param aFileNameIndex The index position of the File Name
      */
-    public void setFileNameIndex(final int aFileNameIndex) {
+    public CsvHeaders setFileNameIndex(final int aFileNameIndex) {
         myFileNameIndex = aFileNameIndex;
+        return this;
     }
 
     /**
@@ -178,5 +186,30 @@ public class CsvHeaders {
      */
     public boolean hasFileNameIndex() {
         return myFileNameIndex != -1;
+    }
+
+    /**
+     * Sets the Item Sequence index position.
+     *
+     * @param aItemSequence
+     * @return
+     */
+    public CsvHeaders setItemSequence(final int aItemSequence) {
+        myItemSequence = aItemSequence;
+        return this;
+    }
+
+    /**
+     * Gets the Item Sequence header position.
+     */
+    public int getItemSequence() {
+        return myItemSequence;
+    }
+
+    /**
+     * Checks whether the CSV headers have a item sequence position registered.
+     */
+    public boolean hasItemSequence() {
+        return myItemSequence != -1;
     }
 }

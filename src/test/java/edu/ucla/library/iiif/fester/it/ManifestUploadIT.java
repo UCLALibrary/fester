@@ -1,5 +1,5 @@
 
-package edu.ucla.library.fester;
+package edu.ucla.library.iiif.fester.it;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +19,7 @@ import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
+import edu.ucla.library.iiif.fester.TestConstants;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.RequestOptions;

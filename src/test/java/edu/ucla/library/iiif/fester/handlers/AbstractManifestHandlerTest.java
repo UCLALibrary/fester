@@ -4,6 +4,8 @@ package edu.ucla.library.iiif.fester.handlers;
 import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.After;
@@ -20,18 +22,21 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
-import info.freelibrary.util.StringUtils;
 
+import edu.ucla.library.bucketeer.verticles.S3BucketVerticle;
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.MessageCodes;
+import edu.ucla.library.iiif.fester.verticles.FakeS3BucketVerticle;
 import edu.ucla.library.iiif.fester.verticles.MainVerticle;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.shareddata.LocalMap;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -62,6 +67,7 @@ abstract class AbstractManifestHandlerTest {
      * @param aContext A testing context
      */
     @Before
+    @SuppressWarnings({ "rawtypes", "deprecation" })
     public void setUp(final TestContext aContext) throws IOException {
         final DeploymentOptions options = new DeploymentOptions();
         final ServerSocket socket = new ServerSocket(0);
@@ -132,7 +138,28 @@ abstract class AbstractManifestHandlerTest {
         myVertx.deployVerticle(MainVerticle.class.getName(), aOpts, deployment -> {
             if (deployment.succeeded()) {
                 try {
-                    final String testManifest = StringUtils.read(MANIFEST_FILE);
+
+                    @SuppressWarnings("rawtypes")
+                    final List<Future> futures = new ArrayList<>();
+                    final LocalMap<String, String> map = myVertx.sharedData().getLocalMap(Constants.VERTICLE_MAP);
+                    final String s3BucketDeploymentId = map.get(S3BucketVerticle.class.getSimpleName());
+
+                    if (s3BucketDeploymentId.contains(DELIMITER)) {
+                        for (final String delimitedId : s3BucketDeploymentId.split(DELIMITER)) {
+                            futures.add(updateDeployment(delimitedId, Future.future()));
+                        }
+                    } else {
+                        futures.add(updateDeployment(s3BucketDeploymentId, Future.future()));
+                    }
+
+                    CompositeFuture.all(futures).setHandler(handler -> {
+                        if (handler.succeeded()) {
+                            getLogger().debug(MessageCodes.BUCKETEER_143, getClass().getName());
+                            loadCSV(asyncTask, aContext, port);
+                        } else {
+                            aContext.fail(handler.cause());
+                        }
+                    });
 
                     // Store a manifest whose ID that has a '.json' extension
                     LOGGER.debug(MessageCodes.MFS_006, myManifestID, myS3Bucket);
@@ -158,6 +185,7 @@ abstract class AbstractManifestHandlerTest {
      * @param aFuture A future to capture when the initialization is completed
      * @throws IOException If there is trouble reading from the configuration file
      */
+    @SuppressWarnings({ "rawtypes", "deprecation" })
     private void initialize(final Future aFuture) throws IOException {
         final ConfigRetriever configRetriever;
 
@@ -196,4 +224,28 @@ abstract class AbstractManifestHandlerTest {
         });
     }
 
+    /**
+     * Removes the real S3UploadVerticle and replaces it with a fake version for our tests. The fake version
+     * acknowledges it receives a request but doesn't try to upload the item into S3.
+     *
+     * @param aDeploymentId
+     * @param aFuture
+     */
+    private Future<Void> updateDeployment(final String aDeploymentId, final Future<Void> aFuture) {
+        myVertx.undeploy(aDeploymentId, undeployment -> {
+            if (undeployment.succeeded()) {
+                myVertx.deployVerticle(FakeS3BucketVerticle.class.getName(), fakeDeployment -> {
+                    if (fakeDeployment.succeeded()) {
+                        aFuture.complete();
+                    } else {
+                        aFuture.fail(fakeDeployment.cause());
+                    }
+                });
+            } else {
+                aFuture.fail(undeployment.cause());
+            }
+        });
+
+        return aFuture;
+    }
 }

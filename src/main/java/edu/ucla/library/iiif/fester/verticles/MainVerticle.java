@@ -50,6 +50,7 @@ public class MainVerticle extends AbstractVerticle {
      * Starts a Web server.
      */
     @Override
+    @SuppressWarnings({ "deprecation" })
     public void start(final Future<Void> aFuture) {
         final JsonObject deploymentConfig = config();
         final HttpServer server = vertx.createHttpServer();
@@ -100,7 +101,7 @@ public class MainVerticle extends AbstractVerticle {
                             server.requestHandler(router).listen(port);
 
                             // Start up our Fester verticles
-                            startVerticles(aFuture);
+                            startVerticles(config, aFuture);
                         } catch (final IOException details) {
                             LOGGER.error(details, details.getMessage());
                             aFuture.fail(details);
@@ -117,12 +118,17 @@ public class MainVerticle extends AbstractVerticle {
     }
 
     // Start verticles -- this is where to add any new verticles that we create and want to load
-    private void startVerticles(final Future<Void> aFuture) {
-        final DeploymentOptions options = new DeploymentOptions();
+    @SuppressWarnings({ "rawtypes", "deprecation" })
+    private void startVerticles(final JsonObject aConfig, final Future<Void> aFuture) {
+        final DeploymentOptions uploaderOptions = new DeploymentOptions();
+        final DeploymentOptions manifestorOptions = new DeploymentOptions();
         final List<Future> futures = new ArrayList<>();
 
+        uploaderOptions.setConfig(aConfig);
+
         // Start up any necessary Fester verticles
-        futures.add(deployVerticle(ManifestVerticle.class.getName(), options, Future.future()));
+        futures.add(deployVerticle(ManifestVerticle.class.getName(), manifestorOptions, Future.future()));
+        futures.add(deployVerticle(S3BucketVerticle.class.getName(), uploaderOptions, Future.future()));
 
         // Confirm all our verticles were successfully deployed
         CompositeFuture.all(futures).setHandler(handler -> {
@@ -140,6 +146,7 @@ public class MainVerticle extends AbstractVerticle {
      * @param aVerticleName The name of the verticle to deploy
      * @param aOptions Any deployment options that should be considered
      */
+    @SuppressWarnings({ "deprecation" })
     private Future<Void> deployVerticle(final String aVerticleName, final DeploymentOptions aOptions,
             final Future<Void> aFuture) {
         vertx.deployVerticle(aVerticleName, aOptions, response -> {
