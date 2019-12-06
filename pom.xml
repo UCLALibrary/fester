@@ -186,7 +186,6 @@
       </testResource>
     </testResources>
 
-    <pluginManagement>
     <plugins>
       <!-- The build-helper plug-in gets us a dynamic port for testing -->
       <plugin>
@@ -660,9 +659,7 @@
           </execution>
         </executions>
       </plugin>
-      
     </plugins>
-    </pluginManagement>
   </build>
 
   <!-- A live testing mode that will spin up the server locally when the following is run: mvn -Plive test -->
