@@ -65,7 +65,7 @@
   <entry key="MFS-050">Preparing to send '{}' to S3 bucket: {}</entry>
   <entry key="MFS-051">Sending '{}' to S3 bucket: {}</entry>
   <entry key="MFS-052">{}</entry>
-  <entry key="MFS-053">Image file '{}' successfully uploaded to S3</entry>
+  <entry key="MFS-053">Manifest '{}' successfully uploaded to S3</entry>
   <entry key="MFS-054">S3 bucket upload failed: {} -&gt; {}</entry>
   <entry key="MFS-055">Error triggering S3 upload retry: {}</entry>
   <entry key="MFS-056">S3 connection pool is full; re-queuing the request: {}</entry>
@@ -110,4 +110,7 @@
   <entry key="MFS-125">Failed to upload collection manifest: {}</entry>
   <entry key="MFS-126">Manifest successfully sent to S3 verticle for upload: {}</entry>
   <entry key="MFS-127">Failed to upload all the work manifests for collection: {}</entry>
+  <entry key="MFS-128">Extracted unique part of manifest ID: {}</entry>
+  <entry key="MFS-129">Checking S3 collection object: {}</entry>
+  <entry key="MFS-130">Reset collection manifest key to: {}</entry>
 </properties>

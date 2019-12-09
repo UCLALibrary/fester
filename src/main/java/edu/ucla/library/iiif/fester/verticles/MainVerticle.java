@@ -81,9 +81,9 @@ public class MainVerticle extends AbstractVerticle {
 
                         try {
                             final int port = config.getInteger(Config.HTTP_PORT, DEFAULT_PORT);
-                            final PostCsvHandler postHandler = new PostCsvHandler(vertx, config);
+                            final PostCsvHandler postCsvHandler = new PostCsvHandler(vertx, config);
 
-                            factory.addHandlerByOperationId(Op.POST_COLLECTION, postHandler);
+                            factory.addHandlerByOperationId(Op.POST_CSV, postCsvHandler);
 
                             // After that, we can get a router that's been configured by our OpenAPI spec
                             router = factory.getRouter();

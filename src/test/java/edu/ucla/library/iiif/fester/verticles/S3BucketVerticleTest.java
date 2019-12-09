@@ -47,6 +47,8 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
 
     private static final String MANIFEST_URI = "http://localhost:9999/{}/manifest";
 
+    private static final String COLLECTION_URI = "http://localhost:9999{}";
+
     private static final String ID = "@id";
 
     private static String myS3Bucket = "unconfigured";
@@ -57,6 +59,8 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
     public RunTestOnContext myRunTestOnContextRule = new RunTestOnContext();
 
     private String myManifestKey;
+
+    private String myCollectionKey;
 
     /** We can't, as of yet, execute these tests without a non-default S3 configuration */
     private boolean isExecutable;
@@ -81,7 +85,9 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
             if (getConfig.succeeded()) {
                 final JsonObject config = getConfig.result();
 
+                // Create the IDs that will be needed for running the tests
                 myManifestKey = UUID.randomUUID().toString();
+                myCollectionKey = Constants.COLLECTIONS_PATH + Constants.SLASH + myManifestKey;
 
                 // We need to determine if we'll be able to run the S3 integration tests so we can skip if needed
                 if (config.containsKey(Config.S3_ACCESS_KEY) && !config.getString(Config.S3_ACCESS_KEY,
@@ -137,23 +143,33 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
 
                 LOGGER.error(message);
                 aContext.fail(message);
+            } else {
+                final String manifestKey = myManifestKey + Constants.JSON_EXT;
+                final String collectionKey = myCollectionKey + Constants.JSON_EXT;
+
+                // Clean up our manifest test file
+                if (myAmazonS3.doesObjectExist(myS3Bucket, manifestKey)) {
+                    myAmazonS3.deleteObject(myS3Bucket, manifestKey);
+                }
+
+                // Clean up our collection test file
+                if (myAmazonS3.doesObjectExist(myS3Bucket, collectionKey)) {
+                    myAmazonS3.deleteObject(myS3Bucket, collectionKey);
+                }
+
+                async.complete();
             }
-
-            // clean up our test files
-            myAmazonS3.deleteObject(myS3Bucket, myManifestKey + Constants.JSON_EXT);
-
-            async.complete();
         });
     }
 
     /**
-     * Tests being able to store to S3. This requires an actual S3 configuration. The test will be skipped if no such
-     * configuration exists.
+     * Tests being able to store a work manifest to S3. This requires an actual S3 configuration. The test will be
+     * skipped if no such configuration exists.
      *
      * @param aContext A test context
      */
     @Test
-    public final void testS3Storage(final TestContext aContext) {
+    public final void testS3ManifestStorage(final TestContext aContext) {
         try {
             // Skip this test if we don't have a valid S3 configuration
             assumeTrue(LOGGER.getMessage(MessageCodes.MFS_065), isExecutable);
@@ -174,6 +190,7 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
             if (send.succeeded()) {
                 final String s3Object;
 
+                // When we check the object though we use the key that's used when the object is PUT
                 try {
                     s3Object = myAmazonS3.getObjectAsString(myS3Bucket, myManifestKey + Constants.JSON_EXT);
                     aContext.assertEquals(manifest, new JsonObject(s3Object));
@@ -191,4 +208,55 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
         });
     }
 
+    /**
+     * Tests being able to store a collection manifest to S3. This requires an actual S3 configuration. The test will
+     * be skipped if no such configuration exists.
+     *
+     * @param aContext A test context
+     */
+    @Test
+    public final void testS3CollectionStorage(final TestContext aContext) {
+        try {
+            // Skip this test if we don't have a valid S3 configuration
+            assumeTrue(LOGGER.getMessage(MessageCodes.MFS_065), isExecutable);
+        } catch (final AssumptionViolatedException details) {
+            LOGGER.warn(details.getMessage());
+            throw details;
+        }
+
+        final Vertx vertx = myRunTestOnContextRule.vertx();
+        final Async asyncTask = aContext.async();
+        final Buffer manifestContent = vertx.fileSystem().readFileBlocking(MANIFEST_PATH);
+        final JsonObject manifest = manifestContent.toJsonObject();
+
+        // Create a fake manifest ID/URI with our collection key
+        manifest.put(ID, StringUtils.format(COLLECTION_URI, myCollectionKey));
+
+        LOGGER.debug(MessageCodes.MFS_130, manifest.getString(ID));
+
+        vertx.eventBus().request(S3BucketVerticle.class.getName(), manifest, send -> {
+            if (send.succeeded()) {
+                final String s3Object;
+
+                // When we check the object though we use the key that's used when the object is PUT
+                try {
+                    final String collectionKey = myCollectionKey + Constants.JSON_EXT;
+
+                    LOGGER.debug(MessageCodes.MFS_129, collectionKey);
+
+                    s3Object = myAmazonS3.getObjectAsString(myS3Bucket, collectionKey);
+                    aContext.assertEquals(manifest, new JsonObject(s3Object));
+                } catch (final AmazonS3Exception details) {
+                    aContext.fail(details);
+                }
+
+                // If the assertion passed, we need to complete our task
+                if (!asyncTask.isCompleted()) {
+                    asyncTask.complete();
+                }
+            } else {
+                aContext.fail(send.cause());
+            }
+        });
+    }
 }

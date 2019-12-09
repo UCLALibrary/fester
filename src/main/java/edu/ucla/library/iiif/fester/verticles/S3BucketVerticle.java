@@ -72,14 +72,14 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
 
         getJsonConsumer().handler(message -> {
             final JsonObject manifest = message.body();
-            final String id = IDUtils.decode(URI.create(manifest.getString(ID)));
-            final String manifestKey = !id.endsWith(Constants.JSON_EXT) ? id + Constants.JSON_EXT : id;
+            final String manifestID = getUniqueID(manifest.getString(ID));
+            final String manifestKey = getS3Key(manifestID);
             final Buffer manifestContent = manifest.toBuffer();
 
             LOGGER.debug(MessageCodes.MFS_051, manifest, myS3Bucket);
 
             // Start with just ID for manifest metadata
-            final UserMetadata metadata = new UserMetadata(Constants.MANIFEST_ID, id);
+            final UserMetadata metadata = new UserMetadata(Constants.MANIFEST_ID, manifestID);
 
             try {
                 myS3Client.put(myS3Bucket, manifestKey, manifestContent, metadata, response -> {
@@ -95,7 +95,7 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
 
                     // If we get a successful upload response code, send a reply to indicate so
                     if (statusCode == HTTP.OK) {
-                        LOGGER.info(MessageCodes.MFS_053, id);
+                        LOGGER.info(MessageCodes.MFS_053, manifestID);
 
                         // Send the success result and decrement the S3 request counter
                         sendReply(message, 0, Op.SUCCESS);
@@ -115,18 +115,50 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
 
                             LOGGER.warn(MessageCodes.MFS_055, errorMessage);
 
-                            retryUpload(id, message);
+                            retryUpload(manifestID, message);
                         }
                     }
                 }, exception -> {
                     LOGGER.warn(MessageCodes.MFS_055, exception.getMessage());
-                    retryUpload(id, message);
+                    retryUpload(manifestID, message);
                 });
             } catch (final ConnectionPoolTooBusyException details) {
-                LOGGER.debug(MessageCodes.MFS_056, id);
+                LOGGER.debug(MessageCodes.MFS_056, manifestID);
                 sendReply(message, 0, Op.RETRY);
             }
         });
+    }
+
+    /**
+     * Gets the ID and checks whether it's a work or collection manifest and then returns the ID for that thing.
+     *
+     * @param aURIString A manifest URI
+     * @return An S3 key for the manifest
+     */
+    private String getUniqueID(final String aURIString) {
+        String uniqueID;
+
+        if (aURIString.contains(Constants.COLLECTIONS_PATH)) {
+            uniqueID = IDUtils.decode(URI.create(aURIString), Constants.COLLECTIONS_PATH);
+            uniqueID = Constants.COLLECTIONS_PATH + Constants.SLASH + uniqueID;
+        } else {
+            // TODO: update this to put Work manifests in a works S3 "directory"
+            uniqueID = IDUtils.decode(URI.create(aURIString));
+        }
+
+        LOGGER.debug(MessageCodes.MFS_128, uniqueID);
+
+        return uniqueID;
+    }
+
+    /**
+     * Gets the key that will be used when putting the manifest in S3.
+     *
+     * @param aID The unique part of a manifest ID
+     * @return An S3 key
+     */
+    private String getS3Key(final String aID) {
+        return !aID.endsWith(Constants.JSON_EXT) ? aID + Constants.JSON_EXT : aID;
     }
 
     /**
