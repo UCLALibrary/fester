@@ -110,6 +110,7 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
                     }
 
                     myS3Bucket = config.getString(Config.S3_BUCKET);
+
                     LOGGER.debug(MessageCodes.MFS_067, getClass().getName());
                     asyncTask.complete();
                 });
