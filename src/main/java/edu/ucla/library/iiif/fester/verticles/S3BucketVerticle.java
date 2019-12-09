@@ -20,7 +20,6 @@ import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.utils.CodeUtils;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
@@ -44,7 +43,7 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
     private S3Client myS3Client;
 
     private String myS3Bucket;
-  
+
     /**
      * Starts the S3 Bucket Verticle.
      */
