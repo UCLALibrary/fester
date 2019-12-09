@@ -87,11 +87,6 @@ public final class Constants {
     public static final String FESTER_HOST = "fester-host";
 
     /**
-     * The path at which we can find the collection manifests.
-     */
-    public static final String COLLECTIONS_PATH = "collections-path";
-
-    /**
      * The path that distinguishes a work manifest at which work manifests.
      */
     public static final String MANIFEST = "manifest";

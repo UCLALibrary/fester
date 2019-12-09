@@ -4,8 +4,6 @@ package edu.ucla.library.iiif.fester.handlers;
 import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 import org.junit.After;
@@ -23,7 +21,6 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
-import edu.ucla.library.bucketeer.verticles.S3BucketVerticle;
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.MessageCodes;
@@ -31,12 +28,10 @@ import edu.ucla.library.iiif.fester.verticles.FakeS3BucketVerticle;
 import edu.ucla.library.iiif.fester.verticles.MainVerticle;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.shareddata.LocalMap;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -138,39 +133,16 @@ abstract class AbstractManifestHandlerTest {
         myVertx.deployVerticle(MainVerticle.class.getName(), aOpts, deployment -> {
             if (deployment.succeeded()) {
                 try {
-
-                    @SuppressWarnings("rawtypes")
-                    final List<Future> futures = new ArrayList<>();
-                    final LocalMap<String, String> map = myVertx.sharedData().getLocalMap(Constants.VERTICLE_MAP);
-                    final String s3BucketDeploymentId = map.get(S3BucketVerticle.class.getSimpleName());
-
-                    if (s3BucketDeploymentId.contains(DELIMITER)) {
-                        for (final String delimitedId : s3BucketDeploymentId.split(DELIMITER)) {
-                            futures.add(updateDeployment(delimitedId, Future.future()));
-                        }
-                    } else {
-                        futures.add(updateDeployment(s3BucketDeploymentId, Future.future()));
-                    }
-
-                    CompositeFuture.all(futures).setHandler(handler -> {
-                        if (handler.succeeded()) {
-                            getLogger().debug(MessageCodes.BUCKETEER_143, getClass().getName());
-                            loadCSV(asyncTask, aContext, port);
-                        } else {
-                            aContext.fail(handler.cause());
-                        }
-                    });
-
                     // Store a manifest whose ID that has a '.json' extension
                     LOGGER.debug(MessageCodes.MFS_006, myManifestID, myS3Bucket);
-                    myS3Client.putObject(myS3Bucket, myManifestID, testManifest);
+                    myS3Client.putObject(myS3Bucket, myManifestID, MANIFEST_FILE);
 
                     // Store a manifest whose ID that doesn't have a '.json' extension
                     LOGGER.debug(MessageCodes.MFS_006, myJsonlessManifestID, myS3Bucket);
-                    myS3Client.putObject(myS3Bucket, myJsonlessManifestID, testManifest);
+                    myS3Client.putObject(myS3Bucket, myJsonlessManifestID, MANIFEST_FILE);
 
                     aAsyncTask.complete();
-                } catch (final IOException | SdkClientException details) {
+                } catch (final SdkClientException details) {
                     aContext.fail(details);
                 }
             } else {

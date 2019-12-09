@@ -17,9 +17,11 @@ import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
+import info.freelibrary.util.StringUtils;
 
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
@@ -27,6 +29,7 @@ import edu.ucla.library.iiif.fester.MessageCodes;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -40,11 +43,13 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
 
     private static final String MANIFEST_PATH = "src/test/resources/testManifest.json";
 
-    private static final String VERTICLE_NAME = S3BucketVerticle.class.getName();
-
     private static final String DEFAULT_ACCESS_KEY = "YOUR_ACCESS_KEY";
 
-    private static String s3Bucket = "unconfigured";
+    private static final String MANIFEST_URI = "http://localhost:9999/{}/manifest";
+
+    private static final String ID = "@id";
+
+    private static String myS3Bucket = "unconfigured";
 
     private static AWSCredentials myAWSCredentials;
 
@@ -76,7 +81,7 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
             if (getConfig.succeeded()) {
                 final JsonObject config = getConfig.result();
 
-                myManifestKey = UUID.randomUUID().toString() + Constants.JSON_EXT;
+                myManifestKey = UUID.randomUUID().toString();
 
                 // We need to determine if we'll be able to run the S3 integration tests so we can skip if needed
                 if (config.containsKey(Config.S3_ACCESS_KEY) && !config.getString(Config.S3_ACCESS_KEY,
@@ -84,7 +89,7 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
                     isExecutable = true;
                 }
 
-                vertx.deployVerticle(VERTICLE_NAME, options.setConfig(config), deployment -> {
+                vertx.deployVerticle(S3BucketVerticle.class.getName(), options.setConfig(config), deployment -> {
                     if (deployment.failed()) {
                         final Throwable details = deployment.cause();
                         final String message = details.getMessage();
@@ -104,7 +109,7 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
                         myAmazonS3 = new AmazonS3Client(myAWSCredentials);
                     }
 
-                    s3Bucket = config.getString(Config.S3_BUCKET);
+                    myS3Bucket = config.getString(Config.S3_BUCKET);
                     LOGGER.debug(MessageCodes.MFS_067, getClass().getName());
                     asyncTask.complete();
                 });
@@ -134,7 +139,7 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
             }
 
             // clean up our test files
-            myAmazonS3.deleteObject(s3Bucket, myManifestKey);
+            myAmazonS3.deleteObject(myS3Bucket, myManifestKey + Constants.JSON_EXT);
 
             async.complete();
         });
@@ -157,32 +162,31 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
         }
 
         final Vertx vertx = myRunTestOnContextRule.vertx();
-        final JsonObject message = new JsonObject();
         final Async asyncTask = aContext.async();
+        final Buffer manifestContent = vertx.fileSystem().readFileBlocking(MANIFEST_PATH);
+        final JsonObject manifest = manifestContent.toJsonObject();
 
-        // load up our test Manifest.json file, and convert it to a JsonObject to hand to our S3 Verticle
-        final JsonObject testManifestContent = vertx.fileSystem().readFileBlocking(MANIFEST_PATH).toJsonObject();
+        // Create a fake manifest ID/URI with our test manifest key
+        manifest.put(ID, StringUtils.format(MANIFEST_URI, myManifestKey));
 
-        // send the parameters the Fester S3 Verticle wants, those would be
-        // param: manifestID:String - the identifier we will use when storing the Manifest in S3
-        // param: manifest-content:jsonObject - holds the content of the Manifest object
+        vertx.eventBus().request(S3BucketVerticle.class.getName(), manifest, send -> {
+            if (send.succeeded()) {
+                final String s3Object;
 
-        message.put(Constants.MANIFEST_ID, myManifestKey);
-
-        message.put(Constants.MANIFEST_CONTENT, testManifestContent);
-
-        vertx.eventBus().request(VERTICLE_NAME, message, send -> {
-            if (send.failed()) {
-                final Throwable details = send.cause();
-
-                if (details != null) {
-                    LOGGER.error(details, details.getMessage());
+                try {
+                    s3Object = myAmazonS3.getObjectAsString(myS3Bucket, myManifestKey + Constants.JSON_EXT);
+                    aContext.assertEquals(manifest, new JsonObject(s3Object));
+                } catch (final AmazonS3Exception details) {
+                    aContext.fail(details);
                 }
 
-                aContext.fail();
+                // If the assertion passed, we need to complete our task
+                if (!asyncTask.isCompleted()) {
+                    asyncTask.complete();
+                }
+            } else {
+                aContext.fail(send.cause());
             }
-
-            asyncTask.complete();
         });
     }
 

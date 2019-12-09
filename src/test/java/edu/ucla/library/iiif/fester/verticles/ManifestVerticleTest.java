@@ -52,7 +52,7 @@ public class ManifestVerticleTest {
      * @throws IOException If there is trouble starting the Vert.x instance
      */
     @Before
-    public void before(final TestContext aContext) throws IOException {
+    public void setUp(final TestContext aContext) throws IOException {
         final DeploymentOptions options = new DeploymentOptions();
         final JsonObject config = new JsonObject();
         final Async asyncTask = aContext.async();
@@ -83,7 +83,7 @@ public class ManifestVerticleTest {
      * @param aContext A testing context
      */
     @After
-    public void after(final TestContext aContext) {
+    public void tearDown(final TestContext aContext) {
         myVertx.close(aContext.asyncAssertSuccess());
     }
 

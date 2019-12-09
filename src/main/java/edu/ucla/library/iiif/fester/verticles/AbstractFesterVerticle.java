@@ -8,7 +8,6 @@ import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
@@ -20,9 +19,8 @@ public abstract class AbstractFesterVerticle extends AbstractVerticle {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFesterVerticle.class, Constants.MESSAGES);
 
-    @SuppressWarnings({ "deprecation" })
     @Override
-    public void start(final Future<Void> aFuture) throws Exception {
+    public void start() throws Exception {
         LOGGER.debug(MessageCodes.MFS_110, getClass().getName(), deploymentID());
 
         // Register our verticle name with its deployment ID.
@@ -35,15 +33,11 @@ public abstract class AbstractFesterVerticle extends AbstractVerticle {
         } else {
             verticleMap.put(verticleName, deploymentID());
         }
-
-        aFuture.complete();
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public void stop(final Future<Void> aFuture) {
+    public void stop() {
         LOGGER.debug(MessageCodes.MFS_100, getClass().getName(), deploymentID());
-        aFuture.complete();
     }
 
     protected MessageConsumer<JsonObject> getJsonConsumer() {
