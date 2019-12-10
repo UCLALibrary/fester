@@ -21,6 +21,59 @@ public class CsvHeaders {
     private int myItemSequence;
 
     /**
+     * Create a new CSV headers object.
+     *
+     * @param aRow CSV header data
+     * @throws CsvParsingException If there is trouble parsing the headers
+     */
+    public CsvHeaders(final String[] aRow) throws CsvParsingException {
+        for (int index = 0; index < aRow.length; index++) {
+            switch (aRow[index]) {
+                case CSV.TITLE:
+                    setTitleIndex(index);
+                    break;
+                case CSV.PROJECT_NAME:
+                    setProjectNameIndex(index);
+                    break;
+                case CSV.ITEM_ARK:
+                    setItemArkIndex(index);
+                    break;
+                case CSV.PARENT_ARK:
+                    setParentArkIndex(index);
+                    break;
+                case CSV.OBJECT_TYPE:
+                    setObjectTypeIndex(index);
+                    break;
+                case CSV.FILE_NAME:
+                    setFileNameIndex(index);
+                    break;
+                case CSV.ITEM_SEQ:
+                    setItemSequence(index);
+                    break;
+                default:
+                    // Our default is to ignore things we don't care about
+            }
+        }
+
+        // Check to make sure we have the data components that we need to build a manifest
+        if (!hasItemArkIndex()) {
+            throw new CsvParsingException(MessageCodes.MFS_113);
+        } else if (!hasParentArkIndex()) {
+            throw new CsvParsingException(MessageCodes.MFS_114);
+        } else if (!hasProjectNameIndex()) {
+            throw new CsvParsingException(MessageCodes.MFS_105);
+        } else if (!hasObjectTypeIndex()) {
+            throw new CsvParsingException(MessageCodes.MFS_115);
+        } else if (!hasTitleIndex()) {
+            throw new CsvParsingException(MessageCodes.MFS_111);
+        } else if (!hasFileNameIndex()) {
+            throw new CsvParsingException(MessageCodes.MFS_112);
+        } else if (!hasItemSequence()) {
+            throw new CsvParsingException(MessageCodes.MFS_123);
+        }
+    }
+
+    /**
      * Gets the Item ARK index position.
      *
      * @return The Item ARK index position

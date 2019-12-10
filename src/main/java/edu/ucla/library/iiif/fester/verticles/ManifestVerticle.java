@@ -30,7 +30,6 @@ import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 import info.freelibrary.util.StringUtils;
 
-import edu.ucla.library.iiif.fester.CSV;
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.CsvHeaders;
@@ -41,15 +40,13 @@ import edu.ucla.library.iiif.fester.utils.IDUtils;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 
 /**
  * A creator of manifests (collection and work).
  */
 public class ManifestVerticle extends AbstractFesterVerticle {
-
-    // Swap this out with a getName on the class once the class is merged in to the code base
-    private static final String UPLOADER = "edu.ucla.library.iiif.fester.verticles.S3BucketVerticle";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ManifestVerticle.class, Constants.MESSAGES);
 
@@ -86,16 +83,16 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                 final Map<String, List<String[]>> pages = new HashMap<>();
                 final Map<String, List<Collection.Manifest>> works = new HashMap<>();
                 final List<String[]> worksData = new ArrayList<>();
-                final CsvHeaders csvHeaders = new CsvHeaders();
 
-                boolean headersIndexed = false;
+                CsvHeaders csvHeaders = null;
                 Collection collection = null;
 
                 // Read through the CSV data and create store info about collections, works, and pages
                 for (final String[] row : csvReader.readAll()) {
-                    if (!headersIndexed) {
-                        // We will throw a CsvParsingException here if one of our headers isn't found in the CSV
-                        headersIndexed = indexHeaders(row, csvHeaders);
+                    // The first row should be our headers row
+                    if (csvHeaders == null) {
+                        // Throw a CsvParsingException here if one of our 'required' headers is missing
+                        csvHeaders = new CsvHeaders(row);
                     } else {
                         final int objectTypeIndex = csvHeaders.getObjectTypeIndex();
 
@@ -104,78 +101,17 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                         } else if (WORK.equals(row[objectTypeIndex])) {
                             addWork(row, csvHeaders, works, worksData);
                         } else if (PAGE.equals(row[objectTypeIndex])) {
-                            final String parentID = StringUtils.trimToNull(row[csvHeaders.getParentArkIndex()]);
-
-                            if (parentID != null) {
-                                if (pages.containsKey(parentID)) {
-                                    pages.get(parentID).add(row);
-                                } else {
-                                    final List<String[]> page = new ArrayList<>();
-
-                                    page.add(row);
-                                    pages.put(parentID, page);
-                                }
-                            } else {
-                                throw new CsvParsingException(MessageCodes.MFS_121);
-                            }
+                            addPage(row, csvHeaders, pages);
                         }
                     }
                 }
 
-                // If we have a collection record in the CSV we're processing
+                // If we have a collection record in the CSV we're processing, create a collection manifest
                 if (collection != null) {
-                    final List<Collection.Manifest> manifestList = collection.getManifests();
-                    final String collectionID = IDUtils.decode(collection.getID(), Constants.COLLECTIONS_PATH);
-                    final List<Collection.Manifest> manifests = works.get(collectionID);
-                    final Promise<Void> promise = Promise.promise();
-
-                    // If we have work manifests, add them to the collection manifest
-                    if (manifests != null) {
-                        manifestList.addAll(manifests);
-                    } else {
-                        LOGGER.warn(MessageCodes.MFS_118, collectionID);
-                    }
-
-                    // We're going to send to the S3 verticle
-                    LOGGER.debug(MessageCodes.MFS_122, filePath, collection.toJSON());
-
-                    // Create a handler to handle the result of that
-                    promise.future().setHandler(handler -> {
-                        if (handler.succeeded()) {
-                            final Promise<Void> workManifestsPromise = Promise.promise();
-
-                            workManifestsPromise.future().setHandler(workManifestsHandler -> {
-                                if (workManifestsHandler.succeeded()) {
-                                    message.reply(LOGGER.getMessage(MessageCodes.MFS_126, collectionID));
-                                } else {
-                                    final int failCode = CodeUtils.getInt(MessageCodes.MFS_127);
-                                    final String failMessage = handler.cause().getMessage();
-
-                                    LOGGER.error(MessageCodes.MFS_127, failMessage);
-                                    message.fail(failCode, failMessage);
-                                }
-                            });
-
-                            buildWorkManifests(csvHeaders, worksData, pages, workManifestsPromise);
-                        } else {
-                            final int failCode = CodeUtils.getInt(MessageCodes.MFS_125);
-                            final String failMessage = handler.cause().getMessage();
-
-                            LOGGER.error(MessageCodes.MFS_125, failMessage);
-                            message.fail(failCode, failMessage);
-                        }
-                    });
-
-                    // Send collection manifest to S3
-                    sendMessage(collection.toJSON(), UPLOADER, send -> {
-                        if (send.succeeded()) {
-                            promise.complete();
-                        } else {
-                            promise.fail(send.cause());
-                        }
-                    });
+                    LOGGER.debug(MessageCodes.MFS_122, filePath, collection);
+                    buildCollectionManifest(collection, works, worksData, pages, csvHeaders, message);
                 } else { // We don't have a collection manifest, just works and/or pages
-
+                    // TODO
                     message.reply("No collection record");
                 }
             } catch (final IOException details) {
@@ -193,15 +129,92 @@ public class ManifestVerticle extends AbstractFesterVerticle {
         aPromise.complete();
     }
 
-    private void buildWorkManifests(final CsvHeaders aHeaders, final List<String[]> aWorksList,
+    /**
+     * Builds the collection manifest.
+     *
+     * @param aCollection A collection
+     * @param aWorksMap A map of works
+     * @param aWorksDataList Metadata about the works in our map
+     * @param aPageMap A map of pages
+     * @param aHeaders CSV header information
+     * @param aMessage The verticle response message
+     */
+    private void buildCollectionManifest(final Collection aCollection,
+            final Map<String, List<Collection.Manifest>> aWorksMap, final List<String[]> aWorksDataList,
+            final Map<String, List<String[]>> aPageMap, final CsvHeaders aHeaders,
+            final Message<JsonObject> aMessage) {
+        final List<Collection.Manifest> manifestList = aCollection.getManifests(); // Empty list
+        final String collectionID = IDUtils.decode(aCollection.getID(), Constants.COLLECTIONS_PATH);
+        final List<Collection.Manifest> manifests = aWorksMap.get(collectionID);
+        final Promise<Void> promise = Promise.promise();
+        final CsvHeaders finalizedCsvHeaders = aHeaders;
+
+        // If we have work manifests, add them to the collection manifest
+        if (manifests != null) {
+            manifestList.addAll(manifests);
+        } else {
+            LOGGER.warn(MessageCodes.MFS_118, collectionID);
+        }
+
+        // Create a handler to handle the result of that
+        promise.future().setHandler(handler -> {
+            if (handler.succeeded()) {
+                final Promise<Void> workManifestsPromise = Promise.promise();
+
+                // Create a handler for building the work manifests
+                workManifestsPromise.future().setHandler(workManifestsHandler -> {
+                    if (workManifestsHandler.succeeded()) {
+                        // On success, let the class that called us know we've succeeded
+                        aMessage.reply(LOGGER.getMessage(MessageCodes.MFS_126, collectionID));
+                    } else {
+                        final int failCode = CodeUtils.getInt(MessageCodes.MFS_127);
+                        final String failMessage = handler.cause().getMessage();
+
+                        LOGGER.error(handler.cause(), MessageCodes.MFS_127, failMessage);
+                        aMessage.fail(failCode, failMessage);
+                    }
+                });
+
+                // Build the related work manifests, passing a promise to complete when done
+                queueWorkManifests(finalizedCsvHeaders, aWorksDataList, aPageMap, workManifestsPromise);
+            } else {
+                final int failCode = CodeUtils.getInt(MessageCodes.MFS_125);
+                final String failMessage = handler.cause().getMessage();
+
+                LOGGER.error(MessageCodes.MFS_125, failMessage);
+                aMessage.fail(failCode, failMessage);
+            }
+        });
+
+        // Send collection manifest to S3
+        sendMessage(aCollection.toJSON(), S3BucketVerticle.class.getName(), send -> {
+            if (send.succeeded()) {
+                promise.complete();
+            } else {
+                promise.fail(send.cause());
+            }
+        });
+    }
+
+    /**
+     * Queue up manifest creation for all the works.
+     *
+     * @param aHeaders A CSV headers object
+     * @param aWorksList A list of work metadata
+     * @param aPagesMap A list of page metadata
+     * @param aPromise The promise we'll get the work manifests created
+     */
+    private void queueWorkManifests(final CsvHeaders aHeaders, final List<String[]> aWorksList,
             final Map<String, List<String[]>> aPagesMap, final Promise aPromise) {
         final Iterator<String[]> iterator = aWorksList.iterator();
         final List<Future> futures = new ArrayList<>();
 
+        // Request each work manifest be created
         while (iterator.hasNext()) {
             futures.add(buildWorkManifest(aHeaders, iterator.next(), aPagesMap, Promise.promise()));
         }
 
+        // Keep track of our progress and fail our promise if we don't succeed
         CompositeFuture.all(futures).setHandler(handler -> {
             if (handler.succeeded()) {
                 aPromise.complete();
@@ -211,6 +224,15 @@ public class ManifestVerticle extends AbstractFesterVerticle {
         });
     }
 
+    /**
+     * Build an individual work manifest.
+     *
+     * @param aHeaders The CSV headers
+     * @param aWork A metadata array representing the work
+     * @param aPages A list of pages
+     * @param aPromise A promise we'll create the work manifest
+     * @return The future result of our promise
+     */
     private Future buildWorkManifest(final CsvHeaders aHeaders, final String[] aWork,
             final Map<String, List<String[]>> aPages, final Promise<Void> aPromise) {
         final String workID = aWork[aHeaders.getItemArkIndex()];
@@ -236,7 +258,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                 final String encodedPageID = URLEncoder.encode(pageID, StandardCharsets.UTF_8);
                 final String pageLabel = columns[aHeaders.getTitleIndex()];
                 final String canvasID = StringUtils.format(CANVAS_URI, myHost, urlEncodedWorkID, idPart);
-                final Canvas canvas = new Canvas(canvasID, pageLabel, 640, 480);
+                final Canvas canvas = new Canvas(canvasID, pageLabel, 640, 480); // Copying Samvera's canvas size
                 final String pageURI = StringUtils.format(IMAGE_URI, myImageHost, encodedPageID);
                 final ImageContent imageContent = new ImageContent(pageURI, canvas);
 
@@ -245,7 +267,8 @@ public class ManifestVerticle extends AbstractFesterVerticle {
             }
         }
 
-        sendMessage(manifest.toJSON(), UPLOADER, send -> {
+        // Send the work manifest to S3
+        sendMessage(manifest.toJSON(), S3BucketVerticle.class.getName(), send -> {
             if (send.succeeded()) {
                 aPromise.complete();
             } else {
@@ -253,6 +276,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
             }
         });
 
+        // Return our promise's future result
         return aPromise.future();
     }
 
@@ -298,6 +322,32 @@ public class ManifestVerticle extends AbstractFesterVerticle {
     }
 
     /**
+     * Add a page's metadata to our pages map for later processing.
+     *
+     * @param aRow A metadata row
+     * @param aHeaders A CSV headers object
+     * @param aPageMap A map of pages
+     * @throws CsvParsingException
+     */
+    private void addPage(final String[] aRow, final CsvHeaders aHeaders, final Map<String, List<String[]>> aPageMap)
+            throws CsvParsingException {
+        final String parentID = StringUtils.trimToNull(aRow[aHeaders.getParentArkIndex()]);
+
+        if (parentID != null) {
+            if (aPageMap.containsKey(parentID)) {
+                aPageMap.get(parentID).add(aRow);
+            } else {
+                final List<String[]> page = new ArrayList<>();
+
+                page.add(aRow);
+                aPageMap.put(parentID, page);
+            }
+        } else {
+            throw new CsvParsingException(MessageCodes.MFS_121);
+        }
+    }
+
+    /**
      * Get the collection object from the collection row.
      *
      * @param aRow A row of collection metadata
@@ -318,61 +368,5 @@ public class ManifestVerticle extends AbstractFesterVerticle {
         } else {
             throw new CsvParsingException(MessageCodes.MFS_106);
         }
-    }
-
-    /**
-     * Index the header positions so they can be used to extract data.
-     *
-     * @param aRow A headers' row
-     * @param aHeaders A CSV headers object
-     * @return
-     */
-    private boolean indexHeaders(final String[] aRow, final CsvHeaders aHeaders) throws CsvParsingException {
-        for (int index = 0; index < aRow.length; index++) {
-            switch (aRow[index]) {
-                case CSV.TITLE:
-                    aHeaders.setTitleIndex(index);
-                    break;
-                case CSV.PROJECT_NAME:
-                    aHeaders.setProjectNameIndex(index);
-                    break;
-                case CSV.ITEM_ARK:
-                    aHeaders.setItemArkIndex(index);
-                    break;
-                case CSV.PARENT_ARK:
-                    aHeaders.setParentArkIndex(index);
-                    break;
-                case CSV.OBJECT_TYPE:
-                    aHeaders.setObjectTypeIndex(index);
-                    break;
-                case CSV.FILE_NAME:
-                    aHeaders.setFileNameIndex(index);
-                    break;
-                case CSV.ITEM_SEQ:
-                    aHeaders.setItemSequence(index);
-                    break;
-                default:
-                    // Our default is to ignore things we don't care about
-            }
-        }
-
-        // Check to make sure we have the data components that we need to build a manifest
-        if (!aHeaders.hasItemArkIndex()) {
-            throw new CsvParsingException(MessageCodes.MFS_113);
-        } else if (!aHeaders.hasParentArkIndex()) {
-            throw new CsvParsingException(MessageCodes.MFS_114);
-        } else if (!aHeaders.hasProjectNameIndex()) {
-            throw new CsvParsingException(MessageCodes.MFS_105);
-        } else if (!aHeaders.hasObjectTypeIndex()) {
-            throw new CsvParsingException(MessageCodes.MFS_115);
-        } else if (!aHeaders.hasTitleIndex()) {
-            throw new CsvParsingException(MessageCodes.MFS_111);
-        } else if (!aHeaders.hasFileNameIndex()) {
-            throw new CsvParsingException(MessageCodes.MFS_112);
-        } else if (!aHeaders.hasItemSequence()) {
-            throw new CsvParsingException(MessageCodes.MFS_123);
-        }
-
-        return true;
     }
 }

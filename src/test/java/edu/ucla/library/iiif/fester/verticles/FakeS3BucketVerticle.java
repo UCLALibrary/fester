@@ -21,9 +21,8 @@ public class FakeS3BucketVerticle extends AbstractFesterVerticle {
     public void start(final Promise<Void> aPromise) throws Exception {
         LOGGER.debug(MessageCodes.MFS_110, getClass().getName(), deploymentID());
 
-        vertx.eventBus().consumer("edu.ucla.library.iiif.fester.verticles.S3BucketVerticle").handler(message -> {
-            // All messages passed to the S3BucketVerticle _should_ be JsonObjects
-            LOGGER.debug(MessageCodes.MFS_124, ((JsonObject) message.body()).encode());
+        vertx.eventBus().<JsonObject>consumer(S3BucketVerticle.class.getName()).handler(message -> {
+            LOGGER.debug(MessageCodes.MFS_124, message.body().encodePrettily());
             message.reply(Op.SUCCESS);
         });
 
