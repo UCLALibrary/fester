@@ -86,20 +86,19 @@ public class PostCsvHandlerTest extends AbstractManifestHandlerTest {
 
         form.textFileUpload(Constants.CSV_FILE, fileName, filePath, Constants.CSV_MEDIA_TYPE);
 
-        postRequest.sendMultipartForm(form, sendMultipartForm -> {
-            if (sendMultipartForm.succeeded()) {
-                final HttpResponse<Buffer> postResponse = sendMultipartForm.result();
+        postRequest.sendMultipartForm(form, postHandler -> {
+            if (postHandler.succeeded()) {
+                final HttpResponse<Buffer> postResponse = postHandler.result();
                 final String postStatusMessage = postResponse.statusMessage();
                 final int postStatusCode = postResponse.statusCode();
 
-                // If batch job submission successful, submit a batch job update and check the response code
                 if (postStatusCode == HTTP.CREATED) {
                     asyncTask.complete();
                 } else {
                     aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, postStatusCode, postStatusMessage));
                 }
             } else {
-                final Throwable exception = sendMultipartForm.cause();
+                final Throwable exception = postHandler.cause();
 
                 LOGGER.error(exception, exception.getMessage());
                 aContext.fail(exception);

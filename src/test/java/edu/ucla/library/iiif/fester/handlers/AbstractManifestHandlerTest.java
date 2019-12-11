@@ -44,6 +44,8 @@ abstract class AbstractManifestHandlerTest {
 
     private static final String MANIFEST_FILE_NAME = "testManifest.json";
 
+    private static final String IIIF_URL = "http://0.0.0.0";
+
     protected static final File MANIFEST_FILE = new File("src/test/resources", MANIFEST_FILE_NAME);
 
     protected Vertx myVertx;
@@ -62,7 +64,7 @@ abstract class AbstractManifestHandlerTest {
      * @param aContext A testing context
      */
     @Before
-    @SuppressWarnings({ "rawtypes", "deprecation" })
+    @SuppressWarnings({ "deprecation" })
     public void setUp(final TestContext aContext) throws IOException {
         final DeploymentOptions options = new DeploymentOptions();
         final ServerSocket socket = new ServerSocket(0);
@@ -73,7 +75,7 @@ abstract class AbstractManifestHandlerTest {
         LOGGER.debug(MessageCodes.MFS_002, port);
 
         aContext.put(Config.HTTP_PORT, port);
-        options.setConfig(new JsonObject().put(Config.HTTP_PORT, port));
+        options.setConfig(new JsonObject().put(Config.HTTP_PORT, port).put(Config.IIIF_BASE_URL, IIIF_URL));
         socket.close();
 
         myJsonlessManifestID = UUID.randomUUID().toString();
@@ -157,7 +159,7 @@ abstract class AbstractManifestHandlerTest {
      * @param aFuture A future to capture when the initialization is completed
      * @throws IOException If there is trouble reading from the configuration file
      */
-    @SuppressWarnings({ "rawtypes", "deprecation" })
+    @SuppressWarnings({ "deprecation" })
     private void initialize(final Future aFuture) throws IOException {
         final ConfigRetriever configRetriever;
 

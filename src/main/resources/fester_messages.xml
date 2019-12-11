@@ -109,8 +109,9 @@
   <entry key="MFS-124">FakeS3BucketVerticle received a storage request: {}</entry>
   <entry key="MFS-125">Failed to upload collection manifest: {}</entry>
   <entry key="MFS-126">Manifest successfully sent to S3 verticle for upload: {}</entry>
-  <entry key="MFS-127">Failed to upload all the work manifests for collection: {}</entry>
+  <entry key="MFS-127"></entry>
   <entry key="MFS-128">Extracted unique part of manifest ID: {}</entry>
   <entry key="MFS-129">Checking S3 collection object: {}</entry>
   <entry key="MFS-130">Reset collection manifest key to: {}</entry>
+  <entry key="MFS-131">Failed to upload all the work manifests for collection: {} [{}]</entry>
 </properties>

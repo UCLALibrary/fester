@@ -24,8 +24,10 @@ import com.opencsv.exceptions.CsvException;
 import info.freelibrary.iiif.presentation.Canvas;
 import info.freelibrary.iiif.presentation.Collection;
 import info.freelibrary.iiif.presentation.ImageContent;
+import info.freelibrary.iiif.presentation.ImageResource;
 import info.freelibrary.iiif.presentation.Manifest;
 import info.freelibrary.iiif.presentation.Sequence;
+import info.freelibrary.iiif.presentation.services.ImageInfoService;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 import info.freelibrary.util.StringUtils;
@@ -34,6 +36,7 @@ import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.CsvHeaders;
 import edu.ucla.library.iiif.fester.CsvParsingException;
+import edu.ucla.library.iiif.fester.ImageInfo;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.utils.CodeUtils;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
@@ -54,7 +57,11 @@ public class ManifestVerticle extends AbstractFesterVerticle {
 
     private static final String CANVAS_URI = "{}/{}/manifest/canvas/{}";
 
+    private static final String ANNOTATION_URI = "{}/{}/annotation/{}";
+
     private static final String IMAGE_URI = "{}/{}";
+
+    private static final String DEFAULT_IMAGE_URI = "/full/600,/0/default.jpg";
 
     private static final String MANIFEST_URI = "{}/{}/manifest";
 
@@ -167,11 +174,13 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                         // On success, let the class that called us know we've succeeded
                         aMessage.reply(LOGGER.getMessage(MessageCodes.MFS_126, collectionID));
                     } else {
-                        final int failCode = CodeUtils.getInt(MessageCodes.MFS_127);
-                        final String failMessage = handler.cause().getMessage();
+                        final int failCode = CodeUtils.getInt(MessageCodes.MFS_131);
+                        final Throwable cause = workManifestsHandler.cause();
+                        final String causeMessage = cause.getMessage();
+                        final String message = LOGGER.getMessage(MessageCodes.MFS_131, collectionID, causeMessage);
 
-                        LOGGER.error(handler.cause(), MessageCodes.MFS_127, failMessage);
-                        aMessage.fail(failCode, failMessage);
+                        LOGGER.error(cause, message);
+                        aMessage.fail(failCode, message);
                     }
                 });
 
@@ -243,38 +252,46 @@ public class ManifestVerticle extends AbstractFesterVerticle {
         final String sequenceID = StringUtils.format(SEQUENCE_URI, myHost, urlEncodedWorkID);
         final Sequence sequence = new Sequence().setID(sequenceID);
 
-        if (aPages.containsKey(workID)) {
-            final List<String[]> pageList = aPages.get(workID);
-            final Iterator<String[]> iterator;
+        try {
+            if (aPages.containsKey(workID)) {
+                final List<String[]> pageList = aPages.get(workID);
+                final Iterator<String[]> iterator;
 
-            manifest.addSequence(sequence);
-            pageList.sort(new ItemSequenceComparator(aHeaders.getItemSequence()));
-            iterator = pageList.iterator();
+                manifest.addSequence(sequence);
+                pageList.sort(new ItemSequenceComparator(aHeaders.getItemSequence()));
+                iterator = pageList.iterator();
 
-            while (iterator.hasNext()) {
-                final String[] columns = iterator.next();
-                final String pageID = columns[aHeaders.getItemArkIndex()];
-                final String idPart = IDUtils.getLastPart(pageID); // We're just copying Samvera here
-                final String encodedPageID = URLEncoder.encode(pageID, StandardCharsets.UTF_8);
-                final String pageLabel = columns[aHeaders.getTitleIndex()];
-                final String canvasID = StringUtils.format(CANVAS_URI, myHost, urlEncodedWorkID, idPart);
-                final Canvas canvas = new Canvas(canvasID, pageLabel, 640, 480); // Copying Samvera's canvas size
-                final String pageURI = StringUtils.format(IMAGE_URI, myImageHost, encodedPageID);
-                final ImageContent imageContent = new ImageContent(pageURI, canvas);
+                while (iterator.hasNext()) {
+                    final String[] columns = iterator.next();
+                    final String pageID = columns[aHeaders.getItemArkIndex()];
+                    final String idPart = IDUtils.getLastPart(pageID); // We're just copying Samvera here
+                    final String encodedPageID = URLEncoder.encode(pageID, StandardCharsets.UTF_8);
+                    final String pageLabel = columns[aHeaders.getTitleIndex()];
+                    final String canvasID = StringUtils.format(CANVAS_URI, myHost, urlEncodedWorkID, idPart);
+                    final String pageURI = StringUtils.format(IMAGE_URI, myImageHost, encodedPageID);
+                    final ImageInfo info = new ImageInfo(pageURI); // May be room for improvement here
+                    final Canvas canvas = new Canvas(canvasID, pageLabel, info.getWidth(), info.getHeight());
+                    final String annotationURI = StringUtils.format(ANNOTATION_URI, myHost, urlEncodedWorkID, idPart);
+                    final ImageContent imageContent = new ImageContent(annotationURI, canvas);
+                    final String resourceURI = pageURI + DEFAULT_IMAGE_URI; // Copying Samvera's default image link
+                    final ImageResource imageResource = new ImageResource(resourceURI, new ImageInfoService(pageURI));
 
-                canvas.addImageContent(imageContent);
-                sequence.addCanvas(canvas);
+                    imageContent.addResource(imageResource);
+                    canvas.addImageContent(imageContent);
+                    sequence.addCanvas(canvas);
+                }
             }
+
+            sendMessage(manifest.toJSON(), S3BucketVerticle.class.getName(), send -> {
+                if (send.succeeded()) {
+                    aPromise.complete();
+                } else {
+                    aPromise.fail(send.cause());
+                }
+            });
+        } catch (final IOException details) {
+            aPromise.fail(details);
         }
-
-        // Send the work manifest to S3
-        sendMessage(manifest.toJSON(), S3BucketVerticle.class.getName(), send -> {
-            if (send.succeeded()) {
-                aPromise.complete();
-            } else {
-                aPromise.fail(send.cause());
-            }
-        });
 
         // Return our promise's future result
         return aPromise.future();

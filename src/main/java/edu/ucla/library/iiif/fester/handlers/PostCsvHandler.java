@@ -94,7 +94,7 @@ public class PostCsvHandler extends AbstractManifestHandler {
             message.put(Constants.FESTER_HOST, protocol + request.host());
 
             // Send a message to the manifest generator
-            sendMessage(ManifestVerticle.class.getName(), message, send -> {
+            sendMessage(ManifestVerticle.class.getName(), message, Integer.MAX_VALUE, send -> {
                 if (send.succeeded()) {
                     final String responseMessage = LOGGER.getMessage(MessageCodes.MFS_038, fileName, filePath);
 

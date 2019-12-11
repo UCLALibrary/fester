@@ -118,13 +118,15 @@ public class MainVerticle extends AbstractVerticle {
     }
 
     // Start verticles -- this is where to add any new verticles that we create and want to load
-    @SuppressWarnings({ "rawtypes", "deprecation" })
+    @SuppressWarnings({ "deprecation" })
     private void startVerticles(final JsonObject aConfig, final Future<Void> aFuture) {
         final DeploymentOptions uploaderOptions = new DeploymentOptions();
         final DeploymentOptions manifestorOptions = new DeploymentOptions();
         final List<Future> futures = new ArrayList<>();
 
         uploaderOptions.setConfig(aConfig);
+        manifestorOptions.setWorker(true).setWorkerPoolName(ManifestVerticle.class.getSimpleName());
+        manifestorOptions.setWorkerPoolSize(5).setConfig(aConfig);
 
         // Start up any necessary Fester verticles
         futures.add(deployVerticle(ManifestVerticle.class.getName(), manifestorOptions, Future.future()));
