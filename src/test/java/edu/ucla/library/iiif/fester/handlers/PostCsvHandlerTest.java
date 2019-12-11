@@ -16,6 +16,7 @@ import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.file.FileSystem;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.web.client.HttpRequest;
@@ -67,6 +68,8 @@ public class PostCsvHandlerTest extends AbstractManifestHandlerTest {
         final WebClient webClient = WebClient.create(myVertx);
         final HttpRequest<Buffer> postRequest = webClient.post(port, Constants.UNSPECIFIED_HOST, ENDPOINT);
         final MultipartForm form = MultipartForm.create();
+        final FileSystem fileSystem = myVertx.fileSystem();
+        final Buffer expectedCSV = fileSystem.readFileBlocking(CSV_FILE.getAbsolutePath());
         final Async asyncTask = aContext.async();
 
         form.textFileUpload("csv-file", CSV_FILE.getName(), CSV_FILE.getAbsolutePath(), Constants.CSV_MEDIA_TYPE);
@@ -79,7 +82,18 @@ public class PostCsvHandlerTest extends AbstractManifestHandlerTest {
 
                 // If batch job submission successful, submit a batch job update and check the response code
                 if (postStatusCode == HTTP.CREATED) {
-                    asyncTask.complete();
+                    final Buffer actualCSV = postResponse.body();
+                    final String contentType = postResponse.getHeader(Constants.CONTENT_TYPE);
+
+                    // Check that what we get back is the same as what we sent
+                    aContext.assertEquals(expectedCSV, actualCSV);
+
+                    // Check that what we get back has the correct media type
+                    aContext.assertEquals(Constants.CSV_MEDIA_TYPE, contentType);
+
+                    if (!asyncTask.isCompleted()) {
+                        asyncTask.complete();
+                    }
                 } else {
                     aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, postStatusCode, postStatusMessage));
                 }

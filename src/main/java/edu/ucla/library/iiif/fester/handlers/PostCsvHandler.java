@@ -16,6 +16,7 @@ import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.verticles.ManifestVerticle;
 import io.vertx.core.Vertx;
+import io.vertx.core.file.FileSystem;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
@@ -31,8 +32,6 @@ public class PostCsvHandler extends AbstractManifestHandler {
 
     private final String myExceptionPage;
 
-    private final String mySuccessPage;
-
     /**
      * Creates a handler to handle POSTs to generate collection manifests.
      *
@@ -46,8 +45,9 @@ public class PostCsvHandler extends AbstractManifestHandler {
         final StringBuilder templateBuilder = new StringBuilder();
 
         // Load a template used for returning the error page
-        InputStream templateStream = getClass().getResourceAsStream("/webroot/error.html");
-        BufferedReader templateReader = new BufferedReader(new InputStreamReader(templateStream));
+        final InputStream templateStream = getClass().getResourceAsStream("/webroot/error.html");
+        final BufferedReader templateReader = new BufferedReader(new InputStreamReader(templateStream));
+
         String line;
 
         while ((line = templateReader.readLine()) != null) {
@@ -56,18 +56,6 @@ public class PostCsvHandler extends AbstractManifestHandler {
 
         templateReader.close();
         myExceptionPage = templateBuilder.toString();
-
-        // Load a template used for returning the success page
-        templateBuilder.delete(0, templateBuilder.length());
-        templateStream = getClass().getResourceAsStream("/webroot/success.html");
-        templateReader = new BufferedReader(new InputStreamReader(templateStream));
-
-        while ((line = templateReader.readLine()) != null) {
-            templateBuilder.append(line);
-        }
-
-        templateReader.close();
-        mySuccessPage = templateBuilder.toString();
     }
 
     @Override
@@ -98,26 +86,41 @@ public class PostCsvHandler extends AbstractManifestHandler {
             sendMessage(ManifestVerticle.class.getName(), message, send -> {
                 if (send.succeeded()) {
                     final String responseMessage = LOGGER.getMessage(MessageCodes.MFS_038, fileName, filePath);
+                    final FileSystem fileSystem = myVertx.fileSystem();
 
-                    LOGGER.debug(responseMessage);
-
-                    response.setStatusCode(HTTP.CREATED);
-                    response.setStatusMessage(responseMessage);
-                    response.putHeader(Constants.CONTENT_TYPE, Constants.HTML_MEDIA_TYPE);
-                    response.end(StringUtils.format(mySuccessPage, responseMessage));
+                    // For a first pass, we just return the same CSV that was sent to us.
+                    fileSystem.readFile(filePath, read -> {
+                        if (read.succeeded()) {
+                            response.setStatusCode(HTTP.CREATED);
+                            response.setStatusMessage(responseMessage);
+                            response.putHeader(Constants.CONTENT_TYPE, Constants.CSV_MEDIA_TYPE);
+                            response.end(read.result());
+                        } else {
+                            returnError(response, read.cause());
+                        }
+                    });
                 } else {
-                    final String exceptionMessage = send.cause().getMessage();
-                    final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_103, exceptionMessage);
-
-                    LOGGER.error(errorMessage);
-
-                    response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
-                    response.setStatusMessage(exceptionMessage);
-                    response.putHeader(Constants.CONTENT_TYPE, Constants.HTML_MEDIA_TYPE);
-                    response.end(StringUtils.format(myExceptionPage, errorMessage));
+                    returnError(response, send.cause());
                 }
             });
         }
     }
 
+    /**
+     * Return an error page (and response code) to the requester.
+     *
+     * @param aResponse A HTTP response
+     * @param aThrowable A throwable exception
+     */
+    private void returnError(final HttpServerResponse aResponse, final Throwable aThrowable) {
+        final String exceptionMessage = aThrowable.getMessage();
+        final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_103, exceptionMessage);
+
+        LOGGER.error(aThrowable, errorMessage);
+
+        aResponse.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
+        aResponse.setStatusMessage(exceptionMessage);
+        aResponse.putHeader(Constants.CONTENT_TYPE, Constants.HTML_MEDIA_TYPE);
+        aResponse.end(StringUtils.format(myExceptionPage, errorMessage));
+    }
 }
