@@ -82,6 +82,7 @@ public class MainVerticle extends AbstractVerticle {
                         try {
                             final int port = config.getInteger(Config.HTTP_PORT, DEFAULT_PORT);
                             final PostCsvHandler postCsvHandler = new PostCsvHandler(vertx, config);
+                            final StaticHandler staticHandler = StaticHandler.create().setWebRoot("webroot");
 
                             factory.addHandlerByOperationId(Op.POST_CSV, postCsvHandler);
 
@@ -89,7 +90,7 @@ public class MainVerticle extends AbstractVerticle {
                             router = factory.getRouter();
 
                             // Serve Fester documentation
-                            router.get("/docs/fester/*").handler(StaticHandler.create().setWebRoot("webroot"));
+                            router.get("/docs/fester*").handler(staticHandler.setIndexPage("index.html"));
 
                             // If an incoming request doesn't match one of our spec operations, it's treated as a 404;
                             // catch these generic 404s with the handler below and return more specific response codes
