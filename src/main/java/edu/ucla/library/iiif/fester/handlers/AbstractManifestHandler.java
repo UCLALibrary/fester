@@ -26,11 +26,11 @@ abstract class AbstractManifestHandler implements Handler<RoutingContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractManifestHandler.class, Constants.MESSAGES);
 
+    protected final Vertx myVertx;
+
     protected S3Client myS3Client;
 
     protected String myS3Bucket;
-
-    private final Vertx myVertx;
 
     /**
      * An abstract handler that initializes an S3 client.
