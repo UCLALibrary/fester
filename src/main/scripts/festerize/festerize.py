@@ -9,14 +9,14 @@ import os
 @click.option('--server', default='https://iiif.library.ucla.edu',
               help='URL the Fester service we are using. Default: https://iiif.library.ucla.edu')
 @click.option('--endpoint', default='/collections', help='Service endpoint to use. Default: /collections')
-@click.option('--out', type=click.Path, default='./output', help='Folder to store the results of festerizing. Default: ./output')
+@click.option('--out', default='./output', help='Folder to store the results of festerizing. Default: ./output')
 def cli(src, server, endpoint, out):
-    """This script uploads CSV files to the Fester service.
+    """FESTERIZE uploads CSV files to the UCLA Library Fester service.
     """
     request_url = server + endpoint
 
     # if the output folder does not exist, create it
-    if not out.exists:
+    if not os.path.exists(out):
         click.echo("Output directory (%s) not found, creating it." % (out))
         os.makedirs(out)
     else:
@@ -37,7 +37,11 @@ def cli(src, server, endpoint, out):
 
             if r.status_code == 201 :
                 click.echo("  SUCCESS! (status code %s)" %(r.status_code))
-
+                # For now, let's assume the response content is a binary file
+                # and also assume that this file is a CSV, we will save it
+                # in the out folder, with the same fn we sent
+                out_file = click.open_file("%s/%s" %(out, fn), "wb")
+                out_file.write(r.content)
             else:
                 click.echo("  ERROR! (status code %s)" %(r.status_code))
                 click.echo(r.text)
@@ -45,5 +49,3 @@ def cli(src, server, endpoint, out):
         # skip any files that do no have an extension of .csv
         else:
             click.echo("Skipping %s: not a CSV" % (fn))
-
-    # TODO: catch and do something with the CSV file that Fester returns to us (i.e. put it in the 'out' folder

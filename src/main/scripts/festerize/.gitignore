@@ -1,3 +1,8 @@
+# Fester-specific ignores
+output
+
+# Python-speficic ignores courtesy of GitHub
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
