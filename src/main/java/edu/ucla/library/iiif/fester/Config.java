@@ -20,6 +20,8 @@ public final class Config {
 
     public static final String S3_BUCKET = "fester.s3.bucket";
 
+    public static final String IIIF_BASE_URL = "iiif.base.url";
+
     /**
      * Private constructor for the Constants class.
      */

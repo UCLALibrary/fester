@@ -51,7 +51,7 @@ paths:
         'Item ARK', 'Parent ARK', 'Item Sequence', 'Object Type', and 'IIIF Access URL'. These are used to create the
         structure of the manifest. The location of the resulting collection manifest is returned in the 'Location'
         response header."
-      operationId: postCollection
+      operationId: postCSV
       requestBody:
         required: true
         content:

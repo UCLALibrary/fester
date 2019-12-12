@@ -15,6 +15,7 @@ import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -51,8 +52,8 @@ public class GetManifestHandlerTest extends AbstractManifestHandlerTest {
                     // Verify that the COR header is permissive
                     aContext.assertEquals(Constants.STAR, response.getHeader(Constants.CORS_HEADER));
 
-                    // Check that what we retrieve is the same as what we stored
-                    aContext.assertEquals(expectedManifest, foundManifest);
+                    // Verify that our retrieved JSON is as we expect it
+                    aContext.assertEquals(new JsonObject(expectedManifest), new JsonObject(foundManifest));
                     asyncTask.complete();
                 });
             } else {
@@ -85,7 +86,7 @@ public class GetManifestHandlerTest extends AbstractManifestHandlerTest {
                     final String foundManifest = body.toString(StandardCharsets.UTF_8);
 
                     // Check that what we retrieve is the same as what we stored
-                    aContext.assertEquals(expectedManifest, foundManifest);
+                    aContext.assertEquals(new JsonObject(expectedManifest), new JsonObject(foundManifest));
                     asyncTask.complete();
                 });
             } else {

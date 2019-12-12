@@ -1,5 +1,5 @@
 
-package edu.ucla.library.fester;
+package edu.ucla.library.iiif.fester.it;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +19,7 @@ import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
+import edu.ucla.library.iiif.fester.TestConstants;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.RequestOptions;
@@ -28,9 +29,8 @@ import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 
 /**
- * This test confirms that our entire manifest upload process works as expected. From the ticket that requested this
- * integration test (IIIF-350): Test should ensure: round trip: POST a doc and GET it back successfully. Then delete
- * it.
+ * This test confirms that our entire manifest upload process works as expected. We check that we can POST a manifest,
+ * GET it back successfully, and then DELETE it.
  */
 @RunWith(VertxUnitRunner.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -50,146 +50,159 @@ public class ManifestUploadIT {
 
     private static final String HELLO = "Hello";
 
-    private static Vertx vertx = Vertx.vertx();
-
     private static final String MANIFEST_ID = UUID.randomUUID().toString();
 
     private static final String MANIFEST_ID_WITH_EXT = MANIFEST_ID + ".json";
 
+    private static Vertx myVertx = Vertx.vertx();
+
     final String myManifestFilePath = MANIFEST_FILE.getAbsolutePath();
 
-    final Buffer myManifest = vertx.fileSystem().readFileBlocking(myManifestFilePath);
+    final Buffer myManifest = myVertx.fileSystem().readFileBlocking(myManifestFilePath);
 
     /**
-     * confirm that the service is up (should run first, thanks to the FixMethodOrder config above)
+     * Confirms the service is up (should run first, thanks to the FixMethodOrder config above).
+     *
+     * @param aContext A testing environment
      */
     @SuppressWarnings("deprecation")
     @Test
-    public final void TestAcheckThatServiceIsUp(final TestContext aContext) {
+    public final void test1_CheckThatServiceIsUp(final TestContext aContext) {
         final Async asyncTask = aContext.async();
-        // first, let's sanity-check our service status endpoint before we do anything real
-        vertx.createHttpClient().getNow(PORT, Constants.UNSPECIFIED_HOST, STATUS, response -> {
-            // validate the response
 
+        // First, let's sanity-check our service status endpoint before we do anything real
+        myVertx.createHttpClient().getNow(PORT, Constants.UNSPECIFIED_HOST, STATUS, response -> {
             final int statusCode = response.statusCode();
+
+            // Validate the response
             if (statusCode == HTTP.OK) {
                 response.bodyHandler(body -> {
                     aContext.assertEquals(body.getString(0, body.length()), HELLO);
                     LOGGER.info(MessageCodes.MFS_030);
                 });
-                asyncTask.complete();
+
+                if (!asyncTask.isCompleted()) {
+                    asyncTask.complete();
+                }
             } else {
                 aContext.fail(LOGGER.getMessage(MessageCodes.MFS_031));
             }
-
-        }); // end HttpClient.getNow
-    } // end method
+        });
+    }
 
     /**
-     * confirm that it's possible to PUT a manifest
+     * Confirms it's possible to PUT a manifest.
+     *
+     * @param aContext A testing environment
      */
     @SuppressWarnings("deprecation")
     @Test
-    public final void TestBcheckThatPUTmanifestWorks(final TestContext aContext) {
+    public final void test2_CheckThatPutManifestWorks(final TestContext aContext) {
         final Async asyncTask = aContext.async();
-
-        /************ PUT TEST ************************************************/
         final String myDotJsonPutManifestID = TestConstants.PUT_TEST_ID_PREFIX + MANIFEST_ID_WITH_EXT;
         final String testIDPath = StringUtils.format(MANIFEST_PATH, myDotJsonPutManifestID);
-        LOGGER.info(MessageCodes.MFS_016, testIDPath); // Test PUTing a test manifest to: {}
-        final Buffer myManifest = vertx.fileSystem().readFileBlocking(myManifestFilePath);
-        // set up our requestOpts for this PUT
+        final Buffer myManifest = myVertx.fileSystem().readFileBlocking(myManifestFilePath);
         final RequestOptions requestOpts = new RequestOptions();
+
         requestOpts.setPort(PORT).setHost(Constants.UNSPECIFIED_HOST).setURI(testIDPath);
         requestOpts.addHeader(Constants.CONTENT_TYPE, Constants.JSON_MEDIA_TYPE);
 
-        // PUT this Manifest
-        vertx.createHttpClient().put(requestOpts, response -> {
+        LOGGER.info(MessageCodes.MFS_016, testIDPath);
+
+        myVertx.createHttpClient().put(requestOpts, response -> {
             final int statusCode = response.statusCode();
+
             if (statusCode == HTTP.OK) {
                 asyncTask.complete();
             } else {
                 aContext.fail(LOGGER.getMessage(MessageCodes.MFS_032));
             }
-        }).end(myManifest); // end HttpClient.put
-    } // end method
+        }).end(myManifest);
+    }
 
     /**
-     * confirm that it's possible to GET a manifest
+     * Confirms it's possible to GET a manifest.
      *
-     * @throws IOException
+     * @param aContext A testing environment
+     * @throws IOException If there is trouble reading the manifest
      */
     @SuppressWarnings("deprecation")
     @Test
-    public final void TestCcheckThatGETmanifestWorks(final TestContext aContext) throws IOException {
+    public final void test3_CheckThatGetManifestWorks(final TestContext aContext) throws IOException {
         final Async asyncTask = aContext.async();
-        /************ GET TEST ************************************************/
         final String myDotJsonPutManifestID = TestConstants.PUT_TEST_ID_PREFIX + MANIFEST_ID_WITH_EXT;
         final String testIDPath = StringUtils.format(MANIFEST_PATH, myDotJsonPutManifestID);
         final String expectedManifest = StringUtils.read(MANIFEST_FILE);
 
-        LOGGER.info(MessageCodes.MFS_027, testIDPath); // Test GETing a test manifest from: {}
-        vertx.createHttpClient().getNow(PORT, Constants.UNSPECIFIED_HOST, testIDPath, response -> {
+        LOGGER.info(MessageCodes.MFS_027, testIDPath);
+
+        myVertx.createHttpClient().getNow(PORT, Constants.UNSPECIFIED_HOST, testIDPath, response -> {
             final int statusCode = response.statusCode();
+
             if (statusCode == HTTP.OK) {
-                // yep, we can GET a manifest, one last thing to check
                 response.bodyHandler(body -> {
                     final String foundManifest = body.toString(StandardCharsets.UTF_8);
+
                     // Check that what we retrieve is the same as what we stored
                     if (new JsonObject(expectedManifest).equals(new JsonObject(foundManifest))) {
                         asyncTask.complete();
                     } else {
                         aContext.fail(LOGGER.getMessage(MessageCodes.MFS_033));
                     }
-                }); // end bodyHandler
+                });
             } else {
                 aContext.fail(LOGGER.getMessage(MessageCodes.MFS_034));
-            } // end if
-
-        }); // end HttpClient.get
-    } // end method
+            }
+        });
+    }
 
     /**
-     * confirm that it's possible to DELETE a manifest
+     * Confirms it's possible to DELETE a manifest.
+     *
+     * @param aContext A testing environment
      */
     @SuppressWarnings("deprecation")
     @Test
-    public final void TestDcheckThatDELETEmanifestWorks(final TestContext aContext) {
+    public final void test4_CheckThatDeleteManifestWorks(final TestContext aContext) {
         final Async asyncTask = aContext.async();
-        /************ DELETE TEST *********************************************/
         final String myDotJsonPutManifestID = TestConstants.PUT_TEST_ID_PREFIX + MANIFEST_ID_WITH_EXT;
         final String testIDPath = StringUtils.format(MANIFEST_PATH, myDotJsonPutManifestID);
-        LOGGER.info(MessageCodes.MFS_028, testIDPath); // Test DELETing a test manifest at: {}
 
-        vertx.createHttpClient().delete(PORT, Constants.UNSPECIFIED_HOST, testIDPath, response -> {
+        LOGGER.info(MessageCodes.MFS_028, testIDPath);
+
+        myVertx.createHttpClient().delete(PORT, Constants.UNSPECIFIED_HOST, testIDPath, response -> {
             final int statusCode = response.statusCode();
+
             if (statusCode == HTTP.SUCCESS_NO_CONTENT) {
                 asyncTask.complete();
             } else {
                 aContext.fail(LOGGER.getMessage(MessageCodes.MFS_035));
-            } // end if/else
-        }).end(); // end HttpClient.delete
-    } // end method
+            }
+        }).end();
+    }
 
     /**
-     * confirm that our test manifest is no longer stored
+     * Confirms our test manifest is no longer stored.
+     *
+     * @param aContext A testing environment
      */
     @SuppressWarnings("deprecation")
     @Test
-    public final void TestEcheckThatOurManifestIsNotStored(final TestContext aContext) {
+    public final void test5_CheckThatOurManifestIsNotStored(final TestContext aContext) {
         final Async asyncTask = aContext.async();
-        /************ ANOTHER GET TEST, HOPE WE DON'T FIND IT AFTER A DELETE **/
         final String myDotJsonPutManifestID = TestConstants.PUT_TEST_ID_PREFIX + MANIFEST_ID_WITH_EXT;
         final String testIDPath = StringUtils.format(MANIFEST_PATH, myDotJsonPutManifestID);
-        LOGGER.info(MessageCodes.MFS_029, testIDPath); // Confirming test manifest has been deleted from: {}
-        vertx.createHttpClient().getNow(PORT, Constants.UNSPECIFIED_HOST, testIDPath, response -> {
+
+        LOGGER.info(MessageCodes.MFS_029, testIDPath);
+
+        myVertx.createHttpClient().getNow(PORT, Constants.UNSPECIFIED_HOST, testIDPath, response -> {
             final int statusCode = response.statusCode();
+
             if (statusCode == HTTP.OK) {
-                // aw man, this shouldn't be here still
                 aContext.fail(LOGGER.getMessage(MessageCodes.MFS_036));
             } else {
                 asyncTask.complete();
-            } // end if/else
-        }); // end HttpClient.getNow
-    } // end method
-} // end class
+            }
+        });
+    }
+}

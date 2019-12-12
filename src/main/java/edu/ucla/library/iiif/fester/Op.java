@@ -9,11 +9,15 @@ public final class Op {
 
     public static final String PUT_MANIFEST = "putManifest";
 
-    public static final String POST_MANIFEST = "postManifest";
-
     public static final String DELETE_MANIFEST = "deleteManifest";
 
-    public static final String POST_COLLECTION = "postCollection";
+    public static final String GET_COLLECTION = "getCollection";
+
+    public static final String PUT_COLLECTION = "putCollection";
+
+    public static final String DELETE_COLLECTION = "deleteCollection";
+
+    public static final String POST_CSV = "postCSV";
 
     public static final String SUCCESS = "success";
 

@@ -3,6 +3,8 @@ package edu.ucla.library.iiif.fester.verticles;
 
 import static edu.ucla.library.iiif.fester.Constants.EMPTY;
 
+import java.net.URI;
+
 import com.amazonaws.regions.RegionUtils;
 
 import info.freelibrary.util.Logger;
@@ -16,8 +18,8 @@ import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.utils.CodeUtils;
+import edu.ucla.library.iiif.fester.utils.IDUtils;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
@@ -36,16 +38,20 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
 
     private static final long MAX_RETRIES = 10;
 
+    private static final String ID = "@id";
+
     private S3Client myS3Client;
+
+    private String myS3Bucket;
 
     /**
      * Starts the S3 Bucket Verticle.
      */
     @Override
-    @SuppressWarnings({ "deprecation" })
-    public void start(final Future<Void> aFuture) {
+    @SuppressWarnings("Indentation") // Checkstyle's indentation check doesn't work with multiple lambdas
+    public void start() throws Exception {
+        super.start(); // We do some stuff in the abstract class that we want here
 
-        // grab the Fester configuration
         final JsonObject config = config();
 
         // Initialize the S3BucketVerticle by getting our s3 configs and setting up the S3 client
@@ -54,64 +60,29 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
             final String s3SecretKey = config.getString(Config.S3_SECRET_KEY);
             final String s3RegionName = config.getString(Config.S3_REGION);
             final String s3Region = RegionUtils.getRegion(s3RegionName).getServiceEndpoint("s3");
+            final HttpClientOptions httpOptions = new HttpClientOptions().setDefaultHost(s3Region);
 
-            final HttpClientOptions options = new HttpClientOptions();
-
-            // Set the S3 client options
-            options.setDefaultHost(s3Region);
-
-            myS3Client = new S3Client(getVertx(), s3AccessKey, s3SecretKey, options);
+            myS3Client = new S3Client(getVertx(), s3AccessKey, s3SecretKey, httpOptions);
+            myS3Bucket = config.getString(Config.S3_BUCKET);
 
             // Trace is only for developer use; don't turn on when running on a server
-            LOGGER.trace(MessageCodes.MFS_046, s3AccessKey, s3SecretKey); // AWS S3 access / secret keys: {} / {}
-
-            LOGGER.debug(MessageCodes.MFS_047, s3RegionName); // S3 Client configured for region: {}
+            LOGGER.trace(MessageCodes.MFS_046, s3AccessKey, s3SecretKey);
+            LOGGER.debug(MessageCodes.MFS_047, s3RegionName);
         }
 
         getJsonConsumer().handler(message -> {
+            final JsonObject manifest = message.body();
+            final String manifestID = getUniqueID(manifest.getString(ID));
+            final String manifestKey = getS3Key(manifestID);
+            final Buffer manifestContent = manifest.toBuffer();
 
-            // handle S3 upload requests
-            upload(message, config);
+            LOGGER.debug(MessageCodes.MFS_051, manifest, myS3Bucket);
 
-        });
-
-        aFuture.complete();
-    }
-
-    /**
-     * Upload the provided MANIFEST_CONTENT to a file in S3.
-     *
-     * @param aMessage The message containing the S3 upload request
-     * @param aConfig The verticle's configuration
-     */
-    @SuppressWarnings("Indentation") // Checkstyle's indentation check doesn't work with multiple lambdas
-    private void upload(final Message<JsonObject> aMessage, final JsonObject aConfig) {
-        final JsonObject storageRequest = aMessage.body();
-
-        // If an S3 bucket isn't being supplied to us, use the one in our application configuration
-        if (!storageRequest.containsKey(Config.S3_BUCKET)) {
-            storageRequest.mergeIn(aConfig);
-        }
-
-        final String s3Bucket = storageRequest.getString(Config.S3_BUCKET);
-        final String manifestID = storageRequest.getString(Constants.MANIFEST_ID);
-        final String manifestIDwithExt = manifestID + Constants.JSON_EXT;
-
-        LOGGER.debug(MessageCodes.MFS_050, manifestID, s3Bucket);
-
-        // If we have MANIFEST_CONTENT, try to upload it to S3
-        if (storageRequest.containsKey(Constants.MANIFEST_CONTENT)) {
-            LOGGER.debug(MessageCodes.MFS_051, manifestID, s3Bucket);
-
-            // convert MANIFEST_CONTENT to a buffer
-            final Buffer manifestContent = storageRequest.getJsonObject(Constants.MANIFEST_CONTENT).toBuffer();
-
-            // This is pretty rudimentary, we will likely want to add more metadata, but we'll start with an ID
+            // Start with just ID for manifest metadata
             final UserMetadata metadata = new UserMetadata(Constants.MANIFEST_ID, manifestID);
 
-            // If our connection pool is full, drop back and try resubmitting the request
             try {
-                myS3Client.put(s3Bucket, manifestIDwithExt, manifestContent, metadata, response -> {
+                myS3Client.put(myS3Bucket, manifestKey, manifestContent, metadata, response -> {
                     final int statusCode = response.statusCode();
 
                     response.exceptionHandler(exception -> {
@@ -119,7 +90,7 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
 
                         LOGGER.error(exception, details);
 
-                        sendReply(aMessage, CodeUtils.getInt(MessageCodes.MFS_052), details);
+                        sendReply(message, CodeUtils.getInt(MessageCodes.MFS_052), details);
                     });
 
                     // If we get a successful upload response code, send a reply to indicate so
@@ -127,7 +98,7 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
                         LOGGER.info(MessageCodes.MFS_053, manifestID);
 
                         // Send the success result and decrement the S3 request counter
-                        sendReply(aMessage, 0, Op.SUCCESS);
+                        sendReply(message, 0, Op.SUCCESS);
                     } else {
                         LOGGER.error(MessageCodes.MFS_054, statusCode, response.statusMessage());
 
@@ -138,31 +109,56 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
 
                         // If there is some internal S3 server error, let's try again
                         if (statusCode == HTTP.INTERNAL_SERVER_ERROR) {
-                            sendReply(aMessage, 0, Op.RETRY);
+                            sendReply(message, 0, Op.RETRY);
                         } else {
                             final String errorMessage = statusCode + " - " + response.statusMessage();
 
                             LOGGER.warn(MessageCodes.MFS_055, errorMessage);
-                            retryUpload(manifestID, aMessage);
+
+                            retryUpload(manifestID, message);
                         }
                     }
-
                 }, exception -> {
                     LOGGER.warn(MessageCodes.MFS_055, exception.getMessage());
-                    retryUpload(manifestID, aMessage);
+                    retryUpload(manifestID, message);
                 });
             } catch (final ConnectionPoolTooBusyException details) {
                 LOGGER.debug(MessageCodes.MFS_056, manifestID);
-                sendReply(aMessage, 0, Op.RETRY);
+                sendReply(message, 0, Op.RETRY);
             }
+        });
+    }
 
+    /**
+     * Gets the ID and checks whether it's a work or collection manifest and then returns the ID for that thing.
+     *
+     * @param aURIString A manifest URI
+     * @return An S3 key for the manifest
+     */
+    private String getUniqueID(final String aURIString) {
+        String uniqueID;
+
+        if (aURIString.contains(Constants.COLLECTIONS_PATH)) {
+            uniqueID = IDUtils.decode(URI.create(aURIString), Constants.COLLECTIONS_PATH);
+            uniqueID = Constants.COLLECTIONS_PATH + Constants.SLASH + uniqueID;
         } else {
-            // log an error, because we ought to be provided MANIFEST_CONTENT, AND we ought to continue
-            // regardless
-            LOGGER.warn(MessageCodes.MFS_055, manifestID);
-            sendReply(aMessage, CodeUtils.getInt(MessageCodes.MFS_055), manifestID);
+            // TODO: update this to put Work manifests in a works S3 "directory"
+            uniqueID = IDUtils.decode(URI.create(aURIString));
         }
 
+        LOGGER.debug(MessageCodes.MFS_128, uniqueID);
+
+        return uniqueID;
+    }
+
+    /**
+     * Gets the key that will be used when putting the manifest in S3.
+     *
+     * @param aID The unique part of a manifest ID
+     * @return An S3 key
+     */
+    private String getS3Key(final String aID) {
+        return !aID.endsWith(Constants.JSON_EXT) ? aID + Constants.JSON_EXT : aID;
     }
 
     /**

@@ -65,7 +65,7 @@
   <entry key="MFS-050">Preparing to send '{}' to S3 bucket: {}</entry>
   <entry key="MFS-051">Sending '{}' to S3 bucket: {}</entry>
   <entry key="MFS-052">{}</entry>
-  <entry key="MFS-053">Image file '{}' successfully uploaded to S3</entry>
+  <entry key="MFS-053">Manifest '{}' successfully uploaded to S3</entry>
   <entry key="MFS-054">S3 bucket upload failed: {} -&gt; {}</entry>
   <entry key="MFS-055">Error triggering S3 upload retry: {}</entry>
   <entry key="MFS-056">S3 connection pool is full; re-queuing the request: {}</entry>
@@ -101,5 +101,17 @@
   <entry key="MFS-116">Successfully deployed: {} [{}]</entry>
   <entry key="MFS-117">Failed to deploy: {}</entry>
   <entry key="MFS-118">There don't seem to be any manifests to add to the '{}' collection</entry>
-  <entry key="MFS-119">Creating Work manifest ({}) to associate with collection manifest ({})</entry>
+  <entry key="MFS-119">Creating brief Work manifest ({}) to associate with collection manifest ({})</entry>
+  <entry key="MFS-120">Sending {} CSV to {}</entry>
+  <entry key="MFS-121">Page row in the CSV is missing its &quot;Parent ARK&quot; value</entry>
+  <entry key="MFS-122">Manifesting a collection ({}): {}</entry>
+  <entry key="MFS-123">Uploaded CSV's &quot;Item Sequence&quot; header could not be found</entry>
+  <entry key="MFS-124">FakeS3BucketVerticle received a storage request: {}</entry>
+  <entry key="MFS-125">Failed to upload collection manifest: {}</entry>
+  <entry key="MFS-126">Manifest successfully sent to S3 verticle for upload: {}</entry>
+  <entry key="MFS-127"></entry>
+  <entry key="MFS-128">Extracted unique part of manifest ID: {}</entry>
+  <entry key="MFS-129">Checking S3 collection object: {}</entry>
+  <entry key="MFS-130">Reset collection manifest key to: {}</entry>
+  <entry key="MFS-131">Failed to upload all the work manifests for collection: {} [{}]</entry>
 </properties>
