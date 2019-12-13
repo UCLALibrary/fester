@@ -34,7 +34,7 @@ public class PostCsvHandlerTest extends AbstractManifestHandlerTest {
 
     private static final File FULL_CSV_FILE = new File("src/test/resources/csv/hathaway.csv");
 
-    private static final File WORKS_CSV_FILE = new File("src/test/resources/csv/hathaway/works.csv");
+    private static final File WORKS_CSV_FILE = new File("src/test/resources/csv/hathaway/batch1/works.csv");
 
     /**
      * Test tear down.

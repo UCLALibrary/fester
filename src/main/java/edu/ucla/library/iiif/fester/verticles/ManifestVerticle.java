@@ -148,13 +148,12 @@ public class ManifestVerticle extends AbstractFesterVerticle {
      */
     private void buildCollectionManifest(final Collection aCollection,
             final Map<String, List<Collection.Manifest>> aWorksMap, final List<String[]> aWorksDataList,
-            final Map<String, List<String[]>> aPageMap, final CsvHeaders aHeaders,
+            final Map<String, List<String[]>> aPagesMap, final CsvHeaders aHeaders,
             final Message<JsonObject> aMessage) {
         final List<Collection.Manifest> manifestList = aCollection.getManifests(); // Empty list
         final String collectionID = IDUtils.decode(aCollection.getID(), Constants.COLLECTIONS_PATH);
         final List<Collection.Manifest> manifests = aWorksMap.get(collectionID);
         final Promise<Void> promise = Promise.promise();
-        final CsvHeaders finalizedCsvHeaders = aHeaders;
 
         // If we have work manifests, add them to the collection manifest
         if (manifests != null) {
@@ -163,19 +162,25 @@ public class ManifestVerticle extends AbstractFesterVerticle {
             LOGGER.warn(MessageCodes.MFS_118, collectionID);
         }
 
-        // Create a handler to handle the result of that
+        // Create a handler to handle generating work manifests after the collection manage has been uploaded
         promise.future().setHandler(handler -> {
             if (handler.succeeded()) {
-                final Promise<Void> workManifestsPromise = Promise.promise();
+                final Iterator<String[]> iterator = aWorksDataList.iterator();
+                final List<Future> futures = new ArrayList<>();
 
-                // Create a handler for building the work manifests
-                workManifestsPromise.future().setHandler(workManifestsHandler -> {
-                    if (workManifestsHandler.succeeded()) {
+                // Request each work manifest be created
+                while (iterator.hasNext()) {
+                    futures.add(buildWorkManifest(aHeaders, iterator.next(), aPagesMap, Promise.promise()));
+                }
+
+                // Keep track of our progress and fail our promise if we don't succeed
+                CompositeFuture.all(futures).setHandler(worksHandler -> {
+                    if (worksHandler.succeeded()) {
                         // On success, let the class that called us know we've succeeded
                         aMessage.reply(LOGGER.getMessage(MessageCodes.MFS_126, collectionID));
                     } else {
                         final int failCode = CodeUtils.getInt(MessageCodes.MFS_131);
-                        final Throwable cause = workManifestsHandler.cause();
+                        final Throwable cause = worksHandler.cause();
                         final String causeMessage = cause.getMessage();
                         final String message = LOGGER.getMessage(MessageCodes.MFS_131, collectionID, causeMessage);
 
@@ -183,9 +188,6 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                         aMessage.fail(failCode, message);
                     }
                 });
-
-                // Build the related work manifests, passing a promise to complete when done
-                queueWorkManifests(finalizedCsvHeaders, aWorksDataList, aPageMap, workManifestsPromise);
             } else {
                 final int failCode = CodeUtils.getInt(MessageCodes.MFS_125);
                 final String failMessage = handler.cause().getMessage();
