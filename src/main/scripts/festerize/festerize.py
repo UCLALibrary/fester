@@ -5,6 +5,7 @@ import requests
 import os
 import logging
 from datetime import datetime
+import sys
 
 @click.command()
 @click.argument('src', required=True, nargs=-1)
@@ -17,6 +18,7 @@ def cli(src, server, endpoint, out, loglevel):
     """FESTERIZE uploads CSV files to the UCLA Library Fester service.
     """
     request_url = server + endpoint
+    status_url = server + "/status/fester"
 
     # get ready to log some stuff
     started = datetime.now()
@@ -40,11 +42,26 @@ def cli(src, server, endpoint, out, loglevel):
     # log our start time
     logging.info("FESTERIZER STARTED at %s..." % (started.strftime("%Y-%m-%d %H:%M:%S")))
 
+    # If Fester is unavailable, abort
+    try:
+        s = requests.get(status_url)
+    except requests.exceptions.RequestException as e:
+        logging.error("FESTERIZER service status unavailable at %s" % (status_url))
+        click.echo(e)
+        sys.exit("FESTERIZER service status unavailable, aborting.")
+
+    if s.status_code != 200:
+        logging.error("FESTERIZER service status unusable at %s" % (status_url))
+        sys.exit("FESTERIZER service status unusable, aborting.")
+
     # LET'S DO THIS!
     for fn in src:
+        if not os.path.exists(fn):
+            click.echo("Skipping %s: file does not exist" % (fn))
+            logging.error("%s does not exist, skipping" % (fn))
+
         # only work for .csv files
-        if fn.endswith('.csv'):
-            # TODO: confirm this file exists and is readable
+        elif fn.endswith('.csv'):
 
             click.echo("Uploading %s to %s" % (fn, request_url))
 
@@ -61,14 +78,15 @@ def cli(src, server, endpoint, out, loglevel):
                 out_file.write(r.content)
             else:
                 click.echo("  ERROR! (status code %s)" %(r.status_code))
-                logging.error("%{s} failed to load, status code %s" % (fn, r.status_code))
+                logging.error("%s failed to load, status code %s" % (fn, r.status_code))
                 logging.error(r.text)
                 logging.error('--------------------------------------------')
 
         # skip any files that do no have an extension of .csv
         else:
             click.echo("Skipping %s: not a CSV" % (fn))
+            logging.error("%s is not a CSV, skipping" % (fn))
 
-    # log our end time
+# log our end time
     ended = datetime.now()
     logging.info("FESTERIZER ENDED at %s..." % (ended.strftime("%Y-%m-%d %H:%M:%S")))
