@@ -65,10 +65,12 @@ public class PostCsvHandler extends AbstractManifestHandler {
 
         // An uploaded CSV is required
         if (csvUploads.size() == 0) {
+            final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_037);
+
             response.setStatusCode(HTTP.BAD_REQUEST);
-            response.setStatusMessage(LOGGER.getMessage(MessageCodes.MFS_037));
+            response.setStatusMessage(errorMessage);
             response.putHeader(Constants.CONTENT_TYPE, Constants.HTML_MEDIA_TYPE);
-            response.end(StringUtils.format(myExceptionPage, LOGGER.getMessage(MessageCodes.MFS_037)));
+            response.end(StringUtils.format(myExceptionPage, errorMessage));
         } else {
             final FileUpload csvFile = csvUploads.iterator().next();
             final String filePath = csvFile.uploadedFileName();

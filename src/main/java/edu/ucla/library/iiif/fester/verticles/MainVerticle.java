@@ -127,7 +127,7 @@ public class MainVerticle extends AbstractVerticle {
 
         uploaderOptions.setConfig(aConfig);
         manifestorOptions.setWorker(true).setWorkerPoolName(ManifestVerticle.class.getSimpleName());
-        manifestorOptions.setWorkerPoolSize(5).setConfig(aConfig);
+        manifestorOptions.setWorkerPoolSize(1).setConfig(aConfig);
 
         // Start up any necessary Fester verticles
         futures.add(deployVerticle(ManifestVerticle.class.getName(), manifestorOptions, Future.future()));
