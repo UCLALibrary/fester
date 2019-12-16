@@ -40,6 +40,11 @@ public abstract class AbstractFesterVerticle extends AbstractVerticle {
         LOGGER.debug(MessageCodes.MFS_100, getClass().getName(), deploymentID());
     }
 
+    /**
+     * Gets the verticle's JSON consumer.
+     *
+     * @return A message consumer for JSON objects
+     */
     protected MessageConsumer<JsonObject> getJsonConsumer() {
         LOGGER.debug(MessageCodes.MFS_101, getClass().getName());
         return vertx.eventBus().consumer(getClass().getName());
@@ -73,4 +78,28 @@ public abstract class AbstractFesterVerticle extends AbstractVerticle {
         sendMessage(aJsonObject, aVerticleName, DeliveryOptions.DEFAULT_TIMEOUT, aHandler);
     }
 
+    /**
+     * Sends an ID to the supplied verticle.
+     *
+     * @param aID A manifest ID
+     * @param aVerticleName The name of the verticle to which to send the ID
+     * @param aHandler A handler to handle the result of sending the ID
+     */
+    protected void getS3Manifest(final String aID, final String aVerticleName,
+            final Handler<AsyncResult<Message<JsonObject>>> aHandler) {
+        getS3Manifest(aID, aVerticleName, DeliveryOptions.DEFAULT_TIMEOUT, aHandler);
+    }
+
+    /**
+     * Sends an ID to the supplied verticle.
+     *
+     * @param aID A manifest ID
+     * @param aVerticleName The name of the verticle to which to send the ID
+     * @param aTimeout A timeout after which to give up waiting for a response
+     * @param aHandler A handler to handle the result of sending the ID
+     */
+    protected void getS3Manifest(final String aID, final String aVerticleName, final long aTimeout,
+            final Handler<AsyncResult<Message<JsonObject>>> aHandler) {
+        sendMessage(new JsonObject().put(Constants.ID, aID), aVerticleName, aTimeout, aHandler);
+    }
 }

@@ -34,7 +34,9 @@ public class PostCsvHandlerTest extends AbstractManifestHandlerTest {
 
     private static final File FULL_CSV_FILE = new File("src/test/resources/csv/hathaway.csv");
 
-    private static final File WORKS_CSV_FILE = new File("src/test/resources/csv/hathaway/batch1/works.csv");
+    private static final File COLL_WORKS_CSV_FILE = new File("src/test/resources/csv/hathaway/batch1/works.csv");
+
+    private static final File WORKS_CSV_FILE = new File("src/test/resources/csv/hathaway/batch2/works.csv");
 
     /**
      * Test tear down.
@@ -98,12 +100,62 @@ public class PostCsvHandlerTest extends AbstractManifestHandlerTest {
     }
 
     /**
-     * Tests posting a CSV to the PostCollectionHandler.
+     * Tests posting a Collection + Works CSV to the PostCollectionHandler.
      *
      * @param aContext A test context
      */
     @Test
     public final void testCollectionWorksCSV(final TestContext aContext) {
+        final int port = aContext.get(Config.HTTP_PORT);
+        final WebClient webClient = WebClient.create(myVertx);
+        final HttpRequest<Buffer> postRequest = webClient.post(port, UNSPECIFIED_HOST, COLLECTIONS_PATH);
+        final String filePath = COLL_WORKS_CSV_FILE.getAbsolutePath();
+        final String fileName = COLL_WORKS_CSV_FILE.getName();
+        final MultipartForm form = MultipartForm.create();
+        final FileSystem fileSystem = myVertx.fileSystem();
+        final Buffer expectedCSV = fileSystem.readFileBlocking(COLL_WORKS_CSV_FILE.getAbsolutePath());
+        final Async asyncTask = aContext.async();
+
+        form.textFileUpload(Constants.CSV_FILE, fileName, filePath, Constants.CSV_MEDIA_TYPE);
+
+        postRequest.sendMultipartForm(form, postHandler -> {
+            if (postHandler.succeeded()) {
+                final HttpResponse<Buffer> postResponse = postHandler.result();
+                final String postStatusMessage = postResponse.statusMessage();
+                final int postStatusCode = postResponse.statusCode();
+
+                if (postStatusCode == HTTP.CREATED) {
+                    final Buffer actualCSV = postResponse.body();
+                    final String contentType = postResponse.getHeader(Constants.CONTENT_TYPE);
+
+                    // Check that what we get back is the same as what we sent
+                    aContext.assertEquals(expectedCSV, actualCSV);
+
+                    // Check that what we get back has the correct media type
+                    aContext.assertEquals(Constants.CSV_MEDIA_TYPE, contentType);
+
+                    if (!asyncTask.isCompleted()) {
+                        asyncTask.complete();
+                    }
+                } else {
+                    aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, postStatusCode, postStatusMessage));
+                }
+            } else {
+                final Throwable exception = postHandler.cause();
+
+                LOGGER.error(exception, exception.getMessage());
+                aContext.fail(exception);
+            }
+        });
+    }
+
+    /**
+     * Tests posting a CSV to the PostCollectionHandler.
+     *
+     * @param aContext A test context
+     */
+    @Test
+    public final void testWorksCSV(final TestContext aContext) {
         final int port = aContext.get(Config.HTTP_PORT);
         final WebClient webClient = WebClient.create(myVertx);
         final HttpRequest<Buffer> postRequest = webClient.post(port, UNSPECIFIED_HOST, COLLECTIONS_PATH);

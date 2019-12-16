@@ -38,8 +38,6 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
 
     private static final long MAX_RETRIES = 10;
 
-    private static final String ID = "@id";
-
     private S3Client myS3Client;
 
     private String myS3Bucket;
@@ -48,7 +46,6 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
      * Starts the S3 Bucket Verticle.
      */
     @Override
-    @SuppressWarnings("Indentation") // Checkstyle's indentation check doesn't work with multiple lambdas
     public void start() throws Exception {
         super.start(); // We do some stuff in the abstract class that we want here
 
@@ -71,62 +68,93 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
         }
 
         getJsonConsumer().handler(message -> {
-            final JsonObject manifest = message.body();
-            final String manifestID = getUniqueID(manifest.getString(ID));
-            final String manifestKey = getS3Key(manifestID);
-            final Buffer manifestContent = manifest.toBuffer();
+            final JsonObject json = message.body();
 
-            LOGGER.debug(MessageCodes.MFS_051, manifest, myS3Bucket);
-
-            // Start with just ID for manifest metadata
-            final UserMetadata metadata = new UserMetadata(Constants.MANIFEST_ID, manifestID);
-
-            try {
-                myS3Client.put(myS3Bucket, manifestKey, manifestContent, metadata, response -> {
-                    final int statusCode = response.statusCode();
-
-                    response.exceptionHandler(exception -> {
-                        final String details = exception.getMessage();
-
-                        LOGGER.error(exception, details);
-
-                        sendReply(message, CodeUtils.getInt(MessageCodes.MFS_052), details);
-                    });
-
-                    // If we get a successful upload response code, send a reply to indicate so
-                    if (statusCode == HTTP.OK) {
-                        LOGGER.info(MessageCodes.MFS_053, manifestID);
-
-                        // Send the success result and decrement the S3 request counter
-                        sendReply(message, 0, Op.SUCCESS);
-                    } else {
-                        LOGGER.error(MessageCodes.MFS_054, statusCode, response.statusMessage());
-
-                        // Log the detailed reason we failed so we can track down the issue
-                        response.bodyHandler(body -> {
-                            LOGGER.error(MessageCodes.MFS_052, body.getString(0, body.length()));
-                        });
-
-                        // If there is some internal S3 server error, let's try again
-                        if (statusCode == HTTP.INTERNAL_SERVER_ERROR) {
-                            sendReply(message, 0, Op.RETRY);
-                        } else {
-                            final String errorMessage = statusCode + " - " + response.statusMessage();
-
-                            LOGGER.warn(MessageCodes.MFS_055, errorMessage);
-
-                            retryUpload(manifestID, message);
-                        }
-                    }
-                }, exception -> {
-                    LOGGER.warn(MessageCodes.MFS_055, exception.getMessage());
-                    retryUpload(manifestID, message);
-                });
-            } catch (final ConnectionPoolTooBusyException details) {
-                LOGGER.debug(MessageCodes.MFS_056, manifestID);
-                sendReply(message, 0, Op.RETRY);
+            // Our JSON contains a single ID to get or a manifest to put
+            if (json.size() == 1) {
+                get(json.iterator().next().getValue().toString(), message);
+            } else {
+                put(json, message);
             }
         });
+    }
+
+    private void get(final String aID, final Message<JsonObject> aMessage) {
+        LOGGER.debug(MessageCodes.MFS_133, aID);
+
+        myS3Client.get(myS3Bucket, aID, get -> {
+            if (get.statusCode() == HTTP.OK) {
+                get.bodyHandler(body -> {
+                    aMessage.reply(new JsonObject(body.getString(0, body.length())));
+                });
+            } else {
+                aMessage.fail(0, get.statusMessage());
+            }
+        });
+    }
+
+    /**
+     * Puts a collection or manifest into our S3 bucket.
+     *
+     * @param aManifest A work or collection manifest to store in the S3 bucket
+     * @param aMessage A event queue message
+     */
+    @SuppressWarnings("Indentation") // Checkstyle's indentation check doesn't work with multiple lambdas
+    private void put(final JsonObject aManifest, final Message<JsonObject> aMessage) {
+        final String manifestID = getUniqueID(aManifest.getString(Constants.ID));
+        final String manifestKey = getS3Key(manifestID);
+        final Buffer manifestContent = aManifest.toBuffer();
+
+        LOGGER.debug(MessageCodes.MFS_051, aManifest, myS3Bucket);
+
+        // Start with just ID for manifest metadata
+        final UserMetadata metadata = new UserMetadata(Constants.MANIFEST_ID, manifestID);
+
+        try {
+            myS3Client.put(myS3Bucket, manifestKey, manifestContent, metadata, response -> {
+                final int statusCode = response.statusCode();
+
+                response.exceptionHandler(exception -> {
+                    final String details = exception.getMessage();
+
+                    LOGGER.error(exception, details);
+
+                    sendReply(aMessage, CodeUtils.getInt(MessageCodes.MFS_052), details);
+                });
+
+                // If we get a successful upload response code, send a reply to indicate so
+                if (statusCode == HTTP.OK) {
+                    LOGGER.info(MessageCodes.MFS_053, manifestID);
+
+                    // Send the success result and decrement the S3 request counter
+                    sendReply(aMessage, 0, Op.SUCCESS);
+                } else {
+                    LOGGER.error(MessageCodes.MFS_054, statusCode, response.statusMessage());
+
+                    // Log the detailed reason we failed so we can track down the issue
+                    response.bodyHandler(body -> {
+                        LOGGER.error(MessageCodes.MFS_052, body.getString(0, body.length()));
+                    });
+
+                    // If there is some internal S3 server error, let's try again
+                    if (statusCode == HTTP.INTERNAL_SERVER_ERROR) {
+                        sendReply(aMessage, 0, Op.RETRY);
+                    } else {
+                        final String errorMessage = statusCode + " - " + response.statusMessage();
+
+                        LOGGER.warn(MessageCodes.MFS_055, errorMessage);
+
+                        retryUpload(manifestID, aMessage);
+                    }
+                }
+            }, exception -> {
+                LOGGER.warn(MessageCodes.MFS_055, exception.getMessage());
+                retryUpload(manifestID, aMessage);
+            });
+        } catch (final ConnectionPoolTooBusyException details) {
+            LOGGER.debug(MessageCodes.MFS_056, manifestID);
+            sendReply(aMessage, 0, Op.RETRY);
+        }
     }
 
     /**
