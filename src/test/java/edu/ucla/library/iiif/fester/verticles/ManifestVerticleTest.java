@@ -144,7 +144,7 @@ public class ManifestVerticleTest {
      */
     @Test
     public final void testHathawaySinaiManifests(final TestContext aContext) {
-        final String hathawayWorks = HATHAWAY + "/works";
+        final String hathawayWorks = HATHAWAY + "/batch1/works";
         final String filePath = StringUtils.format(CSV_FILE_PATH, hathawayWorks);
         final JsonObject message = new JsonObject();
         final Async asyncTask = aContext.async();

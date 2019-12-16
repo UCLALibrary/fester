@@ -26,12 +26,14 @@ import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.verticles.FakeS3BucketVerticle;
 import edu.ucla.library.iiif.fester.verticles.MainVerticle;
+import edu.ucla.library.iiif.fester.verticles.S3BucketVerticle;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.shareddata.LocalMap;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -134,6 +136,10 @@ abstract class AbstractManifestHandlerTest {
     private void deployFester(final TestContext aContext, final Async aAsyncTask, final DeploymentOptions aOpts) {
         myVertx.deployVerticle(MainVerticle.class.getName(), aOpts, deployment -> {
             if (deployment.succeeded()) {
+                final LocalMap<String, String> map = myVertx.sharedData().getLocalMap(Constants.VERTICLE_MAP);
+                final String s3BucketDeploymentId = map.get(S3BucketVerticle.class.getSimpleName());
+
+                // Our older handlers talk to S3 directly so we need to put some test files there
                 try {
                     // Store a manifest whose ID that has a '.json' extension
                     LOGGER.debug(MessageCodes.MFS_006, myManifestID, myS3Bucket);
@@ -143,7 +149,20 @@ abstract class AbstractManifestHandlerTest {
                     LOGGER.debug(MessageCodes.MFS_006, myJsonlessManifestID, myS3Bucket);
                     myS3Client.putObject(myS3Bucket, myJsonlessManifestID, MANIFEST_FILE);
 
-                    aAsyncTask.complete();
+                    // We don't need to use the real S3BucketVerticle for our non-S3BucketVerticle tests though
+                    myVertx.undeploy(s3BucketDeploymentId, undeployment -> {
+                        if (undeployment.succeeded()) {
+                            myVertx.deployVerticle(FakeS3BucketVerticle.class.getName(), fakeS3VerticleDeployment -> {
+                                if (fakeS3VerticleDeployment.succeeded()) {
+                                    aAsyncTask.complete();
+                                } else {
+                                    aContext.fail(fakeS3VerticleDeployment.cause());
+                                }
+                            });
+                        } else {
+                            aContext.fail(undeployment.cause());
+                        }
+                    });
                 } catch (final SdkClientException details) {
                     aContext.fail(details);
                 }
@@ -196,30 +215,5 @@ abstract class AbstractManifestHandlerTest {
                 aFuture.complete();
             }
         });
-    }
-
-    /**
-     * Removes the real S3UploadVerticle and replaces it with a fake version for our tests. The fake version
-     * acknowledges it receives a request but doesn't try to upload the item into S3.
-     *
-     * @param aDeploymentId
-     * @param aFuture
-     */
-    private Future<Void> updateDeployment(final String aDeploymentId, final Future<Void> aFuture) {
-        myVertx.undeploy(aDeploymentId, undeployment -> {
-            if (undeployment.succeeded()) {
-                myVertx.deployVerticle(FakeS3BucketVerticle.class.getName(), fakeDeployment -> {
-                    if (fakeDeployment.succeeded()) {
-                        aFuture.complete();
-                    } else {
-                        aFuture.fail(fakeDeployment.cause());
-                    }
-                });
-            } else {
-                aFuture.fail(undeployment.cause());
-            }
-        });
-
-        return aFuture;
     }
 }

@@ -122,6 +122,11 @@ public final class Constants {
     public static final String VERTICLE_MAP = "fester-verticles";
 
     /**
+     * The ID property in a manifest (collection or work).
+     */
+    public static final String ID = "@id";
+
+    /**
      * Private constructor for Constants class.
      */
     private Constants() {

@@ -37,6 +37,7 @@ import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.CsvHeaders;
 import edu.ucla.library.iiif.fester.CsvParsingException;
 import edu.ucla.library.iiif.fester.ImageInfo;
+import edu.ucla.library.iiif.fester.LockedManifest;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.utils.CodeUtils;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
@@ -45,6 +46,8 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.shareddata.Lock;
+import io.vertx.core.shareddata.SharedData;
 
 /**
  * A creator of manifests (collection and work).
@@ -59,7 +62,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
 
     private static final String ANNOTATION_URI = "{}/{}/annotation/{}";
 
-    private static final String IMAGE_URI = "{}/{}";
+    private static final String SIMPLE_URI = "{}/{}";
 
     private static final String DEFAULT_IMAGE_URI = "/full/600,/0/default.jpg";
 
@@ -117,9 +120,43 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                 if (collection != null) {
                     LOGGER.debug(MessageCodes.MFS_122, filePath, collection);
                     buildCollectionManifest(collection, works, worksData, pages, csvHeaders, message);
-                } else { // We don't have a collection manifest, just works and/or pages
-                    // TODO
-                    message.reply("No collection record");
+                } else if (worksData.size() > 0) {
+                    final String collectionID = worksData.get(0)[csvHeaders.getParentArkIndex()];
+                    final Promise<LockedManifest> promise = Promise.promise();
+                    final CsvHeaders finalizedCsvHeaders = csvHeaders;
+
+                    LOGGER.debug(MessageCodes.MFS_043, filePath);
+
+                    // If we were able to get a lock on the manifest, update it with our new works
+                    promise.future().setHandler(handler -> {
+                        if (handler.succeeded()) {
+                            final LockedManifest lockedManifest = handler.result();
+                            final Collection collectionToUpdate = lockedManifest.getCollection();
+                            final JsonObject manifestJSON = updateCollection(collectionToUpdate, works);
+
+                            sendMessage(manifestJSON, S3BucketVerticle.class.getName(), update -> {
+                                lockedManifest.release();
+
+                                if (update.succeeded()) {
+                                    buildWorksManifests(finalizedCsvHeaders, worksData, pages, message);
+                                } else {
+                                    message.fail(0, update.cause().getMessage());
+                                }
+                            });
+                        } else {
+                            message.fail(0, handler.cause().getMessage());
+                        }
+                    });
+
+                    getLockedManifest(collectionID, true, promise);
+                } else if (pages.size() > 0) {
+                    LOGGER.debug(MessageCodes.MFS_068, filePath);
+                    message.reply("Processing pages"); // TODO: IIIF-580
+                } else {
+                    final CsvParsingException details = new CsvParsingException(MessageCodes.MFS_042);
+
+                    LOGGER.error(details, details.getMessage());
+                    message.fail(CodeUtils.getInt(MessageCodes.MFS_000), details.getMessage());
                 }
             } catch (final IOException details) {
                 LOGGER.error(details, details.getMessage());
@@ -137,6 +174,92 @@ public class ManifestVerticle extends AbstractFesterVerticle {
     }
 
     /**
+     * Update a collection with new works.
+     *
+     * @param aCollection A collection to be updated
+     * @return The updated collection
+     */
+    private JsonObject updateCollection(final Collection aCollection,
+            final Map<String, List<Collection.Manifest>> aWorksMap) {
+        final List<Collection.Manifest> manifestList = aCollection.getManifests();
+        final String collectionID = IDUtils.decode(aCollection.getID(), Constants.COLLECTIONS_PATH);
+        final List<Collection.Manifest> manifests = aWorksMap.get(collectionID);
+
+        for (int manifestIndex = 0; manifestIndex < manifests.size(); manifestIndex++) {
+            final Collection.Manifest manifest = manifests.get(manifestIndex);
+            final String manifestID = IDUtils.decode(manifest.getID());
+
+            boolean found = false;
+
+            for (int listIndex = 0; listIndex < manifestList.size(); listIndex++) {
+                final Collection.Manifest existingManifest = manifestList.get(listIndex);
+                final String existingID = IDUtils.decode(existingManifest.getID());
+
+                if (existingID.equals(manifestID)) {
+                    final String removedID = manifestList.remove(listIndex).getID().toString();
+
+                    manifestList.add(listIndex, manifest);
+                    found = true;
+
+                    LOGGER.debug(MessageCodes.MFS_132, removedID, manifest.getID().toString());
+                    break;
+                }
+            }
+
+            if (!found) {
+                manifestList.add(manifest);
+            }
+        }
+
+        return aCollection.toJSON();
+    }
+
+    /**
+     * Tries to lock an S3 manifest so we can update it.
+     *
+     * @param aID A manifest ID
+     * @param aCollDoc Whether the manifest is a collection (or a work)
+     * @param aPromise A promise that we'll get a lock
+     */
+    private void getLockedManifest(final String aID, final boolean aCollDoc, final Promise<LockedManifest> aPromise) {
+        final SharedData sharedData = vertx.sharedData();
+
+        // Try to get the lock for a second
+        sharedData.getLocalLockWithTimeout(aID, 1000, lockRequest -> {
+            if (lockRequest.succeeded()) {
+                try {
+                    String id = URLEncoder.encode(aID, StandardCharsets.UTF_8);
+
+                    // If we have a collection manifest, add a directory path to it
+                    if (aCollDoc) {
+                        id = StringUtils.format(SIMPLE_URI, Constants.COLLECTIONS_PATH, id);
+                    }
+
+                    getS3Manifest(id, S3BucketVerticle.class.getName(), handler -> {
+                        if (handler.succeeded()) {
+                            final JsonObject manifest = handler.result().body();
+                            final Lock lock = lockRequest.result();
+
+                            aPromise.complete(new LockedManifest(manifest, aCollDoc, lock));
+                        } else {
+                            lockRequest.result().release();
+                            aPromise.fail(handler.cause());
+                        }
+                    });
+                } catch (final NullPointerException | IndexOutOfBoundsException details) {
+                    lockRequest.result().release();
+                    aPromise.fail(details);
+                }
+            } else {
+                // If we can't get a lock, keep trying (forever, really?)
+                vertx.setTimer(1000, timer -> {
+                    getLockedManifest(aID, aCollDoc, aPromise);
+                });
+            }
+        });
+    }
+
+    /**
      * Builds the collection manifest.
      *
      * @param aCollection A collection
@@ -148,13 +271,12 @@ public class ManifestVerticle extends AbstractFesterVerticle {
      */
     private void buildCollectionManifest(final Collection aCollection,
             final Map<String, List<Collection.Manifest>> aWorksMap, final List<String[]> aWorksDataList,
-            final Map<String, List<String[]>> aPageMap, final CsvHeaders aHeaders,
+            final Map<String, List<String[]>> aPagesMap, final CsvHeaders aHeaders,
             final Message<JsonObject> aMessage) {
         final List<Collection.Manifest> manifestList = aCollection.getManifests(); // Empty list
         final String collectionID = IDUtils.decode(aCollection.getID(), Constants.COLLECTIONS_PATH);
         final List<Collection.Manifest> manifests = aWorksMap.get(collectionID);
         final Promise<Void> promise = Promise.promise();
-        final CsvHeaders finalizedCsvHeaders = aHeaders;
 
         // If we have work manifests, add them to the collection manifest
         if (manifests != null) {
@@ -163,29 +285,10 @@ public class ManifestVerticle extends AbstractFesterVerticle {
             LOGGER.warn(MessageCodes.MFS_118, collectionID);
         }
 
-        // Create a handler to handle the result of that
+        // Create a handler to handle generating work manifests after the collection manage has been uploaded
         promise.future().setHandler(handler -> {
             if (handler.succeeded()) {
-                final Promise<Void> workManifestsPromise = Promise.promise();
-
-                // Create a handler for building the work manifests
-                workManifestsPromise.future().setHandler(workManifestsHandler -> {
-                    if (workManifestsHandler.succeeded()) {
-                        // On success, let the class that called us know we've succeeded
-                        aMessage.reply(LOGGER.getMessage(MessageCodes.MFS_126, collectionID));
-                    } else {
-                        final int failCode = CodeUtils.getInt(MessageCodes.MFS_131);
-                        final Throwable cause = workManifestsHandler.cause();
-                        final String causeMessage = cause.getMessage();
-                        final String message = LOGGER.getMessage(MessageCodes.MFS_131, collectionID, causeMessage);
-
-                        LOGGER.error(cause, message);
-                        aMessage.fail(failCode, message);
-                    }
-                });
-
-                // Build the related work manifests, passing a promise to complete when done
-                queueWorkManifests(finalizedCsvHeaders, aWorksDataList, aPageMap, workManifestsPromise);
+                buildWorksManifests(aHeaders, aWorksDataList, aPagesMap, aMessage);
             } else {
                 final int failCode = CodeUtils.getInt(MessageCodes.MFS_125);
                 final String failMessage = handler.cause().getMessage();
@@ -205,17 +308,9 @@ public class ManifestVerticle extends AbstractFesterVerticle {
         });
     }
 
-    /**
-     * Queue up manifest creation for all the works.
-     *
-     * @param aHeaders A CSV headers object
-     * @param aWorksList A list of work metadata
-     * @param aPagesMap A list of page metadata
-     * @param aPromise The promise we'll get the work manifests created
-     */
-    private void queueWorkManifests(final CsvHeaders aHeaders, final List<String[]> aWorksList,
-            final Map<String, List<String[]>> aPagesMap, final Promise aPromise) {
-        final Iterator<String[]> iterator = aWorksList.iterator();
+    private void buildWorksManifests(final CsvHeaders aHeaders, final List<String[]> aWorksDataList,
+            final Map<String, List<String[]>> aPagesMap, final Message<JsonObject> aMessage) {
+        final Iterator<String[]> iterator = aWorksDataList.iterator();
         final List<Future> futures = new ArrayList<>();
 
         // Request each work manifest be created
@@ -224,11 +319,17 @@ public class ManifestVerticle extends AbstractFesterVerticle {
         }
 
         // Keep track of our progress and fail our promise if we don't succeed
-        CompositeFuture.all(futures).setHandler(handler -> {
-            if (handler.succeeded()) {
-                aPromise.complete();
+        CompositeFuture.all(futures).setHandler(worksHandler -> {
+            if (worksHandler.succeeded()) {
+                aMessage.reply(LOGGER.getMessage(MessageCodes.MFS_126));
             } else {
-                aPromise.fail(handler.cause());
+                final int failCode = CodeUtils.getInt(MessageCodes.MFS_131);
+                final Throwable cause = worksHandler.cause();
+                final String causeMessage = cause.getMessage();
+                final String message = LOGGER.getMessage(MessageCodes.MFS_131, causeMessage);
+
+                LOGGER.error(cause, message);
+                aMessage.fail(failCode, message);
             }
         });
     }
@@ -268,7 +369,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                     final String encodedPageID = URLEncoder.encode(pageID, StandardCharsets.UTF_8);
                     final String pageLabel = columns[aHeaders.getTitleIndex()];
                     final String canvasID = StringUtils.format(CANVAS_URI, myHost, urlEncodedWorkID, idPart);
-                    final String pageURI = StringUtils.format(IMAGE_URI, myImageHost, encodedPageID);
+                    final String pageURI = StringUtils.format(SIMPLE_URI, myImageHost, encodedPageID);
                     final ImageInfo info = new ImageInfo(pageURI); // May be room for improvement here
                     final Canvas canvas = new Canvas(canvasID, pageLabel, info.getWidth(), info.getHeight());
                     final String annotationURI = StringUtils.format(ANNOTATION_URI, myHost, urlEncodedWorkID, idPart);

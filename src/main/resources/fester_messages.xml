@@ -55,7 +55,8 @@
   <entry key="MFS-039">Unexpected POST response: [{}] {}</entry>
   <entry key="MFS-040">Configuration file not found</entry>
   <entry key="MFS-041">Starting the Fester service on port: {}</entry>
-
+  <entry key="MFS-042">CSV didn't contain collections, works, or pages</entry>
+  <entry key="MFS-043">Manifesting a CSV file of works: {}</entry>
   <entry key="MFS-044">Configuring S3 uploader: {} instance(s) and {} thread(s) per instance</entry>
   <entry key="MFS-045">{} starting in thread: {}</entry>
   <entry key="MFS-046">AWS S3 access / secret keys: {} / {}</entry>
@@ -80,7 +81,7 @@
   <entry key="MFS-065">Skipping test because we don't have a valid S3 configuration</entry>
   <entry key="MFS-066">Failed to close Vert.x test instance</entry>
   <entry key="MFS-067">Test server for {} started...</entry>
-  
+  <entry key="MFS-068">Manifesting a CSV file of works: {}</entry>
 
   <entry key="MFS-100">Stopping the {} verticle [id: {}]</entry>
   <entry key="MFS-101">Getting message consumer for: {}</entry>
@@ -108,10 +109,12 @@
   <entry key="MFS-123">Uploaded CSV's &quot;Item Sequence&quot; header could not be found</entry>
   <entry key="MFS-124">FakeS3BucketVerticle received a storage request: {}</entry>
   <entry key="MFS-125">Failed to upload collection manifest: {}</entry>
-  <entry key="MFS-126">Manifest successfully sent to S3 verticle for upload: {}</entry>
-  <entry key="MFS-127"></entry>
+  <entry key="MFS-126">Manifests successfully sent to S3 verticle for upload</entry>
+  <entry key="MFS-127">Trying to get {} from the fake/test S3 bucket</entry>
   <entry key="MFS-128">Extracted unique part of manifest ID: {}</entry>
   <entry key="MFS-129">Checking S3 collection object: {}</entry>
   <entry key="MFS-130">Reset collection manifest key to: {}</entry>
-  <entry key="MFS-131">Failed to upload all the work manifests for collection: {} [{}]</entry>
+  <entry key="MFS-131">Failed to upload all the work manifests: {}</entry>
+  <entry key="MFS-132">Replacing '{}' with '{}' in collection document</entry>
+  <entry key="MFS-133">Getting {} from Fester's S3 bucket</entry>
 </properties>

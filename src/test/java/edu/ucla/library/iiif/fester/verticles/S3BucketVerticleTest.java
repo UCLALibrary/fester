@@ -4,6 +4,8 @@ package edu.ucla.library.iiif.fester.verticles;
 import static edu.ucla.library.iiif.fester.Constants.MESSAGES;
 import static org.junit.Assume.assumeTrue;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.UUID;
 
 import org.junit.After;
@@ -40,6 +42,8 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 public class S3BucketVerticleTest extends AbstractFesterVerticle {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(S3BucketVerticleTest.class, MESSAGES);
+
+    private static final String TEST_COLLECTION_FILE = "src/test/resources/json/ark%3A%2F21198%2Fzz0009gsq9.json";
 
     private static final String MANIFEST_PATH = "src/test/resources/testManifest.json";
 
@@ -160,6 +164,50 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
                 async.complete();
             }
         });
+    }
+
+    /**
+     * Tests getting an S3 collection.
+     *
+     * @param aContext A testing environment
+     */
+    @Test
+    public final void testGetS3Collection(final TestContext aContext) throws IOException {
+        try {
+            // Skip this test if we don't have a valid S3 configuration
+            assumeTrue(LOGGER.getMessage(MessageCodes.MFS_065), isExecutable);
+        } catch (final AssumptionViolatedException details) {
+            LOGGER.warn(details.getMessage());
+            throw details;
+        }
+
+        final String collectionKey = myCollectionKey + Constants.JSON_EXT;
+        final File collectionFile = new File(TEST_COLLECTION_FILE);
+        final JsonObject expected = new JsonObject(StringUtils.read(collectionFile));
+        final JsonObject message = new JsonObject().put(Constants.ID, collectionKey);
+        final Async asyncTask = aContext.async();
+
+        // Initialize our inherited class' vertx instance
+        vertx = myRunTestOnContextRule.vertx();
+
+        // Put our test object in the bucket so we can get it in our test
+        myAmazonS3.putObject(myS3Bucket, collectionKey, collectionFile);
+
+        if (myAmazonS3.doesObjectExist(myS3Bucket, collectionKey)) {
+            sendMessage(message, S3BucketVerticle.class.getName(), send -> {
+                if (send.succeeded()) {
+                    aContext.assertEquals(expected, send.result().body());
+
+                    if (!asyncTask.isCompleted()) {
+                        asyncTask.complete();
+                    }
+                } else {
+                    aContext.fail(send.cause());
+                }
+            });
+        } else {
+            aContext.fail();
+        }
     }
 
     /**
