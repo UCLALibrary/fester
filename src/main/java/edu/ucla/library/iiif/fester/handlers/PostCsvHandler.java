@@ -78,10 +78,15 @@ public class PostCsvHandler extends AbstractManifestHandler {
             final JsonObject message = new JsonObject();
             final HttpServerRequest request = aContext.request();
             final String protocol = request.connection().isSsl() ? "https://" : "http://";
+            final String iiifHost = StringUtils.trimToNull(request.getFormAttribute(Constants.IIIF_HOST));
 
             // Store the information that the manifest generator will need
             message.put(Constants.CSV_FILE_NAME, fileName).put(Constants.CSV_FILE_PATH, filePath);
             message.put(Constants.FESTER_HOST, protocol + request.host());
+
+            if (iiifHost != null) {
+                message.put(Constants.IIIF_HOST, iiifHost);
+            }
 
             // Send a message to the manifest generator
             sendMessage(ManifestVerticle.class.getName(), message, Integer.MAX_VALUE, send -> {

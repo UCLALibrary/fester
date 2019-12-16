@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
@@ -84,6 +85,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
         getJsonConsumer().handler(message -> {
             final JsonObject messageBody = message.body();
             final Path filePath = Paths.get(messageBody.getString(Constants.CSV_FILE_PATH));
+            final Optional<String> imageHost = Optional.ofNullable(messageBody.getString(Constants.IIIF_HOST));
 
             if (myHost == null) {
                 myHost = messageBody.getString(Constants.FESTER_HOST);
@@ -119,7 +121,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                 // If we have a collection record in the CSV we're processing, create a collection manifest
                 if (collection != null) {
                     LOGGER.debug(MessageCodes.MFS_122, filePath, collection);
-                    buildCollectionManifest(collection, works, worksData, pages, csvHeaders, message);
+                    buildCollectionManifest(collection, works, worksData, pages, csvHeaders, imageHost, message);
                 } else if (worksData.size() > 0) {
                     final String collectionID = worksData.get(0)[csvHeaders.getParentArkIndex()];
                     final Promise<LockedManifest> promise = Promise.promise();
@@ -138,7 +140,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                                 lockedManifest.release();
 
                                 if (update.succeeded()) {
-                                    buildWorksManifests(finalizedCsvHeaders, worksData, pages, message);
+                                    buildWorksManifests(finalizedCsvHeaders, worksData, pages, imageHost, message);
                                 } else {
                                     message.fail(0, update.cause().getMessage());
                                 }
@@ -271,7 +273,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
      */
     private void buildCollectionManifest(final Collection aCollection,
             final Map<String, List<Collection.Manifest>> aWorksMap, final List<String[]> aWorksDataList,
-            final Map<String, List<String[]>> aPagesMap, final CsvHeaders aHeaders,
+            final Map<String, List<String[]>> aPagesMap, final CsvHeaders aHeaders, final Optional<String> aImageHost,
             final Message<JsonObject> aMessage) {
         final List<Collection.Manifest> manifestList = aCollection.getManifests(); // Empty list
         final String collectionID = IDUtils.decode(aCollection.getID(), Constants.COLLECTIONS_PATH);
@@ -288,7 +290,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
         // Create a handler to handle generating work manifests after the collection manage has been uploaded
         promise.future().setHandler(handler -> {
             if (handler.succeeded()) {
-                buildWorksManifests(aHeaders, aWorksDataList, aPagesMap, aMessage);
+                buildWorksManifests(aHeaders, aWorksDataList, aPagesMap, aImageHost, aMessage);
             } else {
                 final int failCode = CodeUtils.getInt(MessageCodes.MFS_125);
                 final String failMessage = handler.cause().getMessage();
@@ -309,13 +311,14 @@ public class ManifestVerticle extends AbstractFesterVerticle {
     }
 
     private void buildWorksManifests(final CsvHeaders aHeaders, final List<String[]> aWorksDataList,
-            final Map<String, List<String[]>> aPagesMap, final Message<JsonObject> aMessage) {
+            final Map<String, List<String[]>> aPagesMap, final Optional<String> aImageHost,
+            final Message<JsonObject> aMessage) {
         final Iterator<String[]> iterator = aWorksDataList.iterator();
         final List<Future> futures = new ArrayList<>();
 
         // Request each work manifest be created
         while (iterator.hasNext()) {
-            futures.add(buildWorkManifest(aHeaders, iterator.next(), aPagesMap, Promise.promise()));
+            futures.add(buildWorkManifest(aHeaders, iterator.next(), aPagesMap, aImageHost, Promise.promise()));
         }
 
         // Keep track of our progress and fail our promise if we don't succeed
@@ -344,7 +347,8 @@ public class ManifestVerticle extends AbstractFesterVerticle {
      * @return The future result of our promise
      */
     private Future buildWorkManifest(final CsvHeaders aHeaders, final String[] aWork,
-            final Map<String, List<String[]>> aPages, final Promise<Void> aPromise) {
+            final Map<String, List<String[]>> aPages, final Optional<String> aImageHost,
+            final Promise<Void> aPromise) {
         final String workID = aWork[aHeaders.getItemArkIndex()];
         final String urlEncodedWorkID = URLEncoder.encode(workID, StandardCharsets.UTF_8);
         final String workLabel = aWork[aHeaders.getTitleIndex()];
@@ -355,6 +359,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
 
         try {
             if (aPages.containsKey(workID)) {
+                final String imageHost = aImageHost.orElse(myImageHost);
                 final List<String[]> pageList = aPages.get(workID);
                 final Iterator<String[]> iterator;
 
@@ -369,7 +374,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                     final String encodedPageID = URLEncoder.encode(pageID, StandardCharsets.UTF_8);
                     final String pageLabel = columns[aHeaders.getTitleIndex()];
                     final String canvasID = StringUtils.format(CANVAS_URI, myHost, urlEncodedWorkID, idPart);
-                    final String pageURI = StringUtils.format(SIMPLE_URI, myImageHost, encodedPageID);
+                    final String pageURI = StringUtils.format(SIMPLE_URI, imageHost, encodedPageID);
                     final ImageInfo info = new ImageInfo(pageURI); // May be room for improvement here
                     final Canvas canvas = new Canvas(canvasID, pageLabel, info.getWidth(), info.getHeight());
                     final String annotationURI = StringUtils.format(ANNOTATION_URI, myHost, urlEncodedWorkID, idPart);

@@ -15,6 +15,7 @@ import info.freelibrary.util.LoggerFactory;
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
+import edu.ucla.library.iiif.fester.ImageInfo;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.file.FileSystem;
@@ -67,6 +68,57 @@ public class PostCsvHandlerTest extends AbstractManifestHandlerTest {
         final Async asyncTask = aContext.async();
 
         form.textFileUpload(Constants.CSV_FILE, fileName, filePath, Constants.CSV_MEDIA_TYPE);
+
+        postRequest.sendMultipartForm(form, postHandler -> {
+            if (postHandler.succeeded()) {
+                final HttpResponse<Buffer> postResponse = postHandler.result();
+                final String postStatusMessage = postResponse.statusMessage();
+                final int postStatusCode = postResponse.statusCode();
+
+                if (postStatusCode == HTTP.CREATED) {
+                    final Buffer actualCSV = postResponse.body();
+                    final String contentType = postResponse.getHeader(Constants.CONTENT_TYPE);
+
+                    // Check that what we get back is the same as what we sent
+                    aContext.assertEquals(expectedCSV, actualCSV);
+
+                    // Check that what we get back has the correct media type
+                    aContext.assertEquals(Constants.CSV_MEDIA_TYPE, contentType);
+
+                    if (!asyncTask.isCompleted()) {
+                        asyncTask.complete();
+                    }
+                } else {
+                    aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, postStatusCode, postStatusMessage));
+                }
+            } else {
+                final Throwable exception = postHandler.cause();
+
+                LOGGER.error(exception, exception.getMessage());
+                aContext.fail(exception);
+            }
+        });
+    }
+
+    /**
+     * Tests posting a CSV to the PostCollectionHandler with a supplied IIIF host.
+     *
+     * @param aContext A test context
+     */
+    @Test
+    public final void testFullCsvWithIiifHost(final TestContext aContext) {
+        final int port = aContext.get(Config.HTTP_PORT);
+        final WebClient webClient = WebClient.create(myVertx);
+        final HttpRequest<Buffer> postRequest = webClient.post(port, UNSPECIFIED_HOST, COLLECTIONS_PATH);
+        final String filePath = FULL_CSV_FILE.getAbsolutePath();
+        final String fileName = FULL_CSV_FILE.getName();
+        final MultipartForm form = MultipartForm.create();
+        final FileSystem fileSystem = myVertx.fileSystem();
+        final Buffer expectedCSV = fileSystem.readFileBlocking(FULL_CSV_FILE.getAbsolutePath());
+        final Async asyncTask = aContext.async();
+
+        form.textFileUpload(Constants.CSV_FILE, fileName, filePath, Constants.CSV_MEDIA_TYPE);
+        form.attribute(Constants.IIIF_HOST, ImageInfo.FAKE_IIIF_SERVER);
 
         postRequest.sendMultipartForm(form, postHandler -> {
             if (postHandler.succeeded()) {
