@@ -15,6 +15,8 @@ import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
+import edu.ucla.library.iiif.fester.verticles.FakeS3BucketVerticle;
+import io.vertx.core.DeploymentOptions;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.file.FileSystem;
 import io.vertx.ext.unit.Async;
@@ -44,6 +46,17 @@ public class PostCsvHandlerTest extends AbstractManifestHandlerTest {
     @Before
     public void setUp(final TestContext aContext) throws IOException {
         super.setUp(aContext);
+
+        final Async asyncTask = aContext.async();
+
+        // We don't need to really send something to S3 so let's use our mock verticle
+        myVertx.deployVerticle(FakeS3BucketVerticle.class.getName(), new DeploymentOptions(), deployment -> {
+            if (deployment.succeeded()) {
+                asyncTask.complete();
+            } else {
+                aContext.fail(deployment.cause());
+            }
+        });
     }
 
     /**
@@ -67,20 +80,21 @@ public class PostCsvHandlerTest extends AbstractManifestHandlerTest {
         final int port = aContext.get(Config.HTTP_PORT);
         final WebClient webClient = WebClient.create(myVertx);
         final HttpRequest<Buffer> postRequest = webClient.post(port, Constants.UNSPECIFIED_HOST, ENDPOINT);
+        final String filePath = CSV_FILE.getAbsolutePath();
+        final String fileName = CSV_FILE.getName();
         final MultipartForm form = MultipartForm.create();
         final FileSystem fileSystem = myVertx.fileSystem();
         final Buffer expectedCSV = fileSystem.readFileBlocking(CSV_FILE.getAbsolutePath());
         final Async asyncTask = aContext.async();
 
-        form.textFileUpload("csv-file", CSV_FILE.getName(), CSV_FILE.getAbsolutePath(), Constants.CSV_MEDIA_TYPE);
+        form.textFileUpload(Constants.CSV_FILE, fileName, filePath, Constants.CSV_MEDIA_TYPE);
 
-        postRequest.sendMultipartForm(form, sendMultipartForm -> {
-            if (sendMultipartForm.succeeded()) {
-                final HttpResponse<Buffer> postResponse = sendMultipartForm.result();
+        postRequest.sendMultipartForm(form, postHandler -> {
+            if (postHandler.succeeded()) {
+                final HttpResponse<Buffer> postResponse = postHandler.result();
                 final String postStatusMessage = postResponse.statusMessage();
                 final int postStatusCode = postResponse.statusCode();
 
-                // If batch job submission successful, submit a batch job update and check the response code
                 if (postStatusCode == HTTP.CREATED) {
                     final Buffer actualCSV = postResponse.body();
                     final String contentType = postResponse.getHeader(Constants.CONTENT_TYPE);
@@ -98,7 +112,7 @@ public class PostCsvHandlerTest extends AbstractManifestHandlerTest {
                     aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, postStatusCode, postStatusMessage));
                 }
             } else {
-                final Throwable exception = sendMultipartForm.cause();
+                final Throwable exception = postHandler.cause();
 
                 LOGGER.error(exception, exception.getMessage());
                 aContext.fail(exception);

@@ -54,11 +54,12 @@
 
   <properties>
     <vertx.version>3.8.3</vertx.version>
-    <opencsv.version>4.6</opencsv.version>
+    <opencsv.version>5.0</opencsv.version>
     <slf4j.ext.version>1.7.26</slf4j.ext.version>
     <aws.sdk.version>1.11.478</aws.sdk.version>
+    <commons.lang.version>3.9</commons.lang.version>
     <freelib.utils.version>0.8.10</freelib.utils.version>
-    <jiiify.presentation.version>0.1.1</jiiify.presentation.version>
+    <jiiify.presentation.version>0.1.2</jiiify.presentation.version>
 
     <!-- Build plug-in versions -->
     <shade.plugin.version>2.4.3</shade.plugin.version>
@@ -81,6 +82,9 @@
     <fester.s3.bucket>iiif-fester</fester.s3.bucket>
     <fester.s3.access_key>YOUR_ACCESS_KEY</fester.s3.access_key>
     <fester.s3.secret_key>YOUR_SECRET_KEY</fester.s3.secret_key>
+
+    <!-- The IIIF base URL (including service prefix) -->
+    <iiif.base.url>https://iiif.library.ucla.edu/iiif/2</iiif.base.url>
 
     <!-- The port Fester listens on -->
     <fester.http.port>8888</fester.http.port>
@@ -150,6 +154,11 @@
       <groupId>com.opencsv</groupId>
       <artifactId>opencsv</artifactId>
       <version>${opencsv.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>${commons.lang.version}</version>
     </dependency>
 
     <!-- Below dependencies only used for testing -->

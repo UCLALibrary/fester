@@ -8,12 +8,12 @@ import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.shareddata.LocalMap;
 
 public abstract class AbstractFesterVerticle extends AbstractVerticle {
 
@@ -21,16 +21,24 @@ public abstract class AbstractFesterVerticle extends AbstractVerticle {
 
     @SuppressWarnings({ "deprecation" })
     @Override
-    public void start(final Future<Void> aFuture) throws Exception {
+    public void start() throws Exception {
         LOGGER.debug(MessageCodes.MFS_110, getClass().getName(), deploymentID());
-        aFuture.complete();
+
+        // Register our verticle name with its deployment ID.
+        final LocalMap<String, String> verticleMap = vertx.sharedData().getLocalMap(Constants.VERTICLE_MAP);
+        final String verticleName = getClass().getSimpleName();
+
+        // Add a deployment ID to the verticle map
+        if (verticleMap.containsKey(verticleName)) {
+            verticleMap.put(verticleName, verticleMap.get(verticleName) + "|" + deploymentID());
+        } else {
+            verticleMap.put(verticleName, deploymentID());
+        }
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public void stop(final Future<Void> aFuture) {
+    public void stop() {
         LOGGER.debug(MessageCodes.MFS_100, getClass().getName(), deploymentID());
-        aFuture.complete();
     }
 
     protected MessageConsumer<JsonObject> getJsonConsumer() {
@@ -50,7 +58,7 @@ public abstract class AbstractFesterVerticle extends AbstractVerticle {
             final Handler<AsyncResult<Message<JsonObject>>> aHandler) {
         final DeliveryOptions options = new DeliveryOptions().setSendTimeout(aTimeout);
 
-        LOGGER.debug(MessageCodes.MFS_102, aVerticleName, aJsonObject.encodePrettily());
+        LOGGER.debug(MessageCodes.MFS_102, aVerticleName, aJsonObject.encode());
         vertx.eventBus().request(aVerticleName, aJsonObject, options, aHandler);
     }
 

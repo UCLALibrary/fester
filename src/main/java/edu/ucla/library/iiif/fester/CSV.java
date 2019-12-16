@@ -36,6 +36,11 @@ public final class CSV {
      */
     public static final String TITLE = "Title";
 
+    /**
+     * The row's item sequence.
+     */
+    public static final String ITEM_SEQ = "Item Sequence";
+
     private CSV() {
     }
 }

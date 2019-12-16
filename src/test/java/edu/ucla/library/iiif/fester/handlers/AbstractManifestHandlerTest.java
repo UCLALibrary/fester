@@ -20,11 +20,11 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
-import info.freelibrary.util.StringUtils;
 
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.MessageCodes;
+import edu.ucla.library.iiif.fester.verticles.FakeS3BucketVerticle;
 import edu.ucla.library.iiif.fester.verticles.MainVerticle;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.AsyncResult;
@@ -44,6 +44,8 @@ abstract class AbstractManifestHandlerTest {
 
     private static final String MANIFEST_FILE_NAME = "testManifest.json";
 
+    private static final String IIIF_URL = "http://0.0.0.0";
+
     protected static final File MANIFEST_FILE = new File("src/test/resources", MANIFEST_FILE_NAME);
 
     protected Vertx myVertx;
@@ -62,7 +64,7 @@ abstract class AbstractManifestHandlerTest {
      * @param aContext A testing context
      */
     @Before
-    @SuppressWarnings({ "rawtypes", "deprecation" })
+    @SuppressWarnings({ "deprecation" })
     public void setUp(final TestContext aContext) throws IOException {
         final DeploymentOptions options = new DeploymentOptions();
         final ServerSocket socket = new ServerSocket(0);
@@ -73,7 +75,7 @@ abstract class AbstractManifestHandlerTest {
         LOGGER.debug(MessageCodes.MFS_002, port);
 
         aContext.put(Config.HTTP_PORT, port);
-        options.setConfig(new JsonObject().put(Config.HTTP_PORT, port));
+        options.setConfig(new JsonObject().put(Config.HTTP_PORT, port).put(Config.IIIF_BASE_URL, IIIF_URL));
         socket.close();
 
         myJsonlessManifestID = UUID.randomUUID().toString();
@@ -133,18 +135,16 @@ abstract class AbstractManifestHandlerTest {
         myVertx.deployVerticle(MainVerticle.class.getName(), aOpts, deployment -> {
             if (deployment.succeeded()) {
                 try {
-                    final String testManifest = StringUtils.read(MANIFEST_FILE);
-
                     // Store a manifest whose ID that has a '.json' extension
                     LOGGER.debug(MessageCodes.MFS_006, myManifestID, myS3Bucket);
-                    myS3Client.putObject(myS3Bucket, myManifestID, testManifest);
+                    myS3Client.putObject(myS3Bucket, myManifestID, MANIFEST_FILE);
 
                     // Store a manifest whose ID that doesn't have a '.json' extension
                     LOGGER.debug(MessageCodes.MFS_006, myJsonlessManifestID, myS3Bucket);
-                    myS3Client.putObject(myS3Bucket, myJsonlessManifestID, testManifest);
+                    myS3Client.putObject(myS3Bucket, myJsonlessManifestID, MANIFEST_FILE);
 
                     aAsyncTask.complete();
-                } catch (final IOException | SdkClientException details) {
+                } catch (final SdkClientException details) {
                     aContext.fail(details);
                 }
             } else {
@@ -159,7 +159,7 @@ abstract class AbstractManifestHandlerTest {
      * @param aFuture A future to capture when the initialization is completed
      * @throws IOException If there is trouble reading from the configuration file
      */
-    @SuppressWarnings({ "rawtypes", "deprecation" })
+    @SuppressWarnings({ "deprecation" })
     private void initialize(final Future aFuture) throws IOException {
         final ConfigRetriever configRetriever;
 
@@ -198,4 +198,28 @@ abstract class AbstractManifestHandlerTest {
         });
     }
 
+    /**
+     * Removes the real S3UploadVerticle and replaces it with a fake version for our tests. The fake version
+     * acknowledges it receives a request but doesn't try to upload the item into S3.
+     *
+     * @param aDeploymentId
+     * @param aFuture
+     */
+    private Future<Void> updateDeployment(final String aDeploymentId, final Future<Void> aFuture) {
+        myVertx.undeploy(aDeploymentId, undeployment -> {
+            if (undeployment.succeeded()) {
+                myVertx.deployVerticle(FakeS3BucketVerticle.class.getName(), fakeDeployment -> {
+                    if (fakeDeployment.succeeded()) {
+                        aFuture.complete();
+                    } else {
+                        aFuture.fail(fakeDeployment.cause());
+                    }
+                });
+            } else {
+                aFuture.fail(undeployment.cause());
+            }
+        });
+
+        return aFuture;
+    }
 }

@@ -81,10 +81,10 @@ public class MainVerticle extends AbstractVerticle {
 
                         try {
                             final int port = config.getInteger(Config.HTTP_PORT, DEFAULT_PORT);
-                            final PostCsvHandler postHandler = new PostCsvHandler(vertx, config);
+                            final PostCsvHandler postCsvHandler = new PostCsvHandler(vertx, config);
                             final StaticHandler staticHandler = StaticHandler.create().setWebRoot("webroot");
 
-                            factory.addHandlerByOperationId(Op.POST_COLLECTION, postHandler);
+                            factory.addHandlerByOperationId(Op.POST_CSV, postCsvHandler);
 
                             // After that, we can get a router that's been configured by our OpenAPI spec
                             router = factory.getRouter();
@@ -119,13 +119,15 @@ public class MainVerticle extends AbstractVerticle {
     }
 
     // Start verticles -- this is where to add any new verticles that we create and want to load
-    @SuppressWarnings({ "rawtypes", "deprecation" })
+    @SuppressWarnings({ "deprecation" })
     private void startVerticles(final JsonObject aConfig, final Future<Void> aFuture) {
         final DeploymentOptions uploaderOptions = new DeploymentOptions();
         final DeploymentOptions manifestorOptions = new DeploymentOptions();
         final List<Future> futures = new ArrayList<>();
 
         uploaderOptions.setConfig(aConfig);
+        manifestorOptions.setWorker(true).setWorkerPoolName(ManifestVerticle.class.getSimpleName());
+        manifestorOptions.setWorkerPoolSize(5).setConfig(aConfig);
 
         // Start up any necessary Fester verticles
         futures.add(deployVerticle(ManifestVerticle.class.getName(), manifestorOptions, Future.future()));

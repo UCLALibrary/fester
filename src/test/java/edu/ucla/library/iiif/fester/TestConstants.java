@@ -1,0 +1,30 @@
+
+package edu.ucla.library.iiif.fester;
+
+/**
+ * Constants useful to testing Fester.
+ */
+public final class TestConstants {
+
+    /**
+     * ID Prefix to use for all PUT tests.
+     */
+    public static final String PUT_TEST_ID_PREFIX = "PUT_";
+
+    /**
+     * The port variable for testing.
+     */
+    public static final String HTTP_PORT = "http.port";
+
+    /**
+     * The IP for an unspecified host.
+     */
+    @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
+    public static final String UNSPECIFIED_HOST = "0.0.0.0";
+
+    /**
+     * Creates a new TestConstants object.
+     */
+    private TestConstants() {
+    }
+}
