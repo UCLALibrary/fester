@@ -77,6 +77,11 @@ public final class Constants {
     public static final String CSV_FILE_NAME = "csv-file-name";
 
     /**
+     * The name of the IIIF host parameter.
+     */
+    public static final String IIIF_HOST = "iiif-host";
+
+    /**
      * The path at which we can find the collection manifests.
      */
     public static final String COLLECTIONS_PATH = "/collections";

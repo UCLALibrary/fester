@@ -59,6 +59,8 @@ paths:
             schema:
               type: object
               properties:
+                iiif-host:
+                  type: string
                 csv-file:
                   type: string
                   format: binary

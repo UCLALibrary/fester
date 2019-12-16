@@ -17,6 +17,8 @@ import io.vertx.core.json.JsonObject;
  */
 public class ImageInfo {
 
+    public static final String FAKE_IIIF_SERVER = "https://test.example.com/iiif";
+
     private final int myWidth;
 
     private final int myHeight;
@@ -28,7 +30,7 @@ public class ImageInfo {
      */
     public ImageInfo(final String aURL) throws MalformedURLException, IOException {
         // If our images are using an unspecified host, we're running in test mode
-        if (aURL.contains(Constants.UNSPECIFIED_HOST)) {
+        if (aURL.contains(Constants.UNSPECIFIED_HOST) || aURL.startsWith(FAKE_IIIF_SERVER)) {
             myHeight = 1000;
             myWidth = 1000;
         } else {
