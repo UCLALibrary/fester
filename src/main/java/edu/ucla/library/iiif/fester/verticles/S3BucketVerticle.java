@@ -88,7 +88,7 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
                     aMessage.reply(new JsonObject(body.getString(0, body.length())));
                 });
             } else {
-                aMessage.fail(0, get.statusMessage());
+                aMessage.fail(CodeUtils.getInt(MessageCodes.MFS_052), get.statusMessage());
             }
         });
     }
