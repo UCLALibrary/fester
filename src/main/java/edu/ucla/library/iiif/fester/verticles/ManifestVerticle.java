@@ -38,8 +38,9 @@ import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.CsvHeaders;
 import edu.ucla.library.iiif.fester.CsvMetadata;
 import edu.ucla.library.iiif.fester.CsvParsingException;
-import edu.ucla.library.iiif.fester.ImageInfo;
+import edu.ucla.library.iiif.fester.ImageInfoLookup;
 import edu.ucla.library.iiif.fester.LockedManifest;
+import edu.ucla.library.iiif.fester.ManifestNotFoundException;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.utils.CodeUtils;
@@ -473,6 +474,8 @@ public class ManifestVerticle extends AbstractFesterVerticle {
         final Iterator<String[]> iterator = aPageList.iterator();
         final String imageHost = aImageHost.orElse(myImageHost);
 
+        Canvas lastCanvas = null;
+
         while (iterator.hasNext()) {
             final String[] columns = iterator.next();
             final String pageID = columns[aCsvHeaders.getItemArkIndex()];
@@ -481,13 +484,46 @@ public class ManifestVerticle extends AbstractFesterVerticle {
             final String pageLabel = columns[aCsvHeaders.getTitleIndex()];
             final String canvasID = StringUtils.format(CANVAS_URI, myHost, aWorkID, idPart);
             final String pageURI = StringUtils.format(SIMPLE_URI, imageHost, encodedPageID);
-            final ImageInfo info = new ImageInfo(pageURI); // May be room for improvement here
-            final Canvas canvas = new Canvas(canvasID, pageLabel, info.getWidth(), info.getHeight());
             final String annotationURI = StringUtils.format(ANNOTATION_URI, myHost, aWorkID, idPart);
-            final ImageContent imageContent = new ImageContent(annotationURI, canvas);
             final String resourceURI = pageURI + DEFAULT_IMAGE_URI; // Copying Samvera's default image link
             final ImageResource imageResource = new ImageResource(resourceURI, new ImageInfoService(pageURI));
+            final ImageContent imageContent;
 
+            Canvas canvas;
+
+            try {
+                final ImageInfoLookup infoLookup = new ImageInfoLookup(pageURI);
+
+                canvas = new Canvas(canvasID, pageLabel, infoLookup.getWidth(), infoLookup.getHeight());
+            } catch (final ManifestNotFoundException details) {
+                final int width;
+                final int height;
+
+                // First check the last canvas that we've processed (if there is one)
+                if (lastCanvas != null) {
+                    width = lastCanvas.getWidth();
+                    height = lastCanvas.getHeight();
+                } else {
+                    // If we've not processed any, check to sequence to find one
+                    final List<Canvas> canvases = aSequence.getCanvases();
+
+                    // If there is one use that; else, just use zeros for the w/h values
+                    if (canvases.size() != 0) {
+                        final Canvas altLastCanvas = canvases.get(canvases.size() - 1);
+
+                        width = altLastCanvas.getWidth();
+                        height = altLastCanvas.getHeight();
+                    } else {
+                        width = 0;
+                        height = 0;
+                    }
+                }
+
+                canvas = new Canvas(canvasID, pageLabel, width, height);
+                lastCanvas = canvas;
+            }
+
+            imageContent = new ImageContent(annotationURI, canvas);
             imageContent.addResource(imageResource);
             canvas.addImageContent(imageContent);
             aSequence.addCanvas(canvas);
