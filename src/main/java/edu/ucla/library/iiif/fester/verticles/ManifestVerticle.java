@@ -41,6 +41,7 @@ import edu.ucla.library.iiif.fester.CsvParsingException;
 import edu.ucla.library.iiif.fester.ImageInfo;
 import edu.ucla.library.iiif.fester.LockedManifest;
 import edu.ucla.library.iiif.fester.MessageCodes;
+import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.utils.CodeUtils;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
 import io.vertx.core.CompositeFuture;
@@ -135,7 +136,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                     final List<String[]> pagesList = pages.values().iterator().next();
 
                     LOGGER.debug(MessageCodes.MFS_069, filePath);
-                    updatePages(workID, pagesList, message);
+                    updatePages(workID, csvHeaders, pagesList, imageHost, message);
                 } else {
                     final CsvParsingException details = new CsvParsingException(MessageCodes.MFS_042);
 
@@ -164,20 +165,52 @@ public class ManifestVerticle extends AbstractFesterVerticle {
      * @param aPagesList A list of pages
      * @param aMessage A message
      */
-    private void updatePages(final String aWorkID, final List<String[]> aPagesList,
-            final Message<JsonObject> aMessage) {
+    private void updatePages(final String aWorkID, final CsvHeaders aCsvHeaders, final List<String[]> aPagesList,
+            final Optional<String> aImageHost, final Message<JsonObject> aMessage) {
         final Promise<LockedManifest> promise = Promise.promise();
+        final String encodedWorkID = URLEncoder.encode(aWorkID, StandardCharsets.UTF_8);
 
         promise.future().setHandler(handler -> {
             if (handler.succeeded()) {
                 final LockedManifest lockedManifest = handler.result();
                 final Manifest manifest = lockedManifest.getWork();
+                final List<Sequence> sequences = manifest.getSequences();
+                final Sequence sequence;
 
-                LOGGER.debug(manifest.toJSON().encodePrettily());
-                lockedManifest.release();
-                aMessage.reply("Processing pages");
+                // If the work doesn't already have any sequences, create one for it
+                if (sequences.size() == 0) {
+                    final String sequenceID = StringUtils.format(SEQUENCE_URI, myHost, encodedWorkID);
+
+                    sequence = new Sequence().setID(sequenceID);
+                    manifest.addSequence(sequence);
+                } else {
+                    // For now we're just dealing with single sequence works
+                    sequence = sequences.get(0);
+                }
+
+                aPagesList.sort(new ItemSequenceComparator(aCsvHeaders.getItemSequence()));
+
+                try {
+                    addPages(aCsvHeaders, aPagesList, sequence, aImageHost, encodedWorkID);
+
+                    sendMessage(manifest.toJSON(), S3BucketVerticle.class.getName(), send -> {
+                        if (send.succeeded()) {
+                            aMessage.reply(Op.SUCCESS);
+                        } else {
+                            final Throwable details = send.cause();
+                            final String errorMessage = details.getMessage();
+
+                            LOGGER.error(details, MessageCodes.MFS_052, errorMessage);
+                            aMessage.fail(CodeUtils.getInt(MessageCodes.MFS_052), errorMessage);
+                        }
+                    });
+                } catch (final IOException details) {
+                    aMessage.fail(CodeUtils.getInt(MessageCodes.MFS_052), details.getMessage());
+                } finally {
+                    lockedManifest.release();
+                }
             } else {
-                aMessage.fail(0, handler.cause().getMessage());
+                aMessage.fail(CodeUtils.getInt(MessageCodes.MFS_052), handler.cause().getMessage());
             }
         });
 
@@ -210,11 +243,11 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                     if (update.succeeded()) {
                         processWorks(aCsvHeaders, aCsvMetadata, aImageHost, aMessage);
                     } else {
-                        aMessage.fail(0, update.cause().getMessage());
+                        aMessage.fail(CodeUtils.getInt(MessageCodes.MFS_052), update.cause().getMessage());
                     }
                 });
             } else {
-                aMessage.fail(0, handler.cause().getMessage());
+                aMessage.fail(CodeUtils.getInt(MessageCodes.MFS_052), handler.cause().getMessage());
             }
         });
 
@@ -402,33 +435,12 @@ public class ManifestVerticle extends AbstractFesterVerticle {
 
         try {
             if (aPages.containsKey(workID)) {
-                final String imageHost = aImageHost.orElse(myImageHost);
                 final List<String[]> pageList = aPages.get(workID);
-                final Iterator<String[]> iterator;
 
                 manifest.addSequence(sequence);
                 pageList.sort(new ItemSequenceComparator(aCsvHeaders.getItemSequence()));
-                iterator = pageList.iterator();
 
-                while (iterator.hasNext()) {
-                    final String[] columns = iterator.next();
-                    final String pageID = columns[aCsvHeaders.getItemArkIndex()];
-                    final String idPart = IDUtils.getLastPart(pageID); // We're just copying Samvera here
-                    final String encodedPageID = URLEncoder.encode(pageID, StandardCharsets.UTF_8);
-                    final String pageLabel = columns[aCsvHeaders.getTitleIndex()];
-                    final String canvasID = StringUtils.format(CANVAS_URI, myHost, urlEncodedWorkID, idPart);
-                    final String pageURI = StringUtils.format(SIMPLE_URI, imageHost, encodedPageID);
-                    final ImageInfo info = new ImageInfo(pageURI); // May be room for improvement here
-                    final Canvas canvas = new Canvas(canvasID, pageLabel, info.getWidth(), info.getHeight());
-                    final String annotationURI = StringUtils.format(ANNOTATION_URI, myHost, urlEncodedWorkID, idPart);
-                    final ImageContent imageContent = new ImageContent(annotationURI, canvas);
-                    final String resourceURI = pageURI + DEFAULT_IMAGE_URI; // Copying Samvera's default image link
-                    final ImageResource imageResource = new ImageResource(resourceURI, new ImageInfoService(pageURI));
-
-                    imageContent.addResource(imageResource);
-                    canvas.addImageContent(imageContent);
-                    sequence.addCanvas(canvas);
-                }
+                addPages(aCsvHeaders, pageList, sequence, aImageHost, urlEncodedWorkID);
             }
 
             sendMessage(manifest.toJSON(), S3BucketVerticle.class.getName(), send -> {
@@ -444,6 +456,42 @@ public class ManifestVerticle extends AbstractFesterVerticle {
 
         // Return our promise's future result
         return aPromise.future();
+    }
+
+    /**
+     * Adds pages to a sequence from a work manifest.
+     *
+     * @param aCsvHeaders A CSV headers
+     * @param aPageList A list of pages to add
+     * @param aSequence A sequence to add pages to
+     * @param aImageHost An image host for image links
+     * @param aWorkID A URL encoded work ID
+     * @throws IOException If there is trouble adding a page
+     */
+    private void addPages(final CsvHeaders aCsvHeaders, final List<String[]> aPageList, final Sequence aSequence,
+            final Optional<String> aImageHost, final String aWorkID) throws IOException {
+        final Iterator<String[]> iterator = aPageList.iterator();
+        final String imageHost = aImageHost.orElse(myImageHost);
+
+        while (iterator.hasNext()) {
+            final String[] columns = iterator.next();
+            final String pageID = columns[aCsvHeaders.getItemArkIndex()];
+            final String idPart = IDUtils.getLastPart(pageID); // We're just copying Samvera here
+            final String encodedPageID = URLEncoder.encode(pageID, StandardCharsets.UTF_8);
+            final String pageLabel = columns[aCsvHeaders.getTitleIndex()];
+            final String canvasID = StringUtils.format(CANVAS_URI, myHost, aWorkID, idPart);
+            final String pageURI = StringUtils.format(SIMPLE_URI, imageHost, encodedPageID);
+            final ImageInfo info = new ImageInfo(pageURI); // May be room for improvement here
+            final Canvas canvas = new Canvas(canvasID, pageLabel, info.getWidth(), info.getHeight());
+            final String annotationURI = StringUtils.format(ANNOTATION_URI, myHost, aWorkID, idPart);
+            final ImageContent imageContent = new ImageContent(annotationURI, canvas);
+            final String resourceURI = pageURI + DEFAULT_IMAGE_URI; // Copying Samvera's default image link
+            final ImageResource imageResource = new ImageResource(resourceURI, new ImageInfoService(pageURI));
+
+            imageContent.addResource(imageResource);
+            canvas.addImageContent(imageContent);
+            aSequence.addCanvas(canvas);
+        }
     }
 
     /**

@@ -17,6 +17,7 @@ import info.freelibrary.util.StringUtils;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.Op;
+import edu.ucla.library.iiif.fester.utils.CodeUtils;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.Message;
@@ -73,10 +74,10 @@ public class FakeS3BucketVerticle extends AbstractFesterVerticle {
 
                 aMessage.reply(manifest);
             } else {
-                aMessage.fail(0, id + " not found");
+                aMessage.fail(CodeUtils.getInt(MessageCodes.MFS_052), id + " not found");
             }
         } catch (final IOException details) {
-            aMessage.fail(0, details.getMessage());
+            aMessage.fail(CodeUtils.getInt(MessageCodes.MFS_052), details.getMessage());
         }
     }
 
