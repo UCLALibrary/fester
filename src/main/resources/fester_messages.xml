@@ -82,6 +82,7 @@
   <entry key="MFS-066">Failed to close Vert.x test instance</entry>
   <entry key="MFS-067">Test server for {} started...</entry>
   <entry key="MFS-068">Manifesting a CSV file of works: {}</entry>
+  <entry key="MFS-069">Manifesting a CSV file of pages: {}</entry>
 
   <entry key="MFS-100">Stopping the {} verticle [id: {}]</entry>
   <entry key="MFS-101">Getting message consumer for: {}</entry>

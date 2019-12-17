@@ -35,11 +35,15 @@ public class ManifestVerticleTest {
 
     private static final String IMAGE_HOST = "https://iiif.library.ucla.edu/iiif/2";
 
+    private static final String WORKS_CSV = "src/test/resources/csv/{}/batch1/{}1.csv";
+
     private static final String CSV_FILE_PATH = "src/test/resources/csv/{}.csv";
 
     private static final String HATHAWAY = "hathaway";
 
     private static final String POSTCARDS = "capostcards";
+
+    private static final String WORKS = "works";
 
     private Vertx myVertx;
 
@@ -153,6 +157,31 @@ public class ManifestVerticleTest {
         message.put(Constants.FESTER_HOST, MANIFEST_HOST);
 
         LOGGER.debug(MessageCodes.MFS_120, hathawayWorks, ManifestVerticle.class.getName());
+
+        myVertx.eventBus().request(ManifestVerticle.class.getName(), message, request -> {
+            if (request.succeeded()) {
+                asyncTask.complete();
+            } else {
+                aContext.fail(request.cause());
+            }
+        });
+    }
+
+    /**
+     * Test against a CSV that just has pages.
+     *
+     * @param aContext A testing context
+     */
+    @Test
+    public final void testPagesManifest(final TestContext aContext) {
+        final String filePath = StringUtils.format(WORKS_CSV, HATHAWAY, HATHAWAY);
+        final JsonObject message = new JsonObject();
+        final Async asyncTask = aContext.async();
+
+        message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, filePath);
+        message.put(Constants.FESTER_HOST, MANIFEST_HOST);
+
+        LOGGER.debug(MessageCodes.MFS_120, WORKS, ManifestVerticle.class.getName());
 
         myVertx.eventBus().request(ManifestVerticle.class.getName(), message, request -> {
             if (request.succeeded()) {
