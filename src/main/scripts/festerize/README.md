@@ -32,8 +32,8 @@ Options:
   --server TEXT    URL the Fester service we are using. Default:
                    https://iiif.library.ucla.edu
   --endpoint TEXT  Service endpoint to use. Default: /collections
-  --out TEXT       Folder to store the results of festerizing. Default:
-                   ./output
+  --out TEXT       Folder to store the results of festerizing. Default: output
+  --iiifhost TEXT  IIIF-host this collection uses. Optional, no default.
   --loglevel TEXT  Log level for Festerizer logs. Default: INFO, can also be
                    DEBUG or ERROR
   --help           Show this message and exit.
