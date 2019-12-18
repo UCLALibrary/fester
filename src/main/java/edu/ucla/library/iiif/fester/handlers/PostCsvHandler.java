@@ -5,7 +5,16 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
+
+import org.apache.commons.io.IOUtils;
+
+import com.opencsv.CSVReader;
+import com.opencsv.CSVWriter;
+import com.opencsv.exceptions.CsvException;
 
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
@@ -14,8 +23,10 @@ import info.freelibrary.util.StringUtils;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
+import edu.ucla.library.iiif.fester.utils.LinkUtils;
 import edu.ucla.library.iiif.fester.verticles.ManifestVerticle;
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.file.FileSystem;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
@@ -79,10 +90,11 @@ public class PostCsvHandler extends AbstractManifestHandler {
             final HttpServerRequest request = aContext.request();
             final String protocol = request.connection().isSsl() ? "https://" : "http://";
             final String iiifHost = StringUtils.trimToNull(request.getFormAttribute(Constants.IIIF_HOST));
+            final String festerHost = protocol + request.host();
 
             // Store the information that the manifest generator will need
             message.put(Constants.CSV_FILE_NAME, fileName).put(Constants.CSV_FILE_PATH, filePath);
-            message.put(Constants.FESTER_HOST, protocol + request.host());
+            message.put(Constants.FESTER_HOST, festerHost);
 
             if (iiifHost != null) {
                 message.put(Constants.IIIF_HOST, iiifHost);
@@ -91,25 +103,44 @@ public class PostCsvHandler extends AbstractManifestHandler {
             // Send a message to the manifest generator
             sendMessage(ManifestVerticle.class.getName(), message, Integer.MAX_VALUE, send -> {
                 if (send.succeeded()) {
-                    final String responseMessage = LOGGER.getMessage(MessageCodes.MFS_038, fileName, filePath);
-                    final FileSystem fileSystem = myVertx.fileSystem();
-
-                    // For a first pass, we just return the same CSV that was sent to us.
-                    fileSystem.readFile(filePath, read -> {
-                        if (read.succeeded()) {
-                            response.setStatusCode(HTTP.CREATED);
-                            response.setStatusMessage(responseMessage);
-                            response.putHeader(Constants.CONTENT_TYPE, Constants.CSV_MEDIA_TYPE);
-                            response.end(read.result());
-                        } else {
-                            returnError(response, read.cause());
-                        }
-                    });
+                    updateCSV(fileName, filePath, festerHost, response);
                 } else {
                     returnError(response, send.cause());
                 }
             });
         }
+    }
+
+    private void updateCSV(final String aFileName, final String aFilePath, final String aHost,
+            final HttpServerResponse aResponse) {
+        final String responseMessage = LOGGER.getMessage(MessageCodes.MFS_038, aFileName, aFilePath);
+        final FileSystem fileSystem = myVertx.fileSystem();
+
+        // For a first pass, we just return the same CSV that was sent to us.
+        fileSystem.readFile(aFilePath, read -> {
+            if (read.succeeded()) {
+                final String csvString = read.result().toString(StandardCharsets.UTF_8);
+                final CSVReader csvReader = new CSVReader(new StringReader(csvString));
+                final StringWriter writer = new StringWriter();
+                final CSVWriter csvWriter = new CSVWriter(writer);
+
+                try {
+                    csvWriter.writeAll(LinkUtils.addManifests(aHost, csvReader.readAll()));
+
+                    aResponse.setStatusCode(HTTP.CREATED);
+                    aResponse.setStatusMessage(responseMessage);
+                    aResponse.putHeader(Constants.CONTENT_TYPE, Constants.CSV_MEDIA_TYPE);
+                    aResponse.end(Buffer.buffer(writer.toString()));
+                } catch (final IOException | CsvException details) {
+                    returnError(aResponse, details);
+                } finally {
+                    IOUtils.closeQuietly(csvReader);
+                    IOUtils.closeQuietly(csvWriter);
+                }
+            } else {
+                returnError(aResponse, read.cause());
+            }
+        });
     }
 
     /**
