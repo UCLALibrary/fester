@@ -116,7 +116,7 @@ public class PostCsvHandler extends AbstractManifestHandler {
         final String responseMessage = LOGGER.getMessage(MessageCodes.MFS_038, aFileName, aFilePath);
         final FileSystem fileSystem = myVertx.fileSystem();
 
-        // For a first pass, we just return the same CSV that was sent to us.
+        // Read the uploaded CSV file and updating it before sending it back
         fileSystem.readFile(aFilePath, read -> {
             if (read.succeeded()) {
                 final String csvString = read.result().toString(StandardCharsets.UTF_8);
