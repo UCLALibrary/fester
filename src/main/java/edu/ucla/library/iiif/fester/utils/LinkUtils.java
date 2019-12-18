@@ -11,6 +11,9 @@ import java.util.Objects;
 
 import info.freelibrary.util.StringUtils;
 
+import edu.ucla.library.iiif.fester.CSV;
+import edu.ucla.library.iiif.fester.ObjectType;
+
 /**
  * A utility class for link generation.
  */
@@ -19,16 +22,6 @@ public final class LinkUtils {
     private static final String WORK_MANIFEST_URL = "{}/{}/manifest";
 
     private static final String COLLECTION_DOC_URL = "{}/collections/{}";
-
-    private static final String MANIFEST_HEADER = "IIIF Manifest URL";
-
-    private static final String OBJECT_TYPE_HEADER = "Object Type";
-
-    private static final String ITEM_ARK_HEADER = "Item ARK";
-
-    private static final String COLLECTION = "Collection";
-
-    private static final String WORK = "Work";
 
     private LinkUtils() {
     }
@@ -44,9 +37,9 @@ public final class LinkUtils {
         Objects.requireNonNull(aHostURL);
         Objects.requireNonNull(aCsvList);
 
-        final int objectTypeHeaderIndex = getColumnIndex(OBJECT_TYPE_HEADER, aCsvList);
-        final int manifestHeaderIndex = getColumnIndex(MANIFEST_HEADER, aCsvList);
-        final int itemArkHeaderIndex = getColumnIndex(ITEM_ARK_HEADER, aCsvList);
+        final int objectTypeHeaderIndex = getColumnIndex(CSV.OBJECT_TYPE, aCsvList);
+        final int manifestHeaderIndex = getColumnIndex(CSV.MANIFEST_URL, aCsvList);
+        final int itemArkHeaderIndex = getColumnIndex(CSV.ITEM_ARK, aCsvList);
         final int columnLength = aCsvList.get(0).length;
         final List<String[]> csvList;
 
@@ -68,15 +61,15 @@ public final class LinkUtils {
             final String[] row = csvList.get(index);
 
             if (index == 0) {
-                row[manifestHeaderIndex] = MANIFEST_HEADER;
+                row[manifestHeaderIndex] = CSV.MANIFEST_URL;
             } else {
                 final String objectType = row[objectTypeHeaderIndex];
                 final String itemARK = URLEncoder.encode(row[itemArkHeaderIndex], StandardCharsets.UTF_8);
 
                 // URLs vary depending on whether the row is a Collection or Work
-                if (COLLECTION.equalsIgnoreCase(objectType)) {
+                if (ObjectType.COLLECTION.equals(objectType)) {
                     row[manifestHeaderIndex] = StringUtils.format(COLLECTION_DOC_URL, aHostURL, itemARK);
-                } else if (WORK.equalsIgnoreCase(objectType)) {
+                } else if (ObjectType.WORK.equals(objectType)) {
                     row[manifestHeaderIndex] = StringUtils.format(WORK_MANIFEST_URL, aHostURL, itemARK);
                 } else {
                     row[manifestHeaderIndex] = ""; // Use an empty placeholder for things without links
