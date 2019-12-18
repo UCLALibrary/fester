@@ -5,20 +5,28 @@ import static edu.ucla.library.iiif.fester.Constants.COLLECTIONS_PATH;
 import static edu.ucla.library.iiif.fester.Constants.UNSPECIFIED_HOST;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Test;
 
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
+
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
+import info.freelibrary.util.StringUtils;
 
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.ImageInfoLookup;
 import edu.ucla.library.iiif.fester.MessageCodes;
+import edu.ucla.library.iiif.fester.utils.LinkUtils;
+import edu.ucla.library.iiif.fester.utils.LinkUtilsTest;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.file.FileSystem;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.web.client.HttpRequest;
@@ -39,6 +47,8 @@ public class PostCsvHandlerTest extends AbstractManifestHandlerTest {
 
     private static final File WORKS_CSV_FILE = new File("src/test/resources/csv/hathaway/batch2/works.csv");
 
+    private static final String HOST = "http://0.0.0.0:{}";
+
     /**
      * Test tear down.
      *
@@ -56,15 +66,15 @@ public class PostCsvHandlerTest extends AbstractManifestHandlerTest {
      * @param aContext A test context
      */
     @Test
-    public final void testFullCSV(final TestContext aContext) {
+    public final void testFullCSV(final TestContext aContext) throws CsvException, IOException {
         final int port = aContext.get(Config.HTTP_PORT);
         final WebClient webClient = WebClient.create(myVertx);
         final HttpRequest<Buffer> postRequest = webClient.post(port, UNSPECIFIED_HOST, COLLECTIONS_PATH);
         final String filePath = FULL_CSV_FILE.getAbsolutePath();
         final String fileName = FULL_CSV_FILE.getName();
         final MultipartForm form = MultipartForm.create();
-        final FileSystem fileSystem = myVertx.fileSystem();
-        final Buffer expectedCSV = fileSystem.readFileBlocking(FULL_CSV_FILE.getAbsolutePath());
+        final List<String[]> expected = LinkUtilsTest.read(FULL_CSV_FILE.getAbsolutePath());
+        final String host = StringUtils.format(HOST, port);
         final Async asyncTask = aContext.async();
 
         form.textFileUpload(Constants.CSV_FILE, fileName, filePath, Constants.CSV_MEDIA_TYPE);
@@ -76,11 +86,11 @@ public class PostCsvHandlerTest extends AbstractManifestHandlerTest {
                 final int postStatusCode = postResponse.statusCode();
 
                 if (postStatusCode == HTTP.CREATED) {
-                    final Buffer actualCSV = postResponse.body();
+                    final Buffer actual = postResponse.body();
                     final String contentType = postResponse.getHeader(Constants.CONTENT_TYPE);
 
                     // Check that what we get back is the same as what we sent
-                    aContext.assertEquals(expectedCSV, actualCSV);
+                    check(aContext, LinkUtils.addManifests(host, expected), actual);
 
                     // Check that what we get back has the correct media type
                     aContext.assertEquals(Constants.CSV_MEDIA_TYPE, contentType);
@@ -106,15 +116,15 @@ public class PostCsvHandlerTest extends AbstractManifestHandlerTest {
      * @param aContext A test context
      */
     @Test
-    public final void testFullCsvWithIiifHost(final TestContext aContext) {
+    public final void testFullCsvWithIiifHost(final TestContext aContext) throws IOException, CsvException {
         final int port = aContext.get(Config.HTTP_PORT);
         final WebClient webClient = WebClient.create(myVertx);
         final HttpRequest<Buffer> postRequest = webClient.post(port, UNSPECIFIED_HOST, COLLECTIONS_PATH);
         final String filePath = FULL_CSV_FILE.getAbsolutePath();
         final String fileName = FULL_CSV_FILE.getName();
         final MultipartForm form = MultipartForm.create();
-        final FileSystem fileSystem = myVertx.fileSystem();
-        final Buffer expectedCSV = fileSystem.readFileBlocking(FULL_CSV_FILE.getAbsolutePath());
+        final List<String[]> expected = LinkUtilsTest.read(FULL_CSV_FILE.getAbsolutePath());
+        final String host = StringUtils.format(HOST, port);
         final Async asyncTask = aContext.async();
 
         form.textFileUpload(Constants.CSV_FILE, fileName, filePath, Constants.CSV_MEDIA_TYPE);
@@ -127,11 +137,11 @@ public class PostCsvHandlerTest extends AbstractManifestHandlerTest {
                 final int postStatusCode = postResponse.statusCode();
 
                 if (postStatusCode == HTTP.CREATED) {
-                    final Buffer actualCSV = postResponse.body();
+                    final Buffer actual = postResponse.body();
                     final String contentType = postResponse.getHeader(Constants.CONTENT_TYPE);
 
                     // Check that what we get back is the same as what we sent
-                    aContext.assertEquals(expectedCSV, actualCSV);
+                    check(aContext, LinkUtils.addManifests(host, expected), actual);
 
                     // Check that what we get back has the correct media type
                     aContext.assertEquals(Constants.CSV_MEDIA_TYPE, contentType);
@@ -157,15 +167,15 @@ public class PostCsvHandlerTest extends AbstractManifestHandlerTest {
      * @param aContext A test context
      */
     @Test
-    public final void testCollectionWorksCSV(final TestContext aContext) {
+    public final void testCollectionWorksCSV(final TestContext aContext) throws IOException, CsvException {
         final int port = aContext.get(Config.HTTP_PORT);
         final WebClient webClient = WebClient.create(myVertx);
         final HttpRequest<Buffer> postRequest = webClient.post(port, UNSPECIFIED_HOST, COLLECTIONS_PATH);
         final String filePath = COLL_WORKS_CSV_FILE.getAbsolutePath();
         final String fileName = COLL_WORKS_CSV_FILE.getName();
         final MultipartForm form = MultipartForm.create();
-        final FileSystem fileSystem = myVertx.fileSystem();
-        final Buffer expectedCSV = fileSystem.readFileBlocking(COLL_WORKS_CSV_FILE.getAbsolutePath());
+        final List<String[]> expected = LinkUtilsTest.read(COLL_WORKS_CSV_FILE.getAbsolutePath());
+        final String host = StringUtils.format(HOST, port);
         final Async asyncTask = aContext.async();
 
         form.textFileUpload(Constants.CSV_FILE, fileName, filePath, Constants.CSV_MEDIA_TYPE);
@@ -177,11 +187,11 @@ public class PostCsvHandlerTest extends AbstractManifestHandlerTest {
                 final int postStatusCode = postResponse.statusCode();
 
                 if (postStatusCode == HTTP.CREATED) {
-                    final Buffer actualCSV = postResponse.body();
+                    final Buffer actual = postResponse.body();
                     final String contentType = postResponse.getHeader(Constants.CONTENT_TYPE);
 
                     // Check that what we get back is the same as what we sent
-                    aContext.assertEquals(expectedCSV, actualCSV);
+                    check(aContext, LinkUtils.addManifests(host, expected), actual);
 
                     // Check that what we get back has the correct media type
                     aContext.assertEquals(Constants.CSV_MEDIA_TYPE, contentType);
@@ -207,15 +217,15 @@ public class PostCsvHandlerTest extends AbstractManifestHandlerTest {
      * @param aContext A test context
      */
     @Test
-    public final void testWorksCSV(final TestContext aContext) {
+    public final void testWorksCSV(final TestContext aContext) throws IOException, CsvException {
         final int port = aContext.get(Config.HTTP_PORT);
         final WebClient webClient = WebClient.create(myVertx);
         final HttpRequest<Buffer> postRequest = webClient.post(port, UNSPECIFIED_HOST, COLLECTIONS_PATH);
         final String filePath = WORKS_CSV_FILE.getAbsolutePath();
         final String fileName = WORKS_CSV_FILE.getName();
         final MultipartForm form = MultipartForm.create();
-        final FileSystem fileSystem = myVertx.fileSystem();
-        final Buffer expectedCSV = fileSystem.readFileBlocking(WORKS_CSV_FILE.getAbsolutePath());
+        final List<String[]> expected = LinkUtilsTest.read(WORKS_CSV_FILE.getAbsolutePath());
+        final String host = StringUtils.format(HOST, port);
         final Async asyncTask = aContext.async();
 
         form.textFileUpload(Constants.CSV_FILE, fileName, filePath, Constants.CSV_MEDIA_TYPE);
@@ -227,11 +237,11 @@ public class PostCsvHandlerTest extends AbstractManifestHandlerTest {
                 final int postStatusCode = postResponse.statusCode();
 
                 if (postStatusCode == HTTP.CREATED) {
-                    final Buffer actualCSV = postResponse.body();
+                    final Buffer actual = postResponse.body();
                     final String contentType = postResponse.getHeader(Constants.CONTENT_TYPE);
 
                     // Check that what we get back is the same as what we sent
-                    aContext.assertEquals(expectedCSV, actualCSV);
+                    check(aContext, LinkUtils.addManifests(host, expected), actual);
 
                     // Check that what we get back has the correct media type
                     aContext.assertEquals(Constants.CSV_MEDIA_TYPE, contentType);
@@ -249,5 +259,33 @@ public class PostCsvHandlerTest extends AbstractManifestHandlerTest {
                 aContext.fail(exception);
             }
         });
+    }
+
+    /**
+     * Checks our CSV structures.
+     *
+     * @param aContext A testing context
+     * @param aExpected An expected CSV structure
+     * @param aFound A found CSV structure
+     */
+    private void check(final TestContext aContext, final List<String[]> aExpected, final Buffer aFound) {
+        try (CSVReader reader = new CSVReader(new StringReader(aFound.toString()))) {
+            final List<String[]> found = reader.readAll();
+
+            aContext.assertEquals(aExpected.size(), found.size());
+
+            for (int index = 0; index < aExpected.size(); index++) {
+                final String[] expectedValues = aExpected.get(index);
+                final String[] foundValues = found.get(index);
+
+                aContext.assertEquals(expectedValues.length, foundValues.length);
+
+                for (int valueIndex = 0; valueIndex < expectedValues.length; valueIndex++) {
+                    aContext.assertEquals(expectedValues[valueIndex], foundValues[valueIndex]);
+                }
+            }
+        } catch (IOException | CsvException details) {
+            aContext.fail(details);
+        }
     }
 }

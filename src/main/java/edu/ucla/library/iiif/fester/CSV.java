@@ -22,6 +22,11 @@ public final class CSV {
     public static final String PARENT_ARK = "Parent ARK";
 
     /**
+     * The manifest URL for works and collections.
+     */
+    public static final String MANIFEST_URL = "IIIF Manifest URL";
+
+    /**
      * The object type for the row
      */
     public static final String OBJECT_TYPE = "Object Type";
