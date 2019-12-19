@@ -12,8 +12,6 @@ public class CsvHeaders {
 
     private int myTitleIndex;
 
-    private int myProjectNameIndex;
-
     private int myObjectTypeIndex;
 
     private int myFileNameIndex;
@@ -31,9 +29,6 @@ public class CsvHeaders {
             switch (aRow[index]) {
                 case CSV.TITLE:
                     setTitleIndex(index);
-                    break;
-                case CSV.PROJECT_NAME:
-                    setProjectNameIndex(index);
                     break;
                 case CSV.ITEM_ARK:
                     setItemArkIndex(index);
@@ -60,8 +55,6 @@ public class CsvHeaders {
             throw new CsvParsingException(MessageCodes.MFS_113);
         } else if (!hasParentArkIndex()) {
             throw new CsvParsingException(MessageCodes.MFS_114);
-        } else if (!hasProjectNameIndex()) {
-            throw new CsvParsingException(MessageCodes.MFS_105);
         } else if (!hasObjectTypeIndex()) {
             throw new CsvParsingException(MessageCodes.MFS_115);
         } else if (!hasTitleIndex()) {
@@ -155,34 +148,6 @@ public class CsvHeaders {
      */
     public boolean hasTitleIndex() {
         return myTitleIndex != -1;
-    }
-
-    /**
-     * Gets the Project Name index position.
-     *
-     * @return The index position of the Project Name
-     */
-    public int getProjectNameIndex() {
-        return myProjectNameIndex;
-    }
-
-    /**
-     * Sets the Project Name index position.
-     *
-     * @param aProjectNameIndex The index position of the Project Name
-     */
-    public CsvHeaders setProjectNameIndex(final int aProjectNameIndex) {
-        myProjectNameIndex = aProjectNameIndex;
-        return this;
-    }
-
-    /**
-     * Checks whether there is an Project Name index position
-     *
-     * @return True if there is a Project name index position; else, false
-     */
-    public boolean hasProjectNameIndex() {
-        return myProjectNameIndex != -1;
     }
 
     /**
