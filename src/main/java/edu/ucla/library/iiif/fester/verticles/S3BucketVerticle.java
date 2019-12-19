@@ -80,9 +80,12 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
     }
 
     private void get(final String aID, final Message<JsonObject> aMessage) {
-        LOGGER.debug(MessageCodes.MFS_133, aID);
+        // If our ID doesn't have a .json extension, add one for the lookup
+        final String id = !aID.endsWith(Constants.JSON_EXT) ? aID + Constants.JSON_EXT : aID;
 
-        myS3Client.get(myS3Bucket, aID, get -> {
+        LOGGER.debug(MessageCodes.MFS_133, id, myS3Bucket);
+
+        myS3Client.get(myS3Bucket, id, get -> {
             if (get.statusCode() == HTTP.OK) {
                 get.bodyHandler(body -> {
                     aMessage.reply(new JsonObject(body.getString(0, body.length())));

@@ -119,5 +119,5 @@
   <entry key="MFS-130">Reset collection manifest key to: {}</entry>
   <entry key="MFS-131">Failed to upload all the work manifests: {}</entry>
   <entry key="MFS-132">Replacing '{}' with '{}' in collection document</entry>
-  <entry key="MFS-133">Getting {} from Fester's S3 bucket</entry>
+  <entry key="MFS-133">Getting '{}' from Fester's S3 bucket: {}</entry>
 </properties>
