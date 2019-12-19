@@ -7,11 +7,6 @@ package edu.ucla.library.iiif.fester;
 public final class CSV {
 
     /**
-     * The name of a project. We make the assumption of one project per CSV.
-     */
-    public static final String PROJECT_NAME = "Project Name";
-
-    /**
      * The ARK identifier for a row.
      */
     public static final String ITEM_ARK = "Item ARK";

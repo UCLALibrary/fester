@@ -608,7 +608,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
         final String id = StringUtils.trimToNull(aRow[aHeaders.getItemArkIndex()]);
 
         if (id != null) {
-            final String label = StringUtils.trimToNull(aRow[aHeaders.getProjectNameIndex()]);
+            final String label = StringUtils.trimToNull(aRow[aHeaders.getTitleIndex()]);
 
             if (label != null) {
                 return new Collection(IDUtils.encode(myHost, Constants.COLLECTIONS_PATH, id), label);
