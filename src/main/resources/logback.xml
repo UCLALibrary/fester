@@ -7,9 +7,13 @@
     </encoder>
   </appender>
 
-  <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-    <file>target/monitorstore-${byDay}.log</file>
-    <append>false</append>
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>/var/log/fester/fester-${byDay}.log</file>
+      <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+        <fileNamePattern>/var/log/fester/fester.%d{yyyy-MM-dd}.log</fileNamePattern>
+        <maxHistory>30</maxHistory>
+        <totalSizeCap>2GB</totalSizeCap>
+    </rollingPolicy>
     <encoder>
       <pattern>[%level] %logger{45}:%X{line} | %msg%n</pattern>
     </encoder>
