@@ -26,6 +26,8 @@ public class ImageInfoLookup {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageInfoLookup.class, Constants.MESSAGES);
 
+    private static final int CANTALOUPE_TIMEOUT = 300000; // Five minutes
+
     private final int myWidth;
 
     private final int myHeight;
@@ -36,13 +38,18 @@ public class ImageInfoLookup {
      * @param aURL A URL for an image's info.json file
      */
     public ImageInfoLookup(final String aURL) throws MalformedURLException, IOException, ManifestNotFoundException {
+        LOGGER.debug(MessageCodes.MFS_072, aURL);
+
         // If our images are using an unspecified host, we're running in test mode and will use fake values
         if (aURL.contains(Constants.UNSPECIFIED_HOST) || aURL.startsWith(FAKE_IIIF_SERVER)) {
             myHeight = 1000;
             myWidth = 1000;
         } else {
             final HttpURLConnection connection = (HttpURLConnection) new URL(aURL).openConnection();
-            final int responseCode = connection.getResponseCode();
+            final int responseCode;
+
+            connection.setReadTimeout(CANTALOUPE_TIMEOUT);
+            responseCode = connection.getResponseCode();
 
             if (responseCode == 200) {
                 final InputStream inStream = new BufferedInputStream(connection.getInputStream());
@@ -61,8 +68,8 @@ public class ImageInfoLookup {
                     jsonObject = new JsonObject(result.toString());
 
                     // Find our image's width and height or use zero if they're missing in the manifest
-                    myHeight = jsonObject.getInteger("height", 0);
-                    myWidth = jsonObject.getInteger("width", 0);
+                    myHeight = jsonObject.getInteger("height", 1);
+                    myWidth = jsonObject.getInteger("width", 1);
                 }
             } else if (responseCode == 404) {
                 final String id = IDUtils.decode(URI.create(aURL));
