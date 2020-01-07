@@ -67,9 +67,13 @@ public class ImageInfoLookup {
                     // Get the info.json contents
                     jsonObject = new JsonObject(result.toString());
 
-                    // Find our image's width and height or use one if they're missing in the manifest
-                    myHeight = jsonObject.getInteger("height", 1);
-                    myWidth = jsonObject.getInteger("width", 1);
+                    // Find our image's width and height or use zero if they're missing in the manifest
+                    myHeight = jsonObject.getInteger("height", 0);
+                    myWidth = jsonObject.getInteger("width", 0);
+
+                    if (myHeight == 0 || myWidth == 0) {
+                        LOGGER.warn(MessageCodes.MFS_073, aURL);
+                    }
                 }
             } else if (responseCode == 404) {
                 final String id = IDUtils.decode(URI.create(aURL));

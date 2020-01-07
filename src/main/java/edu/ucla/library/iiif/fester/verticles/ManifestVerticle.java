@@ -514,6 +514,8 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                         width = altLastCanvas.getWidth();
                         height = altLastCanvas.getHeight();
                     } else {
+                        LOGGER.warn(MessageCodes.MFS_073, pageURI);
+
                         width = 0;
                         height = 0;
                     }
