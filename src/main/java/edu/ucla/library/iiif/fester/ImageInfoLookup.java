@@ -70,6 +70,10 @@ public class ImageInfoLookup {
                     // Find our image's width and height or use one if they're missing in the manifest
                     myHeight = jsonObject.getInteger("height", 1);
                     myWidth = jsonObject.getInteger("width", 1);
+
+                    if (myHeight == 1 || myWidth == 1) {
+                        LOGGER.warn(MessageCodes.MFS_073, aURL);
+                    }
                 }
             } else if (responseCode == 404) {
                 final String id = IDUtils.decode(URI.create(aURL));

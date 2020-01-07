@@ -507,15 +507,17 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                     // If we've not processed any, check to sequence to find one
                     final List<Canvas> canvases = aSequence.getCanvases();
 
-                    // If there is one use that; else, just use zeros for the w/h values
+                    // If there is one use that; else, just use ones for the w/h values
                     if (canvases.size() != 0) {
                         final Canvas altLastCanvas = canvases.get(canvases.size() - 1);
 
                         width = altLastCanvas.getWidth();
                         height = altLastCanvas.getHeight();
                     } else {
-                        width = 0;
-                        height = 0;
+                        LOGGER.warn(MessageCodes.MFS_073, pageURI);
+
+                        width = 1;
+                        height = 1;
                     }
                 }
 
