@@ -67,7 +67,7 @@ public class ImageInfoLookup {
                     // Get the info.json contents
                     jsonObject = new JsonObject(result.toString());
 
-                    // Find our image's width and height or use one if they're missing in the manifest
+                    // Find our image's width and height or use zero if they're missing in the manifest
                     myHeight = jsonObject.getInteger("height", 0);
                     myWidth = jsonObject.getInteger("width", 0);
 

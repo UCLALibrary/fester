@@ -86,7 +86,7 @@
   <entry key="MFS-070">Unable to retrieve '{}' from the IIIF image server</entry>
   <entry key="MFS-071">Unexpected response code from the IIIF image server: {} [{}]</entry>
   <entry key="MFS-072">Looking up image width and height from: {}</entry>
-  <entry key="MFS-073">Setting image w/h to a questionable default value: 1 [item: {}]</entry>
+  <entry key="MFS-073">Could not find an image width or height for the canvas; missing values have been set to zero [item: {}]</entry>
 
   <entry key="MFS-100">Stopping the {} verticle [id: {}]</entry>
   <entry key="MFS-101">Getting message consumer for: {}</entry>
