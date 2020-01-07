@@ -516,8 +516,8 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                     } else {
                         LOGGER.warn(MessageCodes.MFS_073, pageURI);
 
-                        width = 1;
-                        height = 1;
+                        width = 0;
+                        height = 0;
                     }
                 }
 
