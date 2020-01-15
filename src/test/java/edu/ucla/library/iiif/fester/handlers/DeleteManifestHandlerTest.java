@@ -4,8 +4,6 @@ package edu.ucla.library.iiif.fester.handlers;
 import java.io.IOException;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 import info.freelibrary.util.StringUtils;
@@ -16,9 +14,7 @@ import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
 
-@RunWith(VertxUnitRunner.class)
 public class DeleteManifestHandlerTest extends AbstractManifestHandlerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DeleteManifestHandlerTest.class, Constants.MESSAGES);

@@ -6,8 +6,6 @@ import java.io.IOException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-
 import com.amazonaws.SdkClientException;
 
 import info.freelibrary.util.Logger;
@@ -22,9 +20,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.RequestOptions;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
 
-@RunWith(VertxUnitRunner.class)
 public class PutManifestHandlerTest extends AbstractManifestHandlerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PutManifestHandlerTest.class, Constants.MESSAGES);
