@@ -34,7 +34,7 @@ public abstract class AbstractFesterVerticle extends AbstractVerticle {
         if (verticleMap.containsKey(verticleName)) {
             verticleMap.put(verticleName, verticleMap.get(verticleName) + "|" + deploymentID);
         } else {
-            verticleMap.put(verticleName, deploymentID());
+            verticleMap.put(verticleName, deploymentID);
         }
     }
 
