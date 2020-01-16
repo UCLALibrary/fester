@@ -41,6 +41,16 @@ public final class CSV {
      */
     public static final String ITEM_SEQ = "Item Sequence";
 
+    /**
+     * The row's viewing hint.
+     */
+    public static final String VIEWING_HINT = "viewingHint";
+
+    /**
+     * The row's viewing direction.
+     */
+    public static final String VIEWING_DIRECTION = "Text direction";
+
     private CSV() {
     }
 }

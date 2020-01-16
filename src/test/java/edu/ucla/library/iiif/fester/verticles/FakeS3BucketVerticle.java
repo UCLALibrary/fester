@@ -43,7 +43,8 @@ public class FakeS3BucketVerticle extends AbstractFesterVerticle {
         LOGGER.debug(MessageCodes.MFS_110, getClass().getName(), deploymentID());
 
         if (myTmpDir == null) {
-            myTmpDir = Files.createTempDirectory(deploymentID).toFile();
+            // Creates a tmp dir from the deploymentID, adding additional random numbers after the underscore
+            myTmpDir = Files.createTempDirectory(deploymentID + "_").toFile();
         }
 
         vertx.eventBus().<JsonObject>consumer(S3BucketVerticle.class.getName()).handler(message -> {

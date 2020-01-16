@@ -87,6 +87,9 @@
   <entry key="MFS-071">Unexpected response code from the IIIF image server: {} [{}]</entry>
   <entry key="MFS-072">Looking up image width and height from: {}</entry>
   <entry key="MFS-073">Could not find an image width or height for the canvas; missing values have been set to zero [item: {}]</entry>
+  <entry key="MFS-074">Unable to build work manifest for '{}': {}</entry>
+  <entry key="MFS-075">Multiple temporary fake s3 directories matching '{}' found</entry>
+  <entry key="MFS-076">The '{}' verticle's ID [{}] has been registered in the application's shared data map</entry>
 
   <entry key="MFS-100">Stopping the {} verticle [id: {}]</entry>
   <entry key="MFS-101">Getting message consumer for: {}</entry>

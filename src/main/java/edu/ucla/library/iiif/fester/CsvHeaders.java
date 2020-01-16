@@ -6,17 +6,21 @@ package edu.ucla.library.iiif.fester;
  */
 public class CsvHeaders {
 
-    private int myItemArkIndex;
+    private int myItemArkIndex = -1;
 
-    private int myParentArkIndex;
+    private int myParentArkIndex = -1;
 
-    private int myTitleIndex;
+    private int myTitleIndex = -1;
 
-    private int myObjectTypeIndex;
+    private int myObjectTypeIndex = -1;
 
-    private int myFileNameIndex;
+    private int myFileNameIndex = -1;
 
-    private int myItemSequence;
+    private int myItemSequenceIndex = -1;
+
+    private int myViewingHintIndex = -1;
+
+    private int myViewingDirectionIndex = -1;
 
     /**
      * Create a new CSV headers object.
@@ -43,7 +47,13 @@ public class CsvHeaders {
                     setFileNameIndex(index);
                     break;
                 case CSV.ITEM_SEQ:
-                    setItemSequence(index);
+                    setItemSequenceIndex(index);
+                    break;
+                case CSV.VIEWING_DIRECTION:
+                    setViewingDirectionIndex(index);
+                    break;
+                case CSV.VIEWING_HINT:
+                    setViewingHintIndex(index);
                     break;
                 default:
                     // Our default is to ignore things we don't care about
@@ -61,9 +71,11 @@ public class CsvHeaders {
             throw new CsvParsingException(MessageCodes.MFS_111);
         } else if (!hasFileNameIndex()) {
             throw new CsvParsingException(MessageCodes.MFS_112);
-        } else if (!hasItemSequence()) {
+        } else if (!hasItemSequenceIndex()) {
             throw new CsvParsingException(MessageCodes.MFS_123);
         }
+
+        // The viewingHint and viewingDirection columns are optional
     }
 
     /**
@@ -209,25 +221,81 @@ public class CsvHeaders {
     /**
      * Sets the Item Sequence index position.
      *
-     * @param aItemSequence
+     * @param aItemSequenceIndex
      * @return
      */
-    public CsvHeaders setItemSequence(final int aItemSequence) {
-        myItemSequence = aItemSequence;
+    public CsvHeaders setItemSequenceIndex(final int aItemSequenceIndex) {
+        myItemSequenceIndex = aItemSequenceIndex;
         return this;
     }
 
     /**
      * Gets the Item Sequence header position.
      */
-    public int getItemSequence() {
-        return myItemSequence;
+    public int getItemSequenceIndex() {
+        return myItemSequenceIndex;
     }
 
     /**
      * Checks whether the CSV headers have a item sequence position registered.
      */
-    public boolean hasItemSequence() {
-        return myItemSequence != -1;
+    public boolean hasItemSequenceIndex() {
+        return myItemSequenceIndex != -1;
+    }
+
+    /**
+     * Gets the viewingHint index position.
+     *
+     * @return The viewingHint index position
+     */
+    public int getViewingHintIndex() {
+        return myViewingHintIndex;
+    }
+
+    /**
+     * Sets the viewingHint index position.
+     *
+     * @param aViewingHintIndex The position of the viewingHint header.
+     */
+    public CsvHeaders setViewingHintIndex(final int aViewingHintIndex) {
+        myViewingHintIndex = aViewingHintIndex;
+        return this;
+    }
+
+    /**
+     * Checks whether there is a viewingHint index position
+     *
+     * @return True if there is a viewingHint index position; else, false
+     */
+    public boolean hasViewingHintIndex() {
+        return myViewingHintIndex != -1;
+    }
+
+    /**
+     * Gets the viewingDirection index position.
+     *
+     * @return The viewingDirection index position
+     */
+    public int getViewingDirectionIndex() {
+        return myViewingDirectionIndex;
+    }
+
+    /**
+     * Sets the viewingDirection index position.
+     *
+     * @param aViewingDirectionIndex The position of the viewingDirection header.
+     */
+    public CsvHeaders setViewingDirectionIndex(final int aViewingDirectionIndex) {
+        myViewingDirectionIndex = aViewingDirectionIndex;
+        return this;
+    }
+
+    /**
+     * Checks whether there is a viewingDirection index position
+     *
+     * @return True if there is a viewingDirection index position; else, false
+     */
+    public boolean hasViewingDirectionIndex() {
+        return myViewingDirectionIndex != -1;
     }
 }
