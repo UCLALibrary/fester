@@ -126,7 +126,7 @@ public class ManifestVerticleTest {
      */
     @Test
     public final void testSinaiWorksManifest(final TestContext aContext) {
-        final String jsonFile = myJsonFiles + "/ark%3A%2F21198%2Fz16t1r0h.json";
+        final String jsonFile = myJsonFiles + "/ark%3A%2F21198%2Fz16t1r0h.json"; // work manifest
         final String path = StringUtils.format(SINAI_WORKS_CSV, SINAI);
         final JsonObject message = new JsonObject();
         final Async asyncTask = aContext.async();
@@ -263,15 +263,17 @@ public class ManifestVerticleTest {
     private String getS3TempDir(final String aS3DeploymentID) throws FileNotFoundException {
         final FilenameFilter dirFilter = new RegexDirFilter(aS3DeploymentID + "_.*");
         final File[] dirs = FileUtils.listFiles(new File(System.getProperty("java.io.tmpdir")), dirFilter);
+        final File s3TmpDir = dirs[0];
+        final String s3TmpDirPath = s3TmpDir.getAbsolutePath();
 
         if (LOGGER.isWarnEnabled() && dirs.length > 1) {
             LOGGER.warn(MessageCodes.MFS_075, aS3DeploymentID);
         }
 
-        if (!dirs[0].exists()) {
-            throw new FileNotFoundException(dirs[0].getAbsolutePath());
+        if (!s3TmpDir.exists()) {
+            throw new FileNotFoundException(s3TmpDirPath);
         }
 
-        return dirs[0].getAbsolutePath();
+        return s3TmpDirPath;
     }
 }
