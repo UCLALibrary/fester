@@ -33,6 +33,7 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.api.contract.openapi3.OpenAPI3RouterFactory;
+import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.StaticHandler;
 
 /**
@@ -84,7 +85,9 @@ public class MainVerticle extends AbstractVerticle {
                             final PostCsvHandler postCsvHandler = new PostCsvHandler(vertx, config);
                             final StaticHandler staticHandler = StaticHandler.create().setWebRoot("webroot");
 
-                            factory.addHandlerByOperationId(Op.POST_CSV, postCsvHandler);
+                            // Make sure uploaded files get deleted
+                            factory.addHandlerByOperationId(Op.POST_CSV, postCsvHandler)
+                                    .setBodyHandler(BodyHandler.create().setDeleteUploadedFilesOnEnd(true));
 
                             // After that, we can get a router that's been configured by our OpenAPI spec
                             router = factory.getRouter();
