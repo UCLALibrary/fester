@@ -8,6 +8,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.junit.After;
 import org.junit.Test;
@@ -32,6 +34,7 @@ import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
+import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.multipart.MultipartForm;
 
 /**
@@ -248,6 +251,79 @@ public class PostCsvHandlerTest extends AbstractManifestHandlerTest {
 
                     if (!asyncTask.isCompleted()) {
                         asyncTask.complete();
+                    }
+                } else {
+                    aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, postStatusCode, postStatusMessage));
+                }
+            } else {
+                final Throwable exception = postHandler.cause();
+
+                LOGGER.error(exception, exception.getMessage());
+                aContext.fail(exception);
+            }
+        });
+    }
+
+    /**
+     * Ensures that uploaded files are deleted.
+     *
+     * @param aContext A test context
+     */
+    @Test
+    public final void testDeleteUploadedFilesOnEnd(final TestContext aContext) throws IOException, CsvException {
+        final int port = aContext.get(Config.HTTP_PORT);
+        final WebClient webClient = WebClient.create(myVertx);
+        final HttpRequest<Buffer> postRequest = webClient.post(port, UNSPECIFIED_HOST, COLLECTIONS_PATH);
+        final String filePath = FULL_CSV_FILE.getAbsolutePath();
+        final String fileName = FULL_CSV_FILE.getName();
+        final MultipartForm form = MultipartForm.create();
+        final List<String[]> expected = LinkUtilsTest.read(FULL_CSV_FILE.getAbsolutePath());
+        final String host = StringUtils.format(HOST, port);
+        final Async asyncTask = aContext.async();
+
+        form.textFileUpload(Constants.CSV_FILE, fileName, filePath, Constants.CSV_MEDIA_TYPE);
+
+        postRequest.sendMultipartForm(form, postHandler -> {
+            if (postHandler.succeeded()) {
+                final HttpResponse<Buffer> postResponse = postHandler.result();
+                final String postStatusMessage = postResponse.statusMessage();
+                final int postStatusCode = postResponse.statusCode();
+
+                if (postStatusCode == HTTP.CREATED) {
+                    final Buffer actual = postResponse.body();
+                    final String contentType = postResponse.getHeader(Constants.CONTENT_TYPE);
+                    // Uploaded file is named with a UUID
+                    final String uploadedFilePathRegex = "(" + BodyHandler.DEFAULT_UPLOADS_DIRECTORY + "\\/"
+                            + "[0-9a-f\\-]+" + ")";
+                    final Matcher uploadedFilePathMatcher = Pattern.compile(uploadedFilePathRegex)
+                            .matcher(postStatusMessage);
+
+                    // Check that what we get back is the same as what we sent
+                    check(aContext, LinkUtils.addManifests(host, expected), actual);
+
+                    // Check that what we get back has the correct media type
+                    aContext.assertEquals(Constants.CSV_MEDIA_TYPE, contentType);
+
+                    if (uploadedFilePathMatcher.find()) {
+                        final String uploadedFilePath = uploadedFilePathMatcher.group(1);
+                        // Wait for the file to get deleted; 500 ms should be long enough, unless the file is huge
+                        final Long timerDelay = 500L;
+
+                        myVertx.setTimer(timerDelay, timerId -> {
+                            final boolean isDeleted = !myVertx.fileSystem().existsBlocking(uploadedFilePath);
+                            try {
+                                aContext.assertTrue(isDeleted);
+                            } catch (AssertionError details) {
+                                aContext.fail(LOGGER.getMessage(MessageCodes.MFS_134, uploadedFilePath, timerDelay));
+                            }
+
+                            if (!asyncTask.isCompleted()) {
+                                asyncTask.complete();
+                            }
+                        });
+                    } else {
+                        aContext.fail(
+                                LOGGER.getMessage(MessageCodes.MFS_135, uploadedFilePathRegex, postStatusMessage));
                     }
                 } else {
                     aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, postStatusCode, postStatusMessage));
