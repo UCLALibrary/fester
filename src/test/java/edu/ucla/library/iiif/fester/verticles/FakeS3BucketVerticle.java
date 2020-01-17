@@ -19,7 +19,6 @@ import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.utils.CodeUtils;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
-import io.vertx.core.Promise;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 
@@ -37,13 +36,14 @@ public class FakeS3BucketVerticle extends AbstractFesterVerticle {
     private File myTmpDir;
 
     @Override
-    public void start(final Promise<Void> aPromise) throws Exception {
-        final String deploymentID = deploymentID();
+    public void start() throws Exception {
+        super.start();
 
         LOGGER.debug(MessageCodes.MFS_110, getClass().getName(), deploymentID());
 
         if (myTmpDir == null) {
-            myTmpDir = Files.createTempDirectory(deploymentID).toFile();
+            // Creates a tmp dir from the deploymentID, adding additional random numbers after the underscore
+            myTmpDir = Files.createTempDirectory(deploymentID() + "_").toFile();
         }
 
         vertx.eventBus().<JsonObject>consumer(S3BucketVerticle.class.getName()).handler(message -> {
@@ -56,8 +56,6 @@ public class FakeS3BucketVerticle extends AbstractFesterVerticle {
                 put(json, message);
             }
         });
-
-        aPromise.complete();
     }
 
     private void get(final String aID, final Message<JsonObject> aMessage) {

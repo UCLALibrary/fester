@@ -1,6 +1,11 @@
 
 package edu.ucla.library.iiif.fester.verticles;
 
+import static org.junit.Assert.assertEquals;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.UUID;
 
@@ -9,8 +14,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import info.freelibrary.iiif.presentation.properties.ViewingDirection;
+import info.freelibrary.iiif.presentation.properties.ViewingHint;
+import info.freelibrary.util.FileUtils;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
+import info.freelibrary.util.RegexDirFilter;
 import info.freelibrary.util.StringUtils;
 
 import edu.ucla.library.iiif.fester.Config;
@@ -19,6 +28,7 @@ import edu.ucla.library.iiif.fester.MessageCodes;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.shareddata.LocalMap;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -37,9 +47,13 @@ public class ManifestVerticleTest {
 
     private static final String WORKS_CSV = "src/test/resources/csv/{}/batch1/{}1.csv";
 
+    private static final String SINAI_WORKS_CSV = "src/test/resources/csv/{}_test_12/works.csv";
+
     private static final String CSV_FILE_PATH = "src/test/resources/csv/{}.csv";
 
     private static final String HATHAWAY = "hathaway";
+
+    private static final String SINAI = "sinai";
 
     private static final String POSTCARDS = "capostcards";
 
@@ -48,6 +62,8 @@ public class ManifestVerticleTest {
     private Vertx myVertx;
 
     private String myRunID;
+
+    private String myJsonFiles;
 
     /**
      * Initialization of the testing environment before the tests are run.
@@ -64,17 +80,29 @@ public class ManifestVerticleTest {
         options.setConfig(config.put(Config.IIIF_BASE_URL, IMAGE_HOST));
 
         myVertx = Vertx.vertx();
-        myVertx.deployVerticle(ManifestVerticle.class.getName(), options, deployment1 -> {
-            if (deployment1.succeeded()) {
-                myVertx.deployVerticle(FakeS3BucketVerticle.class.getName(), options, deployment2 -> {
-                    if (deployment2.succeeded()) {
-                        asyncTask.complete();
+        myVertx.deployVerticle(ManifestVerticle.class.getName(), options, manifestorDeployment -> {
+            if (manifestorDeployment.succeeded()) {
+                myVertx.deployVerticle(FakeS3BucketVerticle.class.getName(), options, s3BucketDeployment -> {
+                    if (s3BucketDeployment.succeeded()) {
+                        final LocalMap<String, String> map = myVertx.sharedData().getLocalMap(Constants.VERTICLE_MAP);
+                        final String deploymentKey = FakeS3BucketVerticle.class.getSimpleName();
+
+                        if (map.containsKey(deploymentKey)) {
+                            try {
+                                myJsonFiles = getS3TempDir(map.get(deploymentKey));
+                                asyncTask.complete();
+                            } catch (final FileNotFoundException details) {
+                                aContext.fail(details);
+                            }
+                        } else {
+                            aContext.fail(LOGGER.getMessage(MessageCodes.MFS_077, deploymentKey));
+                        }
                     } else {
-                        aContext.fail(deployment2.cause());
+                        aContext.fail(s3BucketDeployment.cause());
                     }
                 });
             } else {
-                aContext.fail(deployment1.cause());
+                aContext.fail(manifestorDeployment.cause());
             }
         });
 
@@ -89,6 +117,39 @@ public class ManifestVerticleTest {
     @After
     public void tearDown(final TestContext aContext) {
         myVertx.close(aContext.asyncAssertSuccess());
+    }
+
+    /**
+     * Test against the Sinai works.
+     *
+     * @param aContext A testing context
+     */
+    @Test
+    public final void testSinaiWorksManifest(final TestContext aContext) {
+        final String jsonFile = myJsonFiles + "/ark%3A%2F21198%2Fz16t1r0h.json"; // work manifest
+        final String path = StringUtils.format(SINAI_WORKS_CSV, SINAI);
+        final JsonObject message = new JsonObject();
+        final Async asyncTask = aContext.async();
+
+        message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, path);
+        message.put(Constants.FESTER_HOST, MANIFEST_HOST);
+
+        LOGGER.debug(MessageCodes.MFS_120, SINAI, ManifestVerticle.class.getName());
+
+        myVertx.eventBus().request(ManifestVerticle.class.getName(), message, request -> {
+            if (request.succeeded()) {
+                final JsonObject manifest = new JsonObject(myVertx.fileSystem().readFileBlocking(jsonFile));
+
+                assertEquals(ViewingHint.Option.PAGED.toString(), manifest.getString("viewingHint"));
+                assertEquals(ViewingDirection.RIGHT_TO_LEFT.toString(), manifest.getString("viewingDirection"));
+
+                if (!asyncTask.isCompleted()) {
+                    asyncTask.complete();
+                }
+            } else {
+                aContext.fail(request.cause());
+            }
+        });
     }
 
     /**
@@ -192,4 +253,27 @@ public class ManifestVerticleTest {
         });
     }
 
+    /**
+     * Gets the location of the temporary fake S3 file system created by the FakeS3BucketVerticle.
+     *
+     * @param aS3DeploymentID A deployment ID for the FakeS3BucketVerticle
+     * @return The location of the temporary fake S3 file system
+     * @throws FileNotFoundException If the directory could not be found
+     */
+    private String getS3TempDir(final String aS3DeploymentID) throws FileNotFoundException {
+        final FilenameFilter dirFilter = new RegexDirFilter(aS3DeploymentID + "_.*");
+        final File[] dirs = FileUtils.listFiles(new File(System.getProperty("java.io.tmpdir")), dirFilter);
+        final File s3TmpDir = dirs[0];
+        final String s3TmpDirPath = s3TmpDir.getAbsolutePath();
+
+        if (LOGGER.isWarnEnabled() && dirs.length > 1) {
+            LOGGER.warn(MessageCodes.MFS_075, aS3DeploymentID);
+        }
+
+        if (!s3TmpDir.exists()) {
+            throw new FileNotFoundException(s3TmpDirPath);
+        }
+
+        return s3TmpDirPath;
+    }
 }

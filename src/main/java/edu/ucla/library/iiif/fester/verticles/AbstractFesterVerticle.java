@@ -26,12 +26,15 @@ public abstract class AbstractFesterVerticle extends AbstractVerticle {
         // Register our verticle name with its deployment ID.
         final LocalMap<String, String> verticleMap = vertx.sharedData().getLocalMap(Constants.VERTICLE_MAP);
         final String verticleName = getClass().getSimpleName();
+        final String deploymentID = deploymentID();
+
+        LOGGER.debug(MessageCodes.MFS_076, verticleName, deploymentID);
 
         // Add a deployment ID to the verticle map
         if (verticleMap.containsKey(verticleName)) {
-            verticleMap.put(verticleName, verticleMap.get(verticleName) + "|" + deploymentID());
+            verticleMap.put(verticleName, verticleMap.get(verticleName) + "|" + deploymentID);
         } else {
-            verticleMap.put(verticleName, deploymentID());
+            verticleMap.put(verticleName, deploymentID);
         }
     }
 

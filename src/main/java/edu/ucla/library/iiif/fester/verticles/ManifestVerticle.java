@@ -28,6 +28,8 @@ import info.freelibrary.iiif.presentation.ImageContent;
 import info.freelibrary.iiif.presentation.ImageResource;
 import info.freelibrary.iiif.presentation.Manifest;
 import info.freelibrary.iiif.presentation.Sequence;
+import info.freelibrary.iiif.presentation.properties.ViewingDirection;
+import info.freelibrary.iiif.presentation.properties.ViewingHint;
 import info.freelibrary.iiif.presentation.services.ImageInfoService;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
@@ -189,7 +191,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                     sequence = sequences.get(0);
                 }
 
-                aPagesList.sort(new ItemSequenceComparator(aCsvHeaders.getItemSequence()));
+                aPagesList.sort(new ItemSequenceComparator(aCsvHeaders.getItemSequenceIndex()));
 
                 try {
                     addPages(aCsvHeaders, aPagesList, sequence, aImageHost, encodedWorkID);
@@ -403,13 +405,11 @@ public class ManifestVerticle extends AbstractFesterVerticle {
             if (worksHandler.succeeded()) {
                 aMessage.reply(LOGGER.getMessage(MessageCodes.MFS_126));
             } else {
-                final int failCode = CodeUtils.getInt(MessageCodes.MFS_131);
                 final Throwable cause = worksHandler.cause();
-                final String causeMessage = cause.getMessage();
-                final String message = LOGGER.getMessage(MessageCodes.MFS_131, causeMessage);
+                final String message = LOGGER.getMessage(MessageCodes.MFS_131, cause.getMessage());
 
                 LOGGER.error(cause, message);
-                aMessage.fail(failCode, message);
+                aMessage.fail(CodeUtils.getInt(MessageCodes.MFS_131), message);
             }
         });
     }
@@ -435,11 +435,27 @@ public class ManifestVerticle extends AbstractFesterVerticle {
         final Sequence sequence = new Sequence().setID(sequenceID);
 
         try {
+            if (aCsvHeaders.hasViewingDirectionIndex()) {
+                final String viewingDirection = StringUtils.trimToNull(aWork[aCsvHeaders.getViewingDirectionIndex()]);
+
+                if (viewingDirection != null) {
+                    manifest.setViewingDirection(ViewingDirection.fromString(viewingDirection));
+                }
+            }
+
+            if (aCsvHeaders.hasViewingHintIndex()) {
+                final String viewingHint = StringUtils.trimToNull(aWork[aCsvHeaders.getViewingHintIndex()]);
+
+                if (viewingHint != null) {
+                    manifest.setViewingHint(new ViewingHint(viewingHint));
+                }
+            }
+
             if (aPages.containsKey(workID)) {
                 final List<String[]> pageList = aPages.get(workID);
 
                 manifest.addSequence(sequence);
-                pageList.sort(new ItemSequenceComparator(aCsvHeaders.getItemSequence()));
+                pageList.sort(new ItemSequenceComparator(aCsvHeaders.getItemSequenceIndex()));
 
                 addPages(aCsvHeaders, pageList, sequence, aImageHost, urlEncodedWorkID);
             }
@@ -451,6 +467,9 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                     aPromise.fail(send.cause());
                 }
             });
+        } catch (final IllegalArgumentException details) {
+            LOGGER.warn(MessageCodes.MFS_074, workID, details.getMessage());
+            aPromise.fail(details);
         } catch (final IOException details) {
             aPromise.fail(details);
         }
@@ -528,6 +547,15 @@ public class ManifestVerticle extends AbstractFesterVerticle {
             imageContent = new ImageContent(annotationURI, canvas);
             imageContent.addResource(imageResource);
             canvas.addImageContent(imageContent);
+
+            if (aCsvHeaders.hasViewingHintIndex()) {
+                final String viewingHint = StringUtils.trimToNull(columns[aCsvHeaders.getTitleIndex()]);
+
+                if (viewingHint != null) {
+                    canvas.setViewingHint(new ViewingHint(viewingHint));
+                }
+            }
+
             aSequence.addCanvas(canvas);
         }
     }
