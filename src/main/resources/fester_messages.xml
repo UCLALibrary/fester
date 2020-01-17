@@ -126,4 +126,6 @@
   <entry key="MFS-131">Failed to upload all the work manifests: {}</entry>
   <entry key="MFS-132">Replacing '{}' with '{}' in collection document</entry>
   <entry key="MFS-133">Getting '{}' from Fester's S3 bucket: {}</entry>
+  <entry key="MFS-134">Uploaded CSV file '{}' still exists on disk {} ms after the handler sent the response</entry>
+  <entry key="MFS-135">Regular expression '{}' does not match '{}'</entry>
 </properties>
