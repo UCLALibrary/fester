@@ -70,23 +70,26 @@ public class ManifestUploadIT {
     public final void test1_CheckThatServiceIsUp(final TestContext aContext) {
         final Async asyncTask = aContext.async();
 
-        // First, let's sanity-check our service status endpoint before we do anything real
-        myVertx.createHttpClient().getNow(PORT, Constants.UNSPECIFIED_HOST, STATUS, response -> {
-            final int statusCode = response.statusCode();
+        // Give our Jar-based application a second or two to start up
+        myVertx.setTimer(2000, timer -> {
+            // First, let's sanity-check our service status endpoint before we do anything real
+            myVertx.createHttpClient().getNow(PORT, Constants.UNSPECIFIED_HOST, STATUS, response -> {
+                final int statusCode = response.statusCode();
 
-            // Validate the response
-            if (statusCode == HTTP.OK) {
-                response.bodyHandler(body -> {
-                    aContext.assertEquals(body.getString(0, body.length()), HELLO);
-                    LOGGER.info(MessageCodes.MFS_030);
-                });
+                // Validate the response
+                if (statusCode == HTTP.OK) {
+                    response.bodyHandler(body -> {
+                        aContext.assertEquals(body.getString(0, body.length()), HELLO);
+                        LOGGER.info(MessageCodes.MFS_030);
+                    });
 
-                if (!asyncTask.isCompleted()) {
-                    asyncTask.complete();
+                    if (!asyncTask.isCompleted()) {
+                        asyncTask.complete();
+                    }
+                } else {
+                    aContext.fail(LOGGER.getMessage(MessageCodes.MFS_031));
                 }
-            } else {
-                aContext.fail(LOGGER.getMessage(MessageCodes.MFS_031));
-            }
+            });
         });
     }
 
