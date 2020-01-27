@@ -58,7 +58,8 @@
     <slf4j.ext.version>1.7.26</slf4j.ext.version>
     <aws.sdk.version>1.11.478</aws.sdk.version>
     <commons.lang.version>3.9</commons.lang.version>
-    <freelib.utils.version>0.8.10</freelib.utils.version>
+    <freelib.utils.version>1.0.2</freelib.utils.version>
+    <freelib.maven.version>0.0.3</freelib.maven.version>
     <jiiify.presentation.version>0.2.0</jiiify.presentation.version>
 
     <!-- Build plug-in versions -->
@@ -209,8 +210,8 @@
       ]]>-->
       <plugin>
         <groupId>info.freelibrary</groupId>
-        <artifactId>freelib-utils</artifactId>
-        <version>${freelib.utils.version}</version>
+        <artifactId>freelib-maven-plugins</artifactId>
+        <version>${freelib.maven.version}</version>
         <executions>
           <execution>
             <phase>process-resources</phase>
@@ -411,6 +412,7 @@
             <fester.http.port>${http.port}</fester.http.port>
             <vertx-config-path>${project.basedir}/target/test-classes/test-config.properties</vertx-config-path>
           </systemPropertyVariables>
+          <argLine>${jacoco.agent.arg}</argLine>
         </configuration>
         <executions>
           <execution>
@@ -420,12 +422,6 @@
             </goals>
           </execution>
         </executions>
-      </plugin>
-
-      <!-- Jacoco does code coverage for the test suite -->
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
       </plugin>
 
       <!-- The Vert.x plug-in enables running the application from within Maven for development -->
@@ -780,6 +776,6 @@
   <parent>
     <artifactId>freelib-parent</artifactId>
     <groupId>info.freelibrary</groupId>
-    <version>3.6.4</version>
+    <version>3.8.2</version>
   </parent>
 </project>

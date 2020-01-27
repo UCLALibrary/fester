@@ -10,7 +10,7 @@ x-tagGroups:
     tags:
       - Collection
 info:
-  version: 0.1.0
+  version: 0.2.0
   title: Fester API
   description: "Fester, a IIIF manifest storage microservice, provides a simple storage and retrieval system
     for IIIF manifests. Amazon S3 is required. For more details on how to construct a IIIF manifest, consult these
