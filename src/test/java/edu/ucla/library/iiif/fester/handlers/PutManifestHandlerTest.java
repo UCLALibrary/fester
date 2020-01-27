@@ -21,7 +21,7 @@ import io.vertx.core.http.RequestOptions;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 
-public class PutManifestHandlerTest extends AbstractManifestHandlerTest {
+public class PutManifestHandlerTest extends AbstractFesterHandlerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PutManifestHandlerTest.class, Constants.MESSAGES);
 

@@ -16,7 +16,7 @@ import io.vertx.ext.web.RoutingContext;
 /**
  * A IIIF manifest deleter.
  */
-public class DeleteManifestHandler extends AbstractManifestHandler {
+public class DeleteManifestHandler extends AbstractFesterHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DeleteManifestHandler.class, Constants.MESSAGES);
 

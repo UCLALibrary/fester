@@ -16,7 +16,7 @@ import io.vertx.ext.web.RoutingContext;
 /**
  * A IIIF manifest creator.
  */
-public class PutManifestHandler extends AbstractManifestHandler {
+public class PutManifestHandler extends AbstractFesterHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PutManifestHandler.class, Constants.MESSAGES);
 

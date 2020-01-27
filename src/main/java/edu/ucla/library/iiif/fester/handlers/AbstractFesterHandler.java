@@ -22,9 +22,9 @@ import io.vertx.ext.web.RoutingContext;
 /**
  * Creates an abstract handler so that other instantiated handlers can use its S3Client.
  */
-abstract class AbstractManifestHandler implements Handler<RoutingContext> {
+abstract class AbstractFesterHandler implements Handler<RoutingContext> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractManifestHandler.class, Constants.MESSAGES);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFesterHandler.class, Constants.MESSAGES);
 
     protected final Vertx myVertx;
 
@@ -38,7 +38,7 @@ abstract class AbstractManifestHandler implements Handler<RoutingContext> {
      * @param aVertx A Vert.x instance
      * @param aConfig An application configuration
      */
-    AbstractManifestHandler(final Vertx aVertx, final JsonObject aConfig) {
+    AbstractFesterHandler(final Vertx aVertx, final JsonObject aConfig) {
         if (myS3Client == null) {
             final String s3AccessKey = aConfig.getString(Config.S3_ACCESS_KEY);
             final String s3SecretKey = aConfig.getString(Config.S3_SECRET_KEY);

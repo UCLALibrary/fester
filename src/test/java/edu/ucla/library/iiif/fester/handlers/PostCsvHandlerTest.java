@@ -40,7 +40,7 @@ import io.vertx.ext.web.multipart.MultipartForm;
 /**
  * A test of the PostCollectionHandler.
  */
-public class PostCsvHandlerTest extends AbstractManifestHandlerTest {
+public class PostCsvHandlerTest extends AbstractFesterHandlerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostCsvHandlerTest.class, Constants.MESSAGES);
 

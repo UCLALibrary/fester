@@ -17,7 +17,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 
-public class GetManifestHandlerTest extends AbstractManifestHandlerTest {
+public class GetManifestHandlerTest extends AbstractFesterHandlerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GetManifestHandlerTest.class, Constants.MESSAGES);
 

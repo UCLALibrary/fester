@@ -37,7 +37,7 @@ import io.vertx.ext.web.RoutingContext;
 /**
  * A handler that handles POSTs wanting to generate collection manifests.
  */
-public class PostCsvHandler extends AbstractManifestHandler {
+public class PostCsvHandler extends AbstractFesterHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostCsvHandler.class, Constants.MESSAGES);
 

@@ -39,9 +39,9 @@ import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 
 @RunWith(VertxUnitRunner.class)
-abstract class AbstractManifestHandlerTest {
+abstract class AbstractFesterHandlerTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractManifestHandlerTest.class,
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFesterHandlerTest.class,
             Constants.MESSAGES);
 
     private static final String MANIFEST_FILE_NAME = "testManifest.json";

@@ -16,7 +16,7 @@ import io.vertx.ext.web.RoutingContext;
 /**
  * A IIIF manifest retriever.
  */
-public class GetManifestHandler extends AbstractManifestHandler {
+public class GetManifestHandler extends AbstractFesterHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GetManifestHandler.class, Constants.MESSAGES);
 

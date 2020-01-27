@@ -15,7 +15,7 @@ import edu.ucla.library.iiif.fester.MessageCodes;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 
-public class DeleteManifestHandlerTest extends AbstractManifestHandlerTest {
+public class DeleteManifestHandlerTest extends AbstractFesterHandlerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DeleteManifestHandlerTest.class, Constants.MESSAGES);
 
