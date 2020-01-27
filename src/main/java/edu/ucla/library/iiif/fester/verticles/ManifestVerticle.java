@@ -549,7 +549,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
             canvas.addImageContent(imageContent);
 
             if (aCsvHeaders.hasViewingHintIndex()) {
-                final String viewingHint = StringUtils.trimToNull(columns[aCsvHeaders.getTitleIndex()]);
+                final String viewingHint = StringUtils.trimToNull(columns[aCsvHeaders.getViewingHintIndex()]);
 
                 if (viewingHint != null) {
                     canvas.setViewingHint(new ViewingHint(viewingHint));
