@@ -31,7 +31,8 @@ public class FakeS3BucketVerticle extends AbstractFesterVerticle {
 
     private static final Map<String, File> JSON_FILES = Map.of("ark%3A%2F21198%2Fzz0009gsq9", new File(
             "src/test/resources/json/ark%3A%2F21198%2Fzz0009gsq9.json"), "ark%3A%2F21198%2Fzz0009gv8j", new File(
-                    "src/test/resources/json/ark%3A%2F21198%2Fzz0009gv8j.json"));
+                    "src/test/resources/json/ark%3A%2F21198%2Fzz0009gv8j.json"), "ark%3A%2F21198%2Fz12f8rtw",
+            new File("src/test/resources/json/ark%3A%2F21198%2Fz12f8rtw.json"));
 
     private File myTmpDir;
 

@@ -1,0 +1,8 @@
+{
+   "@context":"http://iiif.io/api/presentation/2/context.json",
+   "label":"Sinai Arabic 249. Martyrdom of St. Catherine : manuscript [ca 18th c.]. St. Catherine's Monastery, Sinai, Egypt",
+   "@id":"http://iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest",
+   "@type":"sc:Manifest",
+   "viewingHint":"paged",
+   "viewingDirection":"right-to-left"
+}

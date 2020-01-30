@@ -2,7 +2,7 @@
  *
  */
 
-package edu.ucla.library.iiif.fester.verticles;
+package edu.ucla.library.iiif.fester.utils;
 
 import java.util.Comparator;
 
@@ -22,7 +22,7 @@ public class ItemSequenceComparator implements Comparator<String[]> {
 
     @Override
     public int compare(final String[] aFirstRow, final String[] aSecondRow) {
-        return aFirstRow[myIndex].compareTo(aSecondRow[myIndex]);
+        return Integer.valueOf(aFirstRow[myIndex]).compareTo(Integer.valueOf(aSecondRow[myIndex]));
     }
 
 }
