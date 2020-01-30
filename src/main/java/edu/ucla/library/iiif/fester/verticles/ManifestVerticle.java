@@ -47,6 +47,7 @@ import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.utils.CodeUtils;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
+import edu.ucla.library.iiif.fester.utils.ItemSequenceComparator;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
