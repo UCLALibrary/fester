@@ -129,4 +129,5 @@
   <entry key="MFS-134">Uploaded CSV file '{}' still exists on disk {} ms after the handler sent the response</entry>
   <entry key="MFS-135">Regular expression '{}' does not match '{}'</entry>
   <entry key="MFS-136">Cannot retrieve object '{}' from S3: unknown type '{}'</entry>
+  <entry key="MFS-137">Test GetCollectionHandler with a test manifest: {}</entry>
 </properties>
