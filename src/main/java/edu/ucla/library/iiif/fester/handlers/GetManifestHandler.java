@@ -7,6 +7,7 @@ import info.freelibrary.util.LoggerFactory;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
+import edu.ucla.library.iiif.fester.utils.IDUtils;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
@@ -34,16 +35,13 @@ public class GetManifestHandler extends AbstractFesterHandler {
     public void handle(final RoutingContext aContext) {
         final HttpServerResponse response = aContext.response();
         final HttpServerRequest request = aContext.request();
-        final String idParam = request.getParam(Constants.MANIFEST_ID);
-        final String manifestId;
+        final String manifestId = request.getParam(Constants.MANIFEST_ID);
+        final String manifestS3Key = IDUtils.getWorkS3Key(manifestId);
 
-        // set a very permissive COR response header
+        // set a very permissive CORS response header
         response.headers().set(Constants.CORS_HEADER, Constants.STAR);
 
-        // If our manifest ID doesn't end with '.json' add it for third party tool convenience
-        manifestId = !idParam.endsWith(Constants.JSON_EXT) ? idParam + Constants.JSON_EXT : idParam;
-
-        myS3Client.get(myS3Bucket, manifestId, getResponse -> {
+        myS3Client.get(myS3Bucket, manifestS3Key, getResponse -> {
             final int statusCode = getResponse.statusCode();
             final String statusMessage;
 

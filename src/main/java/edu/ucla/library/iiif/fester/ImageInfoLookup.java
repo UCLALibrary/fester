@@ -76,7 +76,7 @@ public class ImageInfoLookup {
                     }
                 }
             } else if (responseCode == 404) {
-                final String id = IDUtils.decode(URI.create(aURL));
+                final String id = IDUtils.getResourceID(URI.create(aURL));
                 throw new ManifestNotFoundException(MessageCodes.MFS_070, id);
             } else {
                 final String responseMessage = connection.getResponseMessage();

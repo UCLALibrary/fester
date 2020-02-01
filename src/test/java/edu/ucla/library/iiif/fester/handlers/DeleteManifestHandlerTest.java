@@ -6,20 +6,17 @@ import java.io.IOException;
 import org.junit.Test;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
-import info.freelibrary.util.StringUtils;
-
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
+import edu.ucla.library.iiif.fester.utils.IDUtils;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 
 public class DeleteManifestHandlerTest extends AbstractFesterHandlerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DeleteManifestHandlerTest.class, Constants.MESSAGES);
-
-    private static final String MANIFEST_PATH = "/{}/manifest";
 
     /**
      * Test the DeleteManifestHandler.
@@ -31,44 +28,15 @@ public class DeleteManifestHandlerTest extends AbstractFesterHandlerTest {
     public void testDeleteManifestHandler(final TestContext aContext) throws IOException {
         final Async asyncTask = aContext.async();
         final int port = aContext.get(Config.HTTP_PORT);
-        final String testIDPath = StringUtils.format(MANIFEST_PATH, myManifestID);
+        final String requestPath = IDUtils.getResourceURIPath(myManifestS3Key);
 
-        LOGGER.debug(MessageCodes.MFS_012, myManifestID);
+        LOGGER.debug(MessageCodes.MFS_012, myManifestS3Key);
 
-        myVertx.createHttpClient().delete(port, Constants.UNSPECIFIED_HOST, testIDPath, response -> {
+        myVertx.createHttpClient().delete(port, Constants.UNSPECIFIED_HOST, requestPath, response -> {
             final int statusCode = response.statusCode();
 
             if (response.statusCode() == HTTP.SUCCESS_NO_CONTENT) {
-                aContext.assertFalse(myS3Client.doesObjectExist(myS3Bucket, myManifestID));
-                asyncTask.complete();
-            } else {
-                aContext.fail(LOGGER.getMessage(MessageCodes.MFS_004, HTTP.SUCCESS_NO_CONTENT, statusCode));
-                asyncTask.complete();
-            }
-        }).end();
-    }
-
-    /**
-     * Test the DeleteManifestHandler with .json-less ID.
-     *
-     * @param aContext A testing context
-     */
-    @Test
-    @SuppressWarnings("deprecation")
-    public void testDeleteManifestHandlerJsonless(final TestContext aContext) throws IOException {
-        final Async asyncTask = aContext.async();
-        final int port = aContext.get(Config.HTTP_PORT);
-        final String testIDPath = StringUtils.format(MANIFEST_PATH, myJsonlessManifestID);
-
-        LOGGER.debug(MessageCodes.MFS_012, myJsonlessManifestID);
-
-        myVertx.createHttpClient().delete(port, Constants.UNSPECIFIED_HOST, testIDPath, response -> {
-            final int statusCode = response.statusCode();
-
-            if (response.statusCode() == HTTP.SUCCESS_NO_CONTENT) {
-                final String jsonlessId = myJsonlessManifestID + Constants.JSON_EXT;
-
-                aContext.assertFalse(myS3Client.doesObjectExist(myS3Bucket, jsonlessId));
+                aContext.assertFalse(myS3Client.doesObjectExist(myS3Bucket, myManifestS3Key));
                 asyncTask.complete();
             } else {
                 aContext.fail(LOGGER.getMessage(MessageCodes.MFS_004, HTTP.SUCCESS_NO_CONTENT, statusCode));

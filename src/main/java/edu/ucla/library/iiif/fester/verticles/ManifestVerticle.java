@@ -44,6 +44,7 @@ import edu.ucla.library.iiif.fester.ImageInfoLookup;
 import edu.ucla.library.iiif.fester.LockedManifest;
 import edu.ucla.library.iiif.fester.ManifestNotFoundException;
 import edu.ucla.library.iiif.fester.MessageCodes;
+import edu.ucla.library.iiif.fester.ObjectType;
 import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.utils.CodeUtils;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
@@ -266,18 +267,18 @@ public class ManifestVerticle extends AbstractFesterVerticle {
     private JsonObject updateCollection(final Collection aCollection,
             final Map<String, List<Collection.Manifest>> aWorksMap) {
         final List<Collection.Manifest> manifestList = aCollection.getManifests();
-        final String collectionID = IDUtils.decode(aCollection.getID(), Constants.COLLECTIONS_PATH);
+        final String collectionID = IDUtils.getResourceID(aCollection.getID());
         final List<Collection.Manifest> manifests = aWorksMap.get(collectionID);
 
         for (int manifestIndex = 0; manifestIndex < manifests.size(); manifestIndex++) {
             final Collection.Manifest manifest = manifests.get(manifestIndex);
-            final String manifestID = IDUtils.decode(manifest.getID());
+            final String manifestID = IDUtils.getResourceID(manifest.getID());
 
             boolean found = false;
 
             for (int listIndex = 0; listIndex < manifestList.size(); listIndex++) {
                 final Collection.Manifest existingManifest = manifestList.get(listIndex);
-                final String existingID = IDUtils.decode(existingManifest.getID());
+                final String existingID = IDUtils.getResourceID(existingManifest.getID());
 
                 if (existingID.equals(manifestID)) {
                     final String removedID = manifestList.remove(listIndex).getID().toString();
@@ -312,14 +313,8 @@ public class ManifestVerticle extends AbstractFesterVerticle {
         sharedData.getLocalLockWithTimeout(aID, 1000, lockRequest -> {
             if (lockRequest.succeeded()) {
                 try {
-                    String id = URLEncoder.encode(aID, StandardCharsets.UTF_8);
-
-                    // If we have a collection manifest, add a directory path to it
-                    if (aCollDoc) {
-                        id = StringUtils.format(SIMPLE_URI, Constants.COLLECTIONS_PATH, id);
-                    }
-
-                    getS3Manifest(id, S3BucketVerticle.class.getName(), handler -> {
+                    final ObjectType manifestType = aCollDoc ? COLLECTION : WORK;
+                    getS3Manifest(aID, manifestType, S3BucketVerticle.class.getName(), handler -> {
                         if (handler.succeeded()) {
                             final JsonObject manifest = handler.result().body();
                             final Lock lock = lockRequest.result();
@@ -354,7 +349,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
     private void buildCollectionManifest(final Collection aCollection, final CsvHeaders aCsvHeaders,
             final CsvMetadata aCsvMetadata, final Optional<String> aImageHost, final Message<JsonObject> aMessage) {
         final List<Collection.Manifest> manifestList = aCollection.getManifests(); // Empty list
-        final String collectionID = IDUtils.decode(aCollection.getID(), Constants.COLLECTIONS_PATH);
+        final String collectionID = IDUtils.getResourceID(aCollection.getID());
         final List<Collection.Manifest> manifests = aCsvMetadata.getWorksMap().get(collectionID);
         final Promise<Void> promise = Promise.promise();
 
@@ -580,7 +575,8 @@ public class ManifestVerticle extends AbstractFesterVerticle {
 
         // Create a brief work manifest for inclusion in the collection manifest
         if (id != null && label != null) {
-            final Collection.Manifest manifest = new Collection.Manifest(IDUtils.encode(myHost, id), label);
+            final Collection.Manifest manifest = new Collection.Manifest(IDUtils.getResourceURI(myHost, id).toString(),
+                    label);
 
             LOGGER.debug(MessageCodes.MFS_119, id, parentID);
 
@@ -641,7 +637,8 @@ public class ManifestVerticle extends AbstractFesterVerticle {
             final String label = StringUtils.trimToNull(aRow[aHeaders.getTitleIndex()]);
 
             if (label != null) {
-                return new Collection(IDUtils.encode(myHost, Constants.COLLECTIONS_PATH, id), label);
+                return new Collection(
+                        IDUtils.getResourceURI(myHost, IDUtils.getCollectionS3Key(id)).toString(), label);
             } else {
                 throw new CsvParsingException(MessageCodes.MFS_104);
             }

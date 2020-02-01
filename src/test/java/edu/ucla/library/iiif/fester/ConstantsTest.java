@@ -15,7 +15,7 @@ public class ConstantsTest {
      */
     @Test
     public final void test() {
-        assertEquals("/collections", Constants.COLLECTIONS_PATH);
+        assertEquals("/collections", Constants.POST_CSV_ROUTE);
     }
 
 }

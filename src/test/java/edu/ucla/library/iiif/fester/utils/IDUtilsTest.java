@@ -13,7 +13,24 @@ import org.junit.Test;
  */
 public class IDUtilsTest {
 
-    private static final String COLLECTIONS = "/collections";
+    private static final String FAKE_HOST = "http://localhost:9999";
+
+    private static final String WORK_MANIFEST_ID = "ark:/21198/zz000bjfsv";
+
+    private static final String WORK_MANIFEST_URI_PATH = "/ark%3A%2F21198%2Fzz000bjfsv/manifest";
+
+    private static final String WORK_MANIFEST_URI = FAKE_HOST + WORK_MANIFEST_URI_PATH;
+
+    private static final String WORK_MANIFEST_S3_KEY = "ark:/21198/zz000bjfsv.json";
+
+
+    private static final String COLLECTION_MANIFEST_ID = "ark:/21198/zz0009gss9";
+
+    private static final String COLLECTION_MANIFEST_URI_PATH = "/collections/ark%3A%2F21198%2Fzz0009gss9";
+
+    private static final String COLLECTION_MANIFEST_URI = FAKE_HOST + COLLECTION_MANIFEST_URI_PATH;
+
+    private static final String COLLECTION_MANIFEST_S3_KEY = "collections/ark:/21198/zz0009gss9.json";
 
     /**
      * Tests getIDs().
@@ -56,47 +73,135 @@ public class IDUtilsTest {
     }
 
     /**
-     * Tests collection ID encoding.
+     * Tests S3 key to URI mapping for a work.
      */
     @Test
-    public final void testEncodeStringStringString() {
-        final String expected = "http://localhost:9999/collections/ark%3A%2F21198%2Fzz0009gss9";
-        final String found = IDUtils.encode("http://localhost:9999", COLLECTIONS, "ark:/21198/zz0009gss9");
+    public final void testGetResourceURIWork() {
+        final String expected = WORK_MANIFEST_URI;
+        final String found = IDUtils.getResourceURI(FAKE_HOST, WORK_MANIFEST_S3_KEY).toString();
 
         assertEquals(expected, found);
     }
 
     /**
-     * Tests work ID encoding.
+     * Tests S3 key to URI mapping for a collection.
      */
     @Test
-    public final void testEncodeStringString() {
-        final String expected = "https://localhost:9999/ark%3A%2F21198%2Fzz000bjfsv/manifest";
-        final String found = IDUtils.encode("https://localhost:9999", "ark:/21198/zz000bjfsv");
+    public final void testGetResourceURICollection() {
+        final String expected = COLLECTION_MANIFEST_URI;
+        final String found = IDUtils.getResourceURI(FAKE_HOST, COLLECTION_MANIFEST_S3_KEY)
+                .toString();
 
         assertEquals(expected, found);
     }
 
     /**
-     * Tests work ID decoding.
+     * Tests S3 key to URI path mapping for a work.
      */
     @Test
-    public final void testDecodeURI() {
-        final URI encoded = URI.create("http://localhost:9999/ark%3A%2F21198%2Fzz000bjfvv/manifest");
-        final String expected = "ark:/21198/zz000bjfvv";
+    public final void testGetResourceURIPathWork() {
+        final String expected = WORK_MANIFEST_URI_PATH;
+        final String found = IDUtils.getResourceURIPath(WORK_MANIFEST_S3_KEY);
 
-        assertEquals(expected, IDUtils.decode(encoded));
+        assertEquals(expected, found);
     }
 
     /**
-     * Tests collection ID decoding.
+     * Tests S3 key to URI path mapping for a collection.
      */
     @Test
-    public final void testDecodeUriString() {
-        final URI encoded = URI.create("http://localhost:9999/collections/ark%3A%2F21198%2Fzz0009gsq9");
-        final String expected = "ark:/21198/zz0009gsq9";
+    public final void testGetResourceURIPathCollection() {
+        final String expected = COLLECTION_MANIFEST_URI_PATH;
+        final String found = IDUtils.getResourceURIPath(COLLECTION_MANIFEST_S3_KEY);
 
-        assertEquals(expected, IDUtils.decode(encoded, COLLECTIONS));
+        assertEquals(expected, found);
     }
 
+    /**
+     * Tests URI to S3 key mapping for a work.
+     */
+    @Test
+    public final void testGetResourceS3KeyWork() {
+        final String expected = WORK_MANIFEST_S3_KEY;
+        final String found = IDUtils.getResourceS3Key(URI.create(WORK_MANIFEST_URI));
+
+        assertEquals(expected, found);
+    }
+
+    /**
+     * Tests URI to S3 key mapping for a collection.
+     */
+    @Test
+    public final void testGetResourceS3KeyCollection() {
+        final String expected = COLLECTION_MANIFEST_S3_KEY;
+        final String found = IDUtils.getResourceS3Key(URI.create(COLLECTION_MANIFEST_URI));
+
+        assertEquals(expected, found);
+    }
+
+    /**
+     * Tests URI to ID (ARK) mapping for a work.
+     */
+    @Test
+    public final void testGetResourceIDWorkURI() {
+        final String expected = WORK_MANIFEST_ID;
+        final String found = IDUtils.getResourceID(URI.create(WORK_MANIFEST_URI));
+
+        assertEquals(expected, found);
+    }
+
+    /**
+     * Tests URI to ID (ARK) mapping for a collection.
+     */
+    @Test
+    public final void testGetResourceIDCollectionURI() {
+        final String expected = COLLECTION_MANIFEST_ID;
+        final String found = IDUtils.getResourceID(URI.create(COLLECTION_MANIFEST_URI));
+
+        assertEquals(expected, found);
+    }
+
+    /**
+     * Tests S3 key to ID (ARK) mapping for a work.
+     */
+    @Test
+    public final void testGetResourceIDWorkS3Key() {
+        final String expected = WORK_MANIFEST_ID;
+        final String found = IDUtils.getResourceID(WORK_MANIFEST_S3_KEY);
+
+        assertEquals(expected, found);
+    }
+
+    /**
+     * Tests S3 key to ID (ARK) mapping for a collection.
+     */
+    @Test
+    public final void testGetResourceIDCollectionS3Key() {
+        final String expected = COLLECTION_MANIFEST_ID;
+        final String found = IDUtils.getResourceID(COLLECTION_MANIFEST_S3_KEY);
+
+        assertEquals(expected, found);
+    }
+
+    /**
+     * Tests ID (ARK) to S3 key mapping for a work.
+     */
+    @Test
+    public final void testGetWorkS3Key() {
+        final String expected = WORK_MANIFEST_S3_KEY;
+        final String found = IDUtils.getWorkS3Key(WORK_MANIFEST_ID);
+
+        assertEquals(expected, found);
+    }
+
+    /**
+     * Tests ID (ARK) to S3 key mapping for a collection.
+     */
+    @Test
+    public final void testGetCollectionS3Key() {
+        final String expected = COLLECTION_MANIFEST_S3_KEY;
+        final String found = IDUtils.getCollectionS3Key(COLLECTION_MANIFEST_ID);
+
+        assertEquals(expected, found);
+    }
 }

@@ -1,9 +1,6 @@
 
 package edu.ucla.library.iiif.fester.utils;
 
-import static edu.ucla.library.iiif.fester.Constants.MANIFEST;
-import static edu.ucla.library.iiif.fester.Constants.SLASH;
-
 import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -13,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import edu.ucla.library.iiif.fester.Constants;
@@ -70,58 +68,106 @@ public final class IDUtils {
     }
 
     /**
-     * Encode a collection manifest ID.
+     * Gets a IIIF resource URI from its S3 key.
      *
      * @param aHost The host at which Fester is running
-     * @param aCollectionsPath The path at which the manifest is served
-     * @param aID The manifest ID
-     * @return An encoded manifest ID
+     * @param aS3Key The S3 key for the IIIF resource
+     * @return A IIIF resource URI
      */
-    public static String encode(final String aHost, final String aCollectionsPath, final String aID) {
-        final StringBuilder sb = new StringBuilder();
-        final String encodedID = URLEncoder.encode(aID, StandardCharsets.UTF_8);
-
-        return sb.append(aHost).append(aCollectionsPath).append(SLASH).append(encodedID).toString();
+    public static URI getResourceURI(final String aHost, final String aS3Key) {
+        return URI.create(new StringBuilder().append(aHost).append(getResourceURIPath(aS3Key)).toString());
     }
 
     /**
-     * Encode a work manifest ID.
+     * Gets the path part of a IIIF resource URI from its S3 key.
      *
-     * @param aHost The host at which Fester is running
-     * @param aID The manifest ID
-     * @return An encoded manifest ID
+     * @param aS3Key The S3 key for the IIIF resource
+     * @return A IIIF resource URI path
      */
-    public static String encode(final String aHost, final String aID) {
-        final StringBuilder sb = new StringBuilder();
-        final String encodedID = URLEncoder.encode(aID, StandardCharsets.UTF_8);
+    public static String getResourceURIPath(final String aS3Key) {
+        final String encodedID = URLEncoder.encode(getResourceID(aS3Key), StandardCharsets.UTF_8);
+        final String path;
 
-        return sb.append(aHost).append(SLASH).append(encodedID).append(SLASH).append(MANIFEST).toString();
+        if (aS3Key.contains(Constants.COLLECTION_S3_KEY_PREFIX)) {
+            path = Constants.COLLECTION_URI_PATH_PREFIX + encodedID;
+        } else {
+            path = Constants.SLASH + encodedID + Constants.MANIFEST_URI_PATH_SUFFIX;
+        }
+        return path;
     }
 
     /**
-     * Decodes an encoded collection ID.
+     * Gets a IIIF resource ID (ARK) from its S3 key.
      *
-     * @param aID The encoded collection ID
-     * @param aCollectionsPath The path at which collections can be found
-     * @return A decoded ID
+     * @param aS3Key The S3 key for the IIIF resource
+     * @return An ID (ARK)
      */
-    public static String decode(final URI aID, final String aCollectionsPath) {
-        final int startIndex = aCollectionsPath.length() + 1;
-
-        // Note that getPath() URL decodes the path too
-        return aID.getPath().substring(startIndex);
+    public static String getResourceID(final String aS3Key) {
+        final String s3KeyPrefix;
+        if (aS3Key.contains(Constants.COLLECTION_S3_KEY_PREFIX)) {
+            s3KeyPrefix = Constants.COLLECTION_S3_KEY_PREFIX;
+        } else {
+            s3KeyPrefix = Constants.EMPTY;
+        }
+        return FilenameUtils.removeExtension(aS3Key.substring(s3KeyPrefix.length()));
     }
 
     /**
-     * Decodes an encoded work ID.
+     * Gets a IIIF resource ID (ARK) from its URI.
      *
-     * @param aID The encoded work ID
-     * @return A decoded ID
+     * @param aURI The URI of the IIIF resource
+     * @return An ID (ARK)
      */
-    public static String decode(final URI aID) {
-        final String path = aID.getPath();
-        final int endIndex = path.lastIndexOf('/');
+    public static String getResourceID(final URI aURI) {
+        return getResourceID(getResourceS3Key(aURI));
+    }
 
-        return path.substring(1, endIndex);
+    /**
+     * Gets a IIIF resource's S3 key from its URI.
+     *
+     * @param aURI The URI of the IIIF resource
+     * @return An S3 key
+     */
+    public static String getResourceS3Key(final URI aURI) {
+        final String path = aURI.getPath();
+        final String encodedID;
+        final String uriPathPrefix;
+        final String s3KeyPrefix;
+        final int endIndex;
+
+        // Get the (encoded) resource ID from the URI path
+        if (path.contains(Constants.COLLECTION_URI_PATH_PREFIX)) {
+            uriPathPrefix = Constants.COLLECTION_URI_PATH_PREFIX;
+            s3KeyPrefix = Constants.COLLECTION_S3_KEY_PREFIX;
+            endIndex = path.length();
+        } else {
+            uriPathPrefix = Constants.SLASH;
+            s3KeyPrefix = Constants.EMPTY;
+            endIndex = path.length() - Constants.MANIFEST_URI_PATH_SUFFIX.length();
+        }
+        encodedID = path.substring(uriPathPrefix.length(), endIndex);
+
+        // Add any prefix and a .json extension
+        return s3KeyPrefix + URLDecoder.decode(encodedID, StandardCharsets.UTF_8) + Constants.JSON_EXT;
+    }
+
+    /**
+     * Gets an S3 key for a work.
+     *
+     * @param aID The ID (ARK) of the work
+     * @return An S3 key
+     */
+    public static String getWorkS3Key(final String aID) {
+        return aID + Constants.JSON_EXT;
+    }
+
+    /**
+     * Gets an S3 key for a collection.
+     *
+     * @param aID The ID (ARK) of the collection
+     * @return An S3 key
+     */
+    public static String getCollectionS3Key(final String aID) {
+        return Constants.COLLECTION_S3_KEY_PREFIX + aID + Constants.JSON_EXT;
     }
 }

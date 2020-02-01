@@ -1,7 +1,7 @@
 
 package edu.ucla.library.iiif.fester.handlers;
 
-import static edu.ucla.library.iiif.fester.Constants.COLLECTIONS_PATH;
+import static edu.ucla.library.iiif.fester.Constants.POST_CSV_ROUTE;
 import static edu.ucla.library.iiif.fester.Constants.UNSPECIFIED_HOST;
 
 import java.io.File;
@@ -72,7 +72,7 @@ public class PostCsvHandlerTest extends AbstractFesterHandlerTest {
     public final void testFullCSV(final TestContext aContext) throws CsvException, IOException {
         final int port = aContext.get(Config.HTTP_PORT);
         final WebClient webClient = WebClient.create(myVertx);
-        final HttpRequest<Buffer> postRequest = webClient.post(port, UNSPECIFIED_HOST, COLLECTIONS_PATH);
+        final HttpRequest<Buffer> postRequest = webClient.post(port, UNSPECIFIED_HOST, POST_CSV_ROUTE);
         final String filePath = FULL_CSV_FILE.getAbsolutePath();
         final String fileName = FULL_CSV_FILE.getName();
         final MultipartForm form = MultipartForm.create();
@@ -122,7 +122,7 @@ public class PostCsvHandlerTest extends AbstractFesterHandlerTest {
     public final void testFullCsvWithIiifHost(final TestContext aContext) throws IOException, CsvException {
         final int port = aContext.get(Config.HTTP_PORT);
         final WebClient webClient = WebClient.create(myVertx);
-        final HttpRequest<Buffer> postRequest = webClient.post(port, UNSPECIFIED_HOST, COLLECTIONS_PATH);
+        final HttpRequest<Buffer> postRequest = webClient.post(port, UNSPECIFIED_HOST, POST_CSV_ROUTE);
         final String filePath = FULL_CSV_FILE.getAbsolutePath();
         final String fileName = FULL_CSV_FILE.getName();
         final MultipartForm form = MultipartForm.create();
@@ -173,7 +173,7 @@ public class PostCsvHandlerTest extends AbstractFesterHandlerTest {
     public final void testCollectionWorksCSV(final TestContext aContext) throws IOException, CsvException {
         final int port = aContext.get(Config.HTTP_PORT);
         final WebClient webClient = WebClient.create(myVertx);
-        final HttpRequest<Buffer> postRequest = webClient.post(port, UNSPECIFIED_HOST, COLLECTIONS_PATH);
+        final HttpRequest<Buffer> postRequest = webClient.post(port, UNSPECIFIED_HOST, POST_CSV_ROUTE);
         final String filePath = COLL_WORKS_CSV_FILE.getAbsolutePath();
         final String fileName = COLL_WORKS_CSV_FILE.getName();
         final MultipartForm form = MultipartForm.create();
@@ -223,7 +223,7 @@ public class PostCsvHandlerTest extends AbstractFesterHandlerTest {
     public final void testWorksCSV(final TestContext aContext) throws IOException, CsvException {
         final int port = aContext.get(Config.HTTP_PORT);
         final WebClient webClient = WebClient.create(myVertx);
-        final HttpRequest<Buffer> postRequest = webClient.post(port, UNSPECIFIED_HOST, COLLECTIONS_PATH);
+        final HttpRequest<Buffer> postRequest = webClient.post(port, UNSPECIFIED_HOST, POST_CSV_ROUTE);
         final String filePath = WORKS_CSV_FILE.getAbsolutePath();
         final String fileName = WORKS_CSV_FILE.getName();
         final MultipartForm form = MultipartForm.create();
@@ -273,7 +273,7 @@ public class PostCsvHandlerTest extends AbstractFesterHandlerTest {
     public final void testDeleteUploadedFilesOnEnd(final TestContext aContext) throws IOException, CsvException {
         final int port = aContext.get(Config.HTTP_PORT);
         final WebClient webClient = WebClient.create(myVertx);
-        final HttpRequest<Buffer> postRequest = webClient.post(port, UNSPECIFIED_HOST, COLLECTIONS_PATH);
+        final HttpRequest<Buffer> postRequest = webClient.post(port, UNSPECIFIED_HOST, POST_CSV_ROUTE);
         final String filePath = FULL_CSV_FILE.getAbsolutePath();
         final String fileName = FULL_CSV_FILE.getName();
         final MultipartForm form = MultipartForm.create();
