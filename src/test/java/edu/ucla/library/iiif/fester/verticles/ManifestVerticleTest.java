@@ -26,6 +26,7 @@ import info.freelibrary.util.StringUtils;
 
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
+import edu.ucla.library.iiif.fester.ImageInfoLookup;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
@@ -251,6 +252,42 @@ public class ManifestVerticleTest {
         myVertx.eventBus().request(ManifestVerticle.class.getName(), message, request -> {
             if (request.succeeded()) {
                 asyncTask.complete();
+            } else {
+                aContext.fail(request.cause());
+            }
+        });
+    }
+
+    /**
+     * Test against a CSV that just has pages.
+     *
+     * @param aContext A testing context
+     */
+    @Test
+    public final void testPageOrder(final TestContext aContext) {
+        final String foundFile = myJsonFiles + "/ark%3A%2F21198%2Fz12f8rtw.json";
+        final String expectedFile = "src/test/resources/json/pages-ordered.json";
+        final String filePath = "src/test/resources/csv/ara249.csv";
+        final JsonObject message = new JsonObject();
+        final Async asyncTask = aContext.async();
+
+        message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, filePath);
+        message.put(Constants.IIIF_HOST, ImageInfoLookup.FAKE_IIIF_SERVER);
+        message.put(Constants.FESTER_HOST, MANIFEST_HOST);
+
+        LOGGER.debug(MessageCodes.MFS_120, WORKS, ManifestVerticle.class.getName());
+
+        myVertx.eventBus().request(ManifestVerticle.class.getName(), message, request -> {
+            if (request.succeeded()) {
+                final JsonObject found = new JsonObject(myVertx.fileSystem().readFileBlocking(foundFile));
+                final JsonObject expected = new JsonObject(myVertx.fileSystem().readFileBlocking(expectedFile));
+
+                // Confirm that the order of our pages is what we expect it to be
+                assertEquals(expected, found);
+
+                if (!asyncTask.isCompleted()) {
+                    asyncTask.complete();
+                }
             } else {
                 aContext.fail(request.cause());
             }
