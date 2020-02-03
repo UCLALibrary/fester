@@ -40,7 +40,6 @@ public class DeleteManifestHandlerTest extends AbstractFesterHandlerTest {
                 asyncTask.complete();
             } else {
                 aContext.fail(LOGGER.getMessage(MessageCodes.MFS_004, HTTP.SUCCESS_NO_CONTENT, statusCode));
-                asyncTask.complete();
             }
         }).end();
     }
@@ -52,7 +51,7 @@ public class DeleteManifestHandlerTest extends AbstractFesterHandlerTest {
      */
     @Test
     @SuppressWarnings("deprecation")
-    public void testGetManifestHandler404(final TestContext aContext) {
+    public void testDeleteManifestHandler404(final TestContext aContext) {
         final Async asyncTask = aContext.async();
         final int port = aContext.get(Config.HTTP_PORT);
         final String testIDPath = "/testIdentifier"; // path should be: /{id}/manifest
@@ -64,7 +63,9 @@ public class DeleteManifestHandlerTest extends AbstractFesterHandlerTest {
                 aContext.fail(LOGGER.getMessage(MessageCodes.MFS_004, HTTP.NOT_FOUND, statusCode));
             }
 
-            asyncTask.complete();
+            if (!asyncTask.isCompleted()) {
+                asyncTask.complete();
+            }
         }).end();
     }
 

@@ -7,6 +7,7 @@ import static edu.ucla.library.iiif.fester.ObjectType.WORK;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -576,8 +577,8 @@ public class ManifestVerticle extends AbstractFesterVerticle {
 
         // Create a brief work manifest for inclusion in the collection manifest
         if (id != null && label != null) {
-            final Collection.Manifest manifest = new Collection.Manifest(IDUtils.getResourceURI(myHost, id).toString(),
-                    label);
+            final URI resourceURI = IDUtils.getResourceURI(myHost, id);
+            final Collection.Manifest manifest = new Collection.Manifest(resourceURI.toString(), label);
 
             LOGGER.debug(MessageCodes.MFS_119, id, parentID);
 
@@ -638,8 +639,8 @@ public class ManifestVerticle extends AbstractFesterVerticle {
             final String label = StringUtils.trimToNull(aRow[aHeaders.getTitleIndex()]);
 
             if (label != null) {
-                return new Collection(
-                        IDUtils.getResourceURI(myHost, IDUtils.getCollectionS3Key(id)).toString(), label);
+                final URI resourceURI = IDUtils.getResourceURI(myHost, IDUtils.getCollectionS3Key(id));
+                return new Collection(resourceURI.toString(), label);
             } else {
                 throw new CsvParsingException(MessageCodes.MFS_104);
             }

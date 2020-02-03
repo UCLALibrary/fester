@@ -50,10 +50,12 @@ public class GetCollectionHandlerTest extends AbstractFesterHandlerTest {
 
                     // Verify that our retrieved JSON is as we expect it
                     aContext.assertEquals(new JsonObject(expectedCollection), new JsonObject(foundCollection));
-                    asyncTask.complete();
                 });
             } else {
                 aContext.fail(LOGGER.getMessage(MessageCodes.MFS_003, HTTP.OK, statusCode));
+            }
+
+            if (!asyncTask.isCompleted()) {
                 asyncTask.complete();
             }
         });
@@ -64,21 +66,23 @@ public class GetCollectionHandlerTest extends AbstractFesterHandlerTest {
      *
      * @param aContext A testing context
      */
-    // @Test
+    @Test
     @SuppressWarnings("deprecation")
     public void testGetCollectionHandler404(final TestContext aContext) {
         final Async asyncTask = aContext.async();
         final int port = aContext.get(Config.HTTP_PORT);
-        final String badPath = "/collections/badIdentifier";
+        final String missingPath = "/collections/missingIdentifier";
 
-        myVertx.createHttpClient().getNow(port, Constants.UNSPECIFIED_HOST, badPath, response -> {
+        myVertx.createHttpClient().getNow(port, Constants.UNSPECIFIED_HOST, missingPath, response -> {
             final int statusCode = response.statusCode();
 
             if (response.statusCode() != HTTP.NOT_FOUND) {
                 aContext.fail(LOGGER.getMessage(MessageCodes.MFS_004, HTTP.NOT_FOUND, statusCode));
             }
 
-            asyncTask.complete();
+            if (!asyncTask.isCompleted()) {
+                asyncTask.complete();
+            }
         });
     }
 }

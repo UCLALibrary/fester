@@ -144,7 +144,6 @@ public class ManifestVerticleTest {
             if (request.succeeded()) {
                 final JsonObject manifest = new JsonObject(myVertx.fileSystem().readFileBlocking(jsonFile));
 
-
                 assertEquals(ViewingHint.Option.PAGED.toString(), manifest.getString("viewingHint"));
                 assertEquals(ViewingDirection.RIGHT_TO_LEFT.toString(), manifest.getString("viewingDirection"));
 

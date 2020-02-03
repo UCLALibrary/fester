@@ -1,12 +1,14 @@
 
 package edu.ucla.library.iiif.fester.handlers;
 
+import info.freelibrary.util.FileUtils;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
+import edu.ucla.library.iiif.fester.utils.IDUtils;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
@@ -35,14 +37,17 @@ public class PutManifestHandler extends AbstractFesterHandler {
         final HttpServerResponse response = aContext.response();
         final HttpServerRequest request = aContext.request();
         final JsonObject body = aContext.getBodyAsJson();
-        final String idParam = request.getParam(Constants.MANIFEST_ID);
-        final String manifestId;
+        final String manifestId = request.getParam(Constants.MANIFEST_ID);
+        final String manifestS3Key;
 
-        // If our manifest ID doesn't end with '.json' add it for third party tool convenience
-        manifestId = !idParam.endsWith(Constants.JSON_EXT) ? idParam + Constants.JSON_EXT : idParam;
+        if (FileUtils.getExt(manifestId).equals(Constants.JSON_EXT)) {
+            manifestS3Key = IDUtils.getWorkS3Key(manifestId, Constants.JSON_EXT);
+        } else {
+            manifestS3Key = IDUtils.getWorkS3Key(manifestId);
+        }
 
         // For now we're not going to check if it exists before we overwrite it
-        myS3Client.put(myS3Bucket, manifestId, body.toBuffer(), put -> {
+        myS3Client.put(myS3Bucket, manifestS3Key, body.toBuffer(), put -> {
             final int statusCode = put.statusCode();
 
             switch (statusCode) {

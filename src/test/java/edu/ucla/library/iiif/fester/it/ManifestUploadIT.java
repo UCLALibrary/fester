@@ -134,7 +134,6 @@ public class ManifestUploadIT {
         final Async asyncTask = aContext.async();
         final String myPutManifestID = TestConstants.PUT_TEST_ID_PREFIX + MANIFEST_ID;
         final String requestPath = IDUtils.getResourceURIPath(IDUtils.getWorkS3Key(myPutManifestID));
-
         final String expectedManifest = StringUtils.read(MANIFEST_FILE);
 
         LOGGER.info(MessageCodes.MFS_027, requestPath);

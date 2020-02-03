@@ -10,10 +10,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import edu.ucla.library.iiif.fester.Constants;
+import info.freelibrary.util.FileUtils;
 
 /**
  * A utilities class for working with IDs.
@@ -109,7 +109,7 @@ public final class IDUtils {
         } else {
             s3KeyPrefix = Constants.EMPTY;
         }
-        return FilenameUtils.removeExtension(aS3Key.substring(s3KeyPrefix.length()));
+        return FileUtils.stripExt(aS3Key.substring(s3KeyPrefix.length()));
     }
 
     /**
@@ -148,7 +148,7 @@ public final class IDUtils {
         encodedID = path.substring(uriPathPrefix.length(), endIndex);
 
         // Add any prefix and a .json extension
-        return s3KeyPrefix + URLDecoder.decode(encodedID, StandardCharsets.UTF_8) + Constants.JSON_EXT;
+        return s3KeyPrefix + URLDecoder.decode(encodedID, StandardCharsets.UTF_8) + Constants.DOT + Constants.JSON_EXT;
     }
 
     /**
@@ -158,7 +158,25 @@ public final class IDUtils {
      * @return An S3 key
      */
     public static String getWorkS3Key(final String aID) {
-        return aID + Constants.JSON_EXT;
+        return aID + Constants.DOT + Constants.JSON_EXT;
+    }
+
+    /**
+     * @deprecated Gets an S3 key for a work, with an extension to append if the identifier doesn't have it already.
+     *
+     * TODO: remove in 1.0.0
+     *
+     * @param aID The ID (ARK) of the work
+     * @param aExt The extension to append if the identifier doesn't have it already
+     * @return An S3 key
+     */
+    @Deprecated
+    public static String getWorkS3Key(final String aID, final String aExt) {
+        if (FileUtils.getExt(aID).equals(aExt)) {
+            return aID;
+        } else {
+            return aID + Constants.DOT + aExt;
+        }
     }
 
     /**
@@ -168,6 +186,6 @@ public final class IDUtils {
      * @return An S3 key
      */
     public static String getCollectionS3Key(final String aID) {
-        return Constants.COLLECTION_S3_KEY_PREFIX + aID + Constants.JSON_EXT;
+        return Constants.COLLECTION_S3_KEY_PREFIX + aID + Constants.DOT + Constants.JSON_EXT;
     }
 }

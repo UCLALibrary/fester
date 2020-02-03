@@ -62,6 +62,11 @@ public final class Constants {
     public static final String SLASH = "/";
 
     /**
+     * A dot.
+     */
+    public static final String DOT = ".";
+
+    /**
      * Just a empty string, useful
      */
     public static final String EMPTY = "";
@@ -69,7 +74,7 @@ public final class Constants {
     /**
      * The file extension for JSON files
      */
-    public static final String JSON_EXT = ".json";
+    public static final String JSON_EXT = "json";
 
     /**
      * The file path of the CSV collection file being processed.
