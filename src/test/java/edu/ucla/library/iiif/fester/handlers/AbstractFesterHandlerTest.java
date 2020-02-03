@@ -24,6 +24,7 @@ import info.freelibrary.util.LoggerFactory;
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.MessageCodes;
+import edu.ucla.library.iiif.fester.utils.IDUtils;
 import edu.ucla.library.iiif.fester.verticles.FakeS3BucketVerticle;
 import edu.ucla.library.iiif.fester.verticles.MainVerticle;
 import edu.ucla.library.iiif.fester.verticles.S3BucketVerticle;
@@ -39,16 +40,16 @@ import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 
 @RunWith(VertxUnitRunner.class)
-abstract class AbstractManifestHandlerTest {
+abstract class AbstractFesterHandlerTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractManifestHandlerTest.class,
+    protected static final String IIIF_URL = "http://0.0.0.0";
+
+    protected static final File MANIFEST_FILE = new File("src/test/resources/json/ark%3A%2F21198%2Fzz0009gv8j.json");
+
+    protected static final File COLLECTION_FILE = new File("src/test/resources/json/ark%3A%2F21198%2Fzz0009gsq9.json");
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFesterHandlerTest.class,
             Constants.MESSAGES);
-
-    private static final String MANIFEST_FILE_NAME = "testManifest.json";
-
-    private static final String IIIF_URL = "http://0.0.0.0";
-
-    protected static final File MANIFEST_FILE = new File("src/test/resources", MANIFEST_FILE_NAME);
 
     protected Vertx myVertx;
 
@@ -56,9 +57,7 @@ abstract class AbstractManifestHandlerTest {
 
     protected String myS3Bucket;
 
-    protected String myManifestID;
-
-    protected String myJsonlessManifestID;
+    protected String myManifestS3Key;
 
     /**
      * Test set up.
@@ -80,8 +79,7 @@ abstract class AbstractManifestHandlerTest {
         options.setConfig(new JsonObject().put(Config.HTTP_PORT, port).put(Config.IIIF_BASE_URL, IIIF_URL));
         socket.close();
 
-        myJsonlessManifestID = UUID.randomUUID().toString();
-        myManifestID = myJsonlessManifestID + ".json";
+        myManifestS3Key = IDUtils.getWorkS3Key(UUID.randomUUID().toString());
 
         // We only need to initialize our testing tools once; if done, skip
         if (myVertx == null) {
@@ -111,14 +109,7 @@ abstract class AbstractManifestHandlerTest {
     public void tearDown(final TestContext aContext) {
         try {
             // If object doesn't exist, this still completes successfully
-            myS3Client.deleteObject(myS3Bucket, myManifestID);
-        } catch (final SdkClientException details) {
-            aContext.fail(details);
-        }
-
-        try {
-            // If object doesn't exist, this still completes successfully
-            myS3Client.deleteObject(myS3Bucket, myJsonlessManifestID);
+            myS3Client.deleteObject(myS3Bucket, myManifestS3Key);
         } catch (final SdkClientException details) {
             aContext.fail(details);
         }
@@ -141,13 +132,8 @@ abstract class AbstractManifestHandlerTest {
 
                 // Our older handlers talk to S3 directly so we need to put some test files there
                 try {
-                    // Store a manifest whose ID that has a '.json' extension
-                    LOGGER.debug(MessageCodes.MFS_006, myManifestID, myS3Bucket);
-                    myS3Client.putObject(myS3Bucket, myManifestID, MANIFEST_FILE);
-
-                    // Store a manifest whose ID that doesn't have a '.json' extension
-                    LOGGER.debug(MessageCodes.MFS_006, myJsonlessManifestID, myS3Bucket);
-                    myS3Client.putObject(myS3Bucket, myJsonlessManifestID, MANIFEST_FILE);
+                    LOGGER.debug(MessageCodes.MFS_006, myManifestS3Key, myS3Bucket);
+                    myS3Client.putObject(myS3Bucket, myManifestS3Key, MANIFEST_FILE);
 
                     // We don't need to use the real S3BucketVerticle for our non-S3BucketVerticle tests though
                     myVertx.undeploy(s3BucketDeploymentId, undeployment -> {

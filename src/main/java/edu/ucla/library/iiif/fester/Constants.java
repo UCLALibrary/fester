@@ -22,6 +22,11 @@ public final class Constants {
     public static final String MANIFEST_ID = "manifestId";
 
     /**
+     * The name of the collection name parameter.
+     */
+    public static final String COLLECTION_NAME = "collectionName";
+
+    /**
      * The content-type header key.
      */
     public static final String CONTENT_TYPE = "content-type";
@@ -57,6 +62,11 @@ public final class Constants {
     public static final String SLASH = "/";
 
     /**
+     * A dot.
+     */
+    public static final String DOT = ".";
+
+    /**
      * Just a empty string, useful
      */
     public static final String EMPTY = "";
@@ -64,7 +74,7 @@ public final class Constants {
     /**
      * The file extension for JSON files
      */
-    public static final String JSON_EXT = ".json";
+    public static final String JSON_EXT = "json";
 
     /**
      * The file path of the CSV collection file being processed.
@@ -82,9 +92,9 @@ public final class Constants {
     public static final String IIIF_HOST = "iiif-host";
 
     /**
-     * The path at which we can find the collection manifests.
+     * The HTTP POST route for CSV uploads.
      */
-    public static final String COLLECTIONS_PATH = "/collections";
+    public static final String POST_CSV_ROUTE = "/collections";
 
     /**
      * The host at which we're serving content.
@@ -92,9 +102,19 @@ public final class Constants {
     public static final String FESTER_HOST = "fester-host";
 
     /**
-     * The path that distinguishes a work manifest at which work manifests.
+     * The suffix for work manifest URI paths.
      */
-    public static final String MANIFEST = "manifest";
+    public static final String MANIFEST_URI_PATH_SUFFIX = "/manifest";
+
+    /**
+     * The prefix for collection manifest S3 keys.
+     */
+    public static final String COLLECTION_S3_KEY_PREFIX = "collections/";
+
+    /**
+     * The prefix for collection manifest URI paths.
+     */
+    public static final String COLLECTION_URI_PATH_PREFIX = SLASH + COLLECTION_S3_KEY_PREFIX;
 
     /**
      * The record of completed S3 uploads.

@@ -1,21 +1,21 @@
 
 package edu.ucla.library.iiif.fester.verticles;
 
-import static edu.ucla.library.iiif.fester.Constants.EMPTY;
-
 import java.net.URI;
+import java.util.Map.Entry;
 
 import com.amazonaws.regions.RegionUtils;
 
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
+import info.freelibrary.util.StringUtils;
 import info.freelibrary.vertx.s3.S3Client;
-import info.freelibrary.vertx.s3.UserMetadata;
 
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
+import edu.ucla.library.iiif.fester.ObjectType;
 import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.utils.CodeUtils;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
@@ -72,20 +72,30 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
 
             // Our JSON contains a single ID to get or a manifest to put
             if (json.size() == 1) {
-                get(json.iterator().next().getValue().toString(), message);
+                final Entry<String, Object> entry = json.iterator().next();
+                final String manifestID = entry.getValue().toString();
+                final String manifestType = entry.getKey();
+
+                if (ObjectType.WORK.equals(manifestType)) {
+                    LOGGER.debug(MessageCodes.MFS_133, manifestID, myS3Bucket);
+                    get(IDUtils.getWorkS3Key(manifestID), message);
+                } else if (ObjectType.COLLECTION.equals(manifestType)) {
+                    LOGGER.debug(MessageCodes.MFS_133, manifestID, myS3Bucket);
+                    get(IDUtils.getCollectionS3Key(manifestID), message);
+                } else {
+                    final String errorMessage = StringUtils.format(MessageCodes.MFS_136, entry.getValue(),
+                            entry.getKey());
+                    message.fail(CodeUtils.getInt(MessageCodes.MFS_136), errorMessage);
+                }
             } else {
                 put(json, message);
             }
         });
     }
 
-    private void get(final String aID, final Message<JsonObject> aMessage) {
-        // If our ID doesn't have a .json extension, add one for the lookup
-        final String id = !aID.endsWith(Constants.JSON_EXT) ? aID + Constants.JSON_EXT : aID;
+    private void get(final String aS3Key, final Message<JsonObject> aMessage) {
 
-        LOGGER.debug(MessageCodes.MFS_133, id, myS3Bucket);
-
-        myS3Client.get(myS3Bucket, id, get -> {
+        myS3Client.get(myS3Bucket, aS3Key, get -> {
             if (get.statusCode() == HTTP.OK) {
                 get.bodyHandler(body -> {
                     aMessage.reply(new JsonObject(body.getString(0, body.length())));
@@ -104,17 +114,16 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
      */
     @SuppressWarnings("Indentation") // Checkstyle's indentation check doesn't work with multiple lambdas
     private void put(final JsonObject aManifest, final Message<JsonObject> aMessage) {
-        final String manifestID = getUniqueID(aManifest.getString(Constants.ID));
-        final String manifestKey = getS3Key(manifestID);
         final Buffer manifestContent = aManifest.toBuffer();
+        final URI manifestURI = URI.create(aManifest.getString(Constants.ID));
+        final String manifestID = IDUtils.getResourceID(manifestURI);
+        final String manifestS3Key = IDUtils.getResourceS3Key(manifestURI);
 
         LOGGER.debug(MessageCodes.MFS_051, aManifest, myS3Bucket);
-
-        // Start with just ID for manifest metadata
-        final UserMetadata metadata = new UserMetadata(Constants.MANIFEST_ID, manifestID);
+        LOGGER.debug(MessageCodes.MFS_128, manifestID);
 
         try {
-            myS3Client.put(myS3Bucket, manifestKey, manifestContent, metadata, response -> {
+            myS3Client.put(myS3Bucket, manifestS3Key, manifestContent, response -> {
                 final int statusCode = response.statusCode();
 
                 response.exceptionHandler(exception -> {
@@ -161,38 +170,6 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
     }
 
     /**
-     * Gets the ID and checks whether it's a work or collection manifest and then returns the ID for that thing.
-     *
-     * @param aURIString A manifest URI
-     * @return An S3 key for the manifest
-     */
-    private String getUniqueID(final String aURIString) {
-        String uniqueID;
-
-        if (aURIString.contains(Constants.COLLECTIONS_PATH)) {
-            uniqueID = IDUtils.decode(URI.create(aURIString), Constants.COLLECTIONS_PATH);
-            uniqueID = Constants.COLLECTIONS_PATH + Constants.SLASH + uniqueID;
-        } else {
-            // TODO: update this to put Work manifests in a works S3 "directory"
-            uniqueID = IDUtils.decode(URI.create(aURIString));
-        }
-
-        LOGGER.debug(MessageCodes.MFS_128, uniqueID);
-
-        return uniqueID;
-    }
-
-    /**
-     * Gets the key that will be used when putting the manifest in S3.
-     *
-     * @param aID The unique part of a manifest ID
-     * @return An S3 key
-     */
-    private String getS3Key(final String aID) {
-        return !aID.endsWith(Constants.JSON_EXT) ? aID + Constants.JSON_EXT : aID;
-    }
-
-    /**
      * A more tentative retry attempt. We count the number of times we've retried and give up after a certain point.
      *
      * @param aManifestID A Manifest ID to retry
@@ -204,7 +181,7 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
                 if (retryCheck.result()) {
                     sendReply(aMessage, 0, Op.RETRY);
                 } else {
-                    sendReply(aMessage, CodeUtils.getInt(MessageCodes.MFS_058), EMPTY);
+                    sendReply(aMessage, CodeUtils.getInt(MessageCodes.MFS_058), Constants.EMPTY);
                 }
             } else {
                 final Throwable retryException = retryCheck.cause();

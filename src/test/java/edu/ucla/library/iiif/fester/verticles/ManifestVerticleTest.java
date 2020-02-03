@@ -7,6 +7,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 import org.junit.After;
@@ -127,7 +129,8 @@ public class ManifestVerticleTest {
      */
     @Test
     public final void testSinaiWorksManifest(final TestContext aContext) {
-        final String jsonFile = myJsonFiles + "/ark%3A%2F21198%2Fz16t1r0h.json"; // work manifest
+        final String jsonFile = myJsonFiles + Constants.SLASH
+                + URLEncoder.encode("ark:/21198/z16t1r0h.json", StandardCharsets.UTF_8);
         final String path = StringUtils.format(SINAI_WORKS_CSV, SINAI);
         final JsonObject message = new JsonObject();
         final Async asyncTask = aContext.async();

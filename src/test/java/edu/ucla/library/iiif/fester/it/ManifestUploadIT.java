@@ -20,6 +20,7 @@ import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.TestConstants;
+import edu.ucla.library.iiif.fester.utils.IDUtils;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.RequestOptions;
@@ -51,8 +52,6 @@ public class ManifestUploadIT {
     private static final String HELLO = "Hello";
 
     private static final String MANIFEST_ID = UUID.randomUUID().toString();
-
-    private static final String MANIFEST_ID_WITH_EXT = MANIFEST_ID + ".json";
 
     private static Vertx myVertx = Vertx.vertx();
 
@@ -102,15 +101,15 @@ public class ManifestUploadIT {
     @Test
     public final void test2_CheckThatPutManifestWorks(final TestContext aContext) {
         final Async asyncTask = aContext.async();
-        final String myDotJsonPutManifestID = TestConstants.PUT_TEST_ID_PREFIX + MANIFEST_ID_WITH_EXT;
-        final String testIDPath = StringUtils.format(MANIFEST_PATH, myDotJsonPutManifestID);
+        final String myPutManifestID = TestConstants.PUT_TEST_ID_PREFIX + MANIFEST_ID;
+        final String requestPath = IDUtils.getResourceURIPath(IDUtils.getWorkS3Key(myPutManifestID));
         final Buffer myManifest = myVertx.fileSystem().readFileBlocking(myManifestFilePath);
         final RequestOptions requestOpts = new RequestOptions();
 
-        requestOpts.setPort(PORT).setHost(Constants.UNSPECIFIED_HOST).setURI(testIDPath);
+        requestOpts.setPort(PORT).setHost(Constants.UNSPECIFIED_HOST).setURI(requestPath);
         requestOpts.addHeader(Constants.CONTENT_TYPE, Constants.JSON_MEDIA_TYPE);
 
-        LOGGER.info(MessageCodes.MFS_016, testIDPath);
+        LOGGER.info(MessageCodes.MFS_016, requestPath);
 
         myVertx.createHttpClient().put(requestOpts, response -> {
             final int statusCode = response.statusCode();
@@ -133,13 +132,13 @@ public class ManifestUploadIT {
     @Test
     public final void test3_CheckThatGetManifestWorks(final TestContext aContext) throws IOException {
         final Async asyncTask = aContext.async();
-        final String myDotJsonPutManifestID = TestConstants.PUT_TEST_ID_PREFIX + MANIFEST_ID_WITH_EXT;
-        final String testIDPath = StringUtils.format(MANIFEST_PATH, myDotJsonPutManifestID);
+        final String myPutManifestID = TestConstants.PUT_TEST_ID_PREFIX + MANIFEST_ID;
+        final String requestPath = IDUtils.getResourceURIPath(IDUtils.getWorkS3Key(myPutManifestID));
         final String expectedManifest = StringUtils.read(MANIFEST_FILE);
 
-        LOGGER.info(MessageCodes.MFS_027, testIDPath);
+        LOGGER.info(MessageCodes.MFS_027, requestPath);
 
-        myVertx.createHttpClient().getNow(PORT, Constants.UNSPECIFIED_HOST, testIDPath, response -> {
+        myVertx.createHttpClient().getNow(PORT, Constants.UNSPECIFIED_HOST, requestPath, response -> {
             final int statusCode = response.statusCode();
 
             if (statusCode == HTTP.OK) {
@@ -168,12 +167,12 @@ public class ManifestUploadIT {
     @Test
     public final void test4_CheckThatDeleteManifestWorks(final TestContext aContext) {
         final Async asyncTask = aContext.async();
-        final String myDotJsonPutManifestID = TestConstants.PUT_TEST_ID_PREFIX + MANIFEST_ID_WITH_EXT;
-        final String testIDPath = StringUtils.format(MANIFEST_PATH, myDotJsonPutManifestID);
+        final String myPutManifestID = TestConstants.PUT_TEST_ID_PREFIX + MANIFEST_ID;
+        final String requestPath = StringUtils.format(MANIFEST_PATH, myPutManifestID);
 
-        LOGGER.info(MessageCodes.MFS_028, testIDPath);
+        LOGGER.info(MessageCodes.MFS_028, requestPath);
 
-        myVertx.createHttpClient().delete(PORT, Constants.UNSPECIFIED_HOST, testIDPath, response -> {
+        myVertx.createHttpClient().delete(PORT, Constants.UNSPECIFIED_HOST, requestPath, response -> {
             final int statusCode = response.statusCode();
 
             if (statusCode == HTTP.SUCCESS_NO_CONTENT) {
@@ -193,12 +192,12 @@ public class ManifestUploadIT {
     @Test
     public final void test5_CheckThatOurManifestIsNotStored(final TestContext aContext) {
         final Async asyncTask = aContext.async();
-        final String myDotJsonPutManifestID = TestConstants.PUT_TEST_ID_PREFIX + MANIFEST_ID_WITH_EXT;
-        final String testIDPath = StringUtils.format(MANIFEST_PATH, myDotJsonPutManifestID);
+        final String myPutManifestID = TestConstants.PUT_TEST_ID_PREFIX + MANIFEST_ID;
+        final String requestPath = StringUtils.format(MANIFEST_PATH, myPutManifestID);
 
-        LOGGER.info(MessageCodes.MFS_029, testIDPath);
+        LOGGER.info(MessageCodes.MFS_029, requestPath);
 
-        myVertx.createHttpClient().getNow(PORT, Constants.UNSPECIFIED_HOST, testIDPath, response -> {
+        myVertx.createHttpClient().getNow(PORT, Constants.UNSPECIFIED_HOST, requestPath, response -> {
             final int statusCode = response.statusCode();
 
             if (statusCode == HTTP.OK) {
