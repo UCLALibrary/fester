@@ -107,6 +107,11 @@ public final class Constants {
     public static final String MANIFEST_URI_PATH_SUFFIX = "/manifest";
 
     /**
+     * The prefix for work manifest S3 keys.
+     */
+    public static final String WORK_S3_KEY_PREFIX = "works/";
+
+    /**
      * The prefix for collection manifest S3 keys.
      */
     public static final String COLLECTION_S3_KEY_PREFIX = "collections/";

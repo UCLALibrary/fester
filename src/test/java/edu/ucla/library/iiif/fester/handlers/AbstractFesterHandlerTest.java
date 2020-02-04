@@ -57,6 +57,8 @@ abstract class AbstractFesterHandlerTest {
 
     protected String myS3Bucket;
 
+    protected String myManifestID;
+
     protected String myManifestS3Key;
 
     /**
@@ -79,7 +81,8 @@ abstract class AbstractFesterHandlerTest {
         options.setConfig(new JsonObject().put(Config.HTTP_PORT, port).put(Config.IIIF_BASE_URL, IIIF_URL));
         socket.close();
 
-        myManifestS3Key = IDUtils.getWorkS3Key(UUID.randomUUID().toString());
+        myManifestID = UUID.randomUUID().toString();
+        myManifestS3Key = IDUtils.getWorkS3Key(myManifestID);
 
         // We only need to initialize our testing tools once; if done, skip
         if (myVertx == null) {

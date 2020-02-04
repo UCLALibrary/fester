@@ -2,6 +2,7 @@
 package edu.ucla.library.iiif.fester.handlers;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import org.junit.After;
 import org.junit.Before;
@@ -24,6 +25,8 @@ public class PutManifestHandlerTest extends AbstractFesterHandlerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PutManifestHandlerTest.class, Constants.MESSAGES);
 
+    private String myPutManifestID;
+
     private String myPutManifestS3Key;
 
     /**
@@ -38,7 +41,8 @@ public class PutManifestHandlerTest extends AbstractFesterHandlerTest {
 
         final String putPrefix = "PUT_";
 
-        myPutManifestS3Key = putPrefix + myManifestS3Key;
+        myPutManifestID = putPrefix + UUID.randomUUID().toString();
+        myPutManifestS3Key = IDUtils.getWorkS3Key(myPutManifestID);
     }
 
     /**
