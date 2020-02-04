@@ -91,6 +91,7 @@ public final class IDUtils {
         if (aS3Key.contains(Constants.COLLECTION_S3_KEY_PREFIX)) {
             path = Constants.COLLECTION_URI_PATH_PREFIX + encodedID;
         } else {
+            // TODO: check (aS3Key.contains(Constants.WORK_S3_KEY_PREFIX))
             path = Constants.SLASH + encodedID + Constants.MANIFEST_URI_PATH_SUFFIX;
         }
         return path;
@@ -107,7 +108,8 @@ public final class IDUtils {
         if (aS3Key.contains(Constants.COLLECTION_S3_KEY_PREFIX)) {
             s3KeyPrefix = Constants.COLLECTION_S3_KEY_PREFIX;
         } else {
-            s3KeyPrefix = Constants.EMPTY;
+            // TODO: check (aS3Key.contains(Constants.WORK_S3_KEY_PREFIX))
+            s3KeyPrefix = Constants.WORK_S3_KEY_PREFIX;
         }
         return FileUtils.stripExt(aS3Key.substring(s3KeyPrefix.length()));
     }
@@ -141,8 +143,9 @@ public final class IDUtils {
             s3KeyPrefix = Constants.COLLECTION_S3_KEY_PREFIX;
             endIndex = path.length();
         } else {
+            // TODO: check (path.contains(Constants.MANIFEST_URI_PATH_SUFFIX))
             uriPathPrefix = Constants.SLASH;
-            s3KeyPrefix = Constants.EMPTY;
+            s3KeyPrefix = Constants.WORK_S3_KEY_PREFIX;
             endIndex = path.length() - Constants.MANIFEST_URI_PATH_SUFFIX.length();
         }
         encodedID = path.substring(uriPathPrefix.length(), endIndex);
@@ -158,7 +161,7 @@ public final class IDUtils {
      * @return An S3 key
      */
     public static String getWorkS3Key(final String aID) {
-        return aID + Constants.DOT + Constants.JSON_EXT;
+        return Constants.WORK_S3_KEY_PREFIX + aID + Constants.DOT + Constants.JSON_EXT;
     }
 
     /**
@@ -173,9 +176,9 @@ public final class IDUtils {
     @Deprecated
     public static String getWorkS3Key(final String aID, final String aExt) {
         if (FileUtils.getExt(aID).equals(aExt)) {
-            return aID;
+            return Constants.WORK_S3_KEY_PREFIX + aID;
         } else {
-            return aID + Constants.DOT + aExt;
+            return Constants.WORK_S3_KEY_PREFIX + aID + Constants.DOT + aExt;
         }
     }
 

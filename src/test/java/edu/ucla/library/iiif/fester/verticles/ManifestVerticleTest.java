@@ -28,6 +28,7 @@ import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.ImageInfoLookup;
 import edu.ucla.library.iiif.fester.MessageCodes;
+import edu.ucla.library.iiif.fester.utils.IDUtils;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -130,7 +131,7 @@ public class ManifestVerticleTest {
     @Test
     public final void testSinaiWorksManifest(final TestContext aContext) {
         final String jsonFile = myJsonFiles + Constants.SLASH
-                + URLEncoder.encode("ark:/21198/z16t1r0h.json", StandardCharsets.UTF_8);
+                + URLEncoder.encode(IDUtils.getWorkS3Key("ark:/21198/z16t1r0h"), StandardCharsets.UTF_8);
         final String path = StringUtils.format(SINAI_WORKS_CSV, SINAI);
         final JsonObject message = new JsonObject();
         final Async asyncTask = aContext.async();
@@ -264,7 +265,8 @@ public class ManifestVerticleTest {
      */
     @Test
     public final void testPageOrder(final TestContext aContext) {
-        final String foundFile = myJsonFiles + "/ark%3A%2F21198%2Fz12f8rtw.json";
+        final String foundFile = myJsonFiles + Constants.SLASH
+                + URLEncoder.encode(IDUtils.getWorkS3Key("ark:/21198/z12f8rtw"), StandardCharsets.UTF_8);
         final String expectedFile = "src/test/resources/json/pages-ordered.json";
         final String filePath = "src/test/resources/csv/ara249.csv";
         final JsonObject message = new JsonObject();

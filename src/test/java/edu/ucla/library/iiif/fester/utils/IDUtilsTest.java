@@ -21,7 +21,7 @@ public class IDUtilsTest {
 
     private static final String WORK_MANIFEST_URI = FAKE_HOST + WORK_MANIFEST_URI_PATH;
 
-    private static final String WORK_MANIFEST_S3_KEY = "ark:/21198/zz000bjfsv.json";
+    private static final String WORK_MANIFEST_S3_KEY = "works/ark:/21198/zz000bjfsv.json";
 
 
     private static final String COLLECTION_MANIFEST_ID = "ark:/21198/zz0009gss9";
