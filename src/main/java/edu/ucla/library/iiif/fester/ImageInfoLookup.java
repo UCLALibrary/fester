@@ -51,7 +51,7 @@ public class ImageInfoLookup {
             connection.setReadTimeout(CANTALOUPE_TIMEOUT);
             responseCode = connection.getResponseCode();
 
-            if (responseCode == 200) {
+            if (responseCode == HTTP.OK) {
                 final InputStream inStream = new BufferedInputStream(connection.getInputStream());
                 final StringBuilder result = new StringBuilder();
                 final JsonObject jsonObject;
