@@ -4,17 +4,17 @@ package edu.ucla.library.iiif.fester;
 import info.freelibrary.util.I18nException;
 
 /**
- * An exception thrown when the manifest couldn't be found on the IIIF server.
+ * An exception thrown when an image can't be found on the IIIF server.
  */
 public class ImageNotFoundException extends I18nException {
 
     /**
-     * The <code>serialVersionUID</code> for a ManifestNotFoundException.
+     * The <code>serialVersionUID</code> for an ImageNotFoundException.
      */
     private static final long serialVersionUID = -1307404135679864330L;
 
     /**
-     * Creates a new manifest not found exception.
+     * Creates a new image not found exception.
      *
      * @param aMessageCode A message code
      */
@@ -23,7 +23,7 @@ public class ImageNotFoundException extends I18nException {
     }
 
     /**
-     * Creates a new manifest not found exception.
+     * Creates a new image not found exception.
      *
      * @param aMessageCode A message code
      * @param aDetails Additional details about the exception
