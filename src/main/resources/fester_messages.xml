@@ -91,6 +91,7 @@
   <entry key="MFS-075">Multiple temporary fake s3 directories matching '{}' found</entry>
   <entry key="MFS-076">The '{}' verticle's ID [{}] has been registered in the application's shared data map</entry>
   <entry key="MFS-077">Verticle deployment key not found in shared data map: {}</entry>
+  <entry key="MFS-078">Image for w/h lookup wasn't found; trying to find a sibling image</entry>
 
   <entry key="MFS-100">Stopping the {} verticle [id: {}]</entry>
   <entry key="MFS-101">Getting message consumer for: {}</entry>

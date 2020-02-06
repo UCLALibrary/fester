@@ -42,8 +42,8 @@ import edu.ucla.library.iiif.fester.CsvHeaders;
 import edu.ucla.library.iiif.fester.CsvMetadata;
 import edu.ucla.library.iiif.fester.CsvParsingException;
 import edu.ucla.library.iiif.fester.ImageInfoLookup;
+import edu.ucla.library.iiif.fester.ImageNotFoundException;
 import edu.ucla.library.iiif.fester.LockedManifest;
-import edu.ucla.library.iiif.fester.ManifestNotFoundException;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.ObjectType;
 import edu.ucla.library.iiif.fester.Op;
@@ -510,17 +510,21 @@ public class ManifestVerticle extends AbstractFesterVerticle {
             try {
                 final ImageInfoLookup infoLookup = new ImageInfoLookup(pageURI);
 
+                // Create a canvas using the width and height of the related image
                 canvas = new Canvas(canvasID, pageLabel, infoLookup.getWidth(), infoLookup.getHeight());
-            } catch (final ManifestNotFoundException details) {
+            } catch (final ImageNotFoundException details) {
                 final int width;
                 final int height;
+
+                // Note that we couldn't find the image and are trying to provide a workaround
+                LOGGER.debug(MessageCodes.MFS_078);
 
                 // First check the last canvas that we've processed (if there is one)
                 if (lastCanvas != null) {
                     width = lastCanvas.getWidth();
                     height = lastCanvas.getHeight();
                 } else {
-                    // If we've not processed any, check to sequence to find one
+                    // If we've not processed any, check the sequence to find one
                     final List<Canvas> canvases = aSequence.getCanvases();
 
                     // If there is one use that; else, just use zeros for the w/h values

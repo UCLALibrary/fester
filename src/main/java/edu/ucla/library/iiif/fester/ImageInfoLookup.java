@@ -37,7 +37,7 @@ public class ImageInfoLookup {
      *
      * @param aURL A URL for an image's info.json file
      */
-    public ImageInfoLookup(final String aURL) throws MalformedURLException, IOException, ManifestNotFoundException {
+    public ImageInfoLookup(final String aURL) throws MalformedURLException, IOException, ImageNotFoundException {
         LOGGER.debug(MessageCodes.MFS_072, aURL);
 
         // If our images are using an unspecified host, we're running in test mode and will use fake values
@@ -51,7 +51,7 @@ public class ImageInfoLookup {
             connection.setReadTimeout(CANTALOUPE_TIMEOUT);
             responseCode = connection.getResponseCode();
 
-            if (responseCode == 200) {
+            if (responseCode == HTTP.OK) {
                 final InputStream inStream = new BufferedInputStream(connection.getInputStream());
                 final StringBuilder result = new StringBuilder();
                 final JsonObject jsonObject;
@@ -75,9 +75,10 @@ public class ImageInfoLookup {
                         LOGGER.warn(MessageCodes.MFS_073, aURL);
                     }
                 }
-            } else if (responseCode == 404) {
+            } else if (responseCode == HTTP.NOT_FOUND || responseCode == HTTP.FORBIDDEN) {
+                // Cantaloupe returns 403 for not found images sometimes (which seems like a bug?)
                 final String id = IDUtils.getResourceID(URI.create(aURL));
-                throw new ManifestNotFoundException(MessageCodes.MFS_070, id);
+                throw new ImageNotFoundException(MessageCodes.MFS_070, id);
             } else {
                 final String responseMessage = connection.getResponseMessage();
                 throw new IOException(LOGGER.getMessage(MessageCodes.MFS_071, responseCode, responseMessage));
