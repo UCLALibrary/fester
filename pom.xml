@@ -50,6 +50,14 @@
       <organization>UCLA Library</organization>
       <organizationUrl>http://github.com/uclalibrary</organizationUrl>
     </developer>
+    <developer>
+      <id>markmatney</id>
+      <name>Mark A. Matney, Jr.</name>
+      <email>mmatney@library.ucla.edu</email>
+      <organization>UCLA Library</organization>
+      <organizationUrl>http://github.com/uclalibrary</organizationUrl>
+      <timezone>America/Los_Angeles</timezone>
+    </developer>
   </developers>
 
   <properties>
