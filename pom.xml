@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>fester</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.3.1-SNAPSHOT</version>
   <name>IIIF Fester</name>
   <description>A read/write interface for storing and retrieving IIIF manifests</description>
   <url>https://github.com/uclalibrary/fester</url>
@@ -197,6 +197,12 @@
   </dependencies>
 
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
     <testResources>
       <testResource>
         <directory>src/test/resources</directory>
@@ -241,7 +247,7 @@
         <executions>
           <execution>
             <id>copy-web-resources</id>
-            <phase>validate</phase>
+            <phase>process-resources</phase>
             <goals>
               <goal>copy-resources</goal>
             </goals>
@@ -252,7 +258,7 @@
                   <directory>${basedir}/src/main/webroot</directory>
                 </resource>
                 <resource>
-                  <directory>${basedir}/src/main/resources</directory>
+                  <directory>${basedir}/target/classes</directory>
                   <includes>
                     <include>fester.yaml</include>
                   </includes>
@@ -728,6 +734,7 @@
                       <filtering>true</filtering>
                       <includes>
                         <include>logback.xml</include>
+                        <include>fester.yaml</include>
                       </includes>
                     </resource>
                   </resources>

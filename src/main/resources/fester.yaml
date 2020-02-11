@@ -5,12 +5,14 @@ x-tagGroups:
   - name: Implemented
     tags:
       - Manifest
+      - Collection
       - Utility
   - name: Proposed
     tags:
-      - Collection
+      - Collection (Proposed)
+
 info:
-  version: 0.2.0
+  version: ${project.version}
   title: Fester API
   description: "Fester, a IIIF manifest storage microservice, provides a simple storage and retrieval system
     for IIIF manifests. Amazon S3 is required. For more details on how to construct a IIIF manifest, consult these
@@ -100,7 +102,7 @@ paths:
                 format: binary
   /collections/{collectionName}:
     get:
-      tags: [Collection, Proposed]
+      tags: [Collection]
       summary: Get a collection
       description: Gets a specified collection.
       operationId: getCollection
@@ -110,7 +112,7 @@ paths:
         '404':
           description: Not found
     put:
-      tags: [Collection, Proposed]
+      tags: [Collection (Proposed)]
       summary: Put a collection
       description: Puts a provided IIIF collection.
       operationId: putCollection
@@ -133,7 +135,7 @@ paths:
         '500':
           description: Internal server error
     delete:
-      tags: [Collection, Proposed]
+      tags: [Collection (Proposed)]
       summary: Delete a collection
       description: Deletes a specified collection.
       operationId: deleteCollection
