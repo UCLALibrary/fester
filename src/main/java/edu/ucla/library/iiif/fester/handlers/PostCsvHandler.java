@@ -23,10 +23,12 @@ import info.freelibrary.util.StringUtils;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
+import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.utils.LinkUtils;
 import edu.ucla.library.iiif.fester.verticles.ManifestVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.file.FileSystem;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
@@ -87,6 +89,7 @@ public class PostCsvHandler extends AbstractFesterHandler {
             final String filePath = csvFile.uploadedFileName();
             final String fileName = csvFile.fileName();
             final JsonObject message = new JsonObject();
+            final DeliveryOptions options = new DeliveryOptions();
             final HttpServerRequest request = aContext.request();
             final String protocol = request.connection().isSsl() ? "https://" : "http://";
             final String iiifHost = StringUtils.trimToNull(request.getFormAttribute(Constants.IIIF_HOST));
@@ -95,13 +98,14 @@ public class PostCsvHandler extends AbstractFesterHandler {
             // Store the information that the manifest generator will need
             message.put(Constants.CSV_FILE_NAME, fileName).put(Constants.CSV_FILE_PATH, filePath);
             message.put(Constants.FESTER_HOST, festerHost);
+            options.addHeader(Constants.ACTION, Op.POST_CSV);
 
             if (iiifHost != null) {
                 message.put(Constants.IIIF_HOST, iiifHost);
             }
 
             // Send a message to the manifest generator
-            sendMessage(ManifestVerticle.class.getName(), message, Integer.MAX_VALUE, send -> {
+            sendMessage(ManifestVerticle.class.getName(), message, options, Integer.MAX_VALUE, send -> {
                 if (send.succeeded()) {
                     updateCSV(fileName, filePath, festerHost, response);
                 } else {

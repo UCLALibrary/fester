@@ -62,29 +62,30 @@ abstract class AbstractFesterHandler implements Handler<RoutingContext> {
     /**
      * Sends a message to another verticle with a supplied timeout value.
      *
-     * @param aJsonObject A JSON message
      * @param aVerticleName A verticle name that will respond to the message
-     * @param aTimeout A timeout measured in milliseconds
+     * @param aMessage A JSON message
+     * @param aHeaders Message headers
      * @param aHandler A handler to handle the result of the message delivery
+     * @param aTimeout A timeout measured in milliseconds
      */
-    protected void sendMessage(final String aVerticleName, final JsonObject aJsonObject, final long aTimeout,
-            final Handler<AsyncResult<Message<JsonObject>>> aHandler) {
-        final DeliveryOptions options = new DeliveryOptions().setSendTimeout(aTimeout);
+    protected void sendMessage(final String aVerticleName, final JsonObject aMessage, final DeliveryOptions aHeaders,
+            final long aTimeout, final Handler<AsyncResult<Message<JsonObject>>> aHandler) {
+        aHeaders.setSendTimeout(aTimeout);
 
-        LOGGER.debug(MessageCodes.MFS_102, aVerticleName, aJsonObject.encodePrettily());
-        myVertx.eventBus().request(aVerticleName, aJsonObject, options, aHandler);
+        LOGGER.debug(MessageCodes.MFS_102, aVerticleName, aMessage.encodePrettily());
+        myVertx.eventBus().request(aVerticleName, aMessage, aHeaders, aHandler);
     }
 
     /**
      * Send a message to another verticle.
      *
-     * @param aJsonObject A JSON message
      * @param aVerticleName A verticle name that will respond to the message
+     * @param aMessage A JSON message
+     * @param aHeaders Message headers
      * @param aHandler A handler to handle the result of the message delivery
      */
-    protected void sendMessage(final String aVerticleName, final JsonObject aJsonObject,
+    protected void sendMessage(final String aVerticleName, final JsonObject aMessage, final DeliveryOptions aHeaders,
             final Handler<AsyncResult<Message<JsonObject>>> aHandler) {
-        sendMessage(aVerticleName, aJsonObject, DeliveryOptions.DEFAULT_TIMEOUT, aHandler);
+        sendMessage(aVerticleName, aMessage, aHeaders, DeliveryOptions.DEFAULT_TIMEOUT, aHandler);
     }
-
 }

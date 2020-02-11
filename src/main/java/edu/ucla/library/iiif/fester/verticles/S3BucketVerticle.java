@@ -2,8 +2,6 @@
 package edu.ucla.library.iiif.fester.verticles;
 
 import java.net.URI;
-import java.util.Map.Entry;
-
 import com.amazonaws.regions.RegionUtils;
 
 import info.freelibrary.util.Logger;
@@ -15,7 +13,6 @@ import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
-import edu.ucla.library.iiif.fester.ObjectType;
 import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.utils.CodeUtils;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
@@ -68,31 +65,47 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
         }
 
         getJsonConsumer().handler(message -> {
-            final JsonObject json = message.body();
+            final JsonObject msg = message.body();
+            final String manifestID;
+            final JsonObject manifest;
+            final String action = message.headers().get(Constants.ACTION);
 
-            // Our JSON contains a single ID to get or a manifest to put
-            if (json.size() == 1) {
-                final Entry<String, Object> entry = json.iterator().next();
-                final String manifestID = entry.getValue().toString();
-                final String manifestType = entry.getKey();
-
-                if (ObjectType.WORK.equals(manifestType)) {
+            switch (action) {
+                case Op.GET_MANIFEST:
+                    manifestID = msg.getString(Constants.MANIFEST_ID);
                     LOGGER.debug(MessageCodes.MFS_133, manifestID, myS3Bucket);
                     get(IDUtils.getWorkS3Key(manifestID), message);
-                } else if (ObjectType.COLLECTION.equals(manifestType)) {
+                    break;
+                case Op.PUT_MANIFEST:
+                    manifestID = msg.getString(Constants.MANIFEST_ID);
+                    manifest = msg.getJsonObject(Constants.DATA);
+                    put(IDUtils.getWorkS3Key(manifestID), manifest, message);
+                    break;
+                case Op.GET_COLLECTION:
+                    manifestID = msg.getString(Constants.COLLECTION_NAME);
                     LOGGER.debug(MessageCodes.MFS_133, manifestID, myS3Bucket);
                     get(IDUtils.getCollectionS3Key(manifestID), message);
-                } else {
-                    final String errorMessage = StringUtils.format(MessageCodes.MFS_136, entry.getValue(),
-                            entry.getKey());
-                    message.fail(CodeUtils.getInt(MessageCodes.MFS_136), errorMessage);
-                }
-            } else {
-                put(json, message);
+                    break;
+                case Op.PUT_COLLECTION:
+                    manifestID = msg.getString(Constants.COLLECTION_NAME);
+                    manifest = msg.getJsonObject(Constants.DATA);
+                    put(IDUtils.getCollectionS3Key(manifestID), manifest, message);
+                    break;
+                default:
+                    final String errorMessage = StringUtils.format(MessageCodes.MFS_139,
+                            this.getClass().toString(), message.toString(), action);
+                    message.fail(CodeUtils.getInt(MessageCodes.MFS_139), errorMessage);
+                    break;
             }
         });
     }
 
+    /**
+     * Gets a manifest from our S3 bucket.
+     *
+     * @param aS3Key The S3 key to use for the manifest
+     * @param aMessage A event queue message
+     */
     private void get(final String aS3Key, final Message<JsonObject> aMessage) {
 
         myS3Client.get(myS3Bucket, aS3Key, get -> {
@@ -107,23 +120,26 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
     }
 
     /**
-     * Puts a collection or manifest into our S3 bucket.
+     * Puts a manifest into our S3 bucket.
      *
+     * @param aS3Key The S3 key to use for the manifest
      * @param aManifest A work or collection manifest to store in the S3 bucket
      * @param aMessage A event queue message
      */
     @SuppressWarnings("Indentation") // Checkstyle's indentation check doesn't work with multiple lambdas
-    private void put(final JsonObject aManifest, final Message<JsonObject> aMessage) {
+    private void put(final String aS3Key, final JsonObject aManifest, final Message<JsonObject> aMessage) {
         final Buffer manifestContent = aManifest.toBuffer();
-        final URI manifestURI = URI.create(aManifest.getString(Constants.ID));
-        final String manifestID = IDUtils.getResourceID(manifestURI);
-        final String manifestS3Key = IDUtils.getResourceS3Key(manifestURI);
+        final String manifestID = IDUtils.getResourceID(aS3Key);
+        final String derivedManifestS3Key = IDUtils.getResourceS3Key(URI.create(aManifest.getString(Constants.ID)));
 
         LOGGER.debug(MessageCodes.MFS_051, aManifest, myS3Bucket);
         LOGGER.debug(MessageCodes.MFS_128, manifestID);
+        if (!aS3Key.equals(derivedManifestS3Key)) {
+            LOGGER.warn(MessageCodes.MFS_138, aS3Key, derivedManifestS3Key);
+        }
 
         try {
-            myS3Client.put(myS3Bucket, manifestS3Key, manifestContent, response -> {
+            myS3Client.put(myS3Bucket, aS3Key, manifestContent, response -> {
                 final int statusCode = response.statusCode();
 
                 response.exceptionHandler(exception -> {

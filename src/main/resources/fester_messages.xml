@@ -131,4 +131,6 @@
   <entry key="MFS-135">Regular expression '{}' does not match '{}'</entry>
   <entry key="MFS-136">Cannot retrieve object '{}' from S3: unknown type '{}'</entry>
   <entry key="MFS-137">Test GetCollectionHandler with a test manifest: {}</entry>
+  <entry key="MFS-138">Supplied S3 key '{}' does not match what would have been derived from the IIIF resource URI: '{}'</entry>
+  <entry key="MFS-139">'{}' unable to handle message '{}': unknown action '{}'</entry>
 </properties>

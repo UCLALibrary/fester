@@ -45,7 +45,6 @@ import edu.ucla.library.iiif.fester.ImageInfoLookup;
 import edu.ucla.library.iiif.fester.ImageNotFoundException;
 import edu.ucla.library.iiif.fester.LockedManifest;
 import edu.ucla.library.iiif.fester.MessageCodes;
-import edu.ucla.library.iiif.fester.ObjectType;
 import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.utils.CodeUtils;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
@@ -53,6 +52,7 @@ import edu.ucla.library.iiif.fester.utils.ItemSequenceComparator;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.Lock;
@@ -92,72 +92,86 @@ public class ManifestVerticle extends AbstractFesterVerticle {
 
         getJsonConsumer().handler(message -> {
             final JsonObject messageBody = message.body();
-            final Path filePath = Paths.get(messageBody.getString(Constants.CSV_FILE_PATH));
-            final Optional<String> imageHost = Optional.ofNullable(messageBody.getString(Constants.IIIF_HOST));
+            final String action = message.headers().get(Constants.ACTION);
 
-            if (myHost == null) {
-                myHost = messageBody.getString(Constants.FESTER_HOST);
-            }
+            switch (action) {
+                case Op.POST_CSV: {
+                    final Path filePath = Paths.get(messageBody.getString(Constants.CSV_FILE_PATH));
+                    final Optional<String> imageHost = Optional.ofNullable(messageBody.getString(Constants.IIIF_HOST));
 
-            try (Reader reader = Files.newBufferedReader(filePath); CSVReader csvReader = new CSVReader(reader)) {
-                final Map<String, List<String[]>> pages = new HashMap<>();
-                final Map<String, List<Collection.Manifest>> works = new HashMap<>();
-                final List<String[]> worksMetadata = new ArrayList<>();
-                final CsvMetadata csvMetadata = new CsvMetadata(works, worksMetadata, pages);
-
-                CsvHeaders csvHeaders = null;
-                Collection collection = null;
-
-                // Read through the CSV data and create store info about collections, works, and pages
-                for (final String[] row : csvReader.readAll()) {
-                    // The first row should be our headers row
-                    if (csvHeaders == null) {
-                        // Throw a CsvParsingException here if one of our 'required' headers is missing
-                        csvHeaders = new CsvHeaders(row);
-                    } else {
-                        final int objectTypeIndex = csvHeaders.getObjectTypeIndex();
-
-                        if (COLLECTION.equals(row[objectTypeIndex])) {
-                            collection = getCollection(row, csvHeaders);
-                        } else if (WORK.equals(row[objectTypeIndex])) {
-                            extractWorkMetadata(row, csvHeaders, works, worksMetadata);
-                        } else if (PAGE.equals(row[objectTypeIndex])) {
-                            extractPageMetadata(row, csvHeaders, pages);
-                        }
+                    if (myHost == null) {
+                        myHost = messageBody.getString(Constants.FESTER_HOST);
                     }
+
+                    try (Reader reader = Files.newBufferedReader(filePath);
+                            CSVReader csvReader = new CSVReader(reader)) {
+                        final Map<String, List<String[]>> pages = new HashMap<>();
+                        final Map<String, List<Collection.Manifest>> works = new HashMap<>();
+                        final List<String[]> worksMetadata = new ArrayList<>();
+                        final CsvMetadata csvMetadata = new CsvMetadata(works, worksMetadata, pages);
+
+                        CsvHeaders csvHeaders = null;
+                        Collection collection = null;
+
+                        // Read through the CSV data and create store info about collections, works, and pages
+                        for (final String[] row : csvReader.readAll()) {
+                            // The first row should be our headers row
+                            if (csvHeaders == null) {
+                                // Throw a CsvParsingException here if one of our 'required' headers is missing
+                                csvHeaders = new CsvHeaders(row);
+                            } else {
+                                final int objectTypeIndex = csvHeaders.getObjectTypeIndex();
+
+                                if (COLLECTION.equals(row[objectTypeIndex])) {
+                                    collection = getCollection(row, csvHeaders);
+                                } else if (WORK.equals(row[objectTypeIndex])) {
+                                    extractWorkMetadata(row, csvHeaders, works, worksMetadata);
+                                } else if (PAGE.equals(row[objectTypeIndex])) {
+                                    extractPageMetadata(row, csvHeaders, pages);
+                                }
+                            }
+                        }
+
+                        // If we have a collection record in the CSV we're processing, create a collection manifest
+                        if (collection != null) {
+                            LOGGER.debug(MessageCodes.MFS_122, filePath, collection);
+                            buildCollectionManifest(collection, csvHeaders, csvMetadata, imageHost, message);
+                        } else if (worksMetadata.size() > 0) {
+                            final String collectionID = worksMetadata.get(0)[csvHeaders.getParentArkIndex()];
+
+                            LOGGER.debug(MessageCodes.MFS_043, filePath);
+                            updateWorks(collectionID, csvHeaders, csvMetadata, imageHost, message);
+                        } else if (pages.size() > 0) {
+                            // All our page-only CSVs, at this point, have pages from only one work
+                            final String workID = pages.keySet().iterator().next();
+                            final List<String[]> pagesList = pages.values().iterator().next();
+
+                            LOGGER.debug(MessageCodes.MFS_069, filePath);
+                            updatePages(workID, csvHeaders, pagesList, imageHost, message);
+                        } else {
+                            final CsvParsingException details = new CsvParsingException(MessageCodes.MFS_042);
+
+                            LOGGER.error(details, details.getMessage());
+                            message.fail(CodeUtils.getInt(MessageCodes.MFS_000), details.getMessage());
+                        }
+                    } catch (final IOException details) {
+                        LOGGER.error(details, details.getMessage());
+                        message.fail(CodeUtils.getInt(MessageCodes.MFS_000), details.getMessage());
+                    } catch (final CsvParsingException details) {
+                        LOGGER.error(details, details.getMessage());
+                        message.fail(CodeUtils.getInt(MessageCodes.MFS_000), details.getMessage());
+                    } catch (final CsvException details) {
+                        LOGGER.error(details, details.getMessage());
+                        message.fail(CodeUtils.getInt(MessageCodes.MFS_000), details.getMessage());
+                    }
+                    break;
                 }
-
-                // If we have a collection record in the CSV we're processing, create a collection manifest
-                if (collection != null) {
-                    LOGGER.debug(MessageCodes.MFS_122, filePath, collection);
-                    buildCollectionManifest(collection, csvHeaders, csvMetadata, imageHost, message);
-                } else if (worksMetadata.size() > 0) {
-                    final String collectionID = worksMetadata.get(0)[csvHeaders.getParentArkIndex()];
-
-                    LOGGER.debug(MessageCodes.MFS_043, filePath);
-                    updateWorks(collectionID, csvHeaders, csvMetadata, imageHost, message);
-                } else if (pages.size() > 0) {
-                    // All our page-only CSVs, at this point, have pages from only one work
-                    final String workID = pages.keySet().iterator().next();
-                    final List<String[]> pagesList = pages.values().iterator().next();
-
-                    LOGGER.debug(MessageCodes.MFS_069, filePath);
-                    updatePages(workID, csvHeaders, pagesList, imageHost, message);
-                } else {
-                    final CsvParsingException details = new CsvParsingException(MessageCodes.MFS_042);
-
-                    LOGGER.error(details, details.getMessage());
-                    message.fail(CodeUtils.getInt(MessageCodes.MFS_000), details.getMessage());
+                default: {
+                    final String errorMessage = StringUtils.format(MessageCodes.MFS_139,
+                            this.getClass().toString(), message.toString(), action);
+                    message.fail(CodeUtils.getInt(MessageCodes.MFS_139), errorMessage);
+                    break;
                 }
-            } catch (final IOException details) {
-                LOGGER.error(details, details.getMessage());
-                message.fail(CodeUtils.getInt(MessageCodes.MFS_000), details.getMessage());
-            } catch (final CsvParsingException details) {
-                LOGGER.error(details, details.getMessage());
-                message.fail(CodeUtils.getInt(MessageCodes.MFS_000), details.getMessage());
-            } catch (final CsvException details) {
-                LOGGER.error(details, details.getMessage());
-                message.fail(CodeUtils.getInt(MessageCodes.MFS_000), details.getMessage());
             }
         });
 
@@ -182,6 +196,8 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                 final Manifest manifest = lockedManifest.getWork();
                 final List<Sequence> sequences = manifest.getSequences();
                 final Sequence sequence;
+                final JsonObject message = new JsonObject();
+                final DeliveryOptions options = new DeliveryOptions();
 
                 // If the work doesn't already have any sequences, create one for it
                 if (sequences.size() == 0) {
@@ -199,7 +215,10 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                 try {
                     addPages(aCsvHeaders, aPagesList, sequence, aImageHost, encodedWorkID);
 
-                    sendMessage(manifest.toJSON(), S3BucketVerticle.class.getName(), send -> {
+                    message.put(Constants.MANIFEST_ID, aWorkID).put(Constants.DATA, manifest.toJSON());
+                    options.addHeader(Constants.ACTION, Op.PUT_MANIFEST);
+
+                    sendMessage(S3BucketVerticle.class.getName(), message, options, send -> {
                         if (send.succeeded()) {
                             aMessage.reply(Op.SUCCESS);
                         } else {
@@ -242,8 +261,13 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                 final LockedManifest lockedManifest = handler.result();
                 final Collection collectionToUpdate = lockedManifest.getCollection();
                 final JsonObject manifestJSON = updateCollection(collectionToUpdate, aCsvMetadata.getWorksMap());
+                final JsonObject message = new JsonObject();
+                final DeliveryOptions options = new DeliveryOptions();
 
-                sendMessage(manifestJSON, S3BucketVerticle.class.getName(), update -> {
+                message.put(Constants.COLLECTION_NAME, aCollectionID).put(Constants.DATA, manifestJSON);
+                options.addHeader(Constants.ACTION, Op.PUT_COLLECTION);
+
+                sendMessage(S3BucketVerticle.class.getName(), message, options, update -> {
                     lockedManifest.release();
 
                     if (update.succeeded()) {
@@ -315,8 +339,18 @@ public class ManifestVerticle extends AbstractFesterVerticle {
         sharedData.getLocalLockWithTimeout(aID, 1000, lockRequest -> {
             if (lockRequest.succeeded()) {
                 try {
-                    final ObjectType manifestType = aCollDoc ? COLLECTION : WORK;
-                    getS3Manifest(aID, manifestType, S3BucketVerticle.class.getName(), handler -> {
+                    final JsonObject message = new JsonObject();
+                    final DeliveryOptions options = new DeliveryOptions();
+
+                    if (aCollDoc) {
+                        message.put(Constants.COLLECTION_NAME, aID);
+                        options.addHeader(Constants.ACTION, Op.GET_COLLECTION);
+                    } else {
+                        message.put(Constants.MANIFEST_ID, aID);
+                        options.addHeader(Constants.ACTION, Op.GET_MANIFEST);
+                    }
+
+                    sendMessage(S3BucketVerticle.class.getName(), message, options, handler -> {
                         if (handler.succeeded()) {
                             final JsonObject manifest = handler.result().body();
                             final Lock lock = lockRequest.result();
@@ -354,6 +388,8 @@ public class ManifestVerticle extends AbstractFesterVerticle {
         final String collectionID = IDUtils.getResourceID(aCollection.getID());
         final List<Collection.Manifest> manifests = aCsvMetadata.getWorksMap().get(collectionID);
         final Promise<Void> promise = Promise.promise();
+        final JsonObject message = new JsonObject();
+        final DeliveryOptions options = new DeliveryOptions();
 
         // If we have work manifests, add them to the collection manifest
         if (manifests != null) {
@@ -361,6 +397,9 @@ public class ManifestVerticle extends AbstractFesterVerticle {
         } else {
             LOGGER.warn(MessageCodes.MFS_118, collectionID);
         }
+
+        message.put(Constants.COLLECTION_NAME, collectionID).put(Constants.DATA, aCollection.toJSON());
+        options.addHeader(Constants.ACTION, Op.PUT_COLLECTION);
 
         // Create a handler to handle generating work manifests after the collection manage has been uploaded
         promise.future().setHandler(handler -> {
@@ -376,7 +415,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
         });
 
         // Send collection manifest to S3
-        sendMessage(aCollection.toJSON(), S3BucketVerticle.class.getName(), send -> {
+        sendMessage(S3BucketVerticle.class.getName(), message, options, send -> {
             if (send.succeeded()) {
                 promise.complete();
             } else {
@@ -430,6 +469,8 @@ public class ManifestVerticle extends AbstractFesterVerticle {
         final Manifest manifest = new Manifest(manifestID, workLabel);
         final String sequenceID = StringUtils.format(SEQUENCE_URI, myHost, urlEncodedWorkID);
         final Sequence sequence = new Sequence().setID(sequenceID);
+        final JsonObject message = new JsonObject();
+        final DeliveryOptions options = new DeliveryOptions();
 
         try {
             if (aCsvHeaders.hasViewingDirectionIndex()) {
@@ -457,7 +498,10 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                 addPages(aCsvHeaders, pageList, sequence, aImageHost, urlEncodedWorkID);
             }
 
-            sendMessage(manifest.toJSON(), S3BucketVerticle.class.getName(), send -> {
+            message.put(Constants.MANIFEST_ID, workID).put(Constants.DATA, manifest.toJSON());
+            options.addHeader(Constants.ACTION, Op.PUT_MANIFEST);
+
+            sendMessage(S3BucketVerticle.class.getName(), message, options, send -> {
                 if (send.succeeded()) {
                     aPromise.complete();
                 } else {

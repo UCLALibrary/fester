@@ -28,9 +28,11 @@ import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.ImageInfoLookup;
 import edu.ucla.library.iiif.fester.MessageCodes;
+import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
 import io.vertx.ext.unit.Async;
@@ -134,14 +136,16 @@ public class ManifestVerticleTest {
                 + URLEncoder.encode(IDUtils.getWorkS3Key("ark:/21198/z16t1r0h"), StandardCharsets.UTF_8);
         final String path = StringUtils.format(SINAI_WORKS_CSV, SINAI);
         final JsonObject message = new JsonObject();
+        final DeliveryOptions options = new DeliveryOptions();
         final Async asyncTask = aContext.async();
 
         message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, path);
         message.put(Constants.FESTER_HOST, MANIFEST_HOST);
+        options.addHeader(Constants.ACTION, Op.POST_CSV);
 
         LOGGER.debug(MessageCodes.MFS_120, SINAI, ManifestVerticle.class.getName());
 
-        myVertx.eventBus().request(ManifestVerticle.class.getName(), message, request -> {
+        myVertx.eventBus().request(ManifestVerticle.class.getName(), message, options, request -> {
             if (request.succeeded()) {
                 final JsonObject manifest = new JsonObject(myVertx.fileSystem().readFileBlocking(jsonFile));
 
@@ -166,14 +170,16 @@ public class ManifestVerticleTest {
     public final void testHathawayManifest(final TestContext aContext) {
         final String filePath = StringUtils.format(CSV_FILE_PATH, HATHAWAY);
         final JsonObject message = new JsonObject();
+        final DeliveryOptions options = new DeliveryOptions();
         final Async asyncTask = aContext.async();
 
         message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, filePath);
         message.put(Constants.FESTER_HOST, MANIFEST_HOST);
+        options.addHeader(Constants.ACTION, Op.POST_CSV);
 
         LOGGER.debug(MessageCodes.MFS_120, HATHAWAY, ManifestVerticle.class.getName());
 
-        myVertx.eventBus().request(ManifestVerticle.class.getName(), message, request -> {
+        myVertx.eventBus().request(ManifestVerticle.class.getName(), message, options, request -> {
             if (request.succeeded()) {
                 asyncTask.complete();
             } else {
@@ -191,14 +197,16 @@ public class ManifestVerticleTest {
     public final void testPostcardsManifest(final TestContext aContext) {
         final String filePath = StringUtils.format(CSV_FILE_PATH, POSTCARDS);
         final JsonObject message = new JsonObject();
+        final DeliveryOptions options = new DeliveryOptions();
         final Async asyncTask = aContext.async();
 
         message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, filePath);
         message.put(Constants.FESTER_HOST, MANIFEST_HOST);
+        options.addHeader(Constants.ACTION, Op.POST_CSV);
 
         LOGGER.debug(MessageCodes.MFS_120, POSTCARDS, ManifestVerticle.class.getName());
 
-        myVertx.eventBus().request(ManifestVerticle.class.getName(), message, request -> {
+        myVertx.eventBus().request(ManifestVerticle.class.getName(), message, options, request -> {
             if (request.succeeded()) {
                 asyncTask.complete();
             } else {
@@ -217,14 +225,16 @@ public class ManifestVerticleTest {
         final String hathawayWorks = HATHAWAY + "/batch1/works";
         final String filePath = StringUtils.format(CSV_FILE_PATH, hathawayWorks);
         final JsonObject message = new JsonObject();
+        final DeliveryOptions options = new DeliveryOptions();
         final Async asyncTask = aContext.async();
 
         message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, filePath);
         message.put(Constants.FESTER_HOST, MANIFEST_HOST);
+        options.addHeader(Constants.ACTION, Op.POST_CSV);
 
         LOGGER.debug(MessageCodes.MFS_120, hathawayWorks, ManifestVerticle.class.getName());
 
-        myVertx.eventBus().request(ManifestVerticle.class.getName(), message, request -> {
+        myVertx.eventBus().request(ManifestVerticle.class.getName(), message, options, request -> {
             if (request.succeeded()) {
                 asyncTask.complete();
             } else {
@@ -242,14 +252,16 @@ public class ManifestVerticleTest {
     public final void testPagesManifest(final TestContext aContext) {
         final String filePath = StringUtils.format(WORKS_CSV, HATHAWAY, HATHAWAY);
         final JsonObject message = new JsonObject();
+        final DeliveryOptions options = new DeliveryOptions();
         final Async asyncTask = aContext.async();
 
         message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, filePath);
         message.put(Constants.FESTER_HOST, MANIFEST_HOST);
+        options.addHeader(Constants.ACTION, Op.POST_CSV);
 
         LOGGER.debug(MessageCodes.MFS_120, WORKS, ManifestVerticle.class.getName());
 
-        myVertx.eventBus().request(ManifestVerticle.class.getName(), message, request -> {
+        myVertx.eventBus().request(ManifestVerticle.class.getName(), message, options, request -> {
             if (request.succeeded()) {
                 asyncTask.complete();
             } else {
@@ -270,15 +282,17 @@ public class ManifestVerticleTest {
         final String expectedFile = "src/test/resources/json/pages-ordered.json";
         final String filePath = "src/test/resources/csv/ara249.csv";
         final JsonObject message = new JsonObject();
+        final DeliveryOptions options = new DeliveryOptions();
         final Async asyncTask = aContext.async();
 
         message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, filePath);
         message.put(Constants.IIIF_HOST, ImageInfoLookup.FAKE_IIIF_SERVER);
         message.put(Constants.FESTER_HOST, MANIFEST_HOST);
+        options.addHeader(Constants.ACTION, Op.POST_CSV);
 
         LOGGER.debug(MessageCodes.MFS_120, WORKS, ManifestVerticle.class.getName());
 
-        myVertx.eventBus().request(ManifestVerticle.class.getName(), message, request -> {
+        myVertx.eventBus().request(ManifestVerticle.class.getName(), message, options, request -> {
             if (request.succeeded()) {
                 final JsonObject found = new JsonObject(myVertx.fileSystem().readFileBlocking(foundFile));
                 final JsonObject expected = new JsonObject(myVertx.fileSystem().readFileBlocking(expectedFile));

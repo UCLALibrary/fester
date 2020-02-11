@@ -3,12 +3,13 @@ package edu.ucla.library.iiif.fester.handlers;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
-import edu.ucla.library.iiif.fester.ObjectType;
+import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.verticles.S3BucketVerticle;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
@@ -31,9 +32,13 @@ public class GetCollectionHandler extends AbstractFesterHandler implements Handl
     public void handle(final RoutingContext aContext) {
         final HttpServerResponse response = aContext.response();
         final String collectionName = aContext.request().getParam(Constants.COLLECTION_NAME);
-        final JsonObject message = new JsonObject().put(ObjectType.COLLECTION.getValue(), collectionName);
+        final JsonObject message = new JsonObject();
+        final DeliveryOptions options = new DeliveryOptions();
 
-        sendMessage(S3BucketVerticle.class.getName(), message, 10000, send -> {
+        message.put(Constants.COLLECTION_NAME, collectionName);
+        options.addHeader(Constants.ACTION, Op.GET_COLLECTION);
+
+        sendMessage(S3BucketVerticle.class.getName(), message, options, send -> {
             response.headers().set(Constants.CORS_HEADER, Constants.STAR);
 
             if (send.succeeded()) {
@@ -45,7 +50,7 @@ public class GetCollectionHandler extends AbstractFesterHandler implements Handl
             } else {
                 final Throwable aThrowable = send.cause();
                 final String exceptionMessage = aThrowable.getMessage();
-                final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_103, exceptionMessage);
+                final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_009, exceptionMessage);
 
                 LOGGER.error(aThrowable, errorMessage);
 
