@@ -21,6 +21,7 @@ import edu.ucla.library.iiif.fester.handlers.GetManifestHandler;
 import edu.ucla.library.iiif.fester.handlers.GetStatusHandler;
 import edu.ucla.library.iiif.fester.handlers.MatchingOpNotFoundHandler;
 import edu.ucla.library.iiif.fester.handlers.PostCsvHandler;
+import edu.ucla.library.iiif.fester.handlers.PutCollectionHandler;
 import edu.ucla.library.iiif.fester.handlers.PutManifestHandler;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
@@ -81,6 +82,7 @@ public class MainVerticle extends AbstractVerticle {
                         factory.addHandlerByOperationId(Op.PUT_MANIFEST, new PutManifestHandler(vertx, config));
                         factory.addHandlerByOperationId(Op.DELETE_MANIFEST, new DeleteManifestHandler(vertx, config));
                         factory.addHandlerByOperationId(Op.GET_COLLECTION, new GetCollectionHandler(vertx, config));
+                        factory.addHandlerByOperationId(Op.PUT_COLLECTION, new PutCollectionHandler(vertx, config));
 
                         try {
                             final int port = config.getInteger(Config.HTTP_PORT, DEFAULT_PORT);
