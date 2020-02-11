@@ -581,7 +581,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
 
         // Create a brief work manifest for inclusion in the collection manifest
         if (id != null && label != null) {
-            final URI resourceURI = IDUtils.getResourceURI(myHost, id);
+            final URI resourceURI = IDUtils.getResourceURI(myHost, IDUtils.getWorkS3Key(id));
             final Collection.Manifest manifest = new Collection.Manifest(resourceURI.toString(), label);
 
             LOGGER.debug(MessageCodes.MFS_119, id, parentID);
