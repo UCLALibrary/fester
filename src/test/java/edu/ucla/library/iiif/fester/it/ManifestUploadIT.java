@@ -117,7 +117,7 @@ public class ManifestUploadIT {
             if (statusCode == HTTP.OK) {
                 asyncTask.complete();
             } else {
-                aContext.fail(LOGGER.getMessage(MessageCodes.MFS_032));
+                aContext.fail(LOGGER.getMessage(MessageCodes.MFS_018, myPutManifestID, response.statusMessage()));
             }
         }).end(myManifest);
     }
@@ -149,11 +149,11 @@ public class ManifestUploadIT {
                     if (new JsonObject(expectedManifest).equals(new JsonObject(foundManifest))) {
                         asyncTask.complete();
                     } else {
-                        aContext.fail(LOGGER.getMessage(MessageCodes.MFS_033));
+                        aContext.fail(LOGGER.getMessage(MessageCodes.MFS_033, foundManifest, expectedManifest));
                     }
                 });
             } else {
-                aContext.fail(LOGGER.getMessage(MessageCodes.MFS_034));
+                aContext.fail(LOGGER.getMessage(MessageCodes.MFS_009, myPutManifestID));
             }
         });
     }
@@ -178,7 +178,7 @@ public class ManifestUploadIT {
             if (statusCode == HTTP.SUCCESS_NO_CONTENT) {
                 asyncTask.complete();
             } else {
-                aContext.fail(LOGGER.getMessage(MessageCodes.MFS_035));
+                aContext.fail(LOGGER.getMessage(MessageCodes.MFS_035, myPutManifestID));
             }
         }).end();
     }
@@ -201,7 +201,7 @@ public class ManifestUploadIT {
             final int statusCode = response.statusCode();
 
             if (statusCode == HTTP.OK) {
-                aContext.fail(LOGGER.getMessage(MessageCodes.MFS_036));
+                aContext.fail(LOGGER.getMessage(MessageCodes.MFS_036, myPutManifestID));
             } else {
                 asyncTask.complete();
             }

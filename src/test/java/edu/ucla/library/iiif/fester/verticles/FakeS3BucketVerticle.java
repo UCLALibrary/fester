@@ -7,9 +7,8 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-
 import info.freelibrary.util.BufferedFileWriter;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
@@ -17,7 +16,6 @@ import info.freelibrary.util.StringUtils;
 
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.MessageCodes;
-import edu.ucla.library.iiif.fester.ObjectType;
 import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.utils.CodeUtils;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
@@ -31,12 +29,7 @@ public class FakeS3BucketVerticle extends AbstractFesterVerticle {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FakeS3BucketVerticle.class, Constants.MESSAGES);
 
-    private static final Map<String, File> JSON_FILES = Map.of(IDUtils.getCollectionS3Key("ark:/21198/zz0009gsq9"),
-            new File("src/test/resources/json/ark%3A%2F21198%2Fzz0009gsq9.json"),
-            IDUtils.getWorkS3Key("ark:/21198/zz0009gv8j"),
-            new File("src/test/resources/json/ark%3A%2F21198%2Fzz0009gv8j.json"),
-            IDUtils.getWorkS3Key("ark:/21198/z12f8rtw"),
-            new File("src/test/resources/json/ark%3A%2F21198%2Fz12f8rtw.json"));
+    private static final Map<String, File> JSON_FILES = new HashMap<String, File>();
 
     private File myTmpDir;
 
@@ -51,28 +44,45 @@ public class FakeS3BucketVerticle extends AbstractFesterVerticle {
             myTmpDir = Files.createTempDirectory(deploymentID() + "_").toFile();
         }
 
+        JSON_FILES.put(IDUtils.getCollectionS3Key("ark:/21198/zz0009gsq9"),
+                new File("src/test/resources/json/ark%3A%2F21198%2Fzz0009gsq9.json"));
+        JSON_FILES.put(IDUtils.getWorkS3Key("ark:/21198/zz0009gv8j"),
+                new File("src/test/resources/json/ark%3A%2F21198%2Fzz0009gv8j.json"));
+        JSON_FILES.put(IDUtils.getWorkS3Key("ark:/21198/z12f8rtw"),
+                new File("src/test/resources/json/ark%3A%2F21198%2Fz12f8rtw.json"));
+
         vertx.eventBus().<JsonObject>consumer(S3BucketVerticle.class.getName()).handler(message -> {
-            final JsonObject json = message.body();
+            final JsonObject msg = message.body();
+            final String manifestID;
+            final JsonObject manifest;
+            final String action = message.headers().get(Constants.ACTION);
 
-            // Our JSON contains a single ID to get or a manifest to put
-            if (json.size() == 1) {
-                final Entry<String, Object> entry = json.iterator().next();
-                final String manifestID = entry.getValue().toString();
-                final String manifestType = entry.getKey();
-
-                if (ObjectType.WORK.equals(manifestType)) {
+            switch (action) {
+                case Op.GET_MANIFEST:
+                    manifestID = msg.getString(Constants.MANIFEST_ID);
                     LOGGER.debug(MessageCodes.MFS_127, manifestID);
                     get(IDUtils.getWorkS3Key(manifestID), message);
-                } else if (ObjectType.COLLECTION.equals(manifestType)) {
+                    break;
+                case Op.PUT_MANIFEST:
+                    manifestID = msg.getString(Constants.MANIFEST_ID);
+                    manifest = msg.getJsonObject(Constants.DATA);
+                    put(IDUtils.getWorkS3Key(manifestID), manifest, message);
+                    break;
+                case Op.GET_COLLECTION:
+                    manifestID = msg.getString(Constants.COLLECTION_NAME);
                     LOGGER.debug(MessageCodes.MFS_127, manifestID);
                     get(IDUtils.getCollectionS3Key(manifestID), message);
-                } else {
-                    final String errorMessage = StringUtils.format(MessageCodes.MFS_136, entry.getValue(),
-                            entry.getKey());
-                    message.fail(CodeUtils.getInt(MessageCodes.MFS_136), errorMessage);
-                }
-            } else {
-                put(json, message);
+                    break;
+                case Op.PUT_COLLECTION:
+                    manifestID = msg.getString(Constants.COLLECTION_NAME);
+                    manifest = msg.getJsonObject(Constants.DATA);
+                    put(IDUtils.getCollectionS3Key(manifestID), manifest, message);
+                    break;
+                default:
+                    final String errorMessage = StringUtils.format(MessageCodes.MFS_139, this.getClass().toString(),
+                            message.toString(), action);
+                    message.fail(CodeUtils.getInt(MessageCodes.MFS_139), errorMessage);
+                    break;
             }
         });
     }
@@ -103,21 +113,26 @@ public class FakeS3BucketVerticle extends AbstractFesterVerticle {
     /**
      * Saves the JSON file locally with its name as a URL-encoded S3 key.
      *
+     * @param aS3Key
      * @param aManifest
      * @param aMessage
      */
-    private void put(final JsonObject aManifest, final Message<JsonObject> aMessage) {
-        final URI uri = URI.create(aManifest.getString(Constants.ID));
-
+    private void put(final String aS3Key, final JsonObject aManifest, final Message<JsonObject> aMessage) {
         // URL-encoding makes it so we don't have to worry about creating subdirectories
-        final String path = URLEncoder.encode(IDUtils.getResourceS3Key(uri), StandardCharsets.UTF_8);
+        final String path = URLEncoder.encode(aS3Key, StandardCharsets.UTF_8);
         final File tmpFile = new File(myTmpDir, path);
+        final String derivedManifestS3Key = IDUtils.getResourceS3Key(URI.create(aManifest.getString(Constants.ID)));
+
+        if (!aS3Key.equals(derivedManifestS3Key)) {
+            LOGGER.warn(MessageCodes.MFS_138, aS3Key, derivedManifestS3Key);
+        }
 
         try (BufferedFileWriter writer = new BufferedFileWriter(tmpFile)) {
             if (LOGGER.isDebugEnabled()) {
-                writer.write(aManifest.encodePrettily());
                 LOGGER.debug(MessageCodes.MFS_124, aManifest.encode());
             }
+            writer.write(aManifest.encodePrettily());
+            JSON_FILES.put(aS3Key, tmpFile);
 
             aMessage.reply(Op.SUCCESS);
         } catch (final IOException details) {

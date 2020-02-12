@@ -6,7 +6,6 @@ import info.freelibrary.util.LoggerFactory;
 
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.MessageCodes;
-import edu.ucla.library.iiif.fester.ObjectType;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -57,55 +56,30 @@ public abstract class AbstractFesterVerticle extends AbstractVerticle {
     /**
      * Sends a message to another verticle with a supplied timeout value.
      *
-     * @param aJsonObject A JSON message
      * @param aVerticleName A verticle name that will respond to the message
-     * @param aTimeout A timeout measured in milliseconds
+     * @param aMessage A JSON message
+     * @param aHeaders Message headers
      * @param aHandler A handler to handle the result of the message delivery
+     * @param aTimeout A timeout measured in milliseconds
      */
-    protected void sendMessage(final JsonObject aJsonObject, final String aVerticleName, final long aTimeout,
-            final Handler<AsyncResult<Message<JsonObject>>> aHandler) {
-        final DeliveryOptions options = new DeliveryOptions().setSendTimeout(aTimeout);
+    protected void sendMessage(final String aVerticleName, final JsonObject aMessage, final DeliveryOptions aHeaders,
+            final long aTimeout, final Handler<AsyncResult<Message<JsonObject>>> aHandler) {
+        aHeaders.setSendTimeout(aTimeout);
 
-        LOGGER.debug(MessageCodes.MFS_102, aVerticleName, aJsonObject.encode());
-        vertx.eventBus().request(aVerticleName, aJsonObject, options, aHandler);
+        LOGGER.debug(MessageCodes.MFS_102, aVerticleName, aMessage.encodePrettily());
+        vertx.eventBus().request(aVerticleName, aMessage, aHeaders, aHandler);
     }
 
     /**
      * Send a message to another verticle.
      *
-     * @param aJsonObject A JSON message
      * @param aVerticleName A verticle name that will respond to the message
+     * @param aMessage A JSON message
+     * @param aHeaders Message headers
      * @param aHandler A handler to handle the result of the message delivery
      */
-    protected void sendMessage(final JsonObject aJsonObject, final String aVerticleName,
+    protected void sendMessage(final String aVerticleName, final JsonObject aMessage, final DeliveryOptions aHeaders,
             final Handler<AsyncResult<Message<JsonObject>>> aHandler) {
-        sendMessage(aJsonObject, aVerticleName, DeliveryOptions.DEFAULT_TIMEOUT, aHandler);
-    }
-
-    /**
-     * Sends an ID to the supplied verticle.
-     *
-     * @param aID A manifest ID
-     * @param aManifestType The type of manifest (work or collection) to get
-     * @param aVerticleName The name of the verticle to which to send the ID
-     * @param aHandler A handler to handle the result of sending the ID
-     */
-    protected void getS3Manifest(final String aID, final ObjectType aManifestType, final String aVerticleName,
-            final Handler<AsyncResult<Message<JsonObject>>> aHandler) {
-        getS3Manifest(aID, aManifestType, aVerticleName, DeliveryOptions.DEFAULT_TIMEOUT, aHandler);
-    }
-
-    /**
-     * Sends an ID to the supplied verticle.
-     *
-     * @param aID A manifest ID\
-     * @param aManifestType The type of manifest (work or collection) to get
-     * @param aVerticleName The name of the verticle to which to send the ID
-     * @param aTimeout A timeout after which to give up waiting for a response
-     * @param aHandler A handler to handle the result of sending the ID
-     */
-    protected void getS3Manifest(final String aID, final ObjectType aManifestType, final String aVerticleName,
-            final long aTimeout, final Handler<AsyncResult<Message<JsonObject>>> aHandler) {
-        sendMessage(new JsonObject().put(aManifestType.getValue(), aID), aVerticleName, aTimeout, aHandler);
+        sendMessage(aVerticleName, aMessage, aHeaders, DeliveryOptions.DEFAULT_TIMEOUT, aHandler);
     }
 }

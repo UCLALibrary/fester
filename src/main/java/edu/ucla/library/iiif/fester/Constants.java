@@ -17,6 +17,17 @@ public final class Constants {
     public static final String UNSPECIFIED_HOST = "0.0.0.0";
 
     /**
+     * The message header key associated with the Fester operation (HTTP request) that caused the message send.
+     */
+    public static final String ACTION = "action";
+
+    /**
+     * The message body key associated with the Fester operation input data (HTTP request body) that caused the message
+     * send.
+     */
+    public static final String DATA = "data";
+
+    /**
      * The name of the manifest ID parameter.
      */
     public static final String MANIFEST_ID = "manifestId";

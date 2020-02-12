@@ -7,24 +7,23 @@ import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.verticles.S3BucketVerticle;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 
-public class GetCollectionHandler extends AbstractFesterHandler implements Handler<RoutingContext> {
+public class PutCollectionHandler extends AbstractFesterHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GetCollectionHandler.class, Constants.MESSAGES);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PutCollectionHandler.class, Constants.MESSAGES);
 
     /**
-     * Creates a handler that returns IIIF collection manifests from Fester.
+     * Creates a handler that creates IIIF collection manifests in Fester.
      *
      * @param aVertx A Vert.x instance
      * @param aConfig A JSON configuration
      */
-    public GetCollectionHandler(final Vertx aVertx, final JsonObject aConfig) {
+    public PutCollectionHandler(final Vertx aVertx, final JsonObject aConfig) {
         super(aVertx, aConfig);
     }
 
@@ -35,28 +34,20 @@ public class GetCollectionHandler extends AbstractFesterHandler implements Handl
         final JsonObject message = new JsonObject();
         final DeliveryOptions options = new DeliveryOptions();
 
-        message.put(Constants.COLLECTION_NAME, collectionName);
-        options.addHeader(Constants.ACTION, Op.GET_COLLECTION);
+        message.put(Constants.COLLECTION_NAME, collectionName).put(Constants.DATA, aContext.getBodyAsJson());
+        options.addHeader(Constants.ACTION, Op.PUT_COLLECTION);
 
         sendMessage(S3BucketVerticle.class.getName(), message, options, send -> {
-            response.headers().set(Constants.CORS_HEADER, Constants.STAR);
-
             if (send.succeeded()) {
-                final String collection = send.result().body().toString();
-
-                response.setStatusCode(HTTP.OK);
-                response.putHeader(Constants.CONTENT_TYPE, Constants.JSON_MEDIA_TYPE);
-                response.end(collection);
+                response.setStatusCode(HTTP.OK).end();
             } else {
                 final Throwable aThrowable = send.cause();
                 final String exceptionMessage = aThrowable.getMessage();
-                final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_009, collectionName);
+                final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_015, exceptionMessage);
 
                 LOGGER.error(aThrowable, errorMessage);
 
-                response.setStatusCode(HTTP.NOT_FOUND);
-                response.setStatusMessage(exceptionMessage);
-                response.end(errorMessage);
+                response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR).setStatusMessage(exceptionMessage).end(errorMessage);
             }
         });
     }

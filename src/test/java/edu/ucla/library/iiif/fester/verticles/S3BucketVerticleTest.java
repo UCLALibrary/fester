@@ -2,7 +2,6 @@
 package edu.ucla.library.iiif.fester.verticles;
 
 import static edu.ucla.library.iiif.fester.Constants.MESSAGES;
-import static edu.ucla.library.iiif.fester.ObjectType.COLLECTION;
 import static org.junit.Assume.assumeTrue;
 
 import java.io.File;
@@ -30,11 +29,13 @@ import info.freelibrary.util.StringUtils;
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.MessageCodes;
+import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -192,8 +193,12 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
 
         final File collectionFile = new File(TEST_COLLECTION_FILE);
         final JsonObject expected = new JsonObject(StringUtils.read(collectionFile));
-        final JsonObject message = new JsonObject().put(COLLECTION.getValue(), myCollectionID);
+        final JsonObject message = new JsonObject();
+        final DeliveryOptions options = new DeliveryOptions();
         final Async asyncTask = aContext.async();
+
+        message.put(Constants.COLLECTION_NAME, myCollectionID);
+        options.addHeader(Constants.ACTION, Op.GET_COLLECTION);
 
         // Initialize our inherited class' vertx instance
         vertx = myRunTestOnContextRule.vertx();
@@ -202,7 +207,7 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
         myAmazonS3.putObject(myS3Bucket, myCollectionS3Key, collectionFile);
 
         if (myAmazonS3.doesObjectExist(myS3Bucket, myCollectionS3Key)) {
-            sendMessage(message, S3BucketVerticle.class.getName(), send -> {
+            sendMessage(S3BucketVerticle.class.getName(), message, options, send -> {
                 if (send.succeeded()) {
                     aContext.assertEquals(expected, send.result().body());
 
@@ -238,11 +243,16 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
         final Async asyncTask = aContext.async();
         final Buffer manifestContent = vertx.fileSystem().readFileBlocking(MANIFEST_PATH);
         final JsonObject manifest = manifestContent.toJsonObject();
+        final JsonObject message = new JsonObject();
+        final DeliveryOptions options = new DeliveryOptions();
 
         // Create a fake manifest ID/URI with our test manifest key
         manifest.put(Constants.ID, myManifestUri.toString());
 
-        vertx.eventBus().request(S3BucketVerticle.class.getName(), manifest, send -> {
+        message.put(Constants.MANIFEST_ID, myManifestID).put(Constants.DATA, manifest);
+        options.addHeader(Constants.ACTION, Op.PUT_MANIFEST);
+
+        vertx.eventBus().request(S3BucketVerticle.class.getName(), message, options, send -> {
             if (send.succeeded()) {
                 final String s3Object;
 
@@ -284,13 +294,18 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
         final Async asyncTask = aContext.async();
         final Buffer manifestContent = vertx.fileSystem().readFileBlocking(MANIFEST_PATH);
         final JsonObject manifest = manifestContent.toJsonObject();
+        final JsonObject message = new JsonObject();
+        final DeliveryOptions options = new DeliveryOptions();
 
         // Create a fake manifest ID/URI with our collection key
         manifest.put(Constants.ID, myCollectionUri.toString());
 
         LOGGER.debug(MessageCodes.MFS_130, manifest.getString(Constants.ID));
 
-        vertx.eventBus().request(S3BucketVerticle.class.getName(), manifest, send -> {
+        message.put(Constants.COLLECTION_NAME, myCollectionID).put(Constants.DATA, manifest);
+        options.addHeader(Constants.ACTION, Op.PUT_COLLECTION);
+
+        vertx.eventBus().request(S3BucketVerticle.class.getName(), message, options, send -> {
             if (send.succeeded()) {
                 final String s3Object;
 
