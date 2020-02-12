@@ -167,10 +167,9 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                     break;
                 }
                 default: {
-                    final String errorMessage = StringUtils.format(MessageCodes.MFS_139,
-                            this.getClass().toString(), message.toString(), action);
+                    final String errorMessage = StringUtils.format(MessageCodes.MFS_139, getClass().toString(),
+                            message.toString(), action);
                     message.fail(CodeUtils.getInt(MessageCodes.MFS_139), errorMessage);
-                    break;
                 }
             }
         });

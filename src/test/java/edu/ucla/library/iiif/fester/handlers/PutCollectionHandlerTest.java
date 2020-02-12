@@ -90,28 +90,26 @@ public class PutCollectionHandlerTest extends AbstractFesterHandlerTest {
         myVertx.createHttpClient().put(requestOpts, putResponse -> {
             final int putStatusCode = putResponse.statusCode();
 
-            switch (putStatusCode) {
-                case HTTP.OK:
-                    // Send a GET request to the same path to make sure PUT succeeded
-                    myVertx.createHttpClient().getNow(port, Constants.UNSPECIFIED_HOST, requestPath, getResponse -> {
-                        final int getStatusCode = getResponse.statusCode();
+            if (putStatusCode == HTTP.OK) {
+                // Send a GET request to the same path to make sure PUT succeeded
+                myVertx.createHttpClient().getNow(port, Constants.UNSPECIFIED_HOST, requestPath, getResponse -> {
+                    final int getStatusCode = getResponse.statusCode();
 
-                        if (getStatusCode == HTTP.OK) {
-                            getResponse.bodyHandler(body -> {
-                                final String foundCollection = body.toString(StandardCharsets.UTF_8);
-                                aContext.assertEquals(new JsonObject(manifest), new JsonObject(foundCollection));
+                    if (getStatusCode == HTTP.OK) {
+                        getResponse.bodyHandler(body -> {
+                            final String foundCollection = body.toString(StandardCharsets.UTF_8);
+                            aContext.assertEquals(new JsonObject(manifest), new JsonObject(foundCollection));
 
-                                if (!asyncTask.isCompleted()) {
-                                    asyncTask.complete();
-                                }
-                            });
-                        } else {
-                            aContext.fail(LOGGER.getMessage(MessageCodes.MFS_140, myPutCollectionID));
-                        }
-                    });
-                    break;
-                default:
-                    aContext.fail(LOGGER.getMessage(MessageCodes.MFS_018, manifestPath, putStatusCode));
+                            if (!asyncTask.isCompleted()) {
+                                asyncTask.complete();
+                            }
+                        });
+                    } else {
+                        aContext.fail(LOGGER.getMessage(MessageCodes.MFS_140, myPutCollectionID));
+                    }
+                });
+            } else {
+                aContext.fail(LOGGER.getMessage(MessageCodes.MFS_018, manifestPath, putStatusCode));
             }
         }).end(manifest);
     }

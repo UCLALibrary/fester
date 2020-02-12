@@ -39,21 +39,15 @@ public class PutCollectionHandler extends AbstractFesterHandler {
 
         sendMessage(S3BucketVerticle.class.getName(), message, options, send -> {
             if (send.succeeded()) {
-                response.setStatusCode(HTTP.OK);
-                response.end();
+                response.setStatusCode(HTTP.OK).end();
             } else {
                 final Throwable aThrowable = send.cause();
-                final String exceptionMessage;
-                final String errorMessage;
-
-                exceptionMessage = aThrowable.getMessage();
-                errorMessage = LOGGER.getMessage(MessageCodes.MFS_015, exceptionMessage);
+                final String exceptionMessage = aThrowable.getMessage();
+                final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_015, exceptionMessage);
 
                 LOGGER.error(aThrowable, errorMessage);
 
-                response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
-                response.setStatusMessage(exceptionMessage);
-                response.end(errorMessage);
+                response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR).setStatusMessage(exceptionMessage).end(errorMessage);
             }
         });
     }

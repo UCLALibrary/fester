@@ -133,6 +133,6 @@
   <entry key="MFS-137">Test GetCollectionHandler with a test manifest: {}</entry>
   <entry key="MFS-138">Supplied S3 key '{}' does not match what would have been derived from the IIIF resource URI: '{}'</entry>
   <entry key="MFS-139">'{}' unable to handle message '{}': unknown action '{}'</entry>
-  <entry key="MFS-140">FAIL--manifest '{}' not found when it should have been put</entry>
-  <entry key="MFS-141">FAIL--manifest '{}' found when it should not have been put</entry>
+  <entry key="MFS-140">Manifest '{}' not found when it should have been put</entry>
+  <entry key="MFS-141">Manifest '{}' found when it should not have been put</entry>
 </properties>
