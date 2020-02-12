@@ -50,7 +50,7 @@ public class GetCollectionHandler extends AbstractFesterHandler implements Handl
             } else {
                 final Throwable aThrowable = send.cause();
                 final String exceptionMessage = aThrowable.getMessage();
-                final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_009, exceptionMessage);
+                final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_009, collectionName);
 
                 LOGGER.error(aThrowable, errorMessage);
 

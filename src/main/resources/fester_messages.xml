@@ -22,7 +22,7 @@
   <entry key="MFS-006">Putting '{}' (test object) into S3 bucket: {}</entry>
   <entry key="MFS-007">S3 client credentials: {} | {}</entry>
   <entry key="MFS-008">Test GetManifestHandler with a test manifest: {}</entry>
-  <entry key="MFS-009">Manifest not found: {}</entry>
+  <entry key="MFS-009">Manifest '{}' not found</entry>
   <entry key="MFS-010">Internal server error while trying to retrieve manifest: {}</entry>
   <entry key="MFS-011">Unexpected response code while trying to retrieve manifest: {}</entry>
   <entry key="MFS-012">Test DeleteManifestHandler with a test manifest: {}</entry>
@@ -43,13 +43,13 @@
   <entry key="MFS-027">Test GETing a test manifest from: {}</entry>
   <entry key="MFS-028">Test DELETing a test manifest at: {}</entry>
   <entry key="MFS-029">Confirming test manifest has been deleted from: {}</entry>
-  <entry key="MFS-030">Fester service confirmed to be available.</entry>
-  <entry key="MFS-031">FAIL--fester service is unavailable.</entry>
-  <entry key="MFS-032">FAIL--unable to put manifest</entry>
-  <entry key="MFS-033">FAIL--found manifest does not match expected manifest</entry>
-  <entry key="MFS-034">FAIL--manifest not found</entry>
-  <entry key="MFS-035">FAIL--unable to DELETE manifest</entry>
-  <entry key="MFS-036">FAIL--manifest found when it should have been deleted</entry>
+  <entry key="MFS-030">Fester service confirmed to be available</entry>
+  <entry key="MFS-031">Fester service is unavailable</entry>
+
+  <entry key="MFS-033">Found manifest '{}' does not match expected manifest '{}'</entry>
+
+  <entry key="MFS-035">Unable to DELETE manifest '{}'</entry>
+  <entry key="MFS-036">Manifest '{}' found when it should have been deleted</entry>
   <entry key="MFS-037">Not processed. The submission is missing a CSV file.</entry>
   <entry key="MFS-038">Uploaded CSV file received: {} [{}]</entry>
   <entry key="MFS-039">Unexpected POST response: [{}] {}</entry>
