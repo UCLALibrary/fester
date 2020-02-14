@@ -6,21 +6,50 @@ package edu.ucla.library.iiif.fester;
  */
 public class CsvHeaders {
 
+    /**
+     * The index position for the item ARK column.
+     */
     private int myItemArkIndex = -1;
 
+    /**
+     * The index position for the parent ARK column.
+     */
     private int myParentArkIndex = -1;
 
+    /**
+     * The index position for the title column.
+     */
     private int myTitleIndex = -1;
 
+    /**
+     * The index position for the object type column.
+     */
     private int myObjectTypeIndex = -1;
 
+    /**
+     * The index position for the file name column.
+     */
     private int myFileNameIndex = -1;
 
+    /**
+     * The index position for the item sequence column.
+     */
     private int myItemSequenceIndex = -1;
 
+    /**
+     * The index position for the viewingHint column.
+     */
     private int myViewingHintIndex = -1;
 
+    /**
+     * The index position for the viewingDirection column.
+     */
     private int myViewingDirectionIndex = -1;
+
+    /**
+     * The index position for the image access URL column.
+     */
+    private int myImageAccessUrlIndex = -1;
 
     /**
      * Create a new CSV headers object.
@@ -55,6 +84,9 @@ public class CsvHeaders {
                 case CSV.VIEWING_HINT:
                     setViewingHintIndex(index);
                     break;
+                case CSV.IIIF_ACCESS_URL:
+                    setImageAccessUrlIndex(index);
+                    break;
                 default:
                     // Our default is to ignore things we don't care about
             }
@@ -73,6 +105,8 @@ public class CsvHeaders {
             throw new CsvParsingException(MessageCodes.MFS_112);
         } else if (!hasItemSequenceIndex()) {
             throw new CsvParsingException(MessageCodes.MFS_123);
+        } else if (!hasImageAccessUrlIndex()) {
+            throw new CsvParsingException(MessageCodes.MFS_032);
         }
 
         // The viewingHint and viewingDirection columns are optional
@@ -104,6 +138,34 @@ public class CsvHeaders {
      */
     public boolean hasItemArkIndex() {
         return myItemArkIndex != -1;
+    }
+
+    /**
+     * Gets the image access URL index position.
+     *
+     * @return The image access URL index position
+     */
+    public int getImageAccessUrlIndex() {
+        return myImageAccessUrlIndex;
+    }
+
+    /**
+     * Sets the image access URL index position.
+     *
+     * @param aImageAccessUrlIndex The position of the image access URL header.
+     */
+    public CsvHeaders setImageAccessUrlIndex(final int aImageAccessUrlIndex) {
+        myImageAccessUrlIndex = aImageAccessUrlIndex;
+        return this;
+    }
+
+    /**
+     * Checks whether there is an image access URL index position
+     *
+     * @return True if there is an image access URL index position; else, false
+     */
+    public boolean hasImageAccessUrlIndex() {
+        return myImageAccessUrlIndex != -1;
     }
 
     /**
