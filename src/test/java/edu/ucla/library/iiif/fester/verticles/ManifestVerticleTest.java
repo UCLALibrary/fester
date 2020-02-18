@@ -9,6 +9,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.After;
@@ -16,6 +17,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import info.freelibrary.iiif.presentation.Manifest;
+import info.freelibrary.iiif.presentation.Sequence;
+import info.freelibrary.iiif.presentation.io.Manifestor;
 import info.freelibrary.iiif.presentation.properties.ViewingDirection;
 import info.freelibrary.iiif.presentation.properties.ViewingHint;
 import info.freelibrary.util.FileUtils;
@@ -132,8 +136,7 @@ public class ManifestVerticleTest {
      */
     @Test
     public final void testSinaiWorksManifest(final TestContext aContext) {
-        final String jsonFile = myJsonFiles + Constants.SLASH
-                + URLEncoder.encode(IDUtils.getWorkS3Key("ark:/21198/z16t1r0h"), StandardCharsets.UTF_8);
+        final String jsonFile = myJsonFiles + getTestFilePath("ark:/21198/z16t1r0h");
         final String path = StringUtils.format(SINAI_WORKS_CSV, SINAI);
         final JsonObject message = new JsonObject();
         final DeliveryOptions options = new DeliveryOptions();
@@ -195,6 +198,7 @@ public class ManifestVerticleTest {
      */
     @Test
     public final void testPostcardsManifest(final TestContext aContext) {
+        final String foundFile = myJsonFiles + getTestFilePath("ark:/21198/zz000s3rfj");
         final String filePath = StringUtils.format(CSV_FILE_PATH, POSTCARDS);
         final JsonObject message = new JsonObject();
         final DeliveryOptions options = new DeliveryOptions();
@@ -208,7 +212,18 @@ public class ManifestVerticleTest {
 
         myVertx.eventBus().request(ManifestVerticle.class.getName(), message, options, request -> {
             if (request.succeeded()) {
-                asyncTask.complete();
+                final Manifest foundManifest = new Manifestor().readManifest(new File(foundFile));
+                final List<Sequence> sequences = foundManifest.getSequences();
+
+                // Check that the sequence was added to this manifest
+                assertEquals(1, sequences.size());
+
+                // Check that the canvas was added to this sequence
+                assertEquals(1, sequences.get(0).getCanvases().size());
+
+                if (!asyncTask.isCompleted()) {
+                    asyncTask.complete();
+                }
             } else {
                 aContext.fail(request.cause());
             }
@@ -277,8 +292,7 @@ public class ManifestVerticleTest {
      */
     @Test
     public final void testPageOrder(final TestContext aContext) {
-        final String foundFile = myJsonFiles + Constants.SLASH
-                + URLEncoder.encode(IDUtils.getWorkS3Key("ark:/21198/z12f8rtw"), StandardCharsets.UTF_8);
+        final String foundFile = myJsonFiles + getTestFilePath("ark:/21198/z12f8rtw");
         final String expectedFile = "src/test/resources/json/pages-ordered.json";
         final String filePath = "src/test/resources/csv/ara249.csv";
         final JsonObject message = new JsonObject();
@@ -331,5 +345,15 @@ public class ManifestVerticleTest {
         }
 
         return s3TmpDirPath;
+    }
+
+    /**
+     * A convenience method for getting the test file's path.
+     *
+     * @param aID An ID
+     * @return The path of the found test file
+     */
+    private String getTestFilePath(final String aID) {
+        return Constants.SLASH + URLEncoder.encode(IDUtils.getWorkS3Key(aID), StandardCharsets.UTF_8);
     }
 }

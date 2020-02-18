@@ -94,83 +94,80 @@ public class ManifestVerticle extends AbstractFesterVerticle {
             final JsonObject messageBody = message.body();
             final String action = message.headers().get(Constants.ACTION);
 
-            switch (action) {
-                case Op.POST_CSV: {
-                    final Path filePath = Paths.get(messageBody.getString(Constants.CSV_FILE_PATH));
-                    final Optional<String> imageHost = Optional.ofNullable(messageBody.getString(Constants.IIIF_HOST));
+            if (Op.POST_CSV.equals(action)) {
+                final Path filePath = Paths.get(messageBody.getString(Constants.CSV_FILE_PATH));
+                final Optional<String> imageHost = Optional.ofNullable(messageBody.getString(Constants.IIIF_HOST));
 
-                    if (myHost == null) {
-                        myHost = messageBody.getString(Constants.FESTER_HOST);
-                    }
+                if (myHost == null) {
+                    myHost = messageBody.getString(Constants.FESTER_HOST);
+                }
 
-                    try (Reader reader = Files.newBufferedReader(filePath);
-                            CSVReader csvReader = new CSVReader(reader)) {
-                        final Map<String, List<String[]>> pages = new HashMap<>();
-                        final Map<String, List<Collection.Manifest>> works = new HashMap<>();
-                        final List<String[]> worksMetadata = new ArrayList<>();
-                        final CsvMetadata csvMetadata = new CsvMetadata(works, worksMetadata, pages);
+                try (Reader reader = Files.newBufferedReader(filePath); CSVReader csvReader = new CSVReader(reader)) {
+                    final Map<String, List<String[]>> pages = new HashMap<>();
+                    final Map<String, List<Collection.Manifest>> works = new HashMap<>();
+                    final List<String[]> worksMetadata = new ArrayList<>();
+                    final CsvMetadata csvMetadata = new CsvMetadata(works, worksMetadata, pages);
 
-                        CsvHeaders csvHeaders = null;
-                        Collection collection = null;
+                    CsvHeaders csvHeaders = null;
+                    Collection collection = null;
 
-                        // Read through the CSV data and create store info about collections, works, and pages
-                        for (final String[] row : csvReader.readAll()) {
-                            // The first row should be our headers row
-                            if (csvHeaders == null) {
-                                // Throw a CsvParsingException here if one of our 'required' headers is missing
-                                csvHeaders = new CsvHeaders(row);
-                            } else {
-                                final int objectTypeIndex = csvHeaders.getObjectTypeIndex();
+                    // Read through the CSV data and create store info about collections, works, and pages
+                    for (final String[] row : csvReader.readAll()) {
+                        // The first row should be our headers row
+                        if (csvHeaders == null) {
+                            // Throw a CsvParsingException here if one of our 'required' headers is missing
+                            csvHeaders = new CsvHeaders(row);
+                        } else {
+                            final int objectTypeIndex = csvHeaders.getObjectTypeIndex();
 
-                                if (COLLECTION.equals(row[objectTypeIndex])) {
-                                    collection = getCollection(row, csvHeaders);
-                                } else if (WORK.equals(row[objectTypeIndex])) {
-                                    extractWorkMetadata(row, csvHeaders, works, worksMetadata);
-                                } else if (PAGE.equals(row[objectTypeIndex])) {
-                                    extractPageMetadata(row, csvHeaders, pages);
-                                }
+                            if (COLLECTION.equals(row[objectTypeIndex])) {
+                                collection = getCollection(row, csvHeaders);
+                            } else if (WORK.equals(row[objectTypeIndex])) {
+                                extractWorkMetadata(row, csvHeaders, works, worksMetadata);
+                            } else if (PAGE.equals(row[objectTypeIndex])) {
+                                extractPageMetadata(row, csvHeaders, pages);
                             }
                         }
+                    }
 
-                        // If we have a collection record in the CSV we're processing, create a collection manifest
-                        if (collection != null) {
-                            LOGGER.debug(MessageCodes.MFS_122, filePath, collection);
-                            buildCollectionManifest(collection, csvHeaders, csvMetadata, imageHost, message);
-                        } else if (worksMetadata.size() > 0) {
-                            final String collectionID = worksMetadata.get(0)[csvHeaders.getParentArkIndex()];
+                    // If we have a collection record in the CSV we're processing, create a collection manifest
+                    if (collection != null) {
+                        LOGGER.debug(MessageCodes.MFS_122, filePath, collection);
+                        buildCollectionManifest(collection, csvHeaders, csvMetadata, imageHost, message);
+                    } else if (worksMetadata.size() > 0) {
+                        final String collectionID = worksMetadata.get(0)[csvHeaders.getParentArkIndex()];
 
-                            LOGGER.debug(MessageCodes.MFS_043, filePath);
-                            updateWorks(collectionID, csvHeaders, csvMetadata, imageHost, message);
-                        } else if (pages.size() > 0) {
-                            // All our page-only CSVs, at this point, have pages from only one work
-                            final String workID = pages.keySet().iterator().next();
-                            final List<String[]> pagesList = pages.values().iterator().next();
+                        LOGGER.debug(MessageCodes.MFS_043, filePath);
+                        updateWorks(collectionID, csvHeaders, csvMetadata, imageHost, message);
+                    } else if (pages.size() > 0) {
+                        // All our page-only CSVs, at this point, have pages from only one work
+                        final String workID = pages.keySet().iterator().next();
+                        final List<String[]> pagesList = pages.values().iterator().next();
 
-                            LOGGER.debug(MessageCodes.MFS_069, filePath);
-                            updatePages(workID, csvHeaders, pagesList, imageHost, message);
-                        } else {
-                            final CsvParsingException details = new CsvParsingException(MessageCodes.MFS_042);
+                        LOGGER.debug(MessageCodes.MFS_069, filePath);
+                        updatePages(workID, csvHeaders, pagesList, imageHost, message);
+                    } else {
+                        final CsvParsingException details = new CsvParsingException(MessageCodes.MFS_042);
 
-                            LOGGER.error(details, details.getMessage());
-                            message.fail(CodeUtils.getInt(MessageCodes.MFS_000), details.getMessage());
-                        }
-                    } catch (final IOException details) {
-                        LOGGER.error(details, details.getMessage());
-                        message.fail(CodeUtils.getInt(MessageCodes.MFS_000), details.getMessage());
-                    } catch (final CsvParsingException details) {
-                        LOGGER.error(details, details.getMessage());
-                        message.fail(CodeUtils.getInt(MessageCodes.MFS_000), details.getMessage());
-                    } catch (final CsvException details) {
                         LOGGER.error(details, details.getMessage());
                         message.fail(CodeUtils.getInt(MessageCodes.MFS_000), details.getMessage());
                     }
-                    break;
+                } catch (final IOException details) {
+                    LOGGER.error(details, details.getMessage());
+                    message.fail(CodeUtils.getInt(MessageCodes.MFS_000), details.getMessage());
+                } catch (final CsvParsingException details) {
+                    LOGGER.error(details, details.getMessage());
+                    message.fail(CodeUtils.getInt(MessageCodes.MFS_000), details.getMessage());
+                } catch (final CsvException details) {
+                    LOGGER.error(details, details.getMessage());
+                    message.fail(CodeUtils.getInt(MessageCodes.MFS_000), details.getMessage());
                 }
-                default: {
-                    final String errorMessage = StringUtils.format(MessageCodes.MFS_139, getClass().toString(),
-                            message.toString(), action);
-                    message.fail(CodeUtils.getInt(MessageCodes.MFS_139), errorMessage);
-                }
+            } else {
+                final String jsonMsg = message.toString();
+                final String verticleName = getClass().getSimpleName();
+                final String errorMessage = StringUtils.format(MessageCodes.MFS_139, verticleName, jsonMsg, action);
+
+                message.fail(CodeUtils.getInt(MessageCodes.MFS_139), errorMessage);
             }
         });
 
@@ -488,6 +485,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                 }
             }
 
+            // Check first for pages, then if the work itself is an image
             if (aPages.containsKey(workID)) {
                 final List<String[]> pageList = aPages.get(workID);
 
@@ -495,6 +493,17 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                 pageList.sort(new ItemSequenceComparator(aCsvHeaders.getItemSequenceIndex()));
 
                 addPages(aCsvHeaders, pageList, sequence, aImageHost, urlEncodedWorkID);
+            } else if (aCsvHeaders.hasImageAccessUrlIndex()) {
+                final String accessURL = StringUtils.trimToNull(aWork[aCsvHeaders.getImageAccessUrlIndex()]);
+
+                if (accessURL != null) {
+                    final List<String[]> pageList = new ArrayList<>(1);
+
+                    pageList.add(aWork);
+                    manifest.addSequence(sequence);
+
+                    addPages(aCsvHeaders, pageList, sequence, aImageHost, urlEncodedWorkID);
+                }
             }
 
             message.put(Constants.MANIFEST_ID, workID).put(Constants.DATA, manifest.toJSON());

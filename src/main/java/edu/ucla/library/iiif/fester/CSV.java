@@ -51,6 +51,11 @@ public final class CSV {
      */
     public static final String VIEWING_DIRECTION = "Text direction";
 
+    /**
+     * The row's image access URL.
+     */
+    public static final String IIIF_ACCESS_URL = "IIIF Access URL";
+
     private CSV() {
     }
 }
