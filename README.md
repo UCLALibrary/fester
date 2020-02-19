@@ -39,6 +39,40 @@ You can run a development instance of Fester by typing the following within the 
 
 Once run, the service can be verified/accessed at [http://localhost:8888/status/fester](http://localhost:8888/status/fester). The API documentation can be accessed at [http://localhost:8888/docs/fester](http://localhost:8888/docs/fester)
 
+## Debugging with Eclipse IDE
+
+Development instances are configured to accept remote debugger connections on port `5555`.
+
+To debug Fester with [Eclipse IDE](https://www.eclipse.org/eclipseide/):
+
+1. Create a new run configuration
+    - In the top-level menu, select *Run* > *Run Configurations...*
+    - In the pop-up window:
+        - Create a new configuration of type *Maven Build*
+        - Set *Name* to something like `Fester (development mode)`
+        - In the *Main* tab:
+            - Set *Base directory* to the Fester project directory
+            - Set *Goals* to `test`
+            - Set *Profiles* to `live`
+            - Set *User settings* to the path to a `settings.xml` that contains your AWS S3 credentials
+2. Create a new debug configuration
+    - In the top-level menu, select *Run* > *Debug Configurations...*
+    - In the pop-up window:
+        - Create a new configuration of type *Remote Java Application*
+        - Set *Name* to something like `Fester (socket attach)`
+        - In the *Connect* tab:
+            - Set *Project* to the Fester project directory
+            - Set *Connection Type* to `Standard (Socket Attach)`
+            - Set *Host* to `localhost`
+            - Set *Port* to `5555`
+            - Check *Allow termination of remote VM* (optional)
+3. Run the new run configuration created in Step 1 *
+4. Run the new debug configuration created in Step 2 *
+
+_* If you're doing this for the first time, you may need to bring back the pop-up window where you created the configuration in order to invoke it. Otherwise, you can use toolbar buttons, or hotkeys <kbd>Ctrl</kbd> <kbd>F11</kbd> (Run) or <kbd>F11</kbd> (Debug)._
+
+Tested with Eclipse IDE 4.14.0 (2019-12).
+
 ## Load Testing
 
 A [Locust](https://docs.locust.io/en/stable/index.html) test file is included, it only tests PUTs of manifests. If you wish to run the test, you need to have Locust installed, and then run the following command from the src/test/scripts/locust folder:

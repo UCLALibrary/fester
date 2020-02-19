@@ -97,6 +97,7 @@
 
     <!-- The port Fester listens on -->
     <fester.http.port>8888</fester.http.port>
+    <fester.debug.port>5555</fester.debug.port>
   </properties>
 
   <dependencies>
@@ -770,17 +771,18 @@
                 <id>vertx-plugin</id>
                 <phase>test</phase>
                 <goals>
-                  <goal>run</goal>
+                  <goal>debug</goal>
                 </goals>
               </execution>
             </executions>
             <configuration>
               <verticle>${main.verticle}</verticle>
               <redeploy>${live.test.reloads}</redeploy>
-              <runArgs>
-                <runArg>-Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.SLF4JLogDelegateFactory</runArg>
-                <runArg>-Dvertx-config-path=target/test-classes/test-config.properties</runArg>
-              </runArgs>
+              <jvmArgs>
+                <jvmArg>-Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.SLF4JLogDelegateFactory</jvmArg>
+                <jvmArg>-Dvertx-config-path=target/test-classes/test-config.properties</jvmArg>
+              </jvmArgs>
+              <debugPort>${fester.debug.port}</debugPort>
             </configuration>
           </plugin>
         </plugins>
