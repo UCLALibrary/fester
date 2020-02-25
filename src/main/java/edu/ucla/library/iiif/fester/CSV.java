@@ -56,6 +56,21 @@ public final class CSV {
      */
     public static final String IIIF_ACCESS_URL = "IIIF Access URL";
 
+    /**
+     * The row's repository name.
+     */
+    public static final String REPOSITORY_NAME = "Name.repository";
+
+    /**
+     * The row's local rights statement.
+     */
+    public static final String LOCAL_RIGHTS_STATEMENT = "Rights.statementLocal";
+
+    /**
+     * The row's rights contact.
+     */
+    public static final String RIGHTS_CONTACT = "Rights.servicesContact";
+
     private CSV() {
     }
 }

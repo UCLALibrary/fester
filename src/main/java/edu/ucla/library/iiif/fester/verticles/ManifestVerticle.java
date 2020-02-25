@@ -29,6 +29,8 @@ import info.freelibrary.iiif.presentation.ImageContent;
 import info.freelibrary.iiif.presentation.ImageResource;
 import info.freelibrary.iiif.presentation.Manifest;
 import info.freelibrary.iiif.presentation.Sequence;
+import info.freelibrary.iiif.presentation.properties.Attribution;
+import info.freelibrary.iiif.presentation.properties.Metadata;
 import info.freelibrary.iiif.presentation.properties.ViewingDirection;
 import info.freelibrary.iiif.presentation.properties.ViewingHint;
 import info.freelibrary.iiif.presentation.services.ImageInfoService;
@@ -461,6 +463,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
         final String workID = aWork[aCsvHeaders.getItemArkIndex()];
         final String urlEncodedWorkID = URLEncoder.encode(workID, StandardCharsets.UTF_8);
         final String workLabel = aWork[aCsvHeaders.getTitleIndex()];
+        final Metadata metadata = new Metadata();
         final String manifestID = StringUtils.format(MANIFEST_URI, myHost, urlEncodedWorkID);
         final Manifest manifest = new Manifest(manifestID, workLabel);
         final String sequenceID = StringUtils.format(SEQUENCE_URI, myHost, urlEncodedWorkID);
@@ -469,6 +472,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
         final DeliveryOptions options = new DeliveryOptions();
 
         try {
+            // Add optional properties
             if (aCsvHeaders.hasViewingDirectionIndex()) {
                 final String viewingDirection = StringUtils.trimToNull(aWork[aCsvHeaders.getViewingDirectionIndex()]);
 
@@ -476,13 +480,37 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                     manifest.setViewingDirection(ViewingDirection.fromString(viewingDirection));
                 }
             }
-
             if (aCsvHeaders.hasViewingHintIndex()) {
                 final String viewingHint = StringUtils.trimToNull(aWork[aCsvHeaders.getViewingHintIndex()]);
 
                 if (viewingHint != null) {
                     manifest.setViewingHint(new ViewingHint(viewingHint));
                 }
+            }
+            if (aCsvHeaders.hasRepositoryNameIndex()) {
+                final String repositoryName = StringUtils.trimToNull(aWork[aCsvHeaders.getRepositoryNameIndex()]);
+
+                if (repositoryName != null) {
+                    metadata.add(Constants.REPOSITORY_NAME_METADATA_LABEL, repositoryName);
+                }
+            }
+            if (aCsvHeaders.hasLocalRightsStatementIndex()) {
+                final String localRightsStatement = StringUtils
+                        .trimToNull(aWork[aCsvHeaders.getLocalRightsStatementIndex()]);
+
+                if (localRightsStatement != null) {
+                    manifest.setAttribution(new Attribution(localRightsStatement));
+                }
+            }
+            if (aCsvHeaders.hasRightsContactIndex()) {
+                final String rightsContact = StringUtils.trimToNull(aWork[aCsvHeaders.getRightsContactIndex()]);
+
+                if (rightsContact != null) {
+                    metadata.add(Constants.RIGHTS_CONTACT_METADATA_LABEL, rightsContact);
+                }
+            }
+            if (metadata.getEntries().size() > 0) {
+                manifest.setMetadata(metadata);
             }
 
             // Check first for pages, then if the work itself is an image
@@ -623,7 +651,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
      */
     private void extractWorkMetadata(final String[] aRow, final CsvHeaders aHeaders,
             final Map<String, List<Collection.Manifest>> aWorksMap, final List<String[]> aWorksList)
-            throws CsvParsingException {
+                    throws CsvParsingException {
         final String id = StringUtils.trimToNull(aRow[aHeaders.getItemArkIndex()]);
         final String parentID = StringUtils.trimToNull(aRow[aHeaders.getParentArkIndex()]);
         final String label = StringUtils.trimToNull(aRow[aHeaders.getTitleIndex()]);
@@ -692,14 +720,45 @@ public class ManifestVerticle extends AbstractFesterVerticle {
         final String id = StringUtils.trimToNull(aRow[aHeaders.getItemArkIndex()]);
 
         if (id != null) {
+            final URI resourceURI = IDUtils.getResourceURI(myHost, IDUtils.getCollectionS3Key(id));
             final String label = StringUtils.trimToNull(aRow[aHeaders.getTitleIndex()]);
+            final Metadata metadata = new Metadata();
+            final String repositoryName;
+            final String localRightsStatement;
+            final String rightsContact;
+            final Collection collection;
 
-            if (label != null) {
-                final URI resourceURI = IDUtils.getResourceURI(myHost, IDUtils.getCollectionS3Key(id));
-                return new Collection(resourceURI.toString(), label);
-            } else {
+            if (label == null) {
                 throw new CsvParsingException(MessageCodes.MFS_104);
             }
+            collection = new Collection(resourceURI.toString(), label);
+
+            // Add optional properties
+            if (aHeaders.hasRepositoryNameIndex()) {
+                repositoryName = StringUtils.trimToNull(aRow[aHeaders.getRepositoryNameIndex()]);
+
+                if (repositoryName != null) {
+                    metadata.add(Constants.REPOSITORY_NAME_METADATA_LABEL, repositoryName);
+                }
+            }
+            if (aHeaders.hasLocalRightsStatementIndex()) {
+                localRightsStatement = StringUtils.trimToNull(aRow[aHeaders.getLocalRightsStatementIndex()]);
+
+                if (localRightsStatement != null) {
+                    collection.setAttribution(new Attribution(localRightsStatement));
+                }
+            }
+            if (aHeaders.hasRightsContactIndex()) {
+                rightsContact = StringUtils.trimToNull(aRow[aHeaders.getRightsContactIndex()]);
+
+                if (rightsContact != null) {
+                    metadata.add(Constants.RIGHTS_CONTACT_METADATA_LABEL, rightsContact);
+                }
+            }
+            if (metadata.getEntries().size() > 0) {
+                collection.setMetadata(metadata);
+            }
+            return collection;
         } else {
             throw new CsvParsingException(MessageCodes.MFS_106);
         }
