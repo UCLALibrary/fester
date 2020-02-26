@@ -168,6 +168,16 @@ public final class Constants {
     public static final String ID = "@id";
 
     /**
+     * The label that should be displayed along with the repository name in the manifest metadata.
+     */
+    public static final String REPOSITORY_NAME_METADATA_LABEL = "Repository";
+
+    /**
+     * The label that should be displayed along with the rights contact in the manifest metadata.
+     */
+    public static final String RIGHTS_CONTACT_METADATA_LABEL = "Rights contact";
+
+    /**
      * Private constructor for Constants class.
      */
     private Constants() {

@@ -52,6 +52,21 @@ public class CsvHeaders {
     private int myImageAccessUrlIndex = -1;
 
     /**
+     * The index position for the repository name column.
+     */
+    private int myRepositoryNameIndex = -1;
+
+    /**
+     * The index position for the local rights statement column.
+     */
+    private int myLocalRightsStatementIndex = -1;
+
+    /**
+     * The index position for the rights contact column.
+     */
+    private int myRightsContactIndex = -1;
+
+    /**
      * Create a new CSV headers object.
      *
      * @param aRow CSV header data
@@ -87,6 +102,15 @@ public class CsvHeaders {
                 case CSV.IIIF_ACCESS_URL:
                     setImageAccessUrlIndex(index);
                     break;
+                case CSV.REPOSITORY_NAME:
+                    setRepositoryNameIndex(index);
+                    break;
+                case CSV.LOCAL_RIGHTS_STATEMENT:
+                    setLocalRightsStatementIndex(index);
+                    break;
+                case CSV.RIGHTS_CONTACT:
+                    setRightsContactIndex(index);
+                    break;
                 default:
                     // Our default is to ignore things we don't care about
             }
@@ -109,7 +133,8 @@ public class CsvHeaders {
             throw new CsvParsingException(MessageCodes.MFS_032);
         }
 
-        // The viewingHint and viewingDirection columns are optional
+        // The following columns are optional:
+        // viewingHint, viewingDirection, Name.repository, Rights.statementLocal, Rights.servicesContact
     }
 
     /**
@@ -359,5 +384,89 @@ public class CsvHeaders {
      */
     public boolean hasViewingDirectionIndex() {
         return myViewingDirectionIndex != -1;
+    }
+
+    /**
+     * Gets the repository name index position.
+     *
+     * @return The repository name index position
+     */
+    public int getRepositoryNameIndex() {
+        return myRepositoryNameIndex;
+    }
+
+    /**
+     * Sets the repository name index position.
+     *
+     * @param aRepositoryNameIndex The position of the repository name header.
+     */
+    public CsvHeaders setRepositoryNameIndex(final int aRepositoryNameIndex) {
+        myRepositoryNameIndex = aRepositoryNameIndex;
+        return this;
+    }
+
+    /**
+     * Checks whether there is a repository name index position
+     *
+     * @return True if there is a repository name index position; else, false
+     */
+    public boolean hasRepositoryNameIndex() {
+        return myRepositoryNameIndex != -1;
+    }
+
+    /**
+     * Gets the local rights statement index position.
+     *
+     * @return The local rights statement index position
+     */
+    public int getLocalRightsStatementIndex() {
+        return myLocalRightsStatementIndex;
+    }
+
+    /**
+     * Sets the local rights statement index position.
+     *
+     * @param aLocalRightsStatementIndex The position of the local rights statement header.
+     */
+    public CsvHeaders setLocalRightsStatementIndex(final int aLocalRightsStatementIndex) {
+        myLocalRightsStatementIndex = aLocalRightsStatementIndex;
+        return this;
+    }
+
+    /**
+     * Checks whether there is a local rights statement index position
+     *
+     * @return True if there is a local rights statement index position; else, false
+     */
+    public boolean hasLocalRightsStatementIndex() {
+        return myLocalRightsStatementIndex != -1;
+    }
+
+    /**
+     * Gets the rights contact index position.
+     *
+     * @return The rights contact index position
+     */
+    public int getRightsContactIndex() {
+        return myRightsContactIndex;
+    }
+
+    /**
+     * Sets the rights contact index position.
+     *
+     * @param aRightsContactIndex The position of the rights contact header.
+     */
+    public CsvHeaders setRightsContactIndex(final int aRightsContactIndex) {
+        myRightsContactIndex = aRightsContactIndex;
+        return this;
+    }
+
+    /**
+     * Checks whether there is a rights contact index position
+     *
+     * @return True if there is a rights contact index position; else, false
+     */
+    public boolean hasRightsContactIndex() {
+        return myRightsContactIndex != -1;
     }
 }
