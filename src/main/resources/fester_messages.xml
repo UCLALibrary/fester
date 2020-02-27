@@ -45,7 +45,7 @@
   <entry key="MFS-029">Confirming test manifest has been deleted from: {}</entry>
   <entry key="MFS-030">Fester service confirmed to be available</entry>
   <entry key="MFS-031">Fester service is unavailable</entry>
-  <entry key="MFS-032">Uploaded CSV's &quot;IIIF Access URL&quot; header could not be found</entry>
+
   <entry key="MFS-033">Found manifest '{}' does not match expected manifest '{}'</entry>
 
   <entry key="MFS-035">Unable to DELETE manifest '{}'</entry>

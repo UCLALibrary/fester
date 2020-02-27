@@ -57,7 +57,7 @@ public class ManifestVerticleTest {
 
     private static final String WORKS_CSV = "src/test/resources/csv/{}/batch1/{}1.csv";
 
-    private static final String SINAI_WORKS_CSV = "src/test/resources/csv/{}_test_12/works.csv";
+    private static final String SINAI_WORKS_CSV = "src/test/resources/csv/sinai_test_12/works.csv";
 
     private static final String CSV_FILE_PATH = "src/test/resources/csv/{}.csv";
 
@@ -137,12 +137,11 @@ public class ManifestVerticleTest {
     @Test
     public final void testSinaiWorksManifest(final TestContext aContext) {
         final String jsonFile = myJsonFiles + getTestFilePath("ark:/21198/z16t1r0h");
-        final String path = StringUtils.format(SINAI_WORKS_CSV, SINAI);
         final JsonObject message = new JsonObject();
         final DeliveryOptions options = new DeliveryOptions();
         final Async asyncTask = aContext.async();
 
-        message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, path);
+        message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, SINAI_WORKS_CSV);
         message.put(Constants.FESTER_HOST, MANIFEST_HOST);
         options.addHeader(Constants.ACTION, Op.POST_CSV);
 
@@ -294,7 +293,7 @@ public class ManifestVerticleTest {
     public final void testPageOrder(final TestContext aContext) {
         final String foundFile = myJsonFiles + getTestFilePath("ark:/21198/z12f8rtw");
         final String expectedFile = "src/test/resources/json/pages-ordered.json";
-        final String filePath = "src/test/resources/csv/ara249.csv";
+        final String filePath = "src/test/resources/csv/sinai_del1/ara249.csv";
         final JsonObject message = new JsonObject();
         final DeliveryOptions options = new DeliveryOptions();
         final Async asyncTask = aContext.async();
