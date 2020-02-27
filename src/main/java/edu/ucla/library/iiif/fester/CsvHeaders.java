@@ -129,12 +129,10 @@ public class CsvHeaders {
             throw new CsvParsingException(MessageCodes.MFS_112);
         } else if (!hasItemSequenceIndex()) {
             throw new CsvParsingException(MessageCodes.MFS_123);
-        } else if (!hasImageAccessUrlIndex()) {
-            throw new CsvParsingException(MessageCodes.MFS_032);
         }
 
-        // The following columns are optional:
-        // viewingHint, viewingDirection, Name.repository, Rights.statementLocal, Rights.servicesContact
+        // The following columns are optional: IIIF Access URL, viewingHint, viewingDirection, Name.repository,
+        // Rights.statementLocal, Rights.servicesContact
     }
 
     /**
