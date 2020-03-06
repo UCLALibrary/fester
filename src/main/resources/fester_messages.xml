@@ -22,9 +22,9 @@
   <entry key="MFS-006">Putting '{}' (test object) into S3 bucket: {}</entry>
   <entry key="MFS-007">S3 client credentials: {} | {}</entry>
   <entry key="MFS-008">Test GetManifestHandler with a test manifest: {}</entry>
-  <entry key="MFS-009">Manifest '{}' not found</entry>
+  <entry key="MFS-009">Manifest '{}' not found [{}: {}]</entry>
   <entry key="MFS-010">Internal server error while trying to retrieve manifest: {}</entry>
-  <entry key="MFS-011">Unexpected response code while trying to retrieve manifest: {}</entry>
+  <entry key="MFS-011">Unexpected response code while trying to retrieve manifest: {} [{}: {}]</entry>
   <entry key="MFS-012">Test DeleteManifestHandler with a test manifest: {}</entry>
   <entry key="MFS-013">Unexpected S3 response code: {} [manifest: {}]</entry>
   <entry key="MFS-014">Internal server error while trying to delete manifest: {}</entry>
@@ -45,9 +45,9 @@
   <entry key="MFS-029">Confirming test manifest has been deleted from: {}</entry>
   <entry key="MFS-030">Fester service confirmed to be available</entry>
   <entry key="MFS-031">Fester service is unavailable</entry>
-
+  <entry key="MFS-032">Dockerfile with variables populated: {}</entry>
   <entry key="MFS-033">Found manifest '{}' does not match expected manifest '{}'</entry>
-
+  <entry key="MFS-034">S3 endpoint to be used: {}</entry>
   <entry key="MFS-035">Unable to DELETE manifest '{}'</entry>
   <entry key="MFS-036">Manifest '{}' found when it should have been deleted</entry>
   <entry key="MFS-037">Not processed. The submission is missing a CSV file.</entry>
@@ -92,6 +92,11 @@
   <entry key="MFS-076">The '{}' verticle's ID [{}] has been registered in the application's shared data map</entry>
   <entry key="MFS-077">Verticle deployment key not found in shared data map: {}</entry>
   <entry key="MFS-078">Image for w/h lookup wasn't found; trying to find a sibling image</entry>
+  <entry key="MFS-079">LocalStack S3 endpoint: {}</entry>
+  <entry key="MFS-080">LocalStack S3 signing region: {}</entry>
+  <entry key="MFS-081">LocalStack S3 access key: {}</entry>
+  <entry key="MFS-082">LocalStack S3 secret key: {}</entry>
+  <entry key="MFS-083">Cleaning up S3 testing resource: {}</entry>
 
   <entry key="MFS-100">Stopping the {} verticle [id: {}]</entry>
   <entry key="MFS-101">Getting message consumer for: {}</entry>

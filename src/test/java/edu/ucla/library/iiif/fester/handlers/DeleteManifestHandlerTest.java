@@ -4,8 +4,10 @@ package edu.ucla.library.iiif.fester.handlers;
 import java.io.IOException;
 
 import org.junit.Test;
+
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
+
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
@@ -22,6 +24,7 @@ public class DeleteManifestHandlerTest extends AbstractFesterHandlerTest {
      * Test the DeleteManifestHandler.
      *
      * @param aContext A testing context
+     * @throws IOException If there is trouble reading a manifest
      */
     @Test
     @SuppressWarnings("deprecation")

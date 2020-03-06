@@ -52,11 +52,6 @@ public class PostCsvHandlerTest extends AbstractFesterHandlerTest {
 
     private static final String HOST = "http://0.0.0.0:{}";
 
-    /**
-     * Test tear down.
-     *
-     * @param aContext A testing context
-     */
     @Override
     @After
     public void tearDown(final TestContext aContext) {
@@ -67,6 +62,8 @@ public class PostCsvHandlerTest extends AbstractFesterHandlerTest {
      * Tests posting a CSV to the PostCollectionHandler.
      *
      * @param aContext A test context
+     * @throws IOException If there is trouble reading a manifest
+     * @throws CsvException If there is trouble reading the CSV data
      */
     @Test
     public final void testFullCSV(final TestContext aContext) throws CsvException, IOException {
@@ -117,6 +114,8 @@ public class PostCsvHandlerTest extends AbstractFesterHandlerTest {
      * Tests posting a CSV to the PostCollectionHandler with a supplied IIIF host.
      *
      * @param aContext A test context
+     * @throws IOException If there is trouble reading a manifest
+     * @throws CsvException If there is trouble reading the CSV data
      */
     @Test
     public final void testFullCsvWithIiifHost(final TestContext aContext) throws IOException, CsvException {
@@ -168,6 +167,8 @@ public class PostCsvHandlerTest extends AbstractFesterHandlerTest {
      * Tests posting a Collection + Works CSV to the PostCollectionHandler.
      *
      * @param aContext A test context
+     * @throws IOException If there is trouble reading a manifest
+     * @throws CsvException If there is trouble reading the CSV data
      */
     @Test
     public final void testCollectionWorksCSV(final TestContext aContext) throws IOException, CsvException {
@@ -218,6 +219,8 @@ public class PostCsvHandlerTest extends AbstractFesterHandlerTest {
      * Tests posting a CSV to the PostCollectionHandler.
      *
      * @param aContext A test context
+     * @throws IOException If there is trouble reading a manifest
+     * @throws CsvException If there is trouble reading the CSV data
      */
     @Test
     public final void testWorksCSV(final TestContext aContext) throws IOException, CsvException {
@@ -268,6 +271,8 @@ public class PostCsvHandlerTest extends AbstractFesterHandlerTest {
      * Ensures that uploaded files are deleted.
      *
      * @param aContext A test context
+     * @throws IOException If there is trouble reading a manifest
+     * @throws CsvException If there is trouble reading the CSV data
      */
     @Test
     public final void testDeleteUploadedFilesOnEnd(final TestContext aContext) throws IOException, CsvException {
@@ -293,10 +298,10 @@ public class PostCsvHandlerTest extends AbstractFesterHandlerTest {
                     final Buffer actual = postResponse.body();
                     final String contentType = postResponse.getHeader(Constants.CONTENT_TYPE);
                     // Uploaded file is named with a UUID
-                    final String uploadedFilePathRegex = "(" + BodyHandler.DEFAULT_UPLOADS_DIRECTORY + "\\/"
-                            + "[0-9a-f\\-]+" + ")";
-                    final Matcher uploadedFilePathMatcher = Pattern.compile(uploadedFilePathRegex)
-                            .matcher(postStatusMessage);
+                    final String uploadedFilePathRegex = "(" + BodyHandler.DEFAULT_UPLOADS_DIRECTORY + "\\/" +
+                            "[0-9a-f\\-]+" + ")";
+                    final Matcher uploadedFilePathMatcher = Pattern.compile(uploadedFilePathRegex).matcher(
+                            postStatusMessage);
 
                     // Check that what we get back is the same as what we sent
                     check(aContext, LinkUtils.addManifests(host, expected), actual);
@@ -313,7 +318,7 @@ public class PostCsvHandlerTest extends AbstractFesterHandlerTest {
                             final boolean isDeleted = !myVertx.fileSystem().existsBlocking(uploadedFilePath);
                             try {
                                 aContext.assertTrue(isDeleted);
-                            } catch (AssertionError details) {
+                            } catch (final AssertionError details) {
                                 aContext.fail(LOGGER.getMessage(MessageCodes.MFS_134, uploadedFilePath, timerDelay));
                             }
 
@@ -322,8 +327,8 @@ public class PostCsvHandlerTest extends AbstractFesterHandlerTest {
                             }
                         });
                     } else {
-                        aContext.fail(
-                                LOGGER.getMessage(MessageCodes.MFS_135, uploadedFilePathRegex, postStatusMessage));
+                        aContext.fail(LOGGER.getMessage(MessageCodes.MFS_135, uploadedFilePathRegex,
+                                postStatusMessage));
                     }
                 } else {
                     aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, postStatusCode, postStatusMessage));

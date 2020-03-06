@@ -17,6 +17,11 @@ public final class TestConstants {
     public static final String HTTP_PORT = "http.port";
 
     /**
+     * The name of the Fester container image.
+     */
+    public static final String CONTAINER_IMAGE = "fester.container.tag";
+
+    /**
      * The IP for an unspecified host.
      */
     @SuppressWarnings("PMD.AvoidUsingHardCodedIP")

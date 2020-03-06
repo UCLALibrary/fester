@@ -31,6 +31,37 @@ To generate the site's documentation, run:
 
 This will generate the documentation in the `target/site` directory.
 
+## Configuring the Tests
+
+The project contains unit, functional, and integration tests, with controls on how to control which tests are run. In order to run the functional and integration tests, the build machine must have a working Docker environment. Setting up Docker on your machine will depend on the type of machine you have (e.g., Linux, Mac, or Windows). Docker's [documentation](https://docs.docker.com/get-docker/) should be consulted on how to do this.
+
+When running the build using the 'package' phase (as described above), only the unit tests are run. If you want to run all the possible tests, the project can be built with:
+
+    mvn integration-test
+
+or
+
+    mvn install
+
+This will run the functional and integration tests, in addition to the unit tests. If you want to skip a particular type of test but still run the 'install' phase, you can use one of the following arguments to your Maven command:
+
+    -DskipUTs
+    -DskipITs
+    -DskipFTs
+
+The first will skip the unit tests; the second will skip the integration tests; and, the third will skip the functional tests. They can also be combined so that two types of tests are skipped. For instance, only the functional tests will be run if the following is typed:
+
+    mvn install -DskipUTs -DskipITs
+
+For what it's worth, the difference between the 'install' phase and the 'integration-test' phase is just that the install phase installs the built Jar file into your machine's local Maven repository.
+
+When running the integration and functional tests, it may be desirable to turn on logging for the containers that run the tests. This can be useful in debugging test failures that happen within the container. To do this, supply one (or both) of the following arguments to your build:
+
+    -DseeLogsFT
+    -DseeLogsIT
+
+This will tunnel the container's logs (including the application within the container's logs) to Maven's logging mechanism so that you will be able to see what's happening in the container as the tests are being run against it.
+
 ## Running the Application for Development
 
 You can run a development instance of Fester by typing the following within the project root:

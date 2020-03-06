@@ -1,0 +1,39 @@
+
+FROM ubuntu:19.10
+
+# Store some project metadata in the Docker image
+LABEL ContainerName=${project.name} ContainerSourceCode=${project.url}
+
+# Update packages and install tools
+#  Removing /var/lib/apt/lists/* prevents using `apt` unless you do `apt update` first
+RUN apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -qq --no-install-recommends \
+    openjdk-11-jre-headless=11.0.6+10-1ubuntu1~19.10.1 \
+    python=2.7.17-1 \
+    < /dev/null > /dev/null && \
+    rm -rf /var/lib/apt/lists/*
+
+# Run non privileged
+RUN adduser --system ${project.artifactId}
+
+WORKDIR /usr/local/${project.artifactId}
+COPY maven/${project.artifactId}-${project.version}.jar /usr/local/${project.artifactId}/
+
+COPY docker-entrypoint.sh /usr/local/bin/
+COPY configs/${project.artifactId}.properties.tmpl /etc/${project.artifactId}.properties.tmpl
+COPY configs/${project.artifactId}.properties.default /etc/${project.artifactId}.properties.default
+
+RUN mkdir -p /var/log/${project.artifactId} /var/cache/${project.artifactId} \
+    /usr/local/${project.artifactId}/file-uploads \
+ && touch /etc/${project.artifactId}.properties \
+ && chown -R ${project.artifactId} /var/log/${project.artifactId} /var/cache/${project.artifactId} \
+    /usr/local/${project.artifactId}/file-uploads /etc/${project.artifactId}.properties \
+    /usr/local/bin/docker-entrypoint.sh
+
+USER ${project.artifactId}
+ENTRYPOINT ["docker-entrypoint.sh"]
+ENV CACHE_DIR="-Dvertx.cacheDirBase=/tmp"
+ENV CONFIG_FILE="-Dvertx-config-path=/etc/${project.artifactId}.properties"
+ENV JAR_PATH="/usr/local/${project.artifactId}/${project.artifactId}-${project.version}.jar"
+CMD ["sh", "-c", "java $CACHE_DIR $CONFIG_FILE -Xmx2g -jar $JAR_PATH"]
+
+EXPOSE ${fester.http.port}

@@ -1,6 +1,8 @@
 
 package edu.ucla.library.iiif.fester.verticles;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 
@@ -26,6 +28,7 @@ public class MainVerticleTest {
      * Test set up.
      *
      * @param aContext A testing context
+     * @throws IOException If there is trouble getting a port
      */
     @Before
     public void setUp(final TestContext aContext) throws IOException {
@@ -65,15 +68,9 @@ public class MainVerticleTest {
 
         // Testing the path defined in our OpenAPI YAML file
         myVertx.createHttpClient().getNow(port, "0.0.0.0", "/status/fester", response -> {
-            final int statusCode = response.statusCode();
+            assertEquals(200, response.statusCode());
 
-            if (statusCode == 200) {
-                response.bodyHandler(body -> {
-                    aContext.assertEquals("Hello", body.getString(0, body.length()));
-                    async.complete();
-                });
-            } else {
-                aContext.fail("Failed status code: " + statusCode);
+            if (!async.isCompleted()) {
                 async.complete();
             }
         });

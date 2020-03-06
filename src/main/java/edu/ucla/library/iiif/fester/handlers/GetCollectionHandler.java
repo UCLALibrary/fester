@@ -1,12 +1,14 @@
+
 package edu.ucla.library.iiif.fester.handlers;
+
+import info.freelibrary.util.Logger;
+import info.freelibrary.util.LoggerFactory;
 
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.verticles.S3BucketVerticle;
-import info.freelibrary.util.Logger;
-import info.freelibrary.util.LoggerFactory;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
@@ -50,7 +52,8 @@ public class GetCollectionHandler extends AbstractFesterHandler implements Handl
             } else {
                 final Throwable aThrowable = send.cause();
                 final String exceptionMessage = aThrowable.getMessage();
-                final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_009, collectionName);
+                final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_009, collectionName,
+                        HTTP.INTERNAL_SERVER_ERROR, exceptionMessage);
 
                 LOGGER.error(aThrowable, errorMessage);
 

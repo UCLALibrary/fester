@@ -25,6 +25,20 @@
     <appender-ref ref="STDOUT" />
   </logger>
 
+  <!-- Loggers for the testcontainers.org tool -->
+  <logger name="org.testcontainers.dockerclient.DockerClientProviderStrategy" level="WARN">
+    <appender-ref ref="STDOUT" />
+  </logger>
+  <logger name="org.testcontainers.dockerclient.EnvironmentAndSystemPropertyClientProviderStrategy" level="WARN">
+    <appender-ref ref="STDOUT" />
+  </logger>
+  <logger name="🐳 [alpine/socat:latest]" level="WARN">
+    <appender-ref ref="STDOUT" />
+  </logger><!-- 
+  <logger name="🐳 [localstack/localstack:0.9.4]" level="WARN">
+    <appender-ref ref="STDOUT" />
+  </logger>-->
+
   <root level="INFO">
     <appender-ref ref="STDOUT" />
   </root>

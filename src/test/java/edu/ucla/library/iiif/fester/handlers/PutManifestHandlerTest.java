@@ -7,10 +7,12 @@ import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import com.amazonaws.SdkClientException;
 
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
+
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
@@ -69,6 +71,7 @@ public class PutManifestHandlerTest extends AbstractFesterHandlerTest {
      * Test the PutManifestHandler.
      *
      * @param aContext A testing context
+     * @throws IOException If there is trouble reading the manifest
      */
     @Test
     @SuppressWarnings("deprecation")
@@ -104,6 +107,7 @@ public class PutManifestHandlerTest extends AbstractFesterHandlerTest {
      * Test the PutManifestHandler.
      *
      * @param aContext A testing context
+     * @throws IOException If there is trouble reading the manifest
      */
     @Test
     @SuppressWarnings("deprecation")
@@ -141,6 +145,7 @@ public class PutManifestHandlerTest extends AbstractFesterHandlerTest {
      * Test the PutManifestHandler.
      *
      * @param aContext A testing context
+     * @throws IOException If there is trouble reading the manifest
      */
     @Test
     @SuppressWarnings("deprecation")
