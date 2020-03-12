@@ -83,6 +83,12 @@ For example, if you wish to run a Locust test against a dev instance on your own
 
     locust --host=http://localhost:8888
 
+## Git Hooks
+
+To prevent accidentally pushing commits that would cause the Travis CI build to fail, you can configure your Git client to use a pre-push hook:
+
+    ln -s ../../src/test/scripts/git-hooks/pre-push .git/hooks
+
 ## Contact
 
 We use an internal ticketing system, but we've left the GitHub [issues](https://github.com/UCLALibrary/fester/issues) open in case you'd like to file a ticket or make a suggestion. You can also contact Kevin S. Clarke at <a href="mailto:ksclarke@ksclarke.io">ksclarke@ksclarke.io</a> if you have a question about the project.
