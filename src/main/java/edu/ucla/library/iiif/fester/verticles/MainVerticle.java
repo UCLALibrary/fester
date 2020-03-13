@@ -90,14 +90,22 @@ public class MainVerticle extends AbstractVerticle {
                             final StaticHandler staticHandler = StaticHandler.create().setWebRoot("webroot");
 
                             // Make sure uploaded files get deleted
-                            factory.addHandlerByOperationId(Op.POST_CSV, postCsvHandler)
-                                    .setBodyHandler(BodyHandler.create().setDeleteUploadedFilesOnEnd(true));
+                            factory.addHandlerByOperationId(Op.POST_CSV, postCsvHandler).setBodyHandler(BodyHandler
+                                    .create().setDeleteUploadedFilesOnEnd(true));
 
                             // After that, we can get a router that's been configured by our OpenAPI spec
                             router = factory.getRouter();
 
-                            // Serve Fester documentation
-                            router.get("/docs/fester*").handler(staticHandler.setIndexPage("index.html"));
+                            // Handle some simple, temporary redirecting
+                            router.getWithRegex("/fester/?").last().handler(event -> {
+                                event.reroute("/fester/docs");
+                            });
+                            router.getWithRegex("/fester/upload/?").last().handler(event -> {
+                                event.reroute("/fester/upload/csv");
+                            });
+
+                            // Serve Fester HTML pages
+                            router.get("/fester*").handler(staticHandler.setIndexPage("index.html"));
 
                             // If an incoming request doesn't match one of our spec operations, it's treated as a 404;
                             // catch these generic 404s with the handler below and return more specific response codes
