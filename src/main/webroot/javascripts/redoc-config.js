@@ -11,7 +11,7 @@
  *  #FF00A5 (pink)
  */
 
-Redoc.init('/docs/fester/fester.yaml', {
+Redoc.init('/fester/fester.yaml', {
   theme : {
     colors : {
       primary : {

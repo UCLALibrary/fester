@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<title>Fester CSV Upload</title>
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<link rel="stylesheet" href="/fester/css/bootstrap.min.css">
+<link rel="stylesheet" href="/fester/css/fester-custom.css">
+<link rel="stylesheet" href="/fester/upload/css/upload-custom.css">
+
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-md bg-custom-grey navbar-dark bg-dark fixed-top">
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+      data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false"
+      aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <a class="navbar-brand" href="/fester">Fester</a>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <div class="navbar-nav">
+        <a class="nav-item nav-link active" href="/fester/upload/csv">CSV Upload</a> <a class="nav-item nav-link active"
+          href="/fester/docs">API Documentation</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container-fluid">
+    <h1 id="csv-upload-title">CSV Upload</h1>
+    <p>The CSV upload form can be used to upload CSV files for processing by the Fester application.</p>
+    <div class="row csv-upload-form">
+      <div class="col-sm-3 offset-sm-1">
+        <div class="info-form">
+          <form class="form-inlin justify-content-center" action="/collections" method="post"
+            enctype="multipart/form-data">
+            <div class="form-group">
+              <label for="csv-file">File to upload:</label> <input type="file" name="csv-file" id="csv-file">
+            </div>
+            <div class="form-group">
+              <label for="iiif-host">IIIF Host:</label> <input type="text" value="https://iiif.library.ucla.edu"
+                name="iiif-host" id="iiif-host" onfocus="this.value=''" />
+              <div class="infotext">Use the default IIIF URL (https://iiif.library.ucla.edu) or enter the base URL
+                for a different IIIF server.</div>
+            </div>
+            <div class="form-group">
+              <input type="submit" value="Upload" name="submit">
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="col-sm-4 offset-sm-1">
+        <h4>Instructions</h4>
+        <p>
+          To start a batch job, upload a CSV file (like one of those found in the <a
+            href="https://github.com/UCLALibrary/eureka/">Eureka</a> GitHub repository). If you would like image
+          dimensions looked up in a different IIIF server from the one supplied in the "IIIF Host" box, be sure to put
+          that server's base URL in the text box.
+        </p>
+        <p>If most cases, with the exception being the Sinai CSVs, you are probably okay with just using the default
+          value.</p>
+        <p>The CSV columns that are required by the Fester service are:</p>
+        <ul>
+          <li><code>Item ARK</code></li>
+          <li><code>Parent ARK</code></li>
+          <li><code>Object Type</code></li>
+          <li><code>Title</code></li>
+          <li><code>File Name</code></li>
+          <li><code>Item Sequence</code></li>
+        </ul>
+        <p>There are also some optional columns that will be used if they're found:</p>
+        <ul>
+          <li><code>viewingHint</code></li>
+          <li><code>viewingDirection</code></li>
+          <li><code>Name.repository</code></li>
+          <li><code>Rights.statementLocal</code></li>
+          <li><code>Rights.servicesContract</code></li>
+          <li><code>IIIF Access URL</code></li>
+        </ul>
+        <br />
+        <h4>Problems?</h4>
+        <p>
+          It's possible to submit a job that takes longer than the timeout on your browser allows. For really large CSV
+          submissions, you might need to use the <a
+            href="https://github.com/UCLALibrary/fester/tree/master/src/main/scripts/festerize">Festerize</a> script,
+          which does not have a timeout.
+        </p>
+        <p>
+          If you run into issues when using this upload form, please feel free to contact us in the
+          <code>#softwaredev-services</code>
+          Slack channel. We will be glad to troubleshoot any problems that you may encounter. Thanks!
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+</body>
+
+</html>

@@ -41,6 +41,9 @@ Once run, the service can be verified/accessed at [http://localhost:8888/status/
 
 ## Debugging with Eclipse IDE
 
+You can run a development instance of Fester with debugging turned on by typing the following within the project root:
+
+    mvn -Pdebug test
 Development instances are configured to accept remote debugger connections on port `5555`.
 
 To debug Fester with [Eclipse IDE](https://www.eclipse.org/eclipseide/):
