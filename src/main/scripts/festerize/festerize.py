@@ -10,96 +10,81 @@ import pathlib
 
 @click.command()
 @click.argument('src', required=True, nargs=-1)
-@click.option('--server', default='https://iiif.library.ucla.edu',
-              help='URL the Fester service we are using. Default: https://iiif.library.ucla.edu')
-@click.option('--endpoint', default='/collections', help='Service endpoint to use. Default: /collections')
-@click.option('--out', default='output', help='Folder to store the results of festerizing. Default: output')
-@click.option('--iiifhost', default='undefined', help="IIIF-host this collection uses. Optional, no default.", )
-@click.option('--loglevel', default='INFO', help='Log level for Festerizer logs. Default: INFO, can also be DEBUG or ERROR')
+@click.option('--server', default='https://iiif.library.ucla.edu', show_default=True,
+              help='URL of the IIIF manifest service to send the manifests to')
+@click.option('--endpoint', default='/collections', show_default=True, help='API endpoint for CSV uploading')
+@click.option('--out', default='output', show_default=True, help='local directory to put the updated CSV')
+@click.option('--iiifhost', default=None, help='IIIF image server URL (optional)', )
+@click.option('--loglevel', type=click.Choice(['INFO', 'DEBUG', 'ERROR']), default='INFO', show_default=True)
 def cli(src, server, endpoint, out, iiifhost, loglevel):
-    """FESTERIZE uploads CSV files to the UCLA Library Fester service.
+    """Uploads CSV files to the UCLA Library IIIF manifest service.
+
+    SRC is either a path to a CSV file or a Unix-style glob like '*.csv'.
     """
-    request_url = server + endpoint
-    status_url = server + "/fester/status"
-
-    # get ready to log some stuff
-    started = datetime.now()
-    right_now = started.strftime("%Y-%m-%d--%H-%M-%S")
-    logfile_name = "%s.log" % (right_now)
-    logfile_path = "%s%s%s" % (out, os.sep, logfile_name)
-
-    # if the output folder does not exist, create it
     if not os.path.exists(out):
-        click.echo("Output directory (%s) not found, creating it." % (out))
+        click.echo('Output directory {} not found, creating it.'.format(out))
         os.makedirs(out)
     else:
-        # alert the user, ask if they want to continue?
-        click.confirm("Output directory (%s) found, should we continue? YES might overwrite any existing output files." % (out), abort=True)
+        click.confirm('Output directory {} found, should we continue? YES might overwrite any existing output files.'.format(out), abort=True)
 
-    festerizer_loglevel = loglevel
+    # Logging setup.
+    started = datetime.now()
+    logfile_path = os.path.join(out, '{}.log'.format(started.strftime('%Y-%m-%d--%H-%M-%S')))
+    logging.basicConfig(filename=logfile_path, filemode='w', level=loglevel, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-    # start a log file in the out folder
-    logging.basicConfig(filename=logfile_path, filemode='w', level=festerizer_loglevel, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    logging.info('STARTING at {}...'.format(started.strftime('%Y-%m-%d %H:%M:%S')))
 
-    # log our start time
-    logging.info("FESTERIZER STARTED at %s..." % (started.strftime("%Y-%m-%d %H:%M:%S")))
-
-    # If Fester is unavailable, abort
+    # If the IIIF manifest service is unavailable, abort.
     try:
-        s = requests.get(status_url)
+        s = requests.get(server + '/fester/status')
+        s.raise_for_status()
     except requests.exceptions.RequestException as e:
-        logging.error("FESTERIZER service status unavailable at %s" % (status_url))
-        click.echo(e)
-        sys.exit("FESTERIZER service status unavailable, aborting.")
+        error_msg = 'IIIF manifest service unavailable: {}'.format(str(e))
+        click.echo(error_msg)
+        logging.error(error_msg)
+        sys.exit(1)
 
-    if s.status_code != 200:
-        logging.error("FESTERIZER service status unusable at %s" % (status_url))
-        sys.exit("FESTERIZER service status unusable, aborting.")
+    request_url = server + endpoint
 
-    # LET'S DO THIS!
-    for fp in src:
+    for pathstring in src:
 
-        # derive a filename (fn) from provided filepath (fp)
-        filePath = pathlib.Path(fp)
-        fn = filePath.name
+        csv_filepath = pathlib.Path(pathstring)
+        csv_filename = csv_filepath.name
 
-        if not filePath.exists():
-            click.echo("Skipping %s: file does not exist" % (fn))
-            logging.error("%s does not exist, skipping" % (fn))
+        if not csv_filepath.exists():
+            error_msg = 'File {} does not exist, skipping'.format(csv_filename)
+            click.echo(error_msg)
+            logging.error(error_msg)
 
-        # only work for .csv files
-        elif fn.endswith('.csv'):
+        # Only work with CSV files that have the proper extension.
+        elif csv_filepath.suffix == '.csv':
 
-            click.echo("Uploading %s to %s" % (fn, request_url))
+            click.echo('Uploading {} to {}'.format(csv_filename, request_url))
 
-            # upload the file via a post
-            files = {'file': (fp, open(fp, 'rb'), 'text/csv', {'Expires': '0'})}
-
-            # handle the iiifhost option
-            if iiifhost == 'undefined':
-                r = requests.post(request_url, files=files )
-            else:
+            # Upload the file.
+            files = {'file': (pathstring, open(pathstring, 'rb'), 'text/csv', {'Expires': '0'})}
+            payload = None
+            if iiifhost is not None:
                 payload = [('iiif-host', iiifhost)]
-                r = requests.post(request_url, files=files, data=payload)
+            r = requests.post(request_url, files=files, data=payload)
 
+            # Handle the response.
             if r.status_code == 201 :
-                click.echo("  SUCCESS! (status code %s)" % (r.status_code))
-                # For now, let's assume the response content is a binary file
-                # and also assume that this file is a CSV, we will save it
-                # in the out folder, with the same fn we sent
-                out_file = click.open_file("%s%s%s" %(out, os.sep, fn), "wb")
+                click.echo('Uploaded {}'.format(csv_filename))
+
+                # Save it in the out directory with the same filename
+                out_file = click.open_file(os.path.join(out, csv_filename), 'wb')
                 out_file.write(r.content)
             else:
-                click.echo("  ERROR! (status code %s)" %(r.status_code))
-                logging.error("%s failed to load, status code %s" % (fn, r.status_code))
+                error_msg = 'Failed to upload {}: {}'.format(csv_filename, r.status_code)
+                click.echo(error_msg)
+                logging.error(error_msg)
                 logging.error(r.text)
                 logging.error('--------------------------------------------')
 
-        # skip any files that do no have an extension of .csv
         else:
-            click.echo("Skipping %s: not a CSV" % (fn))
-            logging.error("%s is not a CSV, skipping" % (fn))
+            error_msg= 'File {} is not a CSV, skipping'.format(csv_filename)
+            click.echo(error_msg)
+            logging.error()
 
-# log our end time
-    ended = datetime.now()
-    logging.info("FESTERIZER ENDED at %s..." % (ended.strftime("%Y-%m-%d %H:%M:%S")))
+    logging.info('DONE at {}.'.format(datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
