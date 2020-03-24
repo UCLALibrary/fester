@@ -11,6 +11,7 @@ import info.freelibrary.util.StringUtils;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
+import edu.ucla.library.iiif.fester.utils.IDUtils;
 import edu.ucla.library.iiif.fester.utils.TestUtils;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
@@ -47,7 +48,7 @@ public class GetManifestFIT {
         @Test
         public void testGetManifest(final TestContext aContext) {
             final String testData = TestUtils.getTestData(VERTX_INSTANCE, TEST_FILE_PATH);
-            final String s3ManifestKey = TestUtils.getWorkS3Key(myID);
+            final String s3ManifestKey = IDUtils.getWorkS3Key(myID);
             final String apiPath = StringUtils.format(API_PATH, myID);
             final Async asyncTask = aContext.async();
 
@@ -121,7 +122,7 @@ public class GetManifestFIT {
         @Test
         public void testGetManifest(final TestContext aContext) {
             final String testData = TestUtils.getTestData(VERTX_INSTANCE, TEST_FILE_PATH);
-            final String s3ManifestKey = TestUtils.getWorkS3Key(myID);
+            final String s3ManifestKey = IDUtils.getWorkS3Key(myID);
             final String apiPath = StringUtils.format(API_PATH, myID);
             final Async asyncTask = aContext.async();
 

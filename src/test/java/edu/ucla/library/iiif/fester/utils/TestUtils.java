@@ -25,26 +25,6 @@ public final class TestUtils {
     }
 
     /**
-     * Gets an S3 key for the supplied work ID.
-     *
-     * @param aID A work ID
-     * @return An S3 key
-     */
-    public static String getWorkS3Key(final String aID) {
-        return "works/" + aID + JSON_EXT;
-    }
-
-    /**
-     * Gets an S3 key for the supplied collection ID.
-     *
-     * @param aID A collection ID
-     * @return An S3 key
-     */
-    public static String getCollS3Key(final String aID) {
-        return "collections/" + aID + JSON_EXT;
-    }
-
-    /**
      * Gets test data from the test resources directory.
      *
      * @param aVertx A Vert.x instance
