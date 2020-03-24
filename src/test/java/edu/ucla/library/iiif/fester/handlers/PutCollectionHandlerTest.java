@@ -1,3 +1,4 @@
+
 package edu.ucla.library.iiif.fester.handlers;
 
 import java.io.IOException;
@@ -10,13 +11,14 @@ import org.junit.Test;
 
 import com.amazonaws.SdkClientException;
 
+import info.freelibrary.util.Logger;
+import info.freelibrary.util.LoggerFactory;
+
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
-import info.freelibrary.util.Logger;
-import info.freelibrary.util.LoggerFactory;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.RequestOptions;
 import io.vertx.core.json.JsonObject;
@@ -31,11 +33,6 @@ public class PutCollectionHandlerTest extends AbstractFesterHandlerTest {
 
     private String myPutCollectionS3Key;
 
-    /**
-     * Test set up.
-     *
-     * @param aContext A testing context
-     */
     @Override
     @Before
     public void setUp(final TestContext aContext) throws IOException {
@@ -47,11 +44,6 @@ public class PutCollectionHandlerTest extends AbstractFesterHandlerTest {
         myPutCollectionS3Key = IDUtils.getCollectionS3Key(myPutCollectionID);
     }
 
-    /**
-     * Test tear down.
-     *
-     * @param aContext A testing context
-     */
     @Override
     @After
     public void tearDown(final TestContext aContext) {
@@ -71,6 +63,7 @@ public class PutCollectionHandlerTest extends AbstractFesterHandlerTest {
      * Test the PutCollectionHandler.
      *
      * @param aContext A testing context
+     * @throws IOException If there is trouble reading a manifest
      */
     @Test
     @SuppressWarnings("deprecation")
@@ -118,6 +111,7 @@ public class PutCollectionHandlerTest extends AbstractFesterHandlerTest {
      * Test the PutCollectionHandler.
      *
      * @param aContext A testing context
+     * @throws IOException If there is trouble reading a manifest
      */
     @Test
     @SuppressWarnings("deprecation")
@@ -165,6 +159,7 @@ public class PutCollectionHandlerTest extends AbstractFesterHandlerTest {
      * Test the PutCollectionHandler.
      *
      * @param aContext A testing context
+     * @throws IOException If there is trouble reading a manifest
      */
     @Test
     @SuppressWarnings("deprecation")

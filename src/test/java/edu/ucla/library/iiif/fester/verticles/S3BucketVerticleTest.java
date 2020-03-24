@@ -180,6 +180,7 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
      * Tests getting an S3 collection.
      *
      * @param aContext A testing environment
+     * @throws IOException If there is trouble reading a manifest
      */
     @Test
     public final void testGetS3Collection(final TestContext aContext) throws IOException {

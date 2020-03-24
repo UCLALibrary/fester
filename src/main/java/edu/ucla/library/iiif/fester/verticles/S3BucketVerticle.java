@@ -2,6 +2,7 @@
 package edu.ucla.library.iiif.fester.verticles;
 
 import java.net.URI;
+
 import com.amazonaws.regions.RegionUtils;
 
 import info.freelibrary.util.Logger;
@@ -53,8 +54,10 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
             final String s3AccessKey = config.getString(Config.S3_ACCESS_KEY);
             final String s3SecretKey = config.getString(Config.S3_SECRET_KEY);
             final String s3RegionName = config.getString(Config.S3_REGION);
-            final String s3Region = RegionUtils.getRegion(s3RegionName).getServiceEndpoint("s3");
-            final HttpClientOptions httpOptions = new HttpClientOptions().setDefaultHost(s3Region);
+            final String s3Host = RegionUtils.getRegion(s3RegionName).getServiceEndpoint("s3");
+            final HttpClientOptions httpOptions = new HttpClientOptions().setDefaultHost(s3Host);
+
+            LOGGER.debug(MessageCodes.MFS_034, s3Host);
 
             myS3Client = new S3Client(getVertx(), s3AccessKey, s3SecretKey, httpOptions);
             myS3Bucket = config.getString(Config.S3_BUCKET);

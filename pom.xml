@@ -5,7 +5,7 @@
 
   <artifactId>fester</artifactId>
   <version>0.6.0-SNAPSHOT</version>
-  <name>IIIF Fester</name>
+  <name>Fester</name>
   <description>A read/write interface for storing and retrieving IIIF manifests</description>
   <url>https://github.com/uclalibrary/fester</url>
 
@@ -40,6 +40,7 @@
       <id>hardyoyo</id>
       <name>Hardy Pottinger</name>
       <email>hardy.pottinger@gmail.com</email>
+      <timezone>America/Chicago</timezone>
     </developer>
     <developer>
       <id>cachemeoutside</id>
@@ -47,6 +48,7 @@
       <email>avuong@cachemeoutside.io</email>
       <organization>UCLA Library</organization>
       <organizationUrl>http://github.com/uclalibrary</organizationUrl>
+      <timezone>America/Los_Angeles</timezone>
     </developer>
     <developer>
       <id>markmatney</id>
@@ -59,24 +61,28 @@
   </developers>
 
   <properties>
-    <vertx.version>3.8.3</vertx.version>
+    <vertx.version>3.8.5</vertx.version>
     <opencsv.version>5.0</opencsv.version>
     <slf4j.ext.version>1.7.26</slf4j.ext.version>
-    <aws.sdk.version>1.11.478</aws.sdk.version>
     <commons.lang.version>3.9</commons.lang.version>
     <freelib.utils.version>1.0.2</freelib.utils.version>
     <freelib.maven.version>0.0.3</freelib.maven.version>
-    <jiiify.presentation.version>0.2.0</jiiify.presentation.version>
+    <vertx.super.s3.version>1.2.1</vertx.super.s3.version>
+    <jiiify.presentation.version>0.3.0</jiiify.presentation.version>
+
+    <!-- Versions of tools used for testing -->
+    <localstack.version>1.13.0</localstack.version>
+    <aws.sdk.version>1.11.478</aws.sdk.version>
+    <testcontainers.version>1.12.5</testcontainers.version>
+    <jcip.annotations.version>1.0-1</jcip.annotations.version>
 
     <!-- Build plug-in versions -->
     <shade.plugin.version>2.4.3</shade.plugin.version>
     <netty.epoll.version>4.1.37.Final</netty.epoll.version>
     <vertx.plugin.version>1.0.18</vertx.plugin.version>
     <codacy.plugin.version>1.0.2</codacy.plugin.version>
-    <vertx.super.s3.version>1.2.1</vertx.super.s3.version>
-    <jcip.annotations.version>1.0-1</jcip.annotations.version>
-    <maven.failsafe.plugin.version>2.18.1</maven.failsafe.plugin.version>
     <xml.maven.plugin.version>1.0.2</xml.maven.plugin.version>
+    <docker.maven.plugin.version>0.33.0</docker.maven.plugin.version>
 
     <!-- Name of the main Vert.x verticle -->
     <main.verticle>edu.ucla.library.iiif.fester.verticles.MainVerticle</main.verticle>
@@ -84,11 +90,23 @@
     <!-- Whether the test instances started with the 'live' profile reloads code automatically -->
     <live.test.reloads>false</live.test.reloads>
 
+    <!-- These properties provide the ability to override the running of any type of test -->
+    <skipITs>false</skipITs>
+    <skipFTs>false</skipFTs>
+    <skipUTs>false</skipUTs>
+
+    <!-- Whether we want the container logs to be visible when we run our tests (useful for debugging) -->
+    <seeLogsFT>false</seeLogsFT>
+    <seeLogsIT>false</seeLogsIT>
+
     <!-- AWS configuration properties -->
     <fester.s3.region>us-east-1</fester.s3.region>
     <fester.s3.bucket>iiif-fester</fester.s3.bucket>
     <fester.s3.access_key>YOUR_ACCESS_KEY</fester.s3.access_key>
     <fester.s3.secret_key>YOUR_SECRET_KEY</fester.s3.secret_key>
+
+    <!-- Don't touch below unless you are using something other than S3 -->
+    <fester.s3.endpoint>s3.amazonaws.com</fester.s3.endpoint>
 
     <!-- The IIIF base URL (including service prefix) -->
     <iiif.base.url>https://iiif.library.ucla.edu/iiif/2</iiif.base.url>
@@ -193,6 +211,18 @@
       <version>${vertx.version}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>testcontainers</artifactId>
+      <version>${testcontainers.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>localstack</artifactId>
+      <version>${localstack.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -210,6 +240,46 @@
     </testResources>
 
     <plugins>
+      <!-- A Maven plugin that can build a Docker image with our application -->
+      <plugin>
+        <groupId>io.fabric8</groupId>
+        <artifactId>docker-maven-plugin</artifactId>
+        <version>${docker.maven.plugin.version}</version>
+        <configuration>
+          <images>
+            <image>
+              <name>${project.artifactId}:${project.version}</name>
+              <build>
+                <dockerFile>${project.basedir}/src/main/docker/Dockerfile</dockerFile>
+                <assembly>
+                  <inline>
+                    <fileSets>
+                      <fileSet>
+                        <!-- The directory where we can find our Maven-built artifact -->
+                        <directory>${project.basedir}/target/build-artifact</directory>
+                        <!-- We don't want directory structure on output, just the artifact -->
+                        <outputDirectory>.</outputDirectory>
+                        <includes>
+                          <include>${project.artifactId}-${project.version}.jar</include>
+                        </includes>
+                      </fileSet>
+                    </fileSets>
+                  </inline>
+                </assembly>
+              </build>
+            </image>
+          </images>
+        </configuration>
+        <executions>
+          <execution>
+            <id>docker-build</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>build</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <!-- The build-helper plug-in gets us a dynamic port for testing -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -318,8 +388,6 @@
           <logViolationsToConsole>true</logViolationsToConsole>
           <violationSeverity>warning</violationSeverity>
           <includeTestSourceDirectory>true</includeTestSourceDirectory>
-          <!-- Override rules until upstream project is updated -->
-          <configLocation>${basedir}/src/main/resources/checkstyle.xml</configLocation>
         </configuration>
       </plugin>
 
@@ -390,35 +458,16 @@
         </executions>
       </plugin>
 
-      <!-- Surefire runs the project's unit tests -->
-      <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <excludes>
-            <exclude>**/*IT.java</exclude>
-            <exclude>**/*IntegrationTest.java</exclude>
-          </excludes>
-          <systemPropertyVariables>
-            <vertx.logger-delegate-factory-class-name>io.vertx.core.logging.SLF4JLogDelegateFactory</vertx.logger-delegate-factory-class-name>
-            <fester.http.port>${http.port}</fester.http.port>
-            <vertx-config-path>${project.basedir}/target/test-classes/test-config.properties</vertx-config-path>
-          </systemPropertyVariables>
-          <argLine>${jacoco.agent.arg}</argLine>
-        </configuration>
-      </plugin>
-
-      <!-- Failsafe runs the project's integration tests -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-failsafe-plugin</artifactId>
+        <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <includes>
-            <include>**/*IT.java</include>
-            <include>**/*IntegrationTest.java</include>
+            <include>**/*Test.java</include>
           </includes>
           <excludes>
-            <exclude>**/*.xml</exclude>
-            <exclude>**/*.md</exclude>
+            <exclude>**/*FT.java</exclude>
+            <exclude>**/*IT.java</exclude>
           </excludes>
           <systemPropertyVariables>
             <vertx.logger-delegate-factory-class-name>io.vertx.core.logging.SLF4JLogDelegateFactory</vertx.logger-delegate-factory-class-name>
@@ -426,13 +475,61 @@
             <vertx-config-path>${project.basedir}/target/test-classes/test-config.properties</vertx-config-path>
           </systemPropertyVariables>
           <argLine>${jacoco.agent.arg}</argLine>
+          <skipTests>${skipUTs}</skipTests>
+          <forkCount>0</forkCount><!-- Multiple forks result in multiple containers -->
         </configuration>
         <executions>
           <execution>
+            <id>functional-tests</id>
+            <phase>integration-test</phase>
             <goals>
-              <goal>integration-test</goal>
-              <goal>verify</goal>
+              <goal>test</goal>
             </goals>
+            <configuration>
+              <includes>
+                <include>**/*FT.java</include>
+              </includes>
+              <excludes>
+                <exclude>**/*Test.java</exclude>
+                <exclude>**/*IT.java</exclude>
+              </excludes>
+              <argLine>${jacoco.agent.arg}</argLine>
+              <skipTests>${skipFTs}</skipTests>
+              <systemPropertyVariables>
+                <fester.logs.output>${seeLogsFT}</fester.logs.output>
+                <fester.http.port>8888</fester.http.port>
+                <fester.s3.bucket>${fester.s3.bucket}</fester.s3.bucket>
+                <fester.container.tag>${project.artifactId}:${project.version}</fester.container.tag>
+              </systemPropertyVariables>
+            </configuration>
+          </execution>
+          <execution>
+            <id>integration-tests</id>
+            <phase>integration-test</phase>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <configuration>
+              <includes>
+                <include>**/*IT.java</include>
+              </includes>
+              <excludes>
+                <exclude>**/*FT.java</exclude>
+                <exclude>**/*Test.java</exclude>
+              </excludes>
+              <argLine>${jacoco.agent.arg}</argLine>
+              <skipTests>${skipITs}</skipTests>
+              <systemPropertyVariables>
+                <fester.logs.output>${seeLogsIT}</fester.logs.output>
+                <fester.http.port>9999</fester.http.port>
+                <fester.s3.region>${fester.s3.region}</fester.s3.region>
+                <fester.s3.bucket>${fester.s3.bucket}</fester.s3.bucket>
+                <fester.s3.access_key>${fester.s3.access_key}</fester.s3.access_key>
+                <fester.s3.secret_key>${fester.s3.secret_key}</fester.s3.secret_key>
+                <fester.s3.endpoint>${fester.s3.endpoint}</fester.s3.endpoint>
+                <fester.container.tag>${project.artifactId}:${project.version}</fester.container.tag>
+              </systemPropertyVariables>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -502,6 +599,7 @@
                   <exclude>com.fasterxml.jackson.dataformat:jackson-dataformat-cbor</exclude>
                   <exclude>com.fasterxml.jackson.dataformat:jackson-dataformat-yaml</exclude>
                   <exclude>com.fasterxml.jackson.datatype:jackson-datatype-jdk8</exclude>
+                  <exclude>com.fasterxml.jackson.datatype:jackson-datatype-jsr310</exclude>
                   <exclude>com.github.dblock:oshi-core</exclude>
                   <exclude>com.github.fge:btf</exclude>
                   <exclude>com.github.fge:jackson-coreutils</exclude>
@@ -560,6 +658,7 @@
                   <exclude>io.vertx:vertx-web-common</exclude>
                   <exclude>io.vertx:vertx-web</exclude>
                   <exclude>javax.activation:activation</exclude>
+                  <exclude>javax.activation:javax.activation-api</exclude>
                   <exclude>javax.annotation:jsr250-api</exclude>
                   <exclude>javax.enterprise:cdi-api</exclude>
                   <exclude>javax.inject:javax.inject</exclude>
@@ -621,44 +720,7 @@
         </executions>
       </plugin>
 
-      <!-- We use the maven-exec-plugin to start the jar before the integration tests and stop the jar afterward -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>start-fester</id>
-            <phase>pre-integration-test</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>${project.basedir}/src/test/scripts/pre-it-startup.sh</executable>
-              <workingDirectory>${project.basedir}/target</workingDirectory>
-              <arguments>
-                <argument>java</argument>
-                <argument>-Dvertx-config-path=${project.build.directory}/test-classes/test-config.properties</argument>
-                <argument>-Dfester.http.port=${http.port}</argument>
-                <argument>-jar</argument>
-                <argument>${project.build.directory}/build-artifact/${project.artifactId}-${project.version}.jar</argument>
-              </arguments>
-            </configuration>
-          </execution>
-          <execution>
-            <id>stop-fester</id>
-            <phase>post-integration-test</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>${project.basedir}/src/test/scripts/post-it-shutdown.sh</executable>
-              <workingDirectory>${project.basedir}/target</workingDirectory>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <!-- Check the well-formedness of the project's XML files -->
+      <!-- Check the project's XML files to make sure they are well-formed -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>xml-maven-plugin</artifactId>

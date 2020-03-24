@@ -1,6 +1,8 @@
 
 package edu.ucla.library.iiif.fester.handlers;
 
+import java.net.URI;
+
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.RegionUtils;
 
@@ -16,6 +18,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 
@@ -48,7 +51,22 @@ abstract class AbstractFesterHandler implements Handler<RoutingContext> {
             LOGGER.debug(MessageCodes.MFS_003, s3RegionName);
 
             if (s3Region != null) {
-                myS3Client = new S3Client(aVertx, s3AccessKey, s3SecretKey, s3Region.getServiceEndpoint("s3"));
+                final HttpClientOptions httpOpts = new HttpClientOptions();
+                final String endpoint = aConfig.getString(Config.S3_ENDPOINT);
+
+                // Check to see that we're not overriding the default S3 endpoint
+                if (endpoint == null || Constants.S3_ENDPOINT.equals(endpoint)) {
+                    httpOpts.setDefaultHost(s3Region.getServiceEndpoint("s3"));
+                } else {
+                    final URI s3URI = URI.create(endpoint);
+
+                    httpOpts.setDefaultHost(s3URI.getHost());
+                    httpOpts.setDefaultPort(s3URI.getPort());
+                }
+
+                LOGGER.debug(MessageCodes.MFS_034, httpOpts.getDefaultHost() + ':' + httpOpts.getDefaultPort());
+
+                myS3Client = new S3Client(aVertx, s3AccessKey, s3SecretKey, httpOpts);
             } else {
                 myS3Client = new S3Client(aVertx, s3AccessKey, s3SecretKey);
             }

@@ -36,6 +36,9 @@ public class ImageInfoLookup {
      * Create a new image info object from the information at the supplied URL.
      *
      * @param aURL A URL for an image's info.json file
+     * @throws IOException If there is trouble looking up the image's dimensions
+     * @throws MalformedURLException If the supplied URL isn't well-formed
+     * @throws ImageNotFoundException If the requested image cannot be found
      */
     public ImageInfoLookup(final String aURL) throws MalformedURLException, IOException, ImageNotFoundException {
         LOGGER.debug(MessageCodes.MFS_072, aURL);
