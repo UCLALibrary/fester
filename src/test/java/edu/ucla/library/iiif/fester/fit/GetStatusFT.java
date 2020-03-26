@@ -18,7 +18,7 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 public class GetStatusFT extends BaseFesterFT {
 
     /* Our status endpoint contains the service name because there are other /status options */
-    private static final String API_PATH = "/status/fester";
+    private static final String API_PATH = "/fester/status";
 
     /**
      * Tests the status endpoint.

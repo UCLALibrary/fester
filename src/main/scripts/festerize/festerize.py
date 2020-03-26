@@ -20,7 +20,7 @@ def cli(src, server, endpoint, out, iiifhost, loglevel):
     """FESTERIZE uploads CSV files to the UCLA Library Fester service.
     """
     request_url = server + endpoint
-    status_url = server + "/status/fester"
+    status_url = server + "/fester/status"
 
     # get ready to log some stuff
     started = datetime.now()

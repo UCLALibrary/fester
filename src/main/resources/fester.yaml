@@ -26,22 +26,19 @@ info:
 servers:
   - url: http://iiif.library.ucla.edu/fester
 paths:
-  /status/fester:
+  /fester/status:
     get:
         tags: [Utility]
         summary: Get Application Status
-        description: "This is a query of the application's status. Right now, this just responds with the string 'Hello'
-          to indicate that the application is alive and functioning as expected. This response will be expanded in the
-          future."
+        description: "This endpoint returns a JSON object with information about the status of the Fester service."
         operationId: getStatus
         responses:
           '200':
-            description: OK
+            description: A JSON object with status information
             content:
-              text/plain:
+              application/json:
                 schema:
-                  type: string
-                example: Hello
+                  type: object
           '500':
             description: There was an internal server error
   /collections:
