@@ -68,7 +68,7 @@ You can run a development instance of Fester by typing the following within the 
 
     mvn -Plive test
 
-Once run, the service can be verified/accessed at [http://localhost:8888/status/fester](http://localhost:8888/status/fester). The API documentation can be accessed at [http://localhost:8888/docs/fester](http://localhost:8888/docs/fester)
+Once run, the service can be verified/accessed at [http://localhost:8888/fester/status](http://localhost:8888/fester/status). The API documentation can be accessed at [http://localhost:8888/fester/docs](http://localhost:8888/fester/docs)
 
 ## Debugging with Eclipse IDE
 
