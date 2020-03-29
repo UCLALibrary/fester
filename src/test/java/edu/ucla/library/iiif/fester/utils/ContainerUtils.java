@@ -45,13 +45,15 @@ public final class ContainerUtils {
         final String endpoint = System.getProperty(Config.S3_ENDPOINT, StringUtils.format(HOST, aConfig.getS3Port()));
         final String region = System.getProperty(Config.S3_REGION, aConfig.getS3Region());
         final String bucket = System.getProperty(Config.S3_BUCKET);
+        final String featureFlagsURL = System.getProperty(Config.FEATURE_FLAGS);
+        final String featureFlags = featureFlagsURL == null ? Config.FEATURE_FLAGS : toEnv(Config.FEATURE_FLAGS);
         final Map<String, String> envMap = Map.of(toEnv(Config.S3_ACCESS_KEY), accessKey, toEnv(Config.S3_SECRET_KEY),
                 secretKey, toEnv(Config.S3_REGION), region, toEnv(Config.S3_ENDPOINT), endpoint, toEnv(
                         Config.HTTP_PORT), Integer.toString(aConfig.getContainerPort()), toEnv(Config.S3_BUCKET),
-                bucket);
+                bucket, featureFlags, featureFlagsURL);
 
         // Check to see if we want to output our Fester container logs when we run; the default is "no"
-        if (Boolean.parseBoolean(System.getProperty(Config.LOGS_ON, "false"))) {
+        if (Boolean.parseBoolean(System.getProperty(Config.LOGS_ON, Boolean.FALSE.toString()))) {
             container.withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger(aConfig.getContainerName())));
         }
 

@@ -3,7 +3,6 @@ package edu.ucla.library.iiif.fester.verticles;
 
 import static edu.ucla.library.iiif.fester.Constants.MESSAGES;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,17 +11,8 @@ import info.freelibrary.util.LoggerFactory;
 import info.freelibrary.util.StringUtils;
 
 import edu.ucla.library.iiif.fester.Config;
-import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
-import edu.ucla.library.iiif.fester.Op;
-import edu.ucla.library.iiif.fester.handlers.DeleteManifestHandler;
-import edu.ucla.library.iiif.fester.handlers.GetCollectionHandler;
-import edu.ucla.library.iiif.fester.handlers.GetManifestHandler;
-import edu.ucla.library.iiif.fester.handlers.GetStatusHandler;
-import edu.ucla.library.iiif.fester.handlers.MatchingOpNotFoundHandler;
-import edu.ucla.library.iiif.fester.handlers.PostCsvHandler;
-import edu.ucla.library.iiif.fester.handlers.PutCollectionHandler;
-import edu.ucla.library.iiif.fester.handlers.PutManifestHandler;
+import edu.ucla.library.iiif.fester.handlers.EndpointConfigHandler;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
@@ -30,16 +20,14 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
-import io.vertx.core.Vertx;
+import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.api.contract.openapi3.OpenAPI3RouterFactory;
-import io.vertx.ext.web.handler.BodyHandler;
-import io.vertx.ext.web.handler.StaticHandler;
 
 /**
- * Main verticle that starts the application.
+ * The verticle that starts the Fester service.
  */
 public class MainVerticle extends AbstractVerticle {
 
@@ -50,140 +38,44 @@ public class MainVerticle extends AbstractVerticle {
     private static final int DEFAULT_PORT = 8888;
 
     /**
-     * Starts a Web server.
+     * Starts the Fester service.
      */
     @Override
-    @SuppressWarnings({ "deprecation" })
-    public void start(final Future<Void> aFuture) {
-        final JsonObject deploymentConfig = config();
-        final HttpServer server = vertx.createHttpServer();
-
-        // We pull our application's configuration before configuring the server
+    public void start(final Promise<Void> aPromise) {
         getConfigRetriever().getConfig(configuration -> {
             if (configuration.failed()) {
-                aFuture.fail(configuration.cause());
+                aPromise.fail(configuration.cause());
             } else {
                 final JsonObject config = configuration.result();
                 final String apiSpec = config.getString(Config.OPENAPI_SPEC_PATH, DEFAULT_SPEC);
+                final Promise<Router> promise = Promise.promise();
 
                 // We want the deployment configuration to override other configuration values
-                config.mergeIn(deploymentConfig);
+                config.mergeIn(config());
 
-                // We can use our OpenAPI specification file to configure our app's router
-                OpenAPI3RouterFactory.create(vertx, apiSpec, creation -> {
-                    if (creation.succeeded()) {
-                        final OpenAPI3RouterFactory factory = creation.result();
-                        final Vertx vertx = getVertx();
-                        final Router router;
+                // Set up the server after we've configured the router
+                promise.future().setHandler(handler -> {
+                    if (handler.succeeded()) {
+                        final int port = config.getInteger(Config.HTTP_PORT, DEFAULT_PORT);
+                        final HttpServer server = vertx.createHttpServer();
+                        final Router router = handler.result();
 
-                        // Next, we associate handlers with routes from our specification
-                        factory.addHandlerByOperationId(Op.GET_STATUS, new GetStatusHandler());
-                        factory.addHandlerByOperationId(Op.GET_MANIFEST, new GetManifestHandler(vertx, config));
-                        factory.addHandlerByOperationId(Op.PUT_MANIFEST, new PutManifestHandler(vertx, config));
-                        factory.addHandlerByOperationId(Op.DELETE_MANIFEST, new DeleteManifestHandler(vertx, config));
-                        factory.addHandlerByOperationId(Op.GET_COLLECTION, new GetCollectionHandler(vertx, config));
-                        factory.addHandlerByOperationId(Op.PUT_COLLECTION, new PutCollectionHandler(vertx, config));
+                        LOGGER.info(MessageCodes.MFS_041, port);
 
-                        try {
-                            final int port = config.getInteger(Config.HTTP_PORT, DEFAULT_PORT);
-                            final PostCsvHandler postCsvHandler = new PostCsvHandler(vertx, config);
-                            final StaticHandler staticHandler = StaticHandler.create().setWebRoot("webroot");
+                        // Start our server
+                        server.requestHandler(router).listen(port);
 
-                            // Make sure uploaded files get deleted
-                            factory.addHandlerByOperationId(Op.POST_CSV, postCsvHandler).setBodyHandler(BodyHandler
-                                    .create().setDeleteUploadedFilesOnEnd(true));
-
-                            // After that, we can get a router that's been configured by our OpenAPI spec
-                            router = factory.getRouter();
-
-                            // Handle some simple, temporary redirecting
-                            router.getWithRegex("/fester/?").last().handler(event -> {
-                                event.reroute("/fester/docs");
-                            });
-                            router.getWithRegex("/fester/upload/?").last().handler(event -> {
-                                event.reroute("/fester/upload/csv");
-                            });
-
-                            // Serve Fester HTML pages
-                            router.get("/fester*").handler(staticHandler.setIndexPage("index.html"));
-
-                            // If an incoming request doesn't match one of our spec operations, it's treated as a 404;
-                            // catch these generic 404s with the handler below and return more specific response codes
-                            router.errorHandler(HTTP.NOT_FOUND, new MatchingOpNotFoundHandler());
-
-                            LOGGER.info(MessageCodes.MFS_041, port);
-
-                            // Start our server
-                            server.requestHandler(router).listen(port);
-
-                            // Start up our Fester verticles
-                            startVerticles(config, aFuture);
-                        } catch (final IOException details) {
-                            LOGGER.error(details, details.getMessage());
-                            aFuture.fail(details);
-                        }
+                        // Start up our Fester verticles
+                        startVerticles(config, aPromise);
                     } else {
-                        final Throwable exception = creation.cause();
-
-                        LOGGER.error(exception, exception.getMessage());
-                        aFuture.fail(exception);
+                        aPromise.fail(handler.cause());
                     }
                 });
+
+                // We can use our OpenAPI specification file to configure our app's router
+                OpenAPI3RouterFactory.create(vertx, apiSpec, new EndpointConfigHandler(vertx, config, promise));
             }
         });
-    }
-
-    // Start verticles -- this is where to add any new verticles that we create and want to load
-    @SuppressWarnings({ "deprecation" })
-    private void startVerticles(final JsonObject aConfig, final Future<Void> aFuture) {
-        final DeploymentOptions uploaderOptions = new DeploymentOptions();
-        final DeploymentOptions manifestorOptions = new DeploymentOptions();
-        final List<Future> futures = new ArrayList<>();
-
-        uploaderOptions.setConfig(aConfig);
-        manifestorOptions.setWorker(true).setWorkerPoolName(ManifestVerticle.class.getSimpleName());
-        manifestorOptions.setWorkerPoolSize(1).setConfig(aConfig);
-
-        // Start up any necessary Fester verticles
-        futures.add(deployVerticle(ManifestVerticle.class.getName(), manifestorOptions, Future.future()));
-        futures.add(deployVerticle(S3BucketVerticle.class.getName(), uploaderOptions, Future.future()));
-
-        // Confirm all our verticles were successfully deployed
-        CompositeFuture.all(futures).setHandler(handler -> {
-            if (handler.succeeded()) {
-                aFuture.complete();
-            } else {
-                aFuture.fail(handler.cause());
-            }
-        });
-    }
-
-    /**
-     * Deploys a particular verticle.
-     *
-     * @param aVerticleName The name of the verticle to deploy
-     * @param aOptions Any deployment options that should be considered
-     */
-    @SuppressWarnings({ "deprecation" })
-    private Future<Void> deployVerticle(final String aVerticleName, final DeploymentOptions aOptions,
-            final Future<Void> aFuture) {
-        vertx.deployVerticle(aVerticleName, aOptions, response -> {
-            try {
-                final String verticleName = Class.forName(aVerticleName).getSimpleName();
-
-                if (response.succeeded()) {
-                    LOGGER.debug(MessageCodes.MFS_116, verticleName, response.result());
-                    aFuture.complete();
-                } else {
-                    LOGGER.error(MessageCodes.MFS_117, verticleName, response.cause());
-                    aFuture.fail(response.cause());
-                }
-            } catch (final ClassNotFoundException details) {
-                aFuture.fail(details);
-            }
-        });
-
-        return aFuture;
     }
 
     /**
@@ -203,8 +95,63 @@ public class MainVerticle extends AbstractVerticle {
             LOGGER.warn(MessageCodes.MFS_040);
         }
 
-        configOptions.addStore(systemConfigs);
+        return ConfigRetriever.create(vertx, configOptions.addStore(systemConfigs));
+    }
 
-        return ConfigRetriever.create(vertx, configOptions);
+    /**
+     * Starts Fester's verticles.
+     *
+     * @param aConfig A application configuration
+     * @param aPromise A startup promise
+     */
+    private void startVerticles(final JsonObject aConfig, final Promise<Void> aPromise) {
+        final DeploymentOptions uploaderOptions = new DeploymentOptions();
+        final DeploymentOptions manifestorOptions = new DeploymentOptions();
+        final List<Future> futures = new ArrayList<>();
+
+        uploaderOptions.setConfig(aConfig);
+        manifestorOptions.setWorker(true).setWorkerPoolName(ManifestVerticle.class.getSimpleName());
+        manifestorOptions.setWorkerPoolSize(1).setConfig(aConfig);
+
+        // Start up any necessary Fester verticles
+        futures.add(deployVerticle(ManifestVerticle.class.getName(), manifestorOptions, Promise.promise()));
+        futures.add(deployVerticle(S3BucketVerticle.class.getName(), uploaderOptions, Promise.promise()));
+
+        // Confirm all our verticles were successfully deployed
+        CompositeFuture.all(futures).setHandler(handler -> {
+            if (handler.succeeded()) {
+                aPromise.complete();
+            } else {
+                aPromise.fail(handler.cause());
+            }
+        });
+    }
+
+    /**
+     * Deploys a particular verticle.
+     *
+     * @param aVerticleName The name of the verticle to deploy
+     * @param aOptions Any deployment options that should be considered
+     * @param aPromise A promise to deploy the requested verticle
+     */
+    private Future<Void> deployVerticle(final String aVerticleName, final DeploymentOptions aOptions,
+            final Promise<Void> aPromise) {
+        vertx.deployVerticle(aVerticleName, aOptions, response -> {
+            try {
+                final String verticleName = Class.forName(aVerticleName).getSimpleName();
+
+                if (response.succeeded()) {
+                    LOGGER.debug(MessageCodes.MFS_116, verticleName, response.result());
+                    aPromise.complete();
+                } else {
+                    LOGGER.error(MessageCodes.MFS_117, verticleName, response.cause());
+                    aPromise.fail(response.cause());
+                }
+            } catch (final ClassNotFoundException details) {
+                aPromise.fail(details);
+            }
+        });
+
+        return aPromise.future();
     }
 }

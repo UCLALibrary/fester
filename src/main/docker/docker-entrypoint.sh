@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 # Define locations of our container's property values
-PROPERTIES=/etc/fester.properties
-PROPERTIES_TMPL=/etc/fester.properties.tmpl
-PROPERTIES_DEFAULT=/etc/fester.properties.default
+PROPERTIES=/etc/fester/fester.properties
+PROPERTIES_TMPL=/etc/fester/fester.properties.tmpl
+PROPERTIES_DEFAULT=/etc/fester/fester.properties.default
 
 # Find the python application on our system
 PYTHON=$(which python)
@@ -24,8 +24,14 @@ properties.update(os.environ)
 print(template.safe_substitute(properties))
 EOT
 
-# Write our merged properties file to /etc directory
+# Write our merged properties file to /etc/fester directory
 $PYTHON -c "$SCRIPT" >> $PROPERTIES
+
+# If we have feature flags, grab the configuration
+if [[ -v FEATURE_FLAGS && ! -z FEATURE_FLAGS ]]; then
+  curl -s "${FEATURE_FLAGS}" > /etc/fester/fester-features.conf
+  chown fester /etc/fester/fester-features.conf
+fi
 
 # Replaces parent process so signals are processed correctly
 exec "$@"

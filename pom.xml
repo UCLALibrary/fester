@@ -63,6 +63,7 @@
   <properties>
     <vertx.version>3.8.5</vertx.version>
     <opencsv.version>5.0</opencsv.version>
+    <moirai.version>2.0.0</moirai.version>
     <slf4j.ext.version>1.7.26</slf4j.ext.version>
     <commons.lang.version>3.9</commons.lang.version>
     <freelib.utils.version>1.0.2</freelib.utils.version>
@@ -71,8 +72,9 @@
     <jiiify.presentation.version>0.3.0</jiiify.presentation.version>
 
     <!-- Versions of tools used for testing -->
-    <localstack.version>1.13.0</localstack.version>
+    <jsoup.version>1.13.1</jsoup.version>
     <aws.sdk.version>1.11.478</aws.sdk.version>
+    <localstack.version>1.13.0</localstack.version>
     <testcontainers.version>1.12.5</testcontainers.version>
     <jcip.annotations.version>1.0-1</jcip.annotations.version>
 
@@ -94,10 +96,12 @@
     <skipITs>false</skipITs>
     <skipFTs>false</skipFTs>
     <skipUTs>false</skipUTs>
+    <skipFfTs>false</skipFfTs>
 
     <!-- Whether we want the container logs to be visible when we run our tests (useful for debugging) -->
     <seeLogsFT>false</seeLogsFT>
     <seeLogsIT>false</seeLogsIT>
+    <seeLogsFfT>false</seeLogsFfT>
 
     <!-- AWS configuration properties -->
     <fester.s3.region>us-east-1</fester.s3.region>
@@ -128,6 +132,18 @@
       <groupId>io.vertx</groupId>
       <artifactId>vertx-web</artifactId>
       <version>${vertx.version}</version>
+    </dependency>
+
+    <!-- Feature flag library -->
+    <dependency>
+      <groupId>com.nike.moirai</groupId>
+      <artifactId>moirai-core</artifactId>
+      <version>${moirai.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.nike.moirai</groupId>
+      <artifactId>moirai-typesafeconfig</artifactId>
+      <version>${moirai.version}</version>
     </dependency>
 
     <!-- Library for working with v.2 IIIF manifests -->
@@ -209,6 +225,12 @@
       <groupId>io.vertx</groupId>
       <artifactId>vertx-web-client</artifactId>
       <version>${vertx.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jsoup</groupId>
+      <artifactId>jsoup</artifactId>
+      <version>${jsoup.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -468,6 +490,7 @@
           <excludes>
             <exclude>**/*FT.java</exclude>
             <exclude>**/*IT.java</exclude>
+            <exclude>**/*FfT.java</exclude>
           </excludes>
           <systemPropertyVariables>
             <vertx.logger-delegate-factory-class-name>io.vertx.core.logging.SLF4JLogDelegateFactory</vertx.logger-delegate-factory-class-name>
@@ -477,8 +500,63 @@
           <argLine>${jacoco.agent.arg}</argLine>
           <skipTests>${skipUTs}</skipTests>
           <forkCount>0</forkCount><!-- Multiple forks result in multiple containers -->
+          <useSystemClassLoader>false</useSystemClassLoader> <!-- Override parent project setting -->
         </configuration>
         <executions>
+          <execution>
+            <id>feature-flags-off</id>
+            <phase>integration-test</phase>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <configuration>
+              <includes>
+                <include>**/*FfOffT.java</include>
+              </includes>
+              <excludes>
+                <exclude>**/*Test.java</exclude>
+                <exclude>**/*IT.java</exclude>
+                <exclude>**/*FT.java</exclude>
+                <exclude>**/*FfOnT.java</exclude>
+              </excludes>
+              <argLine>${jacoco.agent.arg}</argLine>
+              <skipTests>${skipFfTs}</skipTests>
+              <systemPropertyVariables>
+                <fester.logs.output>${seeLogsFfT}</fester.logs.output>
+                <fester.http.port>8888</fester.http.port>
+                <fester.s3.bucket>${fester.s3.bucket}</fester.s3.bucket>
+                <fester.container.tag>${project.artifactId}:${project.version}</fester.container.tag>
+                <feature.flags>https://iiif-manifest-store.s3.amazonaws.com/fester-features-off.conf</feature.flags>
+              </systemPropertyVariables>
+            </configuration>
+          </execution>
+          <execution>
+            <id>feature-flags-on</id>
+            <phase>integration-test</phase>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <configuration>
+              <includes>
+                <include>**/*FfOnT.java</include>
+              </includes>
+              <excludes>
+                <exclude>**/*Test.java</exclude>
+                <exclude>**/*IT.java</exclude>
+                <exclude>**/*FT.java</exclude>
+                <exclude>**/*FfOffT.java</exclude>
+              </excludes>
+              <argLine>${jacoco.agent.arg}</argLine>
+              <skipTests>${skipFfTs}</skipTests>
+              <systemPropertyVariables>
+                <fester.logs.output>${seeLogsFfT}</fester.logs.output>
+                <fester.http.port>8888</fester.http.port>
+                <fester.s3.bucket>${fester.s3.bucket}</fester.s3.bucket>
+                <fester.container.tag>${project.artifactId}:${project.version}</fester.container.tag>
+                <feature.flags>https://iiif-manifest-store.s3.amazonaws.com/fester-features-on.conf</feature.flags>
+              </systemPropertyVariables>
+            </configuration>
+          </execution>
           <execution>
             <id>functional-tests</id>
             <phase>integration-test</phase>
@@ -492,6 +570,7 @@
               <excludes>
                 <exclude>**/*Test.java</exclude>
                 <exclude>**/*IT.java</exclude>
+                <exclude>**/*FfT.java</exclude>
               </excludes>
               <argLine>${jacoco.agent.arg}</argLine>
               <skipTests>${skipFTs}</skipTests>
@@ -516,6 +595,7 @@
               <excludes>
                 <exclude>**/*FT.java</exclude>
                 <exclude>**/*Test.java</exclude>
+                <exclude>**/*FfT.java</exclude>
               </excludes>
               <argLine>${jacoco.agent.arg}</argLine>
               <skipTests>${skipITs}</skipTests>
@@ -616,6 +696,9 @@
                   <exclude>com.google.j2objc:j2objc-annotations</exclude>
                   <exclude>com.googlecode.libphonenumber:libphonenumber</exclude>
                   <exclude>com.networknt:json-schema-validator</exclude>
+                  <exclude>com.nike.moirai:moirai-core</exclude>
+                  <exclude>com.nike.moirai:moirai-typesafeconfig</exclude>
+                  <exclude>com.typesafe:config</exclude>
                   <exclude>commons-beanutils:commons-beanutils</exclude>
                   <exclude>commons-collections:commons-collections</exclude>
                   <exclude>commons-codec:commons-codec</exclude>
