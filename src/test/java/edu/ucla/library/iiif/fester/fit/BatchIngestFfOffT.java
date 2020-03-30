@@ -1,8 +1,6 @@
 
 package edu.ucla.library.iiif.fester.fit;
 
-import static edu.ucla.library.iiif.fester.Constants.UNSPECIFIED_HOST;
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.junit.Test;
@@ -35,22 +33,25 @@ public class BatchIngestFfOffT extends BaseFesterFfT {
      * @param aContext A testing context
      */
     @Test
+    @SuppressWarnings("checkstyle:indentation") // Checkstyle doesn't handle lambda indentations well
     public final void testCsvPostEndpoint(final TestContext aContext) {
         final Async asyncTask = aContext.async();
 
-        myWebClient.post(FESTER_PORT, UNSPECIFIED_HOST, API_PATH).sendMultipartForm(CSV_UPLOAD_FORM, request -> {
-            if (request.succeeded()) {
-                final HttpResponse<Buffer> response = request.result();
-                final String expectedStatusMessage = LOGGER.getMessage(MessageCodes.MFS_085, BATCH_INGEST_FEATURE);
+        myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE).sendMultipartForm(
+                CSV_UPLOAD_FORM, request -> {
+                    if (request.succeeded()) {
+                        final HttpResponse<Buffer> response = request.result();
+                        final String expectedStatusMessage = LOGGER.getMessage(MessageCodes.MFS_085,
+                                BATCH_INGEST_FEATURE);
 
-                aContext.assertEquals(HTTP.SERVICE_UNAVAILABLE, response.statusCode());
-                aContext.assertEquals(expectedStatusMessage, response.statusMessage());
+                        aContext.assertEquals(HTTP.SERVICE_UNAVAILABLE, response.statusCode());
+                        aContext.assertEquals(expectedStatusMessage, response.statusMessage());
 
-                complete(asyncTask);
-            } else {
-                aContext.fail(request.cause());
-            }
-        });
+                        complete(asyncTask);
+                    } else {
+                        aContext.fail(request.cause());
+                    }
+                });
     }
 
     /**

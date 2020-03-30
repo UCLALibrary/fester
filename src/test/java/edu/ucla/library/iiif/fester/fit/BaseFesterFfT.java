@@ -16,9 +16,6 @@ public class BaseFesterFfT extends BaseFesterFT {
     /* The path at which our CSV upload form can be found */
     protected static final String UPLOAD_FORM_PATH = "/fester/upload/csv";
 
-    /* The POST collections endpoint */
-    protected static final String API_PATH = "/collections";
-
     /* The upload form passed to the POST collections endpoint */
     protected static final MultipartForm CSV_UPLOAD_FORM = MultipartForm.create().textFileUpload(Constants.CSV_FILE,
             "capostcards.csv", "src/test/resources/csv/capostcards.csv", Constants.CSV_MEDIA_TYPE);

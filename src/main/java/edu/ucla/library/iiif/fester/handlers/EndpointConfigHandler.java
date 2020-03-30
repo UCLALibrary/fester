@@ -106,7 +106,6 @@ public class EndpointConfigHandler implements Handler<AsyncResult<OpenAPI3Router
      * Configure the router with additional paths that are not handled by the OpenAPI router factory
      *
      * @param aFactory An OpenAPI router factory
-     * @param aPromise A router configuration promise
      * @param aBatchIngestEnabled Whether the batch ingest is disabled or enabled
      */
     private void configureRouter(final OpenAPI3RouterFactory aFactory, final boolean aBatchIngestEnabled) {
@@ -166,7 +165,6 @@ public class EndpointConfigHandler implements Handler<AsyncResult<OpenAPI3Router
      * Configure a placeholder for the ingest endpoint
      *
      * @param aFactory A router factory
-     * @param aConfig An application configuration
      * @param aPromise A configuration promise
      */
     private void configureBatchIngestPlaceholder(final OpenAPI3RouterFactory aFactory,

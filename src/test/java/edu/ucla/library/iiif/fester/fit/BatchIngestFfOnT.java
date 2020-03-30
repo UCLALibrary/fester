@@ -1,8 +1,6 @@
 
 package edu.ucla.library.iiif.fester.fit;
 
-import static edu.ucla.library.iiif.fester.Constants.UNSPECIFIED_HOST;
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.junit.Test;
@@ -33,21 +31,23 @@ public class BatchIngestFfOnT extends BaseFesterFfT {
      * @param aContext A testing context
      */
     @Test
+    @SuppressWarnings("checkstyle:indentation") // Checkstyle doesn't handle lambda indentations well
     public final void testCsvPostEndpoint(final TestContext aContext) {
         final Async asyncTask = aContext.async();
 
         // Create our bucket so we have some place to put the manifests
         myS3Client.createBucket(BUCKET);
 
-        myWebClient.post(FESTER_PORT, UNSPECIFIED_HOST, API_PATH).sendMultipartForm(CSV_UPLOAD_FORM, request -> {
-            if (request.succeeded()) {
-                // Check that we get a 201 response code
-                aContext.assertEquals(HTTP.CREATED, request.result().statusCode());
-                complete(asyncTask);
-            } else {
-                aContext.fail(request.cause());
-            }
-        });
+        myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE).sendMultipartForm(
+                CSV_UPLOAD_FORM, request -> {
+                    if (request.succeeded()) {
+                        // Check that we get a 201 response code
+                        aContext.assertEquals(HTTP.CREATED, request.result().statusCode());
+                        complete(asyncTask);
+                    } else {
+                        aContext.fail(request.cause());
+                    }
+                });
     }
 
     /**
