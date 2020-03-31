@@ -54,10 +54,22 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
             final String s3AccessKey = config.getString(Config.S3_ACCESS_KEY);
             final String s3SecretKey = config.getString(Config.S3_SECRET_KEY);
             final String s3RegionName = config.getString(Config.S3_REGION);
-            final String s3Host = RegionUtils.getRegion(s3RegionName).getServiceEndpoint("s3");
-            final HttpClientOptions httpOptions = new HttpClientOptions().setDefaultHost(s3Host);
+            final String endpoint = config.getString(Config.S3_ENDPOINT);
+            final HttpClientOptions httpOptions = new HttpClientOptions();
 
-            LOGGER.debug(MessageCodes.MFS_034, s3Host);
+            // Check to see that we're not overriding the default S3 endpoint
+            if (endpoint == null || Constants.S3_ENDPOINT.equals(endpoint)) {
+                httpOptions.setDefaultHost(RegionUtils.getRegion(s3RegionName).getServiceEndpoint("s3"));
+
+                LOGGER.debug(MessageCodes.MFS_034, httpOptions.getDefaultHost());
+            } else {
+                final URI s3URI = URI.create(endpoint);
+
+                httpOptions.setDefaultHost(s3URI.getHost());
+                httpOptions.setDefaultPort(s3URI.getPort());
+
+                LOGGER.debug(MessageCodes.MFS_034, httpOptions.getDefaultHost() + ':' + httpOptions.getDefaultPort());
+            }
 
             myS3Client = new S3Client(getVertx(), s3AccessKey, s3SecretKey, httpOptions);
             myS3Bucket = config.getString(Config.S3_BUCKET);

@@ -33,6 +33,9 @@ public final class Config {
     /* Config property for turning logs on while running in test mode */
     public static final String LOGS_ON = "fester.logs.output";
 
+    /* A feature flags configuration for the Docker container */
+    public static final String FEATURE_FLAGS = "feature.flags";
+
     /**
      * Private constructor for the Constants class.
      */

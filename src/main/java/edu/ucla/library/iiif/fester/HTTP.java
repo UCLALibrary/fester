@@ -33,6 +33,9 @@ public final class HTTP {
     /** Generic internal server error */
     public static final int INTERNAL_SERVER_ERROR = 500;
 
+    /** A service unavailable error */
+    public static final int SERVICE_UNAVAILABLE = 503;
+
     /**
      * A private constructor for the constants class.
      */

@@ -97,6 +97,10 @@
   <entry key="MFS-081">LocalStack S3 access key: {}</entry>
   <entry key="MFS-082">LocalStack S3 secret key: {}</entry>
   <entry key="MFS-083">Cleaning up S3 testing resource: {}</entry>
+  <entry key="MFS-084">Batch Ingest</entry>
+  <entry key="MFS-085">The '{}' feature is unavailable on this server</entry>
+  <entry key="MFS-086">Turning the '{}' feature off</entry>
+  <entry key="MFS-087">Unable to find the h1 element in the feature flag test</entry>
 
   <entry key="MFS-100">Stopping the {} verticle [id: {}]</entry>
   <entry key="MFS-101">Getting message consumer for: {}</entry>
