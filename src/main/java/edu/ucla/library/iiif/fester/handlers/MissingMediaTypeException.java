@@ -18,8 +18,6 @@ public class MissingMediaTypeException extends I18nException {
 
     /**
      * Creates an incorrect media type exception from the value of the incorrect media type.
-     *
-     * @param aDetail
      */
     public MissingMediaTypeException() {
         super(Constants.MESSAGES, MessageCodes.MFS_020);

@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>fester</artifactId>
-  <version>0.6.0-SNAPSHOT</version>
+  <version>0.7.0-SNAPSHOT</version>
   <name>Fester</name>
   <description>A read/write interface for storing and retrieving IIIF manifests</description>
   <url>https://github.com/uclalibrary/fester</url>
@@ -80,6 +80,7 @@
 
     <!-- Build plug-in versions -->
     <shade.plugin.version>2.4.3</shade.plugin.version>
+    <deploy.plugin.version>2.8.2</deploy.plugin.version>
     <netty.epoll.version>4.1.37.Final</netty.epoll.version>
     <vertx.plugin.version>1.0.18</vertx.plugin.version>
     <codacy.plugin.version>1.0.2</codacy.plugin.version>
@@ -118,6 +119,12 @@
     <!-- The port Fester listens on -->
     <fester.http.port>8888</fester.http.port>
     <fester.debug.port>5555</fester.debug.port>
+
+    <!-- The Docker registry user and password used for publishing images -->
+    <docker.registry.username />
+    <docker.registry.password />
+    <!-- The Docker registry account, if supplied, must end with a slash (e.g. "account/") -->
+    <docker.registry.account />
   </properties>
 
   <dependencies>
@@ -262,6 +269,15 @@
     </testResources>
 
     <plugins>
+      <!-- Disable standard deploy; we publish a Docker image, not Jar file -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <version>${deploy.plugin.version}</version>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
       <!-- A Maven plugin that can build a Docker image with our application -->
       <plugin>
         <groupId>io.fabric8</groupId>
@@ -270,7 +286,8 @@
         <configuration>
           <images>
             <image>
-              <name>${project.artifactId}:${project.version}</name>
+              <!-- Registry account, if supplied, must end in a slash (e.g. "account/") -->
+              <name>${docker.registry.account}${project.artifactId}:%l</name>
               <build>
                 <dockerFile>${project.basedir}/src/main/docker/Dockerfile</dockerFile>
                 <assembly>
@@ -291,6 +308,10 @@
               </build>
             </image>
           </images>
+          <authConfig>
+            <username>${docker.registry.username}</username>
+            <password>${docker.registry.password}</password>
+          </authConfig>
         </configuration>
         <executions>
           <execution>
@@ -298,6 +319,13 @@
             <phase>pre-integration-test</phase>
             <goals>
               <goal>build</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>docker-deploy</id>
+            <phase>deploy</phase>
+            <goals>
+              <goal>push</goal>
             </goals>
           </execution>
         </executions>
@@ -578,7 +606,7 @@
                 <fester.logs.output>${seeLogsFT}</fester.logs.output>
                 <fester.http.port>8888</fester.http.port>
                 <fester.s3.bucket>${fester.s3.bucket}</fester.s3.bucket>
-                <fester.container.tag>${project.artifactId}:${project.version}</fester.container.tag>
+                <fester.container.tag>${docker.registry.account}${project.artifactId}:${project.version}</fester.container.tag>
               </systemPropertyVariables>
             </configuration>
           </execution>
@@ -607,7 +635,7 @@
                 <fester.s3.access_key>${fester.s3.access_key}</fester.s3.access_key>
                 <fester.s3.secret_key>${fester.s3.secret_key}</fester.s3.secret_key>
                 <fester.s3.endpoint>${fester.s3.endpoint}</fester.s3.endpoint>
-                <fester.container.tag>${project.artifactId}:${project.version}</fester.container.tag>
+                <fester.container.tag>${docker.registry.account}${project.artifactId}:${project.version}</fester.container.tag>
               </systemPropertyVariables>
             </configuration>
           </execution>
@@ -834,7 +862,6 @@
     </plugins>
   </build>
 
-  <!-- A live testing mode that will spin up the server locally when the following is run: mvn -Plive test -->
   <profiles>
     <profile>
       <id>linux-os</id>
@@ -1021,6 +1048,6 @@
   <parent>
     <artifactId>freelib-parent</artifactId>
     <groupId>info.freelibrary</groupId>
-    <version>3.8.2</version>
+    <version>3.8.3</version>
   </parent>
 </project>

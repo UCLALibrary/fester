@@ -5,6 +5,7 @@ import static edu.ucla.library.iiif.fester.utils.ContainerConfig.S3_ALIAS;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
@@ -39,7 +40,8 @@ public final class ContainerUtils {
      * @return The Fester container
      */
     public static GenericContainer getFesterContainer(final ContainerConfig aConfig) {
-        final GenericContainer container = new GenericContainer(System.getProperty(TestConstants.CONTAINER_IMAGE));
+        final String containerTag = toTag(System.getProperty(TestConstants.CONTAINER_IMAGE));
+        final GenericContainer container = new GenericContainer(containerTag);
         final String accessKey = System.getProperty(Config.S3_ACCESS_KEY, aConfig.getS3AccessKey());
         final String secretKey = System.getProperty(Config.S3_SECRET_KEY, aConfig.getS3SecretKey());
         final String endpoint = System.getProperty(Config.S3_ENDPOINT, StringUtils.format(HOST, aConfig.getS3Port()));
@@ -76,6 +78,30 @@ public final class ContainerUtils {
     }
 
     /**
+     * Replaces a SNAPSHOT version with 'latest' for the Docker image tag.
+     *
+     * @param aVersion A artifact version
+     * @return A Docker image tag
+     */
+    public static String toTag(final String aVersion) {
+        Objects.requireNonNullElse(aVersion, "(null)");
+
+        if (aVersion.contains("-SNAPSHOT")) {
+            final StringBuilder builder = new StringBuilder(aVersion);
+            final int index = builder.lastIndexOf(":");
+
+            if (index != -1) {
+                builder.replace(index + 1, builder.length(), "latest");
+                return builder.toString();
+            } else {
+                return aVersion;
+            }
+        } else {
+            return aVersion;
+        }
+    }
+
+    /**
      * Converts a system property name to an environmental variable.
      *
      * @param aPropertyName A system property name
@@ -84,5 +110,4 @@ public final class ContainerUtils {
     private static String toEnv(final String aPropertyName) {
         return aPropertyName.replace('.', '_').toUpperCase(Locale.US);
     }
-
 }

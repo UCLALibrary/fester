@@ -27,6 +27,9 @@
   </logger>
 
   <!-- Loggers for the testcontainers.org tool -->
+  <logger name="org.testcontainers.utility.RegistryAuthLocator" level="ERROR">
+    <appender-ref ref="STDOUT" />
+  </logger>
   <logger name="org.testcontainers.dockerclient.DockerClientProviderStrategy" level="WARN">
     <appender-ref ref="STDOUT" />
   </logger>

@@ -14,6 +14,7 @@ import java.util.UUID;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -41,6 +42,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.Timeout;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 
 /**
@@ -68,6 +70,9 @@ public class ManifestVerticleTest {
     private static final String POSTCARDS = "capostcards";
 
     private static final String WORKS = "works";
+
+    @Rule
+    public Timeout myTestTimeout = Timeout.seconds(600);
 
     private Vertx myVertx;
 

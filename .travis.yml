@@ -1,3 +1,6 @@
+
+services: docker
+
 # We want all PRs built but only merges on master branch and tags under semantic version scheme
 branches:
   only:
@@ -14,32 +17,10 @@ jobs:
       install:
         - mvn install -q -Dmaven.test.skip -Dmaven.javadoc.skip -B -V
       script:
-        - mvn verify -q -Dfester.s3.bucket="${AWS_BUCKET}" -Dfester.s3.access_key="${AWS_ACCESS_KEY_ID}" -Dfester.s3.secret_key="${AWS_SECRET_ACCESS_KEY}"
-      # Cache the local Maven repo to save time
+        - mvn deploy -B -Dfester.s3.bucket="${AWS_BUCKET}" -Dfester.s3.access_key="${AWS_ACCESS_KEY_ID}" -Dfester.s3.secret_key="${AWS_SECRET_ACCESS_KEY}" -Ddocker.registry.username="${DOCKER_USERNAME}" -Ddocker.registry.password="${DOCKER_PASSWORD}" -Ddocker.registry.account="${DOCKER_REGISTRY_ACCOUNT}" -Dorg.slf4j.simpleLogger.log.net.sourceforge.pmd=error
       cache:
         directories:
         - $HOME/.m2
-
-    - stage: Trigger Latest Push
-      name: Trigger DockerHub Push > Latest
-      language: minimal
-      deploy:
-        - provider: script
-          script:
-            - FESTER_TAG=latest .travis/trigger.sh uclalibrary/docker-fester
-          on:
-            branch: master
-      if: (NOT type IN (pull_request)) AND (branch = master)
-    - stage: Trigger Tag Push
-      name: Trigger DockerHub Push > Tag
-      language: minimal
-      deploy:
-        - provider: script
-          script:
-            - FESTER_TAG=$TRAVIS_TAG .travis/trigger.sh uclalibrary/docker-fester
-          on:
-            tags: true
-      if: (NOT type IN (pull_request)) AND (branch =~ /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*)?(\+[0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*)?$/)
 
 notifications:
   email:
