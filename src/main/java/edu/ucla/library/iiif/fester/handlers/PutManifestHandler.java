@@ -1,7 +1,6 @@
 
 package edu.ucla.library.iiif.fester.handlers;
 
-import info.freelibrary.util.FileUtils;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
@@ -38,13 +37,7 @@ public class PutManifestHandler extends AbstractFesterHandler {
         final HttpServerRequest request = aContext.request();
         final JsonObject body = aContext.getBodyAsJson();
         final String manifestId = request.getParam(Constants.MANIFEST_ID);
-        final String manifestS3Key;
-
-        if (FileUtils.getExt(manifestId).equals(Constants.JSON_EXT)) {
-            manifestS3Key = IDUtils.getWorkS3Key(manifestId, Constants.JSON_EXT);
-        } else {
-            manifestS3Key = IDUtils.getWorkS3Key(manifestId);
-        }
+        final String manifestS3Key = IDUtils.getWorkS3Key(manifestId);
 
         // For now we're not going to check if it exists before we overwrite it
         myS3Client.put(myS3Bucket, manifestS3Key, body.toBuffer(), put -> {
