@@ -196,7 +196,7 @@ public final class IDUtils {
      * @deprecated Gets an S3 key for a work, with an extension to append if the identifier doesn't have it already.
      *             TODO: remove in 1.0.0
      * @param aID The ID (ARK) of the work
-     * @param aExt The extension to append if the id)entifier doesn't have it already
+     * @param aExt The extension to append if the identifier doesn't have it already
      * @return An S3 key
      */
     @Deprecated
