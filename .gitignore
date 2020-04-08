@@ -14,6 +14,7 @@ buildNumber.properties
 src/main/tools
 src/main/generated
 src/main/jbake/
+logback-test.xml
 
 ## Ignore project files created by IntelliJ IDEA
 *.iml
