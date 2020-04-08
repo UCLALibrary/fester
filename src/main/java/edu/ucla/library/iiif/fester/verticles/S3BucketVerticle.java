@@ -148,6 +148,7 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
 
         LOGGER.debug(MessageCodes.MFS_051, aManifest, myS3Bucket);
         LOGGER.debug(MessageCodes.MFS_128, manifestID);
+
         if (!aS3Key.equals(derivedManifestS3Key)) {
             LOGGER.warn(MessageCodes.MFS_138, aS3Key, derivedManifestS3Key);
         }

@@ -144,4 +144,9 @@
   <entry key="MFS-139">'{}' unable to handle message '{}': unknown action '{}'</entry>
   <entry key="MFS-140">Manifest '{}' not found when it should have been put</entry>
   <entry key="MFS-141">Manifest '{}' found when it should not have been put</entry>
+  <entry key="MFS-142">S3 key '{}' does not start with required prefixes: {} or {}</entry>
+  <entry key="MFS-143">URI path '{}' does not contain a required subpath: {} or {}</entry>
+  <entry key="MFS-144">S3 key already starts with the prefix to be added: {}</entry>
+  <entry key="MFS-145">S3 key already ends with .json extension: {}</entry>
+  <entry key="MFS-146"></entry>
 </properties>
