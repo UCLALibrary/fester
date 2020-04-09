@@ -37,13 +37,13 @@ public class GetManifestHandler extends AbstractFesterHandler {
     public void handle(final RoutingContext aContext) {
         final HttpServerResponse response = aContext.response();
         final HttpServerRequest request = aContext.request();
-        final String manifestId = request.getParam(Constants.MANIFEST_ID);
+        final String manifestID = request.getParam(Constants.MANIFEST_ID);
         final String manifestS3Key;
 
-        if (FileUtils.getExt(manifestId).equals(Constants.JSON_EXT)) {
-            manifestS3Key = IDUtils.getWorkS3Key(manifestId, Constants.JSON_EXT);
+        if (FileUtils.getExt(manifestID).equals(Constants.JSON_EXT)) {
+            manifestS3Key = IDUtils.getWorkS3Key(manifestID, Constants.JSON_EXT);
         } else {
-            manifestS3Key = IDUtils.getWorkS3Key(manifestId);
+            manifestS3Key = IDUtils.getWorkS3Key(manifestID);
         }
 
         // set a very permissive CORS response header
@@ -67,45 +67,50 @@ public class GetManifestHandler extends AbstractFesterHandler {
 
                         break;
                     case HTTP.NOT_FOUND:
-                        message = LOGGER.getMessage(MessageCodes.MFS_009, manifestId, statusCode, statusMessage);
+                        message = LOGGER.getMessage(MessageCodes.MFS_009, manifestID, statusCode, statusMessage);
                         response.setStatusCode(HTTP.NOT_FOUND);
                         response.setStatusMessage(message);
+                        response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
                         response.end(message);
 
                         break;
                     case HTTP.INTERNAL_SERVER_ERROR:
-                        message = LOGGER.getMessage(MessageCodes.MFS_010, manifestId, statusCode, statusMessage);
+                        message = LOGGER.getMessage(MessageCodes.MFS_010, manifestID, statusCode, statusMessage);
                         response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
                         response.setStatusMessage(message);
+                        response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
                         response.end(message);
 
                         LOGGER.error(message);
 
                         break;
                     default:
-                        message = LOGGER.getMessage(MessageCodes.MFS_011, manifestId, statusCode, statusMessage);
+                        message = LOGGER.getMessage(MessageCodes.MFS_011, manifestID, statusCode, statusMessage);
                         response.setStatusCode(statusCode);
                         response.setStatusMessage(message);
+                        response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
                         response.end(message);
 
                         LOGGER.error(message);
                 }
             }, exception -> {
-                final String message = LOGGER.getMessage(MessageCodes.MFS_009, manifestId, HTTP.INTERNAL_SERVER_ERROR,
+                final String message = LOGGER.getMessage(MessageCodes.MFS_009, manifestID, HTTP.INTERNAL_SERVER_ERROR,
                         exception.getMessage());
 
                 response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
                 response.setStatusMessage(message);
+                response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
                 response.end(message);
 
                 LOGGER.error(exception, message);
             });
         } catch (final Throwable aThrowable) {
-            final String message = LOGGER.getMessage(MessageCodes.MFS_009, manifestId, HTTP.INTERNAL_SERVER_ERROR,
+            final String message = LOGGER.getMessage(MessageCodes.MFS_009, manifestID, HTTP.INTERNAL_SERVER_ERROR,
                     aThrowable.getMessage());
 
             response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
             response.setStatusMessage(message);
+            response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
             response.end(message);
 
             LOGGER.error(message);

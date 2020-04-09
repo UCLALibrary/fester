@@ -59,6 +59,7 @@ public class GetCollectionHandler extends AbstractFesterHandler implements Handl
 
                 response.setStatusCode(HTTP.NOT_FOUND);
                 response.setStatusMessage(exceptionMessage);
+                response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
                 response.end(errorMessage);
             }
         });
