@@ -1,11 +1,10 @@
 
 services: docker
 
-# We want all PRs built but only merges on master branch and tags under semantic version scheme
+# We want all PRs built but only merges on master branch
 branches:
   only:
   - master
-  - /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*)?(\+[0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*)?$/
 
 jobs:
   include:
