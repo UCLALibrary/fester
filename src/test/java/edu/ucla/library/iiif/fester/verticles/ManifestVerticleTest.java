@@ -183,6 +183,7 @@ public class ManifestVerticleTest {
         message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, filePath);
         message.put(Constants.FESTER_HOST, MANIFEST_HOST);
         options.addHeader(Constants.ACTION, Op.POST_CSV);
+        options.setSendTimeout(60000);
 
         LOGGER.debug(MessageCodes.MFS_120, HATHAWAY, ManifestVerticle.class.getName());
 
