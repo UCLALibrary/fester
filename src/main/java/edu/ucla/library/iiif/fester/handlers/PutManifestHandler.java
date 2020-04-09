@@ -37,7 +37,7 @@ public class PutManifestHandler extends AbstractFesterHandler {
         final HttpServerRequest request = aContext.request();
         final JsonObject body = aContext.getBodyAsJson();
         final String manifestID = request.getParam(Constants.MANIFEST_ID);
-        final String manifestS3Key = IDUtils.getWorkS3Key(manifestId);
+        final String manifestS3Key = IDUtils.getWorkS3Key(manifestID);
 
         // For now we're not going to check if it exists before we overwrite it
         myS3Client.put(myS3Bucket, manifestS3Key, body.toBuffer(), put -> {

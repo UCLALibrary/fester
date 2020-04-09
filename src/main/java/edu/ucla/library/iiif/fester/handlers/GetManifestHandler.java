@@ -37,7 +37,7 @@ public class GetManifestHandler extends AbstractFesterHandler {
         final HttpServerResponse response = aContext.response();
         final HttpServerRequest request = aContext.request();
         final String manifestID = request.getParam(Constants.MANIFEST_ID);
-        final String manifestS3Key = IDUtils.getWorkS3Key(manifestId);
+        final String manifestS3Key = IDUtils.getWorkS3Key(manifestID);
 
         // set a very permissive CORS response header
         response.headers().set(Constants.CORS_HEADER, Constants.STAR);
