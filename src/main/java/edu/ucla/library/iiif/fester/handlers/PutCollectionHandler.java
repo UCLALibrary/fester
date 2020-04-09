@@ -1,12 +1,14 @@
+
 package edu.ucla.library.iiif.fester.handlers;
+
+import info.freelibrary.util.Logger;
+import info.freelibrary.util.LoggerFactory;
 
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.verticles.S3BucketVerticle;
-import info.freelibrary.util.Logger;
-import info.freelibrary.util.LoggerFactory;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.http.HttpServerResponse;
@@ -47,7 +49,10 @@ public class PutCollectionHandler extends AbstractFesterHandler {
 
                 LOGGER.error(aThrowable, errorMessage);
 
-                response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR).setStatusMessage(exceptionMessage).end(errorMessage);
+                response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
+                response.setStatusMessage(exceptionMessage);
+                response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
+                response.end(errorMessage);
             }
         });
     }
