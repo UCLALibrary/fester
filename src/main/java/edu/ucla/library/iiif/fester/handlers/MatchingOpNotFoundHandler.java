@@ -1,8 +1,12 @@
 
 package edu.ucla.library.iiif.fester.handlers;
 
+import info.freelibrary.util.Logger;
+import info.freelibrary.util.LoggerFactory;
+
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
+import edu.ucla.library.iiif.fester.MessageCodes;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerRequest;
@@ -18,6 +22,8 @@ import io.vertx.ext.web.RoutingContext;
  */
 public class MatchingOpNotFoundHandler implements Handler<RoutingContext> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MatchingOpNotFoundHandler.class, Constants.MESSAGES);
+
     @Override
     public void handle(final RoutingContext aContext) {
         final HttpServerRequest request = aContext.request();
@@ -27,7 +33,9 @@ public class MatchingOpNotFoundHandler implements Handler<RoutingContext> {
         if (method.equals(HttpMethod.PUT)) {
             handlePuts(aContext);
         } else {
-            response.setStatusCode(HTTP.NOT_FOUND).end();
+            response.setStatusCode(HTTP.NOT_FOUND);
+            response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
+            response.end(LOGGER.getMessage(MessageCodes.MFS_091, request.path()));
         }
     }
 
@@ -42,7 +50,9 @@ public class MatchingOpNotFoundHandler implements Handler<RoutingContext> {
         } else if (mediaType == null) {
             aContext.fail(HTTP.UNSUPPORTED_MEDIA_TYPE, new MissingMediaTypeException());
         } else {
-            response.setStatusCode(HTTP.NOT_FOUND).end();
+            response.setStatusCode(HTTP.NOT_FOUND);
+            response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
+            response.end(LOGGER.getMessage(MessageCodes.MFS_091, request.path()));
         }
     }
 }

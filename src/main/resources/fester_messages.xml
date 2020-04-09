@@ -101,6 +101,14 @@
   <entry key="MFS-085">The '{}' feature is unavailable on this server</entry>
   <entry key="MFS-086">Turning the '{}' feature off</entry>
   <entry key="MFS-087">Unable to find the h1 element in the feature flag test</entry>
+  <entry key="MFS-088">Successfully deleted: {}</entry>
+  <entry key="MFS-089">Access forbidden: {}</entry>
+  <entry key="MFS-090">Unexpected response code [{}]: {}</entry>
+  <entry key="MFS-091">Resource not found: {}</entry>
+  <entry key="MFS-092">Manifest successfully PUT: {}</entry>
+  <entry key="MFS-093"></entry>
+  <entry key="MFS-094"></entry>
+  <entry key="MFS-095"></entry>
 
   <entry key="MFS-100">Stopping the {} verticle [id: {}]</entry>
   <entry key="MFS-101">Getting message consumer for: {}</entry>

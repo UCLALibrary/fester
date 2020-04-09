@@ -63,6 +63,11 @@ public final class Constants {
     public static final String CSV_MEDIA_TYPE = "text/csv";
 
     /**
+     * The plain text content-type.
+     */
+    public static final String PLAIN_TEXT_TYPE = "text/plain";
+
+    /**
      * COR header for allowing access to our manifests to the world
      */
     public static final String CORS_HEADER = "Access-Control-Allow-Origin";
