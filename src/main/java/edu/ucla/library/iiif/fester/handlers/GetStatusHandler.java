@@ -5,6 +5,7 @@ import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
 import edu.ucla.library.iiif.fester.Constants;
+import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.Status;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerResponse;
@@ -38,7 +39,8 @@ public class GetStatusHandler implements Handler<RoutingContext> {
 
             LOGGER.error(aThrowable, exceptionMessage);
 
-            response.setStatusCode(500);
+            response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
+            response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
             response.end(exceptionMessage);
         }
     }

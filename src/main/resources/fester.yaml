@@ -41,6 +41,11 @@ paths:
                   type: object
           '500':
             description: There was an internal server error
+            content:
+              text/plain:
+                schema:
+                  type: string
+                  example: The status request failed because the slithy toves did gyre
   /collections:
     post:
       tags: [Collection]
@@ -106,8 +111,17 @@ paths:
       responses:
         '200':
           description: The IIIF collection for the requested ID
+          content:
+            application/json:
+              schema:
+                type: object
         '404':
           description: Not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: The collection 'FakeCollection' could not be found
     put:
       tags: [Collection]
       summary: Put a collection
@@ -123,14 +137,39 @@ paths:
       responses:
         '200':
           description: Updated or created the collection with the supplied name
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: The collection 'MyCollection' was successfully uploaded
         '400':
           description: Bad request
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Bad request while putting collection: MyCollection"
         '403':
           description: Forbidden
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "You do not have permission to put collection: MyCollection"
         '415':
           description: Unsupported media type (i.e. not JSON)
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Collection 'MyCollection' does not have a valid media type
         '500':
           description: Internal server error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Internal server error: the slithy toves did gyre and gimble"
     delete:
       tags: [Collection (Proposed)]
       summary: Delete a collection
@@ -139,10 +178,25 @@ paths:
       responses:
         '204':
           description: Deleted the collection with the supplied name
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Collection successfully deleted: MyCollection"
         '403':
           description: Forbidden
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Permission to delete collection 'MyCollection' denied
         '500':
           description: Internal server error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Internal server error: the slithy toves did gyre and gimble"
     parameters:
        - in: path
          name: collectionName
@@ -159,10 +213,24 @@ paths:
       responses:
         '200':
           description: The IIIF manifest for the requested ID
+          content:
+            application/json:
+              schema:
+                type: object
         '400':
           description: Bad request
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Bad request while putting collection: XYZ"
         '404':
           description: Not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: The manifest 'XYZ' could not be found
     put:
       tags: [Manifest]
       summary: Put a manifest
@@ -182,14 +250,39 @@ paths:
       responses:
         '200':
           description: Updated or created the manifest at the supplied ID
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Manifest successfully uploaded to server: XYZ"
         '400':
           description: Bad request
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Bad request while submitting manifest: XYZ"
         '403':
           description: Forbidden
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Permission to upload manifest 'XYZ' denied
         '415':
           description: Unsupported media type (i.e. not JSON)
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Manifest 'XYZ' upload failed because of unsupported media type
         '500':
           description: Internal server error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Internal server error: the slithy toves did gyre and gimble"
     delete:
       tags: [Manifest]
       summary: Delete a manifest
@@ -198,10 +291,25 @@ paths:
       responses:
         '204':
           description: Deleted the manifest at the supplied ID
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Manifest 'XYZ' has been successfully deleted
         '403':
           description: Forbidden
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Permission to delete manifest 'XYZ' denied
         '500':
           description: Internal server error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Internal server error: the slithy toves did gyre and gimble"
     parameters:
        - in: path
          name: manifestId

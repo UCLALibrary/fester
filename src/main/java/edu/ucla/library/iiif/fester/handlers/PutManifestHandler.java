@@ -36,7 +36,7 @@ public class PutManifestHandler extends AbstractFesterHandler {
         final HttpServerResponse response = aContext.response();
         final HttpServerRequest request = aContext.request();
         final JsonObject body = aContext.getBodyAsJson();
-        final String manifestId = request.getParam(Constants.MANIFEST_ID);
+        final String manifestID = request.getParam(Constants.MANIFEST_ID);
         final String manifestS3Key = IDUtils.getWorkS3Key(manifestId);
 
         // For now we're not going to check if it exists before we overwrite it
@@ -46,28 +46,36 @@ public class PutManifestHandler extends AbstractFesterHandler {
             switch (statusCode) {
                 case HTTP.OK:
                     response.setStatusCode(HTTP.OK);
-                    response.end();
+                    response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
+                    response.end(LOGGER.getMessage(MessageCodes.MFS_092, manifestID));
 
                     break;
                 case HTTP.FORBIDDEN:
-                    LOGGER.debug(MessageCodes.MFS_023, manifestId);
+                    LOGGER.debug(MessageCodes.MFS_023, manifestID);
 
                     response.setStatusCode(HTTP.FORBIDDEN);
-                    response.end();
+                    response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
+                    response.end(LOGGER.getMessage(MessageCodes.MFS_089, manifestID));
 
                     break;
                 case HTTP.INTERNAL_SERVER_ERROR:
-                    LOGGER.error(MessageCodes.MFS_015, manifestId);
+                    final String serverErrorMessage = LOGGER.getMessage(MessageCodes.MFS_015, manifestID);
+
+                    LOGGER.error(serverErrorMessage);
 
                     response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
-                    response.end();
+                    response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
+                    response.end(serverErrorMessage);
 
                     break;
                 default:
-                    LOGGER.warn(MessageCodes.MFS_013, statusCode, manifestId);
+                    final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_013, statusCode, manifestID);
+
+                    LOGGER.warn(errorMessage);
 
                     response.setStatusCode(statusCode);
-                    response.end();
+                    response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
+                    response.end(errorMessage);
             }
         });
     }

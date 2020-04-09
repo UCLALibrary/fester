@@ -35,7 +35,7 @@ public class DeleteManifestHandler extends AbstractFesterHandler {
     public void handle(final RoutingContext aContext) {
         final HttpServerResponse response = aContext.response();
         final HttpServerRequest request = aContext.request();
-        final String manifestId = request.getParam(Constants.MANIFEST_ID);
+        final String manifestID = request.getParam(Constants.MANIFEST_ID);
         final String manifestS3Key = IDUtils.getWorkS3Key(manifestId);
 
         myS3Client.delete(myS3Bucket, manifestS3Key, deleteResponse -> {
@@ -44,26 +44,34 @@ public class DeleteManifestHandler extends AbstractFesterHandler {
             switch (statusCode) {
                 case HTTP.SUCCESS_NO_CONTENT:
                     response.setStatusCode(HTTP.SUCCESS_NO_CONTENT);
-                    response.end();
+                    response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
+                    response.end(LOGGER.getMessage(MessageCodes.MFS_088, manifestID));
 
                     break;
                 case HTTP.FORBIDDEN:
                     response.setStatusCode(HTTP.FORBIDDEN);
-                    response.end();
+                    response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
+                    response.end(LOGGER.getMessage(MessageCodes.MFS_089, manifestID));
 
                     break;
                 case HTTP.INTERNAL_SERVER_ERROR:
-                    LOGGER.error(MessageCodes.MFS_014, manifestId);
+                    final String serverErrorMessage = LOGGER.getMessage(MessageCodes.MFS_014, manifestID);
+
+                    LOGGER.error(serverErrorMessage);
 
                     response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
-                    response.end();
+                    response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
+                    response.end(serverErrorMessage);
 
                     break;
                 default:
-                    LOGGER.warn(MessageCodes.MFS_013, statusCode, manifestId);
+                    final String genericErrorMessage = LOGGER.getMessage(MessageCodes.MFS_013, manifestID);
+
+                    LOGGER.warn(genericErrorMessage);
 
                     response.setStatusCode(statusCode);
-                    response.end();
+                    response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
+                    response.end(genericErrorMessage);
             }
         });
     }
