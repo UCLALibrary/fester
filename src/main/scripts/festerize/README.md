@@ -11,7 +11,11 @@ First, check the Fester project out of GitHub and change into the script's direc
     git clone https://github.com/UCLALibrary/fester.git
     cd fester/src/main/scripts
 
-Then you can install `festerize` and its dependencies:
+Then you can install `festerize` and its dependencies.
+
+### Installing on a Linux machine
+
+To install on a Linux machine, type:
 
     ./setup.py install --user
 
@@ -19,7 +23,15 @@ If you want to install it in a place that's available to all users on a system (
 
     sudo ./setup.py
 
-After it's installed, you can see the available options by running:
+### Installing on a Mac
+
+To install on a Mac that's installed Python 3 with Homebrew, type:
+
+    python3 setup.py install
+
+## Running Festerize
+
+After festerize is installed, you can see the available options by running:
 
     festerize --help
 
