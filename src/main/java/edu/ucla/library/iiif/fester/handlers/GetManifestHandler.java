@@ -1,7 +1,6 @@
 
 package edu.ucla.library.iiif.fester.handlers;
 
-import info.freelibrary.util.FileUtils;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
@@ -38,13 +37,7 @@ public class GetManifestHandler extends AbstractFesterHandler {
         final HttpServerResponse response = aContext.response();
         final HttpServerRequest request = aContext.request();
         final String manifestID = request.getParam(Constants.MANIFEST_ID);
-        final String manifestS3Key;
-
-        if (FileUtils.getExt(manifestID).equals(Constants.JSON_EXT)) {
-            manifestS3Key = IDUtils.getWorkS3Key(manifestID, Constants.JSON_EXT);
-        } else {
-            manifestS3Key = IDUtils.getWorkS3Key(manifestID);
-        }
+        final String manifestS3Key = IDUtils.getWorkS3Key(manifestID);
 
         // set a very permissive CORS response header
         response.headers().set(Constants.CORS_HEADER, Constants.STAR);
