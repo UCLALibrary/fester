@@ -193,22 +193,6 @@ public final class IDUtils {
     }
 
     /**
-     * @deprecated Gets an S3 key for a work, with an extension to append if the identifier doesn't have it already.
-     *             TODO: remove in 1.0.0
-     * @param aID The ID (ARK) of the work
-     * @param aExt The extension to append if the identifier doesn't have it already
-     * @return An S3 key
-     */
-    @Deprecated
-    public static String getWorkS3Key(final String aID, final String aExt) {
-        if (FileUtils.getExt(aID).equals(aExt)) {
-            return Constants.WORK_S3_KEY_PREFIX + aID;
-        } else {
-            return Constants.WORK_S3_KEY_PREFIX + aID + Constants.DOT + aExt;
-        }
-    }
-
-    /**
      * Gets an S3 key for a collection.
      *
      * @param aID The ID (ARK) of the collection
