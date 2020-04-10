@@ -15,6 +15,8 @@ import org.apache.commons.lang3.RandomStringUtils;
 import info.freelibrary.util.FileUtils;
 
 import edu.ucla.library.iiif.fester.Constants;
+import edu.ucla.library.iiif.fester.MalformedPathException;
+import edu.ucla.library.iiif.fester.MessageCodes;
 
 /**
  * A utilities class for working with IDs.
@@ -84,17 +86,21 @@ public final class IDUtils {
      *
      * @param aS3Key The S3 key for the IIIF resource
      * @return A IIIF resource URI path
+     * @throws MalformedPathException If the supplied S3 key doesn't start with {@link Constants.WORK_S3_KEY_PREFIX}
+     *         or {@link Constants.COLLECTION_S3_KEY_PREFIX}
      */
-    public static String getResourceURIPath(final String aS3Key) {
+    public static String getResourceURIPath(final String aS3Key) throws MalformedPathException {
         final String encodedID = URLEncoder.encode(getResourceID(aS3Key), StandardCharsets.UTF_8);
         final String path;
 
-        if (aS3Key.contains(Constants.COLLECTION_S3_KEY_PREFIX)) {
+        checkPrefixValidity(aS3Key);
+
+        if (aS3Key.startsWith(Constants.COLLECTION_S3_KEY_PREFIX)) {
             path = Constants.COLLECTION_URI_PATH_PREFIX + encodedID;
-        } else {
-            // TODO: check (aS3Key.contains(Constants.WORK_S3_KEY_PREFIX))
+        } else { // it starts with Constants.WORK_S3_KEY_PREFIX
             path = Constants.SLASH + encodedID + Constants.MANIFEST_URI_PATH_SUFFIX;
         }
+
         return path;
     }
 
@@ -103,15 +109,20 @@ public final class IDUtils {
      *
      * @param aS3Key The S3 key for the IIIF resource
      * @return An ID (ARK)
+     * @throws MalformedPathException If the supplied S3 key doesn't start with {@link Constants.WORK_S3_KEY_PREFIX}
+     *         or {@link Constants.COLLECTION_S3_KEY_PREFIX}
      */
-    public static String getResourceID(final String aS3Key) {
+    public static String getResourceID(final String aS3Key) throws MalformedPathException {
         final String s3KeyPrefix;
-        if (aS3Key.contains(Constants.COLLECTION_S3_KEY_PREFIX)) {
+
+        checkPrefixValidity(aS3Key);
+
+        if (aS3Key.startsWith(Constants.COLLECTION_S3_KEY_PREFIX)) {
             s3KeyPrefix = Constants.COLLECTION_S3_KEY_PREFIX;
-        } else {
-            // TODO: check (aS3Key.contains(Constants.WORK_S3_KEY_PREFIX))
+        } else { // it starts with Constants.WORK_S3_KEY_PREFIX
             s3KeyPrefix = Constants.WORK_S3_KEY_PREFIX;
         }
+
         return FileUtils.stripExt(aS3Key.substring(s3KeyPrefix.length()));
     }
 
@@ -130,8 +141,10 @@ public final class IDUtils {
      *
      * @param aURI The URI of the IIIF resource
      * @return An S3 key
+     * @throws MalformedPathException If the supplied URI doesn't contain {@link Constants.MANIFEST_URI_PATH_SUFFIX}
+     *         or {@link Constants.COLLECTION_URI_PATH_PREFIX}
      */
-    public static String getResourceS3Key(final URI aURI) {
+    public static String getResourceS3Key(final URI aURI) throws MalformedPathException {
         final String path = aURI.getPath();
         final String encodedID;
         final String uriPathPrefix;
@@ -143,15 +156,18 @@ public final class IDUtils {
             uriPathPrefix = Constants.COLLECTION_URI_PATH_PREFIX;
             s3KeyPrefix = Constants.COLLECTION_S3_KEY_PREFIX;
             endIndex = path.length();
-        } else {
-            // TODO: check (path.contains(Constants.MANIFEST_URI_PATH_SUFFIX))
+        } else if (path.contains(Constants.MANIFEST_URI_PATH_SUFFIX)) {
             uriPathPrefix = Constants.SLASH;
             s3KeyPrefix = Constants.WORK_S3_KEY_PREFIX;
             endIndex = path.length() - Constants.MANIFEST_URI_PATH_SUFFIX.length();
+        } else {
+            throw new MalformedPathException(MessageCodes.MFS_143, aURI, Constants.MANIFEST_URI_PATH_SUFFIX,
+                    Constants.COLLECTION_URI_PATH_PREFIX);
         }
+
         encodedID = path.substring(uriPathPrefix.length(), endIndex);
 
-        // Add any prefix and a .json extension
+        // Concatenate prefix, ID, and a ".json" extension
         return s3KeyPrefix + URLDecoder.decode(encodedID, StandardCharsets.UTF_8) + Constants.DOT +
                 Constants.JSON_EXT;
     }
@@ -163,6 +179,16 @@ public final class IDUtils {
      * @return An S3 key
      */
     public static String getWorkS3Key(final String aID) {
+        final String jsonExtension = Constants.DOT + Constants.JSON_EXT;
+
+        if (aID.startsWith(Constants.WORK_S3_KEY_PREFIX)) {
+            throw new MalformedPathException(MessageCodes.MFS_144, aID);
+        }
+
+        if (aID.endsWith(jsonExtension)) {
+            throw new MalformedPathException(MessageCodes.MFS_145, aID);
+        }
+
         return Constants.WORK_S3_KEY_PREFIX + aID + Constants.DOT + Constants.JSON_EXT;
     }
 
@@ -173,6 +199,29 @@ public final class IDUtils {
      * @return An S3 key
      */
     public static String getCollectionS3Key(final String aID) {
-        return Constants.COLLECTION_S3_KEY_PREFIX + aID + Constants.DOT + Constants.JSON_EXT;
+        final String jsonExtension = Constants.DOT + Constants.JSON_EXT;
+
+        if (aID.startsWith(Constants.COLLECTION_S3_KEY_PREFIX)) {
+            throw new MalformedPathException(MessageCodes.MFS_144, aID);
+        }
+
+        if (aID.endsWith(jsonExtension)) {
+            throw new MalformedPathException(MessageCodes.MFS_145, aID);
+        }
+
+        return Constants.COLLECTION_S3_KEY_PREFIX + aID + jsonExtension;
+    }
+
+    /**
+     * Checks for a valid S3 key path prefix.
+     *
+     * @param aS3Key An S3 key
+     */
+    private static void checkPrefixValidity(final String aS3Key) {
+        if (!aS3Key.startsWith(Constants.COLLECTION_S3_KEY_PREFIX) && !aS3Key.startsWith(
+                Constants.WORK_S3_KEY_PREFIX)) {
+            throw new MalformedPathException(MessageCodes.MFS_142, aS3Key, Constants.WORK_S3_KEY_PREFIX,
+                    Constants.COLLECTION_S3_KEY_PREFIX);
+        }
     }
 }
