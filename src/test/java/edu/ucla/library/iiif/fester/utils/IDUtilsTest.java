@@ -5,8 +5,13 @@ import static org.junit.Assert.assertEquals;
 
 import java.net.URI;
 import java.util.List;
+import java.util.UUID;
 
+import org.junit.Before;
 import org.junit.Test;
+
+import edu.ucla.library.iiif.fester.Constants;
+import edu.ucla.library.iiif.fester.MalformedPathException;
 
 /**
  * Tests of IDUtils.
@@ -23,7 +28,6 @@ public class IDUtilsTest {
 
     private static final String WORK_MANIFEST_S3_KEY = "works/ark:/21198/zz000bjfsv.json";
 
-
     private static final String COLLECTION_MANIFEST_ID = "ark:/21198/zz0009gss9";
 
     private static final String COLLECTION_MANIFEST_URI_PATH = "/collections/ark%3A%2F21198%2Fzz0009gss9";
@@ -31,6 +35,16 @@ public class IDUtilsTest {
     private static final String COLLECTION_MANIFEST_URI = FAKE_HOST + COLLECTION_MANIFEST_URI_PATH;
 
     private static final String COLLECTION_MANIFEST_S3_KEY = "collections/ark:/21198/zz0009gss9.json";
+
+    private String myTestID;
+
+    /**
+     * Create a fake ID for testing.
+     */
+    @Before
+    public final void setUp() {
+        myTestID = UUID.randomUUID().toString();
+    }
 
     /**
      * Tests getIDs().
@@ -68,8 +82,7 @@ public class IDUtilsTest {
      */
     @Test
     public final void testGetLastPartStringWithoutSlashes() {
-        final String id = "YadaYadaYada";
-        assertEquals(id, IDUtils.getLastPart(id));
+        assertEquals(myTestID, IDUtils.getLastPart(myTestID));
     }
 
     /**
@@ -77,10 +90,7 @@ public class IDUtilsTest {
      */
     @Test
     public final void testGetResourceURIWork() {
-        final String expected = WORK_MANIFEST_URI;
-        final String found = IDUtils.getResourceURI(FAKE_HOST, WORK_MANIFEST_S3_KEY).toString();
-
-        assertEquals(expected, found);
+        assertEquals(WORK_MANIFEST_URI, IDUtils.getResourceURI(FAKE_HOST, WORK_MANIFEST_S3_KEY).toString());
     }
 
     /**
@@ -88,11 +98,8 @@ public class IDUtilsTest {
      */
     @Test
     public final void testGetResourceURICollection() {
-        final String expected = COLLECTION_MANIFEST_URI;
-        final String found = IDUtils.getResourceURI(FAKE_HOST, COLLECTION_MANIFEST_S3_KEY)
-                .toString();
-
-        assertEquals(expected, found);
+        assertEquals(COLLECTION_MANIFEST_URI, IDUtils.getResourceURI(FAKE_HOST, COLLECTION_MANIFEST_S3_KEY)
+                .toString());
     }
 
     /**
@@ -100,10 +107,7 @@ public class IDUtilsTest {
      */
     @Test
     public final void testGetResourceURIPathWork() {
-        final String expected = WORK_MANIFEST_URI_PATH;
-        final String found = IDUtils.getResourceURIPath(WORK_MANIFEST_S3_KEY);
-
-        assertEquals(expected, found);
+        assertEquals(WORK_MANIFEST_URI_PATH, IDUtils.getResourceURIPath(WORK_MANIFEST_S3_KEY));
     }
 
     /**
@@ -111,10 +115,15 @@ public class IDUtilsTest {
      */
     @Test
     public final void testGetResourceURIPathCollection() {
-        final String expected = COLLECTION_MANIFEST_URI_PATH;
-        final String found = IDUtils.getResourceURIPath(COLLECTION_MANIFEST_S3_KEY);
+        assertEquals(COLLECTION_MANIFEST_URI_PATH, IDUtils.getResourceURIPath(COLLECTION_MANIFEST_S3_KEY));
+    }
 
-        assertEquals(expected, found);
+    /**
+     * Tests that getResourceURIPath() doesn't accept things without the required paths.
+     */
+    @Test(expected = MalformedPathException.class)
+    public final void testGetResourceURIPathInvalid() {
+        IDUtils.getResourceURIPath(myTestID);
     }
 
     /**
@@ -122,10 +131,7 @@ public class IDUtilsTest {
      */
     @Test
     public final void testGetResourceS3KeyWork() {
-        final String expected = WORK_MANIFEST_S3_KEY;
-        final String found = IDUtils.getResourceS3Key(URI.create(WORK_MANIFEST_URI));
-
-        assertEquals(expected, found);
+        assertEquals(WORK_MANIFEST_S3_KEY, IDUtils.getResourceS3Key(URI.create(WORK_MANIFEST_URI)));
     }
 
     /**
@@ -133,10 +139,31 @@ public class IDUtilsTest {
      */
     @Test
     public final void testGetResourceS3KeyCollection() {
-        final String expected = COLLECTION_MANIFEST_S3_KEY;
-        final String found = IDUtils.getResourceS3Key(URI.create(COLLECTION_MANIFEST_URI));
+        assertEquals(COLLECTION_MANIFEST_S3_KEY, IDUtils.getResourceS3Key(URI.create(COLLECTION_MANIFEST_URI)));
+    }
 
-        assertEquals(expected, found);
+    /**
+     * Tests getResourceS3Key() method to make sure it doesn't accept keys that are invalid.
+     */
+    @Test(expected = MalformedPathException.class)
+    public final void testGetResourceS3KeyInvalid() {
+        IDUtils.getResourceS3Key(URI.create(myTestID));
+    }
+
+    /**
+     * Tests the check on pre-existing collection S3 key prefixes.
+     */
+    @Test(expected = MalformedPathException.class)
+    public final void testGetResourceS3KeyPrefixed() {
+        IDUtils.getResourceS3Key(URI.create(Constants.COLLECTION_S3_KEY_PREFIX + myTestID));
+    }
+
+    /**
+     * Tests the check on pre-existing collection S3 key extensions.
+     */
+    @Test(expected = MalformedPathException.class)
+    public final void testGetResourceS3KeyExtension() {
+        IDUtils.getResourceS3Key(URI.create(myTestID + Constants.DOT + Constants.JSON_EXT));
     }
 
     /**
@@ -144,10 +171,7 @@ public class IDUtilsTest {
      */
     @Test
     public final void testGetResourceIDWorkURI() {
-        final String expected = WORK_MANIFEST_ID;
-        final String found = IDUtils.getResourceID(URI.create(WORK_MANIFEST_URI));
-
-        assertEquals(expected, found);
+        assertEquals(WORK_MANIFEST_ID, IDUtils.getResourceID(URI.create(WORK_MANIFEST_URI)));
     }
 
     /**
@@ -155,10 +179,15 @@ public class IDUtilsTest {
      */
     @Test
     public final void testGetResourceIDCollectionURI() {
-        final String expected = COLLECTION_MANIFEST_ID;
-        final String found = IDUtils.getResourceID(URI.create(COLLECTION_MANIFEST_URI));
+        assertEquals(COLLECTION_MANIFEST_ID, IDUtils.getResourceID(URI.create(COLLECTION_MANIFEST_URI)));
+    }
 
-        assertEquals(expected, found);
+    /**
+     * Tests getResourceID() method to make sure it doesn't except invalid URIs.
+     */
+    @Test(expected = MalformedPathException.class)
+    public final void testGetResourceIDInvalidURI() {
+        IDUtils.getResourceID(URI.create(myTestID));
     }
 
     /**
@@ -166,10 +195,7 @@ public class IDUtilsTest {
      */
     @Test
     public final void testGetResourceIDWorkS3Key() {
-        final String expected = WORK_MANIFEST_ID;
-        final String found = IDUtils.getResourceID(WORK_MANIFEST_S3_KEY);
-
-        assertEquals(expected, found);
+        assertEquals(WORK_MANIFEST_ID, IDUtils.getResourceID(WORK_MANIFEST_S3_KEY));
     }
 
     /**
@@ -177,10 +203,15 @@ public class IDUtilsTest {
      */
     @Test
     public final void testGetResourceIDCollectionS3Key() {
-        final String expected = COLLECTION_MANIFEST_ID;
-        final String found = IDUtils.getResourceID(COLLECTION_MANIFEST_S3_KEY);
+        assertEquals(COLLECTION_MANIFEST_ID, IDUtils.getResourceID(COLLECTION_MANIFEST_S3_KEY));
+    }
 
-        assertEquals(expected, found);
+    /**
+     * Tests to make sure getResourceID() doesn't accept invalid keys.
+     */
+    @Test(expected = MalformedPathException.class)
+    public final void testGetResourceIDInvalidKey() {
+        IDUtils.getResourceID(myTestID);
     }
 
     /**
@@ -188,10 +219,23 @@ public class IDUtilsTest {
      */
     @Test
     public final void testGetWorkS3Key() {
-        final String expected = WORK_MANIFEST_S3_KEY;
-        final String found = IDUtils.getWorkS3Key(WORK_MANIFEST_ID);
+        assertEquals(WORK_MANIFEST_S3_KEY, IDUtils.getWorkS3Key(WORK_MANIFEST_ID));
+    }
 
-        assertEquals(expected, found);
+    /**
+     * Tests S3 key mapping when the key already has the prefix to be added.
+     */
+    @Test(expected = MalformedPathException.class)
+    public final void testGetWorkS3KeyPrefix() {
+        IDUtils.getWorkS3Key(Constants.WORK_S3_KEY_PREFIX + WORK_MANIFEST_ID);
+    }
+
+    /**
+     * Tests S3 key mapping when the key already has the extension to be added.
+     */
+    @Test(expected = MalformedPathException.class)
+    public final void testGetWorkS3KeyExt() {
+        IDUtils.getWorkS3Key(WORK_MANIFEST_ID + Constants.DOT + Constants.JSON_EXT);
     }
 
     /**
@@ -199,9 +243,6 @@ public class IDUtilsTest {
      */
     @Test
     public final void testGetCollectionS3Key() {
-        final String expected = COLLECTION_MANIFEST_S3_KEY;
-        final String found = IDUtils.getCollectionS3Key(COLLECTION_MANIFEST_ID);
-
-        assertEquals(expected, found);
+        assertEquals(COLLECTION_MANIFEST_S3_KEY, IDUtils.getCollectionS3Key(COLLECTION_MANIFEST_ID));
     }
 }
