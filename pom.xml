@@ -104,6 +104,9 @@
     <seeLogsIT>false</seeLogsIT>
     <seeLogsFfT>false</seeLogsFfT>
 
+    <!-- What level of logging we want to see, by default, in our tests -->
+    <testLogLevel>ERROR</testLogLevel>
+
     <!-- AWS configuration properties -->
     <fester.s3.region>us-east-1</fester.s3.region>
     <fester.s3.bucket>iiif-fester</fester.s3.bucket>
@@ -264,6 +267,14 @@
     <testResources>
       <testResource>
         <directory>src/test/resources</directory>
+        <filtering>true</filtering>
+      </testResource>
+      <!-- We can also override the default logging configuration with a file in our root project directory -->
+      <testResource>
+        <directory>${basedir}</directory>
+        <includes>
+          <include>logback-test.xml</include>
+        </includes>
         <filtering>true</filtering>
       </testResource>
     </testResources>

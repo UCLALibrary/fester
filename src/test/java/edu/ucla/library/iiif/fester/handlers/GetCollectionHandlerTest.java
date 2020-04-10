@@ -10,6 +10,7 @@ import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 import info.freelibrary.util.StringUtils;
 
+import ch.qos.logback.classic.Level;
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
@@ -75,9 +76,12 @@ public class GetCollectionHandlerTest extends AbstractFesterHandlerTest {
         final Async asyncTask = aContext.async();
         final int port = aContext.get(Config.HTTP_PORT);
         final String missingPath = "/collections/missingIdentifier";
+        final Level logLevel = setLogLevel(GetCollectionHandler.class, Level.OFF);
 
         myVertx.createHttpClient().getNow(port, Constants.UNSPECIFIED_HOST, missingPath, response -> {
             final int statusCode = response.statusCode();
+
+            setLogLevel(GetCollectionHandler.class, logLevel); // Turn logger back on after expected error
 
             if (response.statusCode() != HTTP.NOT_FOUND) {
                 aContext.fail(LOGGER.getMessage(MessageCodes.MFS_004, HTTP.NOT_FOUND, statusCode));

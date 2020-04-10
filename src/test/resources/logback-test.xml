@@ -3,14 +3,17 @@
   <timestamp key="byDay" datePattern="yyyy-MM-dd" />
   
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>${testLogLevel}</level>
+    </filter>
     <encoder>
       <pattern>[%level] %logger{45}:%X{line} | %msg%n</pattern>
     </encoder>
   </appender>
 
-  <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+  <appender name="FILEOUT" class="ch.qos.logback.core.FileAppender">
     <file>target/${project.artifactId}-${byDay}.log</file>
-    <append>false</append>
+    <append>true</append>
     <encoder>
       <pattern>[%level] %logger{45}:%X{line} | %msg%n</pattern>
     </encoder>
@@ -18,33 +21,45 @@
 
   <logger name="io.netty" level="ERROR" additivity="false">
     <appender-ref ref="STDOUT" />
+    <appender-ref ref="FILEOUT" />
   </logger>
   <logger name="io.vertx" level="ERROR" additivity="false">
     <appender-ref ref="STDOUT" />
+    <appender-ref ref="FILEOUT" />
   </logger>
+
+  <!-- Loggers for our application -->
   <logger name="edu.ucla.library.iiif.fester" level="DEBUG" additivity="false">
     <appender-ref ref="STDOUT" />
+    <appender-ref ref="FILEOUT" />
   </logger>
 
   <!-- Loggers for the testcontainers.org tool -->
   <logger name="org.testcontainers.utility.RegistryAuthLocator" level="ERROR">
     <appender-ref ref="STDOUT" />
+    <appender-ref ref="FILEOUT" />
   </logger>
   <logger name="org.testcontainers.dockerclient.DockerClientProviderStrategy" level="WARN">
     <appender-ref ref="STDOUT" />
+    <appender-ref ref="FILEOUT" />
   </logger>
   <logger name="org.testcontainers.dockerclient.EnvironmentAndSystemPropertyClientProviderStrategy" level="WARN">
     <appender-ref ref="STDOUT" />
+    <appender-ref ref="FILEOUT" />
   </logger>
   <logger name="org.testcontainers.utility.ResourceReaper" level="ERROR">
     <appender-ref ref="STDOUT" />
+    <appender-ref ref="FILEOUT" />
   </logger>
   <logger name="🐳 [alpine/socat:latest]" level="WARN">
     <appender-ref ref="STDOUT" />
+    <appender-ref ref="FILEOUT" />
   </logger>
 
+  <!-- Default logging level for everything else -->
   <root level="INFO">
     <appender-ref ref="STDOUT" />
+    <appender-ref ref="FILEOUT" />
   </root>
 
 </configuration>

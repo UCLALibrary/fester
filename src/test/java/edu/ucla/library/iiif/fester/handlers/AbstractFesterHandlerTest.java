@@ -21,6 +21,7 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
+import ch.qos.logback.classic.Level;
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.MessageCodes;
@@ -46,10 +47,10 @@ abstract class AbstractFesterHandlerTest {
 
     protected static final File MANIFEST_FILE = new File("src/test/resources/json/ark%3A%2F21198%2Fzz0009gv8j.json");
 
-    protected static final File COLLECTION_FILE = new File("src/test/resources/json/ark%3A%2F21198%2Fzz0009gsq9.json");
+    protected static final File COLLECTION_FILE = new File(
+            "src/test/resources/json/ark%3A%2F21198%2Fzz0009gsq9.json");
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFesterHandlerTest.class,
-            Constants.MESSAGES);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFesterHandlerTest.class, Constants.MESSAGES);
 
     protected Vertx myVertx;
 
@@ -118,6 +119,24 @@ abstract class AbstractFesterHandlerTest {
         }
 
         myVertx.close(aContext.asyncAssertSuccess());
+    }
+
+    /**
+     * Set the log level of the supplied logger. This is really something that should bubble back up into the logging
+     * facade library.
+     *
+     * @param aLogClass A logger for which to set the level
+     * @param aLogLevel A new log level
+     * @return The logger's previous log level
+     */
+    protected Level setLogLevel(final Class aLogClass, final Level aLogLevel) {
+        final ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(
+                aLogClass, Constants.MESSAGES).getLoggerImpl();
+        final Level level = logger.getEffectiveLevel();
+
+        logger.setLevel(aLogLevel);
+
+        return level;
     }
 
     /**

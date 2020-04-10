@@ -60,6 +60,12 @@ When running the integration and functional tests, it may be desirable to turn o
 
 This will tunnel the container's logs (including the application within the container's logs) to Maven's logging mechanism so that you will be able to see what's happening in the container as the tests are being run against it.
 
+You might also want to adjust the logging level on the tests themselves. By default, the test loggers are configured to write DEBUG logs to a log file in the `target` directory and ERROR logs to standard out. To change the log level of the standard out logging, run Maven with the `testLogLevel` argument; for instance:
+
+    mvn -DtestLogLevel=DEBUG test
+
+If you want more fine-grained control over the logging, you can copy the `src/test/resources/logback-test.xml` file to the project's root directory and modify it. A `logback-test.xml` file in the project's home directory will be used instead of the standard one in `src/rest/resources` if it's available. That hypothetical file has also been added to the project's `.gitignore` so you don't need to worry about checking it into Git.
+
 ## Running the Application for Development
 
 You can run a development instance of Fester by typing the following within the project root:

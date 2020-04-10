@@ -14,6 +14,7 @@ import com.amazonaws.SdkClientException;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
+import ch.qos.logback.classic.Level;
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
@@ -122,6 +123,7 @@ public class PutCollectionHandlerTest extends AbstractFesterHandlerTest {
         final int port = aContext.get(Config.HTTP_PORT);
         final String requestPath = IDUtils.getResourceURIPath(myPutCollectionS3Key);
         final RequestOptions requestOpts = new RequestOptions();
+        final Level logLevel = setLogLevel(GetCollectionHandler.class, Level.OFF);
 
         LOGGER.debug(MessageCodes.MFS_016, requestPath);
 
@@ -138,6 +140,8 @@ public class PutCollectionHandlerTest extends AbstractFesterHandlerTest {
                     myVertx.createHttpClient().getNow(port, Constants.UNSPECIFIED_HOST, requestPath, getResponse -> {
                         final int getStatusCode = getResponse.statusCode();
 
+                        setLogLevel(GetCollectionHandler.class, logLevel); // Turn logger back on after expected error
+
                         if (getStatusCode == HTTP.NOT_FOUND) {
                             if (!asyncTask.isCompleted()) {
                                 asyncTask.complete();
@@ -148,6 +152,7 @@ public class PutCollectionHandlerTest extends AbstractFesterHandlerTest {
                             aContext.fail(LOGGER.getMessage(MessageCodes.MFS_010, getStatusCode));
                         }
                     });
+
                     break;
                 default:
                     aContext.fail(LOGGER.getMessage(MessageCodes.MFS_019, manifestPath, putStatusCode));
@@ -170,6 +175,7 @@ public class PutCollectionHandlerTest extends AbstractFesterHandlerTest {
         final int port = aContext.get(Config.HTTP_PORT);
         final String requestPath = IDUtils.getResourceURIPath(myPutCollectionS3Key);
         final RequestOptions requestOpts = new RequestOptions();
+        final Level logLevel = setLogLevel(GetCollectionHandler.class, Level.OFF);
 
         LOGGER.debug(MessageCodes.MFS_016, requestPath);
 
@@ -185,6 +191,8 @@ public class PutCollectionHandlerTest extends AbstractFesterHandlerTest {
                     // Send a GET request to the same path to make sure PUT failed
                     myVertx.createHttpClient().getNow(port, Constants.UNSPECIFIED_HOST, requestPath, getResponse -> {
                         final int getStatusCode = getResponse.statusCode();
+
+                        setLogLevel(GetCollectionHandler.class, logLevel); // Turn logger back on after expected error
 
                         if (getStatusCode == HTTP.NOT_FOUND) {
                             if (!asyncTask.isCompleted()) {
