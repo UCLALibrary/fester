@@ -170,12 +170,6 @@
       <artifactId>vertx-web-api-contract</artifactId>
       <version>${vertx.version}</version>
     </dependency>
-    <!-- Allows us to suppress warnings from the AWS SDK (see https://github.com/aws/aws-sdk-java/issues/1707) -->
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>jcl-over-slf4j</artifactId>
-      <version>${jcl.over.slf4j.version}</version>
-    </dependency>
     <!-- Below is a dependency that needs updating due to security issue (may be able to remove in future) -->
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -260,6 +254,13 @@
       <groupId>org.testcontainers</groupId>
       <artifactId>localstack</artifactId>
       <version>${localstack.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- Allows us to suppress warnings from the AWS SDK (see https://github.com/aws/aws-sdk-java/issues/1707) -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
+      <version>${jcl.over.slf4j.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
