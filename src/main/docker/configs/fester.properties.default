@@ -7,6 +7,9 @@
 ## The location of the OpenAPI spec file
 OPENAPI_SPEC_PATH=fester.yaml
 
+## The URL Fester is available at
+FESTER_URL=http://localhost
+
 ## Configures the port on which Fester microservice listens
 FESTER_HTTP_PORT=8888
 

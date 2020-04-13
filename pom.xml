@@ -119,6 +119,9 @@
     <!-- The IIIF base URL (including service prefix) -->
     <iiif.base.url>https://iiif.library.ucla.edu/iiif/2</iiif.base.url>
 
+    <!-- The URL Fester is available at -->
+    <fester.url>https://iiif.library.ucla.edu</fester.url>
+
     <!-- The port Fester listens on -->
     <fester.http.port>8888</fester.http.port>
     <fester.debug.port>5555</fester.debug.port>
@@ -555,6 +558,7 @@
           </excludes>
           <systemPropertyVariables>
             <vertx.logger-delegate-factory-class-name>io.vertx.core.logging.SLF4JLogDelegateFactory</vertx.logger-delegate-factory-class-name>
+            <fester.url>http://localhost</fester.url>
             <fester.http.port>${http.port}</fester.http.port>
             <vertx-config-path>${project.basedir}/target/test-classes/test-config.properties</vertx-config-path>
           </systemPropertyVariables>
@@ -637,6 +641,7 @@
               <skipTests>${skipFTs}</skipTests>
               <systemPropertyVariables>
                 <fester.logs.output>${seeLogsFT}</fester.logs.output>
+                <fester.url>http://localhost</fester.url>
                 <fester.http.port>8888</fester.http.port>
                 <fester.s3.bucket>${fester.s3.bucket}</fester.s3.bucket>
                 <fester.container.tag>${docker.registry.account}${project.artifactId}:${project.version}</fester.container.tag>

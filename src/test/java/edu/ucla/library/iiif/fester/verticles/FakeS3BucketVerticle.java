@@ -9,11 +9,14 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
+
 import info.freelibrary.util.BufferedFileWriter;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 import info.freelibrary.util.StringUtils;
 
+import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.Op;
@@ -32,6 +35,10 @@ public class FakeS3BucketVerticle extends AbstractFesterVerticle {
     private static final Map<String, File> JSON_FILES = new HashMap<String, File>();
 
     private File myTmpDir;
+
+    private final String myUrl = System.getProperty(Config.URL);
+
+    private final String myUrlPlaceholderPattern = Pattern.quote(Constants.URL_PLACEHOLDER);
 
     @Override
     public void start() throws Exception {
@@ -98,10 +105,14 @@ public class FakeS3BucketVerticle extends AbstractFesterVerticle {
             LOGGER.debug(MessageCodes.MFS_127, aS3Key);
 
             if (JSON_FILES.containsKey(aS3Key)) {
-                final String result = StringUtils.read(JSON_FILES.get(aS3Key));
-                final JsonObject manifest = new JsonObject(result);
-
-                aMessage.reply(manifest);
+                final String serializedJson = StringUtils.read(JSON_FILES.get(aS3Key));
+                final String manifest;
+                if (aMessage.headers().get(Constants.NO_REWRITE_URLS) != null) {
+                    manifest = serializedJson;
+                } else {
+                    manifest = serializedJson.replaceAll(myUrlPlaceholderPattern, myUrl);
+                }
+                aMessage.reply(new JsonObject(manifest));
             } else {
                 aMessage.fail(CodeUtils.getInt(MessageCodes.MFS_052), aS3Key + " not found");
             }

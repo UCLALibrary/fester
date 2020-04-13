@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import org.junit.After;
 import org.junit.Before;
@@ -61,6 +62,10 @@ abstract class AbstractFesterHandlerTest {
     protected String myManifestID;
 
     protected String myManifestS3Key;
+
+    protected final String myUrl = System.getProperty(Config.URL);
+
+    protected final String myUrlPlaceholderPattern = Pattern.quote(Constants.URL_PLACEHOLDER);
 
     /**
      * Test set up.

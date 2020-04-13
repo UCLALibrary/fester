@@ -113,6 +113,17 @@ public final class Constants {
     public static final String IIIF_HOST = "iiif-host";
 
     /**
+     * Used as a message header when the sender wants the manifest returned from S3 without resource URLs re-written.
+     */
+    public static final String NO_REWRITE_URLS = "no-rewrite-urls";
+
+    /**
+     * A unique random placeholder URL that prefixes all IIIF Presentation API resource URLs in all manifests at rest in
+     * S3. It gets replaced with Constants.URL on each GET request.
+     */
+    public static final String URL_PLACEHOLDER = "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org";
+
+    /**
      * The HTTP POST route for CSV uploads.
      */
     public static final String POST_CSV_ROUTE = "/collections";

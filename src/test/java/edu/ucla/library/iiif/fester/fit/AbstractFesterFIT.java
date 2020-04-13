@@ -2,6 +2,7 @@
 package edu.ucla.library.iiif.fester.fit;
 
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import org.junit.After;
 import org.junit.Before;
@@ -9,6 +10,7 @@ import org.junit.Before;
 import com.amazonaws.services.s3.AmazonS3;
 
 import edu.ucla.library.iiif.fester.Config;
+import edu.ucla.library.iiif.fester.Constants;
 import io.vertx.core.Vertx;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.web.client.WebClient;
@@ -23,6 +25,12 @@ abstract class AbstractFesterFIT {
 
     /* The Vertx instance that our tests use */
     protected static final Vertx VERTX_INSTANCE = Vertx.vertx();
+
+    /* The base URL of the Fester instance */
+    protected static final String FESTER_URL = System.getProperty(Config.URL);
+
+    /* Regexp of the placeholder base URL of the Fester instance */
+    protected static final String FESTER_URL_PLACEHOLDER = Pattern.quote(Constants.URL_PLACEHOLDER);
 
     /* This is the port that tests can be run against */
     protected static int FESTER_PORT;

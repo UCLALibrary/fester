@@ -6,6 +6,9 @@ package edu.ucla.library.iiif.fester;
  */
 public final class Config {
 
+    /* Configuration parameter for the URL Fester is available at */
+    public static final String URL = "fester.url";
+
     /* The HTTP port configuration parameter */
     public static final String HTTP_PORT = "fester.http.port";
 

@@ -217,13 +217,6 @@ paths:
             application/json:
               schema:
                 type: object
-        '400':
-          description: Bad request
-          content:
-            text/plain:
-              schema:
-                type: string
-                example: "Bad request while putting collection: XYZ"
         '404':
           description: Not found
           content:

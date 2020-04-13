@@ -52,8 +52,8 @@ public class GetCollectionHandler extends AbstractFesterHandler implements Handl
             } else {
                 final Throwable aThrowable = send.cause();
                 final String exceptionMessage = aThrowable.getMessage();
-                final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_009, collectionName,
-                        HTTP.INTERNAL_SERVER_ERROR, exceptionMessage);
+                final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_009, collectionName, HTTP.NOT_FOUND,
+                        exceptionMessage);
 
                 LOGGER.error(aThrowable, errorMessage);
 

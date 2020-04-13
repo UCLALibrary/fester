@@ -7,9 +7,10 @@ import info.freelibrary.util.LoggerFactory;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
-import edu.ucla.library.iiif.fester.utils.IDUtils;
+import edu.ucla.library.iiif.fester.Op;
+import edu.ucla.library.iiif.fester.verticles.S3BucketVerticle;
 import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
@@ -32,82 +33,38 @@ public class GetManifestHandler extends AbstractFesterHandler {
     }
 
     @Override
-    @SuppressWarnings("checkstyle:indentation") // Checkstyle doesn't yet handle the exception lambda indentation
     public void handle(final RoutingContext aContext) {
         final HttpServerResponse response = aContext.response();
-        final HttpServerRequest request = aContext.request();
-        final String manifestID = request.getParam(Constants.MANIFEST_ID);
-        final String manifestS3Key = IDUtils.getWorkS3Key(manifestID);
+        final String manifestID = aContext.request().getParam(Constants.MANIFEST_ID);
+        final JsonObject message = new JsonObject();
+        final DeliveryOptions options = new DeliveryOptions();
 
-        // set a very permissive CORS response header
-        response.headers().set(Constants.CORS_HEADER, Constants.STAR);
+        message.put(Constants.MANIFEST_ID, manifestID);
+        options.addHeader(Constants.ACTION, Op.GET_MANIFEST);
 
-        try {
-            myS3Client.get(myS3Bucket, manifestS3Key, getResponse -> {
-                final int statusCode = getResponse.statusCode();
-                final String statusMessage = getResponse.statusMessage();
-                final String message;
+        sendMessage(S3BucketVerticle.class.getName(), message, options, send -> {
+            response.headers().set(Constants.CORS_HEADER, Constants.STAR);
 
-                switch (statusCode) {
-                    case HTTP.OK:
-                        getResponse.bodyHandler(bodyHandler -> {
-                            final String manifest = bodyHandler.getString(0, bodyHandler.length());
+            if (send.succeeded()) {
+                final String manifest = send.result().body().toString();
 
-                            response.setStatusCode(HTTP.OK);
-                            response.putHeader(Constants.CONTENT_TYPE, Constants.JSON_MEDIA_TYPE);
-                            response.end(manifest);
-                        });
+                response.setStatusCode(HTTP.OK);
+                response.putHeader(Constants.CONTENT_TYPE, Constants.JSON_MEDIA_TYPE);
+                response.end(manifest);
+            } else {
+                final Throwable aThrowable = send.cause();
+                final String exceptionMessage = aThrowable.getMessage();
+                final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_009, manifestID, HTTP.NOT_FOUND,
+                        exceptionMessage);
 
-                        break;
-                    case HTTP.NOT_FOUND:
-                        message = LOGGER.getMessage(MessageCodes.MFS_009, manifestID, statusCode, statusMessage);
-                        response.setStatusCode(HTTP.NOT_FOUND);
-                        response.setStatusMessage(message);
-                        response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
-                        response.end(message);
+                LOGGER.error(aThrowable, errorMessage);
 
-                        break;
-                    case HTTP.INTERNAL_SERVER_ERROR:
-                        message = LOGGER.getMessage(MessageCodes.MFS_010, manifestID, statusCode, statusMessage);
-                        response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
-                        response.setStatusMessage(message);
-                        response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
-                        response.end(message);
-
-                        LOGGER.error(message);
-
-                        break;
-                    default:
-                        message = LOGGER.getMessage(MessageCodes.MFS_011, manifestID, statusCode, statusMessage);
-                        response.setStatusCode(statusCode);
-                        response.setStatusMessage(message);
-                        response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
-                        response.end(message);
-
-                        LOGGER.error(message);
-                }
-            }, exception -> {
-                final String message = LOGGER.getMessage(MessageCodes.MFS_009, manifestID, HTTP.INTERNAL_SERVER_ERROR,
-                        exception.getMessage());
-
-                response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
-                response.setStatusMessage(message);
+                response.setStatusCode(HTTP.NOT_FOUND);
+                response.setStatusMessage(exceptionMessage);
                 response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
-                response.end(message);
-
-                LOGGER.error(exception, message);
-            });
-        } catch (final Throwable aThrowable) {
-            final String message = LOGGER.getMessage(MessageCodes.MFS_009, manifestID, HTTP.INTERNAL_SERVER_ERROR,
-                    aThrowable.getMessage());
-
-            response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
-            response.setStatusMessage(message);
-            response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
-            response.end(message);
-
-            LOGGER.error(message);
-        }
+                response.end(errorMessage);
+            }
+        });
     }
 
 }
