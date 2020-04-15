@@ -65,6 +65,7 @@
     <opencsv.version>5.0</opencsv.version>
     <moirai.version>2.0.0</moirai.version>
     <slf4j.ext.version>1.7.26</slf4j.ext.version>
+    <jcl.over.slf4j.version>1.7.30</jcl.over.slf4j.version>
     <commons.lang.version>3.9</commons.lang.version>
     <freelib.utils.version>1.0.2</freelib.utils.version>
     <freelib.maven.version>0.0.3</freelib.maven.version>
@@ -256,6 +257,13 @@
       <groupId>org.testcontainers</groupId>
       <artifactId>localstack</artifactId>
       <version>${localstack.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- Allows us to suppress warnings from the AWS SDK (see https://github.com/aws/aws-sdk-java/issues/1707) -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
+      <version>${jcl.over.slf4j.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -850,6 +858,7 @@
                   <exclude>org.jboss.forge.roaster:roaster-jdt</exclude>
                   <exclude>org.mozilla:rhino</exclude>
                   <exclude>com.opencsv:opencsv</exclude>
+                  <exclude>org.slf4j:jcl-over-slf4j</exclude>
                   <exclude>org.slf4j:slf4j-api</exclude>
                   <exclude>org.slf4j:slf4j-ext</exclude>
                   <exclude>org.sonatype.plexus:plexus-cipher</exclude>
