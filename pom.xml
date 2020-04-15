@@ -663,7 +663,6 @@
               <skipTests>${skipITs}</skipTests>
               <systemPropertyVariables>
                 <fester.logs.output>${seeLogsIT}</fester.logs.output>
-                <fester.http.port>9999</fester.http.port>
                 <fester.s3.region>${fester.s3.region}</fester.s3.region>
                 <fester.s3.bucket>${fester.s3.bucket}</fester.s3.bucket>
                 <fester.s3.access_key>${fester.s3.access_key}</fester.s3.access_key>
