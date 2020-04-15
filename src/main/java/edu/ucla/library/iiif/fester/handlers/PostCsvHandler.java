@@ -73,7 +73,7 @@ public class PostCsvHandler extends AbstractFesterHandler {
         templateReader.close();
         myExceptionPage = templateBuilder.toString();
 
-        myUrl = aConfig.getString(Config.URL);
+        myUrl = aConfig.getString(Config.FESTER_URL);
     }
 
     @Override

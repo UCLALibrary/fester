@@ -122,6 +122,13 @@ paths:
               schema:
                 type: string
                 example: The collection 'FakeCollection' could not be found
+        '500':
+          description: Internal server error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Internal server error: the slithy toves did gyre and gimble"
     put:
       tags: [Collection]
       summary: Put a collection
@@ -224,6 +231,13 @@ paths:
               schema:
                 type: string
                 example: The manifest 'XYZ' could not be found
+        '500':
+          description: Internal server error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Internal server error: the slithy toves did gyre and gimble"
     put:
       tags: [Manifest]
       summary: Put a manifest

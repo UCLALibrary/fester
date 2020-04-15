@@ -1,25 +1,25 @@
 {
     "@context": "http://iiif.io/api/presentation/2/context.json",
     "label": "Sinai Arabic 249. Martyrdom of St. Catherine : manuscript [ca 18th c.]. St. Catherine's Monastery, Sinai, Egypt",
-    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest",
+    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest",
     "@type": "sc:Manifest",
     "sequences": [
         {
-            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/sequence/normal",
+            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/sequence/normal",
             "@type": "sc:Sequence",
             "canvases": [
                 {
                     "@type": "sc:Canvas",
                     "label": "Front Board Outside",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/th93j13n",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/th93j13n",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/th93j13n",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/th93j13n",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/th93j13n",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/th93j13n",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fth93j13n/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -36,15 +36,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "Front Board Inside",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/2w083x19",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/2w083x19",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/2w083x19",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/2w083x19",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/2w083x19",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/2w083x19",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2F2w083x19/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -61,15 +61,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "f. 001r",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/8v57gn80",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/8v57gn80",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/8v57gn80",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/8v57gn80",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/8v57gn80",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/8v57gn80",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2F8v57gn80/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -86,15 +86,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "f. 001v",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/m1724790",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/m1724790",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/m1724790",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/m1724790",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/m1724790",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/m1724790",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fm1724790/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -111,15 +111,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "f. 002r",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/5s473583",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/5s473583",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/5s473583",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/5s473583",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/5s473583",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/5s473583",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2F5s473583/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -136,15 +136,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "f. 002v",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/7344mx78",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/7344mx78",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/7344mx78",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/7344mx78",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/7344mx78",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/7344mx78",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2F7344mx78/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -161,15 +161,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "f. 003r",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/k579c569",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/k579c569",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/k579c569",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/k579c569",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/k579c569",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/k579c569",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fk579c569/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -186,15 +186,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "f. 003v",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/wb884r4m",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/wb884r4m",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/wb884r4m",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/wb884r4m",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/wb884r4m",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/wb884r4m",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fwb884r4m/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -211,15 +211,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "f. 004r",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/bz13925g",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/bz13925g",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/bz13925g",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/bz13925g",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/bz13925g",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/bz13925g",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fbz13925g/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -236,15 +236,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "f. 004v",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/cn78k884",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/cn78k884",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/cn78k884",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/cn78k884",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/cn78k884",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/cn78k884",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fcn78k884/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -261,15 +261,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "f. 005r",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/s733br2s",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/s733br2s",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/s733br2s",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/s733br2s",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/s733br2s",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/s733br2s",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fs733br2s/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -286,15 +286,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "f. 005v",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/7844pn9v",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/7844pn9v",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/7844pn9v",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/7844pn9v",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/7844pn9v",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/7844pn9v",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2F7844pn9v/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -311,15 +311,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "f. 006r",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/9060tm9r",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/9060tm9r",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/9060tm9r",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/9060tm9r",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/9060tm9r",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/9060tm9r",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2F9060tm9r/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -336,15 +336,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "f. 006v",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/cb36vx4w",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/cb36vx4w",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/cb36vx4w",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/cb36vx4w",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/cb36vx4w",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/cb36vx4w",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fcb36vx4w/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -361,15 +361,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "f. 007r",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/2787wb2r",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/2787wb2r",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/2787wb2r",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/2787wb2r",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/2787wb2r",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/2787wb2r",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2F2787wb2r/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -386,15 +386,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "f. 007v",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/jz860k89",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/jz860k89",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/jz860k89",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/jz860k89",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/jz860k89",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/jz860k89",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fjz860k89/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -411,15 +411,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "f. 008r",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/wp616z3m",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/wp616z3m",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/wp616z3m",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/wp616z3m",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/wp616z3m",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/wp616z3m",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fwp616z3m/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -436,15 +436,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "f. 008v",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/nw85650n",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/nw85650n",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/nw85650n",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/nw85650n",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/nw85650n",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/nw85650n",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fnw85650n/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -461,15 +461,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "f. 009r",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/9h665w63",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/9h665w63",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/9h665w63",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/9h665w63",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/9h665w63",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/9h665w63",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2F9h665w63/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -486,15 +486,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "f. 009v",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/x441th9f",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/x441th9f",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/x441th9f",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/x441th9f",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/x441th9f",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/x441th9f",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fx441th9f/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -511,15 +511,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "f. 010r",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/rh36s81s",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/rh36s81s",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/rh36s81s",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/rh36s81s",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/rh36s81s",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/rh36s81s",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Frh36s81s/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -536,15 +536,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "f. 010v",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/3z55nx59",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/3z55nx59",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/3z55nx59",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/3z55nx59",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/3z55nx59",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/3z55nx59",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2F3z55nx59/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -561,15 +561,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "f. 011r",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/qd72740w",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/qd72740w",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/qd72740w",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/qd72740w",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/qd72740w",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/qd72740w",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fqd72740w/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -586,15 +586,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "f. 011v",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/0f96pt5b",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/0f96pt5b",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/0f96pt5b",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/0f96pt5b",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/0f96pt5b",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/0f96pt5b",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2F0f96pt5b/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -611,15 +611,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "f. 012r",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/8k913d05",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/8k913d05",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/8k913d05",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/8k913d05",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/8k913d05",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/8k913d05",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2F8k913d05/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -636,15 +636,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "f. 012v",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/ch012x2q",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/ch012x2q",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/ch012x2q",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/ch012x2q",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/ch012x2q",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/ch012x2q",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fch012x2q/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -661,15 +661,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "f. 013r",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/7z97jh0s",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/7z97jh0s",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/7z97jh0s",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/7z97jh0s",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/7z97jh0s",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/7z97jh0s",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2F7z97jh0s/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -686,15 +686,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "f. 013v",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/z105x99f",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/z105x99f",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/z105x99f",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/z105x99f",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/z105x99f",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/z105x99f",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fz105x99f/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -711,15 +711,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "f. 014r",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/c226bk23",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/c226bk23",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/c226bk23",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/c226bk23",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/c226bk23",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/c226bk23",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fc226bk23/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -736,15 +736,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "f. 014v",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/wv19dn8z",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/wv19dn8z",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/wv19dn8z",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/wv19dn8z",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/wv19dn8z",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/wv19dn8z",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fwv19dn8z/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -761,15 +761,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "Back Board Inside",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/v479d96g",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/v479d96g",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/v479d96g",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/v479d96g",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/v479d96g",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/v479d96g",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fv479d96g/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -786,15 +786,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "Back Board Outside",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/zd46rk64",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/zd46rk64",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/zd46rk64",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/zd46rk64",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/zd46rk64",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/zd46rk64",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fzd46rk64/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -811,15 +811,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "Spine",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/b059db70",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/b059db70",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/b059db70",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/b059db70",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/b059db70",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/b059db70",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fb059db70/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -836,15 +836,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "Fore edge",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/4r876n12",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/4r876n12",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/4r876n12",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/4r876n12",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/4r876n12",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/4r876n12",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2F4r876n12/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -861,15 +861,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "Head",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/1f29zr8w",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/1f29zr8w",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/1f29zr8w",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/1f29zr8w",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/1f29zr8w",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/1f29zr8w",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2F1f29zr8w/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",
@@ -886,15 +886,15 @@
                 {
                     "@type": "sc:Canvas",
                     "label": "Tail",
-                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/hc563t02",
+                    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/hc563t02",
                     "width": 1000,
                     "height": 1000,
                     "images": [
                         {
                             "@type": "oa:Annotation",
-                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/annotation/hc563t02",
+                            "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/annotation/hc563t02",
                             "motivation": "sc:painting",
-                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.example.org/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/hc563t02",
+                            "on": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz12f8rtw/manifest/canvas/hc563t02",
                             "resource": {
                                 "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fhc563t02/full/600,/0/default.jpg",
                                 "@type": "dctypes:Image",

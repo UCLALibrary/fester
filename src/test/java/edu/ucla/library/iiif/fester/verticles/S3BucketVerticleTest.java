@@ -100,7 +100,7 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
             if (getConfig.succeeded()) {
                 final JsonObject config = getConfig.result();
 
-                myUrl = config.getString(Config.URL);
+                myUrl = config.getString(Config.FESTER_URL);
 
                 // Create the IDs that will be needed for running the tests
                 myManifestID = UUID.randomUUID().toString();

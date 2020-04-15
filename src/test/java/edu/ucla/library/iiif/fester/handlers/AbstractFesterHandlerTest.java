@@ -63,7 +63,7 @@ abstract class AbstractFesterHandlerTest {
 
     protected String myManifestS3Key;
 
-    protected final String myUrl = System.getProperty(Config.URL);
+    protected final String myUrl = System.getProperty(Config.FESTER_URL);
 
     protected final String myUrlPlaceholderPattern = Pattern.quote(Constants.URL_PLACEHOLDER);
 

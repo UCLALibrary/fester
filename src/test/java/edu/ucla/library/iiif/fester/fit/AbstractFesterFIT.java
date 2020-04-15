@@ -27,7 +27,7 @@ abstract class AbstractFesterFIT {
     protected static final Vertx VERTX_INSTANCE = Vertx.vertx();
 
     /* The base URL of the Fester instance */
-    protected static final String FESTER_URL = System.getProperty(Config.URL);
+    protected static final String FESTER_URL = System.getProperty(Config.FESTER_URL);
 
     /* Regexp of the placeholder base URL of the Fester instance */
     protected static final String FESTER_URL_PLACEHOLDER = Pattern.quote(Constants.URL_PLACEHOLDER);

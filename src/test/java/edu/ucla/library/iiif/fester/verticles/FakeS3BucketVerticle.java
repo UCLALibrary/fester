@@ -18,6 +18,7 @@ import info.freelibrary.util.StringUtils;
 
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
+import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.utils.CodeUtils;
@@ -36,7 +37,7 @@ public class FakeS3BucketVerticle extends AbstractFesterVerticle {
 
     private File myTmpDir;
 
-    private final String myUrl = System.getProperty(Config.URL);
+    private final String myUrl = System.getProperty(Config.FESTER_URL);
 
     private final String myUrlPlaceholderPattern = Pattern.quote(Constants.URL_PLACEHOLDER);
 
@@ -114,10 +115,10 @@ public class FakeS3BucketVerticle extends AbstractFesterVerticle {
                 }
                 aMessage.reply(new JsonObject(manifest));
             } else {
-                aMessage.fail(CodeUtils.getInt(MessageCodes.MFS_052), aS3Key + " not found");
+                aMessage.fail(HTTP.NOT_FOUND, aS3Key + " not found");
             }
         } catch (final IOException details) {
-            aMessage.fail(CodeUtils.getInt(MessageCodes.MFS_052), details.getMessage());
+            aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, details.getMessage());
         }
     }
 

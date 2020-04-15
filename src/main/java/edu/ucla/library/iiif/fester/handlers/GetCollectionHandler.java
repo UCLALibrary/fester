@@ -12,6 +12,7 @@ import edu.ucla.library.iiif.fester.verticles.S3BucketVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
+import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
@@ -50,15 +51,16 @@ public class GetCollectionHandler extends AbstractFesterHandler implements Handl
                 response.putHeader(Constants.CONTENT_TYPE, Constants.JSON_MEDIA_TYPE);
                 response.end(collection);
             } else {
-                final Throwable aThrowable = send.cause();
-                final String exceptionMessage = aThrowable.getMessage();
-                final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_009, collectionName, HTTP.NOT_FOUND,
-                        exceptionMessage);
+                final ReplyException failure = (ReplyException) send.cause();
+                final int statusCode = failure.failureCode();
+                final String statusMessage = failure.getMessage();
+                final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_009, collectionName, statusCode,
+                        statusMessage);
 
-                LOGGER.error(aThrowable, errorMessage);
+                LOGGER.error(errorMessage);
 
-                response.setStatusCode(HTTP.NOT_FOUND);
-                response.setStatusMessage(exceptionMessage);
+                response.setStatusCode(statusCode);
+                response.setStatusMessage(statusMessage);
                 response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
                 response.end(errorMessage);
             }

@@ -119,7 +119,7 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
             }
         });
 
-        myUrl = config.getString(Config.URL);
+        myUrl = config.getString(Config.FESTER_URL);
     }
 
     /**
@@ -131,7 +131,10 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
     private void get(final String aS3Key, final Message<JsonObject> aMessage) {
 
         myS3Client.get(myS3Bucket, aS3Key, get -> {
-            if (get.statusCode() == HTTP.OK) {
+            final int statusCode = get.statusCode();
+            final String statusMessage = get.statusMessage();
+
+            if (statusCode == HTTP.OK) {
                 get.bodyHandler(body -> {
                     final String serializedJson = body.toString(StandardCharsets.UTF_8);
                     final String manifest;
@@ -142,8 +145,10 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
                     }
                     aMessage.reply(new JsonObject(manifest));
                 });
+            } else if (statusCode == HTTP.NOT_FOUND) {
+                aMessage.fail(HTTP.NOT_FOUND, statusMessage);
             } else {
-                aMessage.fail(CodeUtils.getInt(MessageCodes.MFS_052), get.statusMessage());
+                aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, statusMessage);
             }
         });
     }
