@@ -129,20 +129,15 @@ To prevent accidentally pushing commits that would cause the Travis CI build to 
 
 ## Releases
 
-Releases follow semantic versioning, with the exception that the API isn't considered stable until it reaches the 1.0.0 release.
+Releases follow semantic versioning, with the exception that we don't consider anything stable until the project reaches the 1.0.0 release.
+
 To create a new release, update the `version` element in the POM file (if needed). The updated version should still end with `-SNAPSHOT`, just change the numeric designation.
 
 After the version in the POM file is ready, the following script can be run:
 
     src/main/tools/travis/prepare_release
 
-This will prepare the code for release by making two commits to Git. The first will be one for the version to be released (minus the snapshot designation), and the second will be one for a new snapshot version. By default, the new snapshot version will just be incremented by a patch increment. If a larger bump is needed, one of the following commands can be used instead:
-
-    src/main/tools/travis/prepare_release minor
-
-or
-
-    src/main/tools/travis/prepare_release major
+This will prepare the code for release by making two commits to Git. The first will be one for the version to be released (minus the snapshot designation), and the second will be one for a new snapshot version.
 
 The actual release will be done by the Travis build. When a non-snapshot version is built by Travis, a Docker image will be uploaded to the Docker registry.
 
