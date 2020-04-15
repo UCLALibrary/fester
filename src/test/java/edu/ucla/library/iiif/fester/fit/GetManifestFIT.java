@@ -65,9 +65,10 @@ public class GetManifestFIT {
                     // Verify that the CORS header is permissive
                     aContext.assertEquals(Constants.STAR, response.getHeader(Constants.CORS_HEADER));
 
-                    // Verify that what we get back is what we put in
+                    // Verify that what we get back is what we put in, with the placeholder URL replaced
                     if (statusCode == HTTP.OK) {
-                        aContext.assertEquals(new JsonObject(testData), response.bodyAsJsonObject());
+                        aContext.assertEquals(new JsonObject(testData.replaceAll(FESTER_URL_PLACEHOLDER, FESTER_URL)),
+                                response.bodyAsJsonObject());
                     } else {
                         aContext.fail(LOGGER.getMessage(MessageCodes.MFS_004, HTTP.OK, statusCode));
                     }
@@ -139,9 +140,10 @@ public class GetManifestFIT {
                     // Verify that the CORS header is permissive
                     aContext.assertEquals(Constants.STAR, response.getHeader(Constants.CORS_HEADER));
 
-                    // Verify that what we get back is what we put in
+                    // Verify that what we get back is what we put in, with the placeholder URL replaced
                     if (statusCode == HTTP.OK) {
-                        aContext.assertEquals(new JsonObject(testData), response.bodyAsJsonObject());
+                        aContext.assertEquals(new JsonObject(testData.replaceAll(FESTER_URL_PLACEHOLDER, FESTER_URL)),
+                                response.bodyAsJsonObject());
                     } else {
                         aContext.fail(LOGGER.getMessage(MessageCodes.MFS_004, HTTP.OK, statusCode));
                     }

@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import org.junit.After;
 import org.junit.AssumptionViolatedException;
@@ -53,8 +54,6 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
 
     private static final String DEFAULT_ACCESS_KEY = "YOUR_ACCESS_KEY";
 
-    private static final String BASE_URI = "http://localhost:9999";
-
     private static String myS3Bucket = "unconfigured";
 
     private static AWSCredentials myAWSCredentials;
@@ -79,6 +78,10 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
 
     private AmazonS3 myAmazonS3;
 
+    private String myUrl;
+
+    private final String myUrlPlaceholderPattern = Pattern.quote(Constants.URL_PLACEHOLDER);
+
     /**
      * Set up the testing environment.
      *
@@ -93,18 +96,20 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
         final DeploymentOptions options = new DeploymentOptions();
         final Async asyncTask = aContext.async();
 
-        // Create the IDs that will be needed for running the tests
-        myManifestID = UUID.randomUUID().toString();
-        myManifestS3Key = IDUtils.getWorkS3Key(myManifestID);
-        myManifestUri = IDUtils.getResourceURI(BASE_URI, myManifestS3Key);
-
-        myCollectionID = UUID.randomUUID().toString();
-        myCollectionS3Key = IDUtils.getCollectionS3Key(myCollectionID);
-        myCollectionUri = IDUtils.getResourceURI(BASE_URI, myCollectionS3Key);
-
         configRetriever.getConfig(getConfig -> {
             if (getConfig.succeeded()) {
                 final JsonObject config = getConfig.result();
+
+                myUrl = config.getString(Config.FESTER_URL);
+
+                // Create the IDs that will be needed for running the tests
+                myManifestID = UUID.randomUUID().toString();
+                myManifestS3Key = IDUtils.getWorkS3Key(myManifestID);
+                myManifestUri = IDUtils.getResourceURI(myUrl, myManifestS3Key);
+
+                myCollectionID = UUID.randomUUID().toString();
+                myCollectionS3Key = IDUtils.getCollectionS3Key(myCollectionID);
+                myCollectionUri = IDUtils.getResourceURI(myUrl, myCollectionS3Key);
 
                 // We need to determine if we'll be able to run the S3 integration tests so we can skip if needed
                 if (config.containsKey(Config.S3_ACCESS_KEY) && !config.getString(Config.S3_ACCESS_KEY,
@@ -193,7 +198,8 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
         }
 
         final File collectionFile = new File(TEST_COLLECTION_FILE);
-        final JsonObject expected = new JsonObject(StringUtils.read(collectionFile));
+        final JsonObject expected = new JsonObject(
+                StringUtils.read(collectionFile).replaceAll(myUrlPlaceholderPattern, myUrl));
         final JsonObject message = new JsonObject();
         final DeliveryOptions options = new DeliveryOptions();
         final Async asyncTask = aContext.async();

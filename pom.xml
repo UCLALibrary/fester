@@ -120,6 +120,9 @@
     <!-- The IIIF base URL (including service prefix) -->
     <iiif.base.url>https://iiif.library.ucla.edu/iiif/2</iiif.base.url>
 
+    <!-- The URL Fester is available at -->
+    <fester.url>http://localhost:${fester.http.port}</fester.url>
+
     <!-- The port Fester listens on -->
     <fester.http.port>8888</fester.http.port>
     <fester.debug.port>5555</fester.debug.port>
@@ -563,6 +566,7 @@
           </excludes>
           <systemPropertyVariables>
             <vertx.logger-delegate-factory-class-name>io.vertx.core.logging.SLF4JLogDelegateFactory</vertx.logger-delegate-factory-class-name>
+            <fester.url>${fester.url}</fester.url>
             <fester.http.port>${http.port}</fester.http.port>
             <vertx-config-path>${project.basedir}/target/test-classes/test-config.properties</vertx-config-path>
           </systemPropertyVariables>
@@ -592,7 +596,6 @@
               <skipTests>${skipFfTs}</skipTests>
               <systemPropertyVariables>
                 <fester.logs.output>${seeLogsFfT}</fester.logs.output>
-                <fester.http.port>8888</fester.http.port>
                 <fester.s3.bucket>${fester.s3.bucket}</fester.s3.bucket>
                 <fester.container.tag>${project.artifactId}:${project.version}</fester.container.tag>
                 <feature.flags>https://iiif-manifest-store.s3.amazonaws.com/fester-features-off.conf</feature.flags>
@@ -619,7 +622,6 @@
               <skipTests>${skipFfTs}</skipTests>
               <systemPropertyVariables>
                 <fester.logs.output>${seeLogsFfT}</fester.logs.output>
-                <fester.http.port>8888</fester.http.port>
                 <fester.s3.bucket>${fester.s3.bucket}</fester.s3.bucket>
                 <fester.container.tag>${project.artifactId}:${project.version}</fester.container.tag>
                 <feature.flags>https://iiif-manifest-store.s3.amazonaws.com/fester-features-on.conf</feature.flags>
@@ -645,7 +647,6 @@
               <skipTests>${skipFTs}</skipTests>
               <systemPropertyVariables>
                 <fester.logs.output>${seeLogsFT}</fester.logs.output>
-                <fester.http.port>8888</fester.http.port>
                 <fester.s3.bucket>${fester.s3.bucket}</fester.s3.bucket>
                 <fester.container.tag>${docker.registry.account}${project.artifactId}:${project.version}</fester.container.tag>
               </systemPropertyVariables>
@@ -670,7 +671,6 @@
               <skipTests>${skipITs}</skipTests>
               <systemPropertyVariables>
                 <fester.logs.output>${seeLogsIT}</fester.logs.output>
-                <fester.http.port>9999</fester.http.port>
                 <fester.s3.region>${fester.s3.region}</fester.s3.region>
                 <fester.s3.bucket>${fester.s3.bucket}</fester.s3.bucket>
                 <fester.s3.access_key>${fester.s3.access_key}</fester.s3.access_key>

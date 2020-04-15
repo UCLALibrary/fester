@@ -20,6 +20,7 @@ import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 import info.freelibrary.util.StringUtils;
 
+import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
@@ -45,6 +46,8 @@ public class PostCsvHandler extends AbstractFesterHandler {
 
     private final String myExceptionPage;
 
+    private final String myUrl;
+
     /**
      * Creates a handler to handle POSTs to generate collection manifests.
      *
@@ -69,6 +72,8 @@ public class PostCsvHandler extends AbstractFesterHandler {
 
         templateReader.close();
         myExceptionPage = templateBuilder.toString();
+
+        myUrl = aConfig.getString(Config.FESTER_URL);
     }
 
     @Override
@@ -91,13 +96,10 @@ public class PostCsvHandler extends AbstractFesterHandler {
             final JsonObject message = new JsonObject();
             final DeliveryOptions options = new DeliveryOptions();
             final HttpServerRequest request = aContext.request();
-            final String protocol = request.connection().isSsl() ? "https://" : "http://";
             final String iiifHost = StringUtils.trimToNull(request.getFormAttribute(Constants.IIIF_HOST));
-            final String festerHost = protocol + request.host();
 
             // Store the information that the manifest generator will need
             message.put(Constants.CSV_FILE_NAME, fileName).put(Constants.CSV_FILE_PATH, filePath);
-            message.put(Constants.FESTER_HOST, festerHost);
             options.addHeader(Constants.ACTION, Op.POST_CSV);
 
             if (iiifHost != null) {
@@ -107,7 +109,7 @@ public class PostCsvHandler extends AbstractFesterHandler {
             // Send a message to the manifest generator
             sendMessage(ManifestVerticle.class.getName(), message, options, Integer.MAX_VALUE, send -> {
                 if (send.succeeded()) {
-                    updateCSV(fileName, filePath, festerHost, response);
+                    updateCSV(fileName, filePath, response);
                 } else {
                     returnError(response, send.cause());
                 }
@@ -115,8 +117,7 @@ public class PostCsvHandler extends AbstractFesterHandler {
         }
     }
 
-    private void updateCSV(final String aFileName, final String aFilePath, final String aHost,
-            final HttpServerResponse aResponse) {
+    private void updateCSV(final String aFileName, final String aFilePath, final HttpServerResponse aResponse) {
         final String responseMessage = LOGGER.getMessage(MessageCodes.MFS_038, aFileName, aFilePath);
         final FileSystem fileSystem = myVertx.fileSystem();
 
@@ -129,7 +130,7 @@ public class PostCsvHandler extends AbstractFesterHandler {
                 final CSVWriter csvWriter = new CSVWriter(writer);
 
                 try {
-                    csvWriter.writeAll(LinkUtils.addManifests(aHost, csvReader.readAll()));
+                    csvWriter.writeAll(LinkUtils.addManifests(myUrl, csvReader.readAll()));
 
                     aResponse.setStatusCode(HTTP.CREATED);
                     aResponse.setStatusMessage(responseMessage);
