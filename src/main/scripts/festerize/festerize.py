@@ -11,13 +11,13 @@ import pathlib
 @click.command()
 @click.argument('src', required=True, nargs=-1)
 @click.option('--server', default='https://iiif.library.ucla.edu', show_default=True,
-              help='URL of the IIIF manifest service to send the manifests to')
+              help='URL of the Fester IIIF manifest service')
 @click.option('--endpoint', default='/collections', show_default=True, help='API endpoint for CSV uploading')
 @click.option('--out', default='output', show_default=True, help='local directory to put the updated CSV')
 @click.option('--iiifhost', default=None, help='IIIF image server URL (optional)', )
 @click.option('--loglevel', type=click.Choice(['INFO', 'DEBUG', 'ERROR']), default='INFO', show_default=True)
 def cli(src, server, endpoint, out, iiifhost, loglevel):
-    """Uploads CSV files to the UCLA Library IIIF manifest service.
+    """Uploads CSV files to the Fester IIIF manifest service.
 
     SRC is either a path to a CSV file or a Unix-style glob like '*.csv'.
     """
@@ -34,12 +34,12 @@ def cli(src, server, endpoint, out, iiifhost, loglevel):
 
     logging.info('STARTING at {}...'.format(started.strftime('%Y-%m-%d %H:%M:%S')))
 
-    # If the IIIF manifest service is unavailable, abort.
+    # If Fester is unavailable, abort.
     try:
         s = requests.get(server + '/fester/status')
         s.raise_for_status()
     except requests.exceptions.RequestException as e:
-        error_msg = 'IIIF manifest service unavailable: {}'.format(str(e))
+        error_msg = 'Fester IIIF manifest service unavailable: {}'.format(str(e))
         click.echo(error_msg)
         logging.error(error_msg)
         sys.exit(1)
@@ -47,7 +47,6 @@ def cli(src, server, endpoint, out, iiifhost, loglevel):
     request_url = server + endpoint
 
     for pathstring in src:
-
         csv_filepath = pathlib.Path(pathstring)
         csv_filename = csv_filepath.name
 
@@ -56,9 +55,8 @@ def cli(src, server, endpoint, out, iiifhost, loglevel):
             click.echo(error_msg)
             logging.error(error_msg)
 
-        # Only work with CSV files that have the proper extension.
+        # Only works with CSV files that have the proper extension.
         elif csv_filepath.suffix == '.csv':
-
             click.echo('Uploading {} to {}'.format(csv_filename, request_url))
 
             # Upload the file.
@@ -72,7 +70,7 @@ def cli(src, server, endpoint, out, iiifhost, loglevel):
             if r.status_code == 201 :
                 click.echo('Uploaded {}'.format(csv_filename))
 
-                # Save it in the out directory with the same filename
+                # Save it in the out directory with the same filename.
                 out_file = click.open_file(os.path.join(out, csv_filename), 'wb')
                 out_file.write(r.content)
             else:
@@ -81,10 +79,9 @@ def cli(src, server, endpoint, out, iiifhost, loglevel):
                 logging.error(error_msg)
                 logging.error(r.text)
                 logging.error('--------------------------------------------')
-
         else:
-            error_msg= 'File {} is not a CSV, skipping'.format(csv_filename)
+            error_msg = 'File {} is not a CSV, skipping'.format(csv_filename)
             click.echo(error_msg)
-            logging.error()
+            logging.error(error_msg)
 
     logging.info('DONE at {}.'.format(datetime.now().strftime('%Y-%m-%d %H:%M:%S')))

@@ -1,6 +1,6 @@
 # Festerize
 
-Uploads CSV files to the UCLA Library IIIF manifest service.
+Uploads CSV files to the Fester IIIF manifest service.
 
 ## Installation
 
@@ -8,10 +8,8 @@ You need to have Python 3 installed to use Festerize. This README will describe 
 
 First, check the Fester project out of GitHub and change into the script's directory:
 
-```bash
-$ git clone https://github.com/UCLALibrary/fester.git
-$ cd fester/src/main/scripts
-```
+    git clone https://github.com/UCLALibrary/fester.git
+    cd fester/src/main/scripts
 
 Then you can install `festerize` and its dependencies.
 
@@ -19,39 +17,54 @@ Then you can install `festerize` and its dependencies.
 
 To install on a Linux machine, type:
 
-```bash
-$ ./setup.py install --user
-```
+    ./setup.py install --user
 
 If you want to install it in a place that's available to all users on a system (and you have sudo privileges) you can use:
 
-```bash
-$ sudo ./setup.py
-```
+    sudo ./setup.py
 
 ### Installing on a Mac
 
 To install on a Mac that's installed Python 3 with Homebrew, type:
 
-```bash
-$ python3 setup.py install
-```
+    python3 setup.py install
 
 ## Usage
 
 After it's installed, you can see the available options by running:
 
-```bash
-$ festerize --help
+    festerize --help
+
+When you do this, you should see the following:
+
+```
+Usage: festerize [OPTIONS] SRC...
+
+  Uploads CSV files to the Fester IIIF manifest service.
+
+  SRC is either a path to a CSV file or a Unix-style glob like '*.csv'.
+
+Options:
+  --server TEXT                  URL of the Fester IIIF manifest service
+                                 [default: https://iiif.library.ucla.edu]
+  --endpoint TEXT                API endpoint for CSV uploading  [default:
+                                 /collections]
+  --out TEXT                     local directory to put the updated CSV
+                                 [default: output]
+  --iiifhost TEXT                IIIF image server URL (optional)
+  --loglevel [INFO|DEBUG|ERROR]  [default: INFO]
+  --help                         Show this message and exit.
 ```
 
-Tips:
+The SRC argument supports standard [filename globbing](https://en.wikipedia.org/wiki/Glob_(programming)) rules. In other words, `*.csv` is a valid entry for the SRC argument.
 
-1. The SRC argument supports standard [filename globbing](https://en.wikipedia.org/wiki/Glob_(programming)) rules. In other words, `*.csv` is a valid entry for the SRC argument.
-2. *There are limits* to how many arguments can be sent to a command. This depends on your OS and its configuration. See this [StackExchange](https://unix.stackexchange.com/questions/110282/cp-max-source-files-number-arguments-for-copy-utility) post for more information.
-3. Festerize will ignore any files that do not end with `.csv`, so a command of `festerize *.*` should be safe to run. Festerize does not recursively search folders.
-4. Festerize creates a folder (by default called `./output`) for all output. CSVs returned by the Fester service are stored there, with the same name as the SRC file.
-5. Festerize also creates a log file in the output folder, named the current date and time of the run, with an extension of `.log`. By default, the start and end time of the run are added as INFO rows to this log file, but this can be disabled by setting the `--loglevel` option to `--loglevel ERROR`.
+*There are limits* to how many arguments can be sent to a command. This depends on your OS and its configuration. See this [StackExchange](https://unix.stackexchange.com/questions/110282/cp-max-source-files-number-arguments-for-copy-utility) post for more information.
+
+Festerize will ignore any files that do not end with `.csv`, so a command of `festerize *.*` should be safe to run. Festerize does not recursively search folders.
+
+Festerize creates a folder (by default called `./output`) for all output. CSVs returned by the Fester service are stored there, with the same name as the SRC file.
+
+Festerize also creates a log file in the output folder, named the current date and time of the run, with an extension of `.log`. By default, the start and end time of the run are added as INFO rows to this log file, but this can be disabled by setting the `--loglevel` option to `--loglevel ERROR`.
 
 ## Contact
 
