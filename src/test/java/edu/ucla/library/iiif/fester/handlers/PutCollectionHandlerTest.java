@@ -91,8 +91,10 @@ public class PutCollectionHandlerTest extends AbstractFesterHandlerTest {
 
                     if (getStatusCode == HTTP.OK) {
                         getResponse.bodyHandler(body -> {
-                            final String foundCollection = body.toString(StandardCharsets.UTF_8);
-                            aContext.assertEquals(new JsonObject(manifest), new JsonObject(foundCollection));
+                            final JsonObject expected = new JsonObject(manifest.toString(StandardCharsets.UTF_8)
+                                    .replaceAll(myUrlPlaceholderPattern, myUrl));
+                            final JsonObject found = new JsonObject(body);
+                            aContext.assertEquals(expected, found);
 
                             if (!asyncTask.isCompleted()) {
                                 asyncTask.complete();

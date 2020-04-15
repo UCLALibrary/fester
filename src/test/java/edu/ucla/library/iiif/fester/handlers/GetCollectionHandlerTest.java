@@ -53,7 +53,8 @@ public class GetCollectionHandlerTest extends AbstractFesterHandlerTest {
                     aContext.assertEquals(Constants.STAR, response.getHeader(Constants.CORS_HEADER));
 
                     // Verify that our retrieved JSON is as we expect it
-                    aContext.assertEquals(new JsonObject(expectedCollection), new JsonObject(foundCollection));
+                    aContext.assertEquals(new JsonObject(expectedCollection.replaceAll(myUrlPlaceholderPattern, myUrl)),
+                            new JsonObject(foundCollection));
                 });
             } else {
                 aContext.fail(LOGGER.getMessage(MessageCodes.MFS_003, HTTP.OK, statusCode));

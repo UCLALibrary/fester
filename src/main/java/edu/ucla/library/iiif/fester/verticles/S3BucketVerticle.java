@@ -2,6 +2,8 @@
 package edu.ucla.library.iiif.fester.verticles;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.regex.Pattern;
 
 import com.amazonaws.regions.RegionUtils;
 
@@ -39,6 +41,10 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
     private S3Client myS3Client;
 
     private String myS3Bucket;
+
+    private String myUrl;
+
+    private final String myUrlPlaceholderPattern = Pattern.quote(Constants.URL_PLACEHOLDER);
 
     /**
      * Starts the S3 Bucket Verticle.
@@ -112,6 +118,8 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
                     message.fail(CodeUtils.getInt(MessageCodes.MFS_139), errorMessage);
             }
         });
+
+        myUrl = config.getString(Config.FESTER_URL);
     }
 
     /**
@@ -123,12 +131,24 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
     private void get(final String aS3Key, final Message<JsonObject> aMessage) {
 
         myS3Client.get(myS3Bucket, aS3Key, get -> {
-            if (get.statusCode() == HTTP.OK) {
+            final int statusCode = get.statusCode();
+            final String statusMessage = get.statusMessage();
+
+            if (statusCode == HTTP.OK) {
                 get.bodyHandler(body -> {
-                    aMessage.reply(new JsonObject(body.getString(0, body.length())));
+                    final String serializedJson = body.toString(StandardCharsets.UTF_8);
+                    final String manifest;
+                    if (aMessage.headers().get(Constants.NO_REWRITE_URLS) != null) {
+                        manifest = serializedJson;
+                    } else {
+                        manifest = serializedJson.replaceAll(myUrlPlaceholderPattern, myUrl);
+                    }
+                    aMessage.reply(new JsonObject(manifest));
                 });
+            } else if (statusCode == HTTP.NOT_FOUND) {
+                aMessage.fail(HTTP.NOT_FOUND, statusMessage);
             } else {
-                aMessage.fail(CodeUtils.getInt(MessageCodes.MFS_052), get.statusMessage());
+                aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, statusMessage);
             }
         });
     }

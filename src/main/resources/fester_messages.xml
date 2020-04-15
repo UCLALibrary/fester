@@ -22,7 +22,7 @@
   <entry key="MFS-006">Putting '{}' (test object) into S3 bucket: {}</entry>
   <entry key="MFS-007">S3 client credentials: {} | {}</entry>
   <entry key="MFS-008">Test GetManifestHandler with a test manifest: {}</entry>
-  <entry key="MFS-009">Manifest '{}' not found [{}: {}]</entry>
+  <entry key="MFS-009">Error retrieving manifest '{}': [{}: {}]</entry>
   <entry key="MFS-010">Internal server error while trying to retrieve manifest: {}</entry>
   <entry key="MFS-011">Unexpected response code while trying to retrieve manifest: {} [{}: {}]</entry>
   <entry key="MFS-012">Test DeleteManifestHandler with a test manifest: {}</entry>

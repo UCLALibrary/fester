@@ -35,6 +35,7 @@ import edu.ucla.library.iiif.fester.ImageInfoLookup;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
+import io.vertx.config.ConfigRetriever;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
@@ -52,10 +53,6 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 public class ManifestVerticleTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ManifestVerticleTest.class, Constants.MESSAGES);
-
-    private static final String MANIFEST_HOST = "https://iiif.library.ucla.edu";
-
-    private static final String IMAGE_HOST = "https://iiif.library.ucla.edu/iiif/2";
 
     private static final String WORKS_CSV = "src/test/resources/csv/{}/batch1/{}1.csv";
 
@@ -92,36 +89,44 @@ public class ManifestVerticleTest {
         final JsonObject config = new JsonObject();
         final Async asyncTask = aContext.async();
 
-        options.setConfig(config.put(Config.IIIF_BASE_URL, IMAGE_HOST));
-
         myVertx = Vertx.vertx();
-        myVertx.deployVerticle(ManifestVerticle.class.getName(), options, manifestorDeployment -> {
-            if (manifestorDeployment.succeeded()) {
-                myVertx.deployVerticle(FakeS3BucketVerticle.class.getName(), options, s3BucketDeployment -> {
-                    if (s3BucketDeployment.succeeded()) {
-                        final LocalMap<String, String> map = myVertx.sharedData().getLocalMap(Constants.VERTICLE_MAP);
-                        final String deploymentKey = FakeS3BucketVerticle.class.getSimpleName();
+        ConfigRetriever.create(myVertx).getConfig(getConfig -> {
+            if (getConfig.succeeded()) {
+                options.setConfig(config.put(Config.IIIF_BASE_URL, getConfig.result().getString(Config.IIIF_BASE_URL)));
 
-                        if (map.containsKey(deploymentKey)) {
-                            try {
-                                myJsonFiles = getS3TempDir(map.get(deploymentKey));
-                                asyncTask.complete();
-                            } catch (final FileNotFoundException details) {
-                                aContext.fail(details);
+                myVertx.deployVerticle(ManifestVerticle.class.getName(), options, manifestorDeployment -> {
+                    if (manifestorDeployment.succeeded()) {
+                        myVertx.deployVerticle(FakeS3BucketVerticle.class.getName(), options, s3BucketDeployment -> {
+                            if (s3BucketDeployment.succeeded()) {
+                                final LocalMap<String, String> map = myVertx.sharedData()
+                                        .getLocalMap(Constants.VERTICLE_MAP);
+                                final String deploymentKey = FakeS3BucketVerticle.class.getSimpleName();
+
+                                if (map.containsKey(deploymentKey)) {
+                                    try {
+                                        myJsonFiles = getS3TempDir(map.get(deploymentKey));
+                                        asyncTask.complete();
+                                    } catch (final FileNotFoundException details) {
+                                        aContext.fail(details);
+                                    }
+                                } else {
+                                    aContext.fail(LOGGER.getMessage(MessageCodes.MFS_077, deploymentKey));
+                                }
+                            } else {
+                                aContext.fail(s3BucketDeployment.cause());
                             }
-                        } else {
-                            aContext.fail(LOGGER.getMessage(MessageCodes.MFS_077, deploymentKey));
-                        }
+                        });
                     } else {
-                        aContext.fail(s3BucketDeployment.cause());
+                        aContext.fail(manifestorDeployment.cause());
                     }
                 });
+
+                myRunID = UUID.randomUUID().toString();
             } else {
-                aContext.fail(manifestorDeployment.cause());
+                aContext.fail(getConfig.cause());
+                asyncTask.complete();
             }
         });
-
-        myRunID = UUID.randomUUID().toString();
     }
 
     /**
@@ -147,7 +152,6 @@ public class ManifestVerticleTest {
         final Async asyncTask = aContext.async();
 
         message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, SINAI_WORKS_CSV);
-        message.put(Constants.FESTER_HOST, MANIFEST_HOST);
         options.addHeader(Constants.ACTION, Op.POST_CSV);
 
         LOGGER.debug(MessageCodes.MFS_120, SINAI, ManifestVerticle.class.getName());
@@ -181,7 +185,6 @@ public class ManifestVerticleTest {
         final Async asyncTask = aContext.async();
 
         message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, filePath);
-        message.put(Constants.FESTER_HOST, MANIFEST_HOST);
         options.addHeader(Constants.ACTION, Op.POST_CSV);
         options.setSendTimeout(60000);
 
@@ -210,7 +213,6 @@ public class ManifestVerticleTest {
         final Async asyncTask = aContext.async();
 
         message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, filePath);
-        message.put(Constants.FESTER_HOST, MANIFEST_HOST);
         options.addHeader(Constants.ACTION, Op.POST_CSV);
 
         LOGGER.debug(MessageCodes.MFS_120, POSTCARDS, ManifestVerticle.class.getName());
@@ -249,7 +251,6 @@ public class ManifestVerticleTest {
         final Async asyncTask = aContext.async();
 
         message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, filePath);
-        message.put(Constants.FESTER_HOST, MANIFEST_HOST);
         options.addHeader(Constants.ACTION, Op.POST_CSV);
 
         LOGGER.debug(MessageCodes.MFS_120, hathawayWorks, ManifestVerticle.class.getName());
@@ -276,7 +277,6 @@ public class ManifestVerticleTest {
         final Async asyncTask = aContext.async();
 
         message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, filePath);
-        message.put(Constants.FESTER_HOST, MANIFEST_HOST);
         options.addHeader(Constants.ACTION, Op.POST_CSV);
 
         LOGGER.debug(MessageCodes.MFS_120, WORKS, ManifestVerticle.class.getName());
@@ -306,16 +306,15 @@ public class ManifestVerticleTest {
 
         message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, filePath);
         message.put(Constants.IIIF_HOST, ImageInfoLookup.FAKE_IIIF_SERVER);
-        message.put(Constants.FESTER_HOST, MANIFEST_HOST);
         options.addHeader(Constants.ACTION, Op.POST_CSV);
 
         LOGGER.debug(MessageCodes.MFS_120, WORKS, ManifestVerticle.class.getName());
 
         myVertx.eventBus().request(ManifestVerticle.class.getName(), message, options, request -> {
             if (request.succeeded()) {
-                final JsonObject found = new JsonObject(myVertx.fileSystem().readFileBlocking(foundFile));
-                final JsonObject expected = new JsonObject(myVertx.fileSystem().readFileBlocking(expectedFile));
 
+                final JsonObject expected = new JsonObject(myVertx.fileSystem().readFileBlocking(expectedFile));
+                final JsonObject found = new JsonObject(myVertx.fileSystem().readFileBlocking(foundFile));
                 // Confirm that the order of our pages is what we expect it to be
                 assertEquals(expected, found);
 

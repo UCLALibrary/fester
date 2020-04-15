@@ -81,8 +81,6 @@ public class ManifestVerticle extends AbstractFesterVerticle {
 
     private String myImageHost;
 
-    private String myHost;
-
     /**
      * Starts the collection manifester.
      */
@@ -99,10 +97,6 @@ public class ManifestVerticle extends AbstractFesterVerticle {
             if (Op.POST_CSV.equals(action)) {
                 final Path filePath = Paths.get(messageBody.getString(Constants.CSV_FILE_PATH));
                 final Optional<String> imageHost = Optional.ofNullable(messageBody.getString(Constants.IIIF_HOST));
-
-                if (myHost == null) {
-                    myHost = messageBody.getString(Constants.FESTER_HOST);
-                }
 
                 try (Reader reader = Files.newBufferedReader(filePath); CSVReader csvReader = new CSVReader(reader)) {
                     final Map<String, List<String[]>> pages = new HashMap<>();
@@ -199,7 +193,8 @@ public class ManifestVerticle extends AbstractFesterVerticle {
 
                 // If the work doesn't already have any sequences, create one for it
                 if (sequences.size() == 0) {
-                    final String sequenceID = StringUtils.format(SEQUENCE_URI, myHost, encodedWorkID);
+                    final String sequenceID = StringUtils.format(SEQUENCE_URI, Constants.URL_PLACEHOLDER,
+                            encodedWorkID);
 
                     sequence = new Sequence().setID(sequenceID);
                     manifest.addSequence(sequence);
@@ -338,7 +333,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
             if (lockRequest.succeeded()) {
                 try {
                     final JsonObject message = new JsonObject();
-                    final DeliveryOptions options = new DeliveryOptions();
+                    final DeliveryOptions options = new DeliveryOptions().addHeader(Constants.NO_REWRITE_URLS, "true");
 
                     if (aCollDoc) {
                         message.put(Constants.COLLECTION_NAME, aID);
@@ -464,9 +459,9 @@ public class ManifestVerticle extends AbstractFesterVerticle {
         final String urlEncodedWorkID = URLEncoder.encode(workID, StandardCharsets.UTF_8);
         final String workLabel = aWork[aCsvHeaders.getTitleIndex()];
         final Metadata metadata = new Metadata();
-        final String manifestID = StringUtils.format(MANIFEST_URI, myHost, urlEncodedWorkID);
+        final String manifestID = StringUtils.format(MANIFEST_URI, Constants.URL_PLACEHOLDER, urlEncodedWorkID);
         final Manifest manifest = new Manifest(manifestID, workLabel);
-        final String sequenceID = StringUtils.format(SEQUENCE_URI, myHost, urlEncodedWorkID);
+        final String sequenceID = StringUtils.format(SEQUENCE_URI, Constants.URL_PLACEHOLDER, urlEncodedWorkID);
         final Sequence sequence = new Sequence().setID(sequenceID);
         final JsonObject message = new JsonObject();
         final DeliveryOptions options = new DeliveryOptions();
@@ -578,9 +573,10 @@ public class ManifestVerticle extends AbstractFesterVerticle {
             final String idPart = IDUtils.getLastPart(pageID); // We're just copying Samvera here
             final String encodedPageID = URLEncoder.encode(pageID, StandardCharsets.UTF_8);
             final String pageLabel = columns[aCsvHeaders.getTitleIndex()];
-            final String canvasID = StringUtils.format(CANVAS_URI, myHost, aWorkID, idPart);
+            final String canvasID = StringUtils.format(CANVAS_URI, Constants.URL_PLACEHOLDER, aWorkID, idPart);
             final String pageURI = StringUtils.format(SIMPLE_URI, imageHost, encodedPageID);
-            final String annotationURI = StringUtils.format(ANNOTATION_URI, myHost, aWorkID, idPart);
+            final String annotationURI = StringUtils.format(ANNOTATION_URI, Constants.URL_PLACEHOLDER, aWorkID,
+                    idPart);
             final String resourceURI = pageURI + DEFAULT_IMAGE_URI; // Copying Samvera's default image link
             final ImageResource imageResource = new ImageResource(resourceURI, new ImageInfoService(pageURI));
             final ImageContent imageContent;
@@ -661,7 +657,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
 
         // Create a brief work manifest for inclusion in the collection manifest
         if (id != null && label != null) {
-            final URI resourceURI = IDUtils.getResourceURI(myHost, IDUtils.getWorkS3Key(id));
+            final URI resourceURI = IDUtils.getResourceURI(Constants.URL_PLACEHOLDER, IDUtils.getWorkS3Key(id));
             final Collection.Manifest manifest = new Collection.Manifest(resourceURI.toString(), label);
 
             LOGGER.debug(MessageCodes.MFS_119, id, parentID);
@@ -720,7 +716,8 @@ public class ManifestVerticle extends AbstractFesterVerticle {
         final String id = StringUtils.trimToNull(aRow[aHeaders.getItemArkIndex()]);
 
         if (id != null) {
-            final URI resourceURI = IDUtils.getResourceURI(myHost, IDUtils.getCollectionS3Key(id));
+            final URI resourceURI = IDUtils.getResourceURI(Constants.URL_PLACEHOLDER,
+                    IDUtils.getCollectionS3Key(id));
             final String label = StringUtils.trimToNull(aRow[aHeaders.getTitleIndex()]);
             final Metadata metadata = new Metadata();
             final String repositoryName;
