@@ -8,7 +8,7 @@ First, ensure that you have Python 3 and Pip installed on your system.
 
 When that's done, run the following command in your shell to install the latest release of Festerize:
 
-    bash <(curl -sSL https://raw.githubusercontent.com/UCLALibrary/fester/master/install.sh)
+    bash <(curl -sSL https://raw.githubusercontent.com/UCLALibrary/fester/master/src/main/scripts/festerize/install.sh)
 
 ## Usage
 
