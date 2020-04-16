@@ -4,7 +4,7 @@ Uploads CSV files to the Fester IIIF manifest service.
 
 ## Installation
 
-First, ensure that you have Python 3 and Pip installed on your system.
+First, ensure that you have Bash, cURL, Python 3 and Pip installed on your system.
 
 When that's done, run the following command in your shell to install the latest release of Festerize:
 

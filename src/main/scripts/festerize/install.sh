@@ -5,6 +5,9 @@ for PIP in pip3 pip; do
     if ! [ -x "$(command -v ${PIP})" ]; then
         echo "${PIP} not installed" >&2
         PIP=
+    elif [ -z "$(${PIP} --version | grep '(python 3\..\+)')" ]; then
+        echo "${PIP} is not compatible with Python 3" >&2
+        PIP=
     else
         break
     fi
@@ -16,9 +19,7 @@ if [ -z ${PIP} ]; then
 fi
 
 LATEST_TAG=$(curl -sSL https://api.github.com/repos/uclalibrary/fester/releases/latest | grep '"tag_name": ".\+"' | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+' ) && \
-
 echo -e "\nInstalling with ${PIP}\n" && \
-
 ${PIP} install -I "git+https://github.com/UCLALibrary/fester.git@${LATEST_TAG}#egg=festerize&subdirectory=src/main/scripts/festerize" && \
-
 echo -e "\nTo uninstall, run '${PIP} uninstall festerize'.\n"
+exit 0
