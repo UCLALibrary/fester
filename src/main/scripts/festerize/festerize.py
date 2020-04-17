@@ -34,6 +34,7 @@ def cli(src, server, endpoint, out, iiifhost, loglevel):
     started = datetime.now()
     logfile_path = os.path.join(out, '{}.log'.format(started.strftime('%Y-%m-%d--%H-%M-%S')))
     logging.basicConfig(filename=logfile_path, filemode='w', level=loglevel, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    extra_satisfaction = ['🎉', '🎊', '✨', '💯', '😎', '✔️ ', '👍']
 
     logging.info('STARTING at {}...'.format(started.strftime('%Y-%m-%d %H:%M:%S')))
 
@@ -71,9 +72,15 @@ def cli(src, server, endpoint, out, iiifhost, loglevel):
 
             # Handle the response.
             if r.status_code == 201 :
-                click.echo('Uploaded {}'.format(csv_filename))
+                # Send an awesome message to the user.
+                border_char = extra_satisfaction[random.randint(0, len(extra_satisfaction) - 1)]
+                border_length = 2 + (20 + len(csv_filename)) // 2
 
-                # Save it in the out directory with the same filename.
+                click.echo(border_char * border_length)
+                click.echo('{} SUCCESS! Uploaded {} {}'.format(border_char, csv_filename, border_char))
+                click.echo(border_char * border_length)
+
+                # Save the result CSV to the output directory.
                 out_file = click.open_file(os.path.join(out, csv_filename), 'wb')
                 out_file.write(r.content)
             else:
