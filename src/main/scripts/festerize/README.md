@@ -4,30 +4,11 @@ Uploads CSV files to the Fester IIIF manifest service.
 
 ## Installation
 
-You need to have Python 3 installed to use Festerize. This README will describe the simplest way to get started; if you're more experienced and would like to use a virtualized Python environment, feel free to do that.
+First, ensure that you have Bash, cURL, Python 3 and Pip installed on your system.
 
-First, check the Fester project out of GitHub and change into the script's directory:
+When that's done, run the following command in your shell to install the latest release of Festerize:
 
-    git clone https://github.com/UCLALibrary/fester.git
-    cd fester/src/main/scripts
-
-Then you can install `festerize` and its dependencies.
-
-### Installing on a Linux machine
-
-To install on a Linux machine, type:
-
-    ./setup.py install --user
-
-If you want to install it in a place that's available to all users on a system (and you have sudo privileges) you can use:
-
-    sudo ./setup.py
-
-### Installing on a Mac
-
-To install on a Mac that's installed Python 3 with Homebrew, type:
-
-    python3 setup.py install
+    bash <(curl -sSL https://raw.githubusercontent.com/UCLALibrary/fester/master/src/main/scripts/festerize/install.sh)
 
 ## Usage
 

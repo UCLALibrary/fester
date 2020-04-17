@@ -8,8 +8,7 @@ setup (
     py_modules=['festerize'],
     install_requires=[
         'click',
-        'requests',
-        'datetime'
+        'requests'
     ],
     entry_points='''
         [console_scripts]
