@@ -8,13 +8,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
-import edu.ucla.library.iiif.fester.utils.IDUtils;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -80,8 +78,7 @@ public class ImageInfoLookup {
                 }
             } else if (responseCode == HTTP.NOT_FOUND || responseCode == HTTP.FORBIDDEN) {
                 // Cantaloupe returns 403 for not found images sometimes (which seems like a bug?)
-                final String id = IDUtils.getResourceID(URI.create(aURL));
-                throw new ImageNotFoundException(MessageCodes.MFS_070, id);
+                throw new ImageNotFoundException(MessageCodes.MFS_070, aURL);
             } else {
                 final String responseMessage = connection.getResponseMessage();
                 throw new IOException(LOGGER.getMessage(MessageCodes.MFS_071, responseCode, responseMessage));
