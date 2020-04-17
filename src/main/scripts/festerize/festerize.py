@@ -1,12 +1,15 @@
 #!/usr/bin/env python
 
+from datetime import datetime
+import logging
+import os
+import pathlib
+import random
+import sys
+
 import click
 import requests
-import os
-import logging
-from datetime import datetime
-import sys
-import pathlib
+
 
 @click.command()
 @click.argument('src', required=True, nargs=-1)
