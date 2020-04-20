@@ -1,8 +1,6 @@
 
 package edu.ucla.library.iiif.fester.verticles;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
@@ -39,6 +37,7 @@ import io.vertx.config.ConfigRetriever;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
+import io.vertx.core.file.FileSystem;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
 import io.vertx.ext.unit.Async;
@@ -92,14 +91,15 @@ public class ManifestVerticleTest {
         myVertx = Vertx.vertx();
         ConfigRetriever.create(myVertx).getConfig(getConfig -> {
             if (getConfig.succeeded()) {
-                options.setConfig(config.put(Config.IIIF_BASE_URL, getConfig.result().getString(Config.IIIF_BASE_URL)));
+                options.setConfig(config.put(Config.IIIF_BASE_URL, getConfig.result().getString(
+                        Config.IIIF_BASE_URL)));
 
                 myVertx.deployVerticle(ManifestVerticle.class.getName(), options, manifestorDeployment -> {
                     if (manifestorDeployment.succeeded()) {
                         myVertx.deployVerticle(FakeS3BucketVerticle.class.getName(), options, s3BucketDeployment -> {
                             if (s3BucketDeployment.succeeded()) {
-                                final LocalMap<String, String> map = myVertx.sharedData()
-                                        .getLocalMap(Constants.VERTICLE_MAP);
+                                final LocalMap<String, String> map = myVertx.sharedData().getLocalMap(
+                                        Constants.VERTICLE_MAP);
                                 final String deploymentKey = FakeS3BucketVerticle.class.getSimpleName();
 
                                 if (map.containsKey(deploymentKey)) {
@@ -159,9 +159,10 @@ public class ManifestVerticleTest {
         myVertx.eventBus().request(ManifestVerticle.class.getName(), message, options, request -> {
             if (request.succeeded()) {
                 final JsonObject manifest = new JsonObject(myVertx.fileSystem().readFileBlocking(jsonFile));
+                final String rightToLeft = ViewingDirection.RIGHT_TO_LEFT.toString();
 
-                assertEquals(ViewingHint.Option.PAGED.toString(), manifest.getString("viewingHint"));
-                assertEquals(ViewingDirection.RIGHT_TO_LEFT.toString(), manifest.getString("viewingDirection"));
+                aContext.assertEquals(ViewingHint.Option.PAGED.toString(), manifest.getString("viewingHint"));
+                aContext.assertEquals(rightToLeft, manifest.getString("viewingDirection"));
 
                 if (!asyncTask.isCompleted()) {
                     asyncTask.complete();
@@ -223,10 +224,10 @@ public class ManifestVerticleTest {
                 final List<Sequence> sequences = foundManifest.getSequences();
 
                 // Check that the sequence was added to this manifest
-                assertEquals(1, sequences.size());
+                aContext.assertEquals(1, sequences.size());
 
                 // Check that the canvas was added to this sequence
-                assertEquals(1, sequences.get(0).getCanvases().size());
+                aContext.assertEquals(1, sequences.get(0).getCanvases().size());
 
                 if (!asyncTask.isCompleted()) {
                     asyncTask.complete();
@@ -312,11 +313,17 @@ public class ManifestVerticleTest {
 
         myVertx.eventBus().request(ManifestVerticle.class.getName(), message, options, request -> {
             if (request.succeeded()) {
+                try {
+                    final FileSystem fileSystem = myVertx.fileSystem();
 
-                final JsonObject expected = new JsonObject(myVertx.fileSystem().readFileBlocking(expectedFile));
-                final JsonObject found = new JsonObject(myVertx.fileSystem().readFileBlocking(foundFile));
-                // Confirm that the order of our pages is what we expect it to be
-                assertEquals(expected, found);
+                    final JsonObject expected = new JsonObject(fileSystem.readFileBlocking(expectedFile));
+                    final JsonObject found = new JsonObject(fileSystem.readFileBlocking(foundFile));
+
+                    // Confirm that the order of our pages is what we expect it to be
+                    aContext.assertEquals(expected, found);
+                } catch (final Exception details) {
+                    aContext.fail(details.getCause());
+                }
 
                 if (!asyncTask.isCompleted()) {
                     asyncTask.complete();
