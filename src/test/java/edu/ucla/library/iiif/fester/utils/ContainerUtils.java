@@ -41,7 +41,7 @@ public final class ContainerUtils {
      */
     public static GenericContainer getFesterContainer(final ContainerConfig aConfig) {
         final String containerTag = toTag(System.getProperty(TestConstants.CONTAINER_IMAGE));
-        final GenericContainer container = new GenericContainer(containerTag);
+        final GenericContainer<?> container = new GenericContainer(containerTag);
         final String accessKey = System.getProperty(Config.S3_ACCESS_KEY, aConfig.getS3AccessKey());
         final String secretKey = System.getProperty(Config.S3_SECRET_KEY, aConfig.getS3SecretKey());
         final String endpoint = System.getProperty(Config.S3_ENDPOINT, StringUtils.format(HOST, aConfig.getS3Port()));
