@@ -7,7 +7,7 @@ LABEL ContainerName=${project.name} ContainerSourceCode=${project.url}
 # Update packages and install tools
 #  Removing /var/lib/apt/lists/* prevents using `apt` unless you do `apt update` first
 RUN apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -qq --no-install-recommends \
-    openjdk-11-jre-headless=11.0.6+10-1ubuntu1~19.10.1 \
+    openjdk-11-jre-headless=11.0.7+10-2ubuntu2~19.10 \
     python=2.7.17-1 \
     curl=7.65.3-1ubuntu3 \
     < /dev/null > /dev/null && \
