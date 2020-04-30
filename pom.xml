@@ -125,7 +125,15 @@
 
     <!-- The port Fester listens on -->
     <fester.http.port>8888</fester.http.port>
+
+    <!-- The port a debugger may attach to when Fester is running in debug mode -->
     <fester.debug.port>5555</fester.debug.port>
+
+    <!-- The port a debugger may listen on to debug a containerized Fester instance -->
+    <jdwp.host.port>5556</jdwp.host.port>
+
+    <!-- The JDWP configuration for debugging a containerized Fester instance; see "debug" profile -->
+    <jdwp.client.config />
 
     <!-- The Docker registry user and password used for publishing images -->
     <docker.registry.username />
@@ -608,6 +616,8 @@
                 <fester.s3.bucket>${fester.s3.bucket}</fester.s3.bucket>
                 <fester.container.tag>${project.artifactId}:${project.version}</fester.container.tag>
                 <feature.flags>https://iiif-manifest-store.s3.amazonaws.com/fester-features-off.conf</feature.flags>
+                <jdwp.host.port>${jdwp.host.port}</jdwp.host.port>
+                <jdwp.client.config>${jdwp.client.config}</jdwp.client.config>
               </systemPropertyVariables>
             </configuration>
           </execution>
@@ -634,6 +644,8 @@
                 <fester.s3.bucket>${fester.s3.bucket}</fester.s3.bucket>
                 <fester.container.tag>${project.artifactId}:${project.version}</fester.container.tag>
                 <feature.flags>https://iiif-manifest-store.s3.amazonaws.com/fester-features-on.conf</feature.flags>
+                <jdwp.host.port>${jdwp.host.port}</jdwp.host.port>
+                <jdwp.client.config>${jdwp.client.config}</jdwp.client.config>
               </systemPropertyVariables>
             </configuration>
           </execution>
@@ -658,6 +670,8 @@
                 <fester.logs.output>${seeLogsFT}</fester.logs.output>
                 <fester.s3.bucket>${fester.s3.bucket}</fester.s3.bucket>
                 <fester.container.tag>${docker.registry.account}${project.artifactId}:${project.version}</fester.container.tag>
+                <jdwp.host.port>${jdwp.host.port}</jdwp.host.port>
+                <jdwp.client.config>${jdwp.client.config}</jdwp.client.config>
               </systemPropertyVariables>
             </configuration>
           </execution>
@@ -686,6 +700,8 @@
                 <fester.s3.secret_key>${fester.s3.secret_key}</fester.s3.secret_key>
                 <fester.s3.endpoint>${fester.s3.endpoint}</fester.s3.endpoint>
                 <fester.container.tag>${docker.registry.account}${project.artifactId}:${project.version}</fester.container.tag>
+                <jdwp.host.port>${jdwp.host.port}</jdwp.host.port>
+                <jdwp.client.config>${jdwp.client.config}</jdwp.client.config>
               </systemPropertyVariables>
             </configuration>
           </execution>
@@ -933,6 +949,13 @@
     </profile>
     <profile>
       <id>debug</id>
+      <properties>
+        <forkCount>0</forkCount>
+        <jdwp.client.config>-agentlib:jdwp=transport=dt_socket,address=host.testcontainers.internal:${jdwp.host.port},suspend=n</jdwp.client.config>
+      </properties>
+    </profile>
+    <profile>
+      <id>runDebug</id>
       <properties>
         <maven.test.skip>true</maven.test.skip>
         <jacoco.skip>true</jacoco.skip>
