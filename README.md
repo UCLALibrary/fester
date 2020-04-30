@@ -78,8 +78,8 @@ Once run, the service can be verified/accessed at [http://localhost:8888/fester/
 
 There are two ways to debug Fester:
 
-- **Debugging the tests.** This enables stepping through test suite code as well as the application code as runs according to the test suite.
-- **Debugging a running instance.** This enables stepping through the application code as it runs according to a developer's interaction with the HTTP API.
+- **Debugging the tests.** This enables the developer to step through both the test and application code as the test suite runs.
+- **Debugging a running instance.** This enables the developer to step through the application code as they interact with the HTTP API.
 
 The following setup instructions were tested with [Eclipse IDE](https://www.eclipse.org/eclipseide/) 4.14.0 (2019-12).
 
