@@ -39,6 +39,9 @@ public final class Config {
     /* A feature flags configuration for the Docker container */
     public static final String FEATURE_FLAGS = "feature.flags";
 
+    /* The port a debugger may listen on to debug a containerized Fester instance */
+    public static final String JDWP_HOST_PORT = "jdwp.host.port";
+
     /**
      * Private constructor for the Constants class.
      */

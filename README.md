@@ -76,40 +76,82 @@ Once run, the service can be verified/accessed at [http://localhost:8888/fester/
 
 ## Debugging with Eclipse IDE
 
-You can run a development instance of Fester with debugging turned on by typing the following within the project root:
+There are two ways to debug Fester:
 
-    mvn -Pdebug test
-Development instances are configured to accept remote debugger connections on port `5555`.
+- **Debugging the tests.** This enables stepping through test suite code as well as the application code as runs according to the test suite.
+- **Debugging a running instance.** This enables stepping through the application code as it runs according to a developer's interaction with the HTTP API.
 
-To debug Fester with [Eclipse IDE](https://www.eclipse.org/eclipseide/):
+The following setup instructions were tested with [Eclipse IDE](https://www.eclipse.org/eclipseide/) 4.14.0 (2019-12).
 
-1. Create a new run configuration
+### Debugging the tests
+
+From within Eclipse:
+
+1. Create a new debug configuration
+    - In the top-level menu, select *Run* > *Debug Configurations...*
+    - In the pop-up window:
+        - Create a new configuration of type *Remote Java Application*
+        - Set *Name* to something like `Fester (JDWP server for containerized instances created by test suite)`
+        - In the *Connect* tab:
+            - Set *Project* to the Fester project directory
+            - Set *Connection Type* to `Standard (Socket Listen)`
+            - Set *Port* to `5556`
+            - Set *Connection limit* to `16`
+            - Check *Allow termination of remote VM* (optional)
+2. Create another debug configuration *
+    - In the top-level menu, select *Run* > *Debug Configurations...*
+    - In the pop-up window:
+        - Create a new configuration of type *Maven Build*
+        - Set *Name* to something like `Fester (debug test suite)`
+        - In the *Main* tab:
+            - Set *Base directory* to the Fester project directory
+            - Set *Goals* to `integration-test`
+            - Set *Profiles* to `debug`
+            - Set *User settings* to the path to a `settings.xml` that contains your AWS S3 credentials
+3. Run the debug configuration created in Step 1 **
+4. Run the debug configuration created in Step 2 **
+
+_* As an alternative to step 2 (and 4), run the following from the command line (after completing steps 1 and 3):_
+
+    mvn -Pdebug integration-test
+
+_** If you're doing this for the first time, you may need to bring back the pop-up window where you created the configuration in order to invoke it. Otherwise, you can use toolbar buttons, or hotkeys <kbd>Ctrl</kbd> <kbd>F11</kbd> (Run) or <kbd>F11</kbd> (Debug)._
+
+### Debugging a running instance
+
+This procedure will start an instance of Fester with port `5555` open for incoming JDWP connections.
+
+From within Eclipse:
+
+1. Create a new run configuration ***
     - In the top-level menu, select *Run* > *Run Configurations...*
     - In the pop-up window:
         - Create a new configuration of type *Maven Build*
-        - Set *Name* to something like `Fester (development mode)`
+        - Set *Name* to something like `Fester (debugging mode)`
         - In the *Main* tab:
             - Set *Base directory* to the Fester project directory
             - Set *Goals* to `test`
-            - Set *Profiles* to `live`
+            - Set *Profiles* to `runDebug`
             - Set *User settings* to the path to a `settings.xml` that contains your AWS S3 credentials
 2. Create a new debug configuration
     - In the top-level menu, select *Run* > *Debug Configurations...*
     - In the pop-up window:
         - Create a new configuration of type *Remote Java Application*
-        - Set *Name* to something like `Fester (socket attach)`
+        - Set *Name* to something like `Fester (JDWP client)`
         - In the *Connect* tab:
             - Set *Project* to the Fester project directory
             - Set *Connection Type* to `Standard (Socket Attach)`
             - Set *Host* to `localhost`
             - Set *Port* to `5555`
             - Check *Allow termination of remote VM* (optional)
-3. Run the new run configuration created in Step 1 *
-4. Run the new debug configuration created in Step 2 *
+3. Run the new run configuration created in Step 1
+4. Run the new debug configuration created in Step 2
 
-_* If you're doing this for the first time, you may need to bring back the pop-up window where you created the configuration in order to invoke it. Otherwise, you can use toolbar buttons, or hotkeys <kbd>Ctrl</kbd> <kbd>F11</kbd> (Run) or <kbd>F11</kbd> (Debug)._
+_*** As an alternative to step 1 (and 3), run the following from the command line:_
 
-Tested with Eclipse IDE 4.14.0 (2019-12).
+    mvn -PrunDebug test
+
+_and then proceed with steps 2 and 4._
 
 ## Load Testing
 

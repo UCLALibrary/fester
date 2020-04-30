@@ -7,6 +7,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
+import org.testcontainers.Testcontainers;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.localstack.LocalStackContainer;
@@ -53,10 +54,16 @@ public final class ContainerUtils {
                 secretKey, toEnv(Config.S3_REGION), region, toEnv(Config.S3_ENDPOINT), endpoint, toEnv(
                         Config.HTTP_PORT), Integer.toString(aConfig.getContainerPort()), toEnv(Config.S3_BUCKET),
                 bucket, featureFlags, featureFlagsURL);
+        final String jdwpHostPort = System.getProperty(Config.JDWP_HOST_PORT);
 
         // Check to see if we want to output our Fester container logs when we run; the default is "no"
         if (Boolean.parseBoolean(System.getProperty(Config.LOGS_ON, Boolean.FALSE.toString()))) {
             container.withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger(aConfig.getContainerName())));
+        }
+
+        if (!"".equals(jdwpHostPort)) {
+            // Allow our container to attach to a JDWP server running on the host machine
+            Testcontainers.exposeHostPorts(Integer.parseInt(jdwpHostPort));
         }
 
         container.withExposedPorts(aConfig.getContainerPort()).withEnv(envMap).withNetwork(NETWORK).start();
