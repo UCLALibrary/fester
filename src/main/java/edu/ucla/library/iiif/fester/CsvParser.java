@@ -139,7 +139,7 @@ public class CsvParser {
      * @param aWorksMap A collection of Work manifests
      * @throws CsvParsingException If there is trouble getting the necessary info from the CSV
      */
-    private List<String[]> extractWorkMetadata(final String[] aRow) throws CsvParsingException {
+    private void extractWorkMetadata(final String[] aRow) throws CsvParsingException {
         final Optional<String> parentID = getMetadata(aRow[myCsvHeaders.getParentArkIndex()]);
         final Optional<String> workID = getMetadata(aRow[myCsvHeaders.getItemArkIndex()]);
         final Optional<String> label = getMetadata(aRow[myCsvHeaders.getTitleIndex()]);
@@ -171,8 +171,6 @@ public class CsvParser {
         } else {
             throw new CsvParsingException(MessageCodes.MFS_108);
         }
-
-        return myWorksList;
     }
 
     /**
