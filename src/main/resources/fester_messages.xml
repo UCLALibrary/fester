@@ -106,8 +106,8 @@
   <entry key="MFS-090">Unexpected response code [{}]: {}</entry>
   <entry key="MFS-091">Resource not found: {}</entry>
   <entry key="MFS-092">Manifest successfully PUT: {}</entry>
-  <entry key="MFS-093"></entry>
-  <entry key="MFS-094"></entry>
+  <entry key="MFS-093">CSV data contains a forbidden hard return: {}</entry>
+  <entry key="MFS-094">Unexpected object type: {}</entry>
   <entry key="MFS-095"></entry>
 
   <entry key="MFS-100">Stopping the {} verticle [id: {}]</entry>
