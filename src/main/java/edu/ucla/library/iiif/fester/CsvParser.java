@@ -6,6 +6,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -67,7 +68,10 @@ public class CsvParser {
                 checkForEOLs(row);
 
                 if (myCsvHeaders == null) {
-                    myCsvHeaders = new CsvHeaders(row); // CsvParsingException if a 'required' header is missing
+                    final String[] headerRow = Arrays.asList(row).stream()
+                            .map(aString -> StringUtils.trimToNull(aString)).toArray(String[]::new);
+
+                    myCsvHeaders = new CsvHeaders(headerRow); // CsvParsingException if a 'required' header is missing
                 } else {
                     final int objectTypeIndex = myCsvHeaders.getObjectTypeIndex();
 
