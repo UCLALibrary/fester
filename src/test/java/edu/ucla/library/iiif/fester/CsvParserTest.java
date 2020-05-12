@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.junit.Before;
@@ -41,7 +42,7 @@ public class CsvParserTest {
      */
     @Test
     public final void testParse() throws CsvParsingException, CsvException, IOException {
-        myCsvParser.parse(Paths.get(new File(DIR, GOOD_CSV).getAbsolutePath()));
+        myCsvParser.parse(getTestPath(GOOD_CSV));
     }
 
     /**
@@ -53,8 +54,7 @@ public class CsvParserTest {
      */
     @Test
     public final void testGetCollection() throws CsvParsingException, CsvException, IOException {
-        myCsvParser.parse(Paths.get(new File(DIR, GOOD_CSV).getAbsolutePath()));
-        assertNotNull(myCsvParser.getCollection().get());
+        assertNotNull(myCsvParser.parse(getTestPath(GOOD_CSV)).getCollection().get());
     }
 
     /**
@@ -66,10 +66,7 @@ public class CsvParserTest {
      */
     @Test
     public final void testGetCsvHeaders() throws CsvParsingException, CsvException, IOException {
-        final CsvHeaders csvHeaders;
-
-        myCsvParser.parse(Paths.get(new File(DIR, GOOD_CSV).getAbsolutePath()));
-        csvHeaders = myCsvParser.getCsvHeaders();
+        final CsvHeaders csvHeaders = myCsvParser.parse(getTestPath(GOOD_CSV)).getCsvHeaders();
 
         assertEquals(6, csvHeaders.getFileNameIndex());
         assertEquals(38, csvHeaders.getImageAccessUrlIndex());
@@ -94,7 +91,7 @@ public class CsvParserTest {
      */
     @Test
     public final void testGetCsvMetadata() throws CsvParsingException, CsvException, IOException {
-        myCsvParser.parse(Paths.get(new File(DIR, GOOD_CSV).getAbsolutePath()));
+        myCsvParser.parse(getTestPath(GOOD_CSV));
 
         assertEquals(20, myCsvParser.getCsvMetadata().getWorksList().size());
         assertEquals(1, myCsvParser.getCsvMetadata().getWorksMap().size());
@@ -110,7 +107,7 @@ public class CsvParserTest {
      */
     @Test(expected = CsvParsingException.class)
     public final void testEolCsvs() throws CsvParsingException, CsvException, IOException {
-        myCsvParser.parse(Paths.get(new File(DIR, "eol.csv").getAbsolutePath()));
+        myCsvParser.parse(getTestPath("eol.csv"));
     }
 
     /**
@@ -122,6 +119,16 @@ public class CsvParserTest {
      */
     @Test(expected = CsvParsingException.class)
     public final void testObjectTypeValuesWorks() throws CsvParsingException, CsvException, IOException {
-        myCsvParser.parse(Paths.get(new File(DIR, "bad_obj_type.csv").getAbsolutePath()));
+        myCsvParser.parse(getTestPath("bad_obj_type.csv"));
+    }
+
+    /**
+     * Gets the test fixture's path.
+     *
+     * @param aFixtureName The test fixture's name
+     * @return The path to the test fixture
+     */
+    private final Path getTestPath(final String aFixtureName) {
+        return Paths.get(new File(DIR, aFixtureName).getAbsolutePath());
     }
 }
