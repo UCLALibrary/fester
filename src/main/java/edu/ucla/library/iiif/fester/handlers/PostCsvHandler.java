@@ -1,21 +1,17 @@
 
 package edu.ucla.library.iiif.fester.handlers;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
-import org.apache.commons.io.IOUtils;
-
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvException;
 
+import info.freelibrary.util.IOUtils;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 import info.freelibrary.util.StringUtils;
@@ -30,6 +26,7 @@ import edu.ucla.library.iiif.fester.verticles.ManifestVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.DeliveryOptions;
+import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.file.FileSystem;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
@@ -58,21 +55,9 @@ public class PostCsvHandler extends AbstractFesterHandler {
     public PostCsvHandler(final Vertx aVertx, final JsonObject aConfig) throws IOException {
         super(aVertx, aConfig);
 
-        final StringBuilder templateBuilder = new StringBuilder();
+        final byte[] bytes = IOUtils.readBytes(getClass().getResourceAsStream("/webroot/error.html"));
 
-        // Load a template used for returning the error page
-        final InputStream templateStream = getClass().getResourceAsStream("/webroot/error.html");
-        final BufferedReader templateReader = new BufferedReader(new InputStreamReader(templateStream));
-
-        String line;
-
-        while ((line = templateReader.readLine()) != null) {
-            templateBuilder.append(line);
-        }
-
-        templateReader.close();
-        myExceptionPage = templateBuilder.toString();
-
+        myExceptionPage = new String(bytes, StandardCharsets.UTF_8);
         myUrl = aConfig.getString(Config.FESTER_URL);
     }
 
@@ -99,7 +84,8 @@ public class PostCsvHandler extends AbstractFesterHandler {
             final String iiifHost = StringUtils.trimToNull(request.getFormAttribute(Constants.IIIF_HOST));
 
             // Store the information that the manifest generator will need
-            message.put(Constants.CSV_FILE_NAME, fileName).put(Constants.CSV_FILE_PATH, filePath);
+            message.put(Constants.CSV_FILE_NAME, fileName);
+            message.put(Constants.CSV_FILE_PATH, filePath);
             options.addHeader(Constants.ACTION, Op.POST_CSV);
 
             if (iiifHost != null) {
@@ -111,7 +97,8 @@ public class PostCsvHandler extends AbstractFesterHandler {
                 if (send.succeeded()) {
                     updateCSV(fileName, filePath, response);
                 } else {
-                    returnError(response, send.cause());
+                    final ReplyException error = (ReplyException) send.cause();
+                    returnError(response, error.failureCode(), error);
                 }
             });
         }
@@ -136,14 +123,16 @@ public class PostCsvHandler extends AbstractFesterHandler {
                     aResponse.setStatusMessage(responseMessage);
                     aResponse.putHeader(Constants.CONTENT_TYPE, Constants.CSV_MEDIA_TYPE);
                     aResponse.end(Buffer.buffer(writer.toString()));
-                } catch (final IOException | CsvException details) {
-                    returnError(aResponse, details);
+                } catch (final IOException details) {
+                    returnError(aResponse, HTTP.INTERNAL_SERVER_ERROR, details);
+                } catch (final CsvException details) {
+                    returnError(aResponse, HTTP.BAD_REQUEST, details);
                 } finally {
-                    IOUtils.closeQuietly(csvReader);
-                    IOUtils.closeQuietly(csvWriter);
+                    org.apache.commons.io.IOUtils.closeQuietly(csvReader);
+                    org.apache.commons.io.IOUtils.closeQuietly(csvWriter);
                 }
             } else {
-                returnError(aResponse, read.cause());
+                returnError(aResponse, HTTP.INTERNAL_SERVER_ERROR, read.cause());
             }
         });
     }
@@ -154,13 +143,13 @@ public class PostCsvHandler extends AbstractFesterHandler {
      * @param aResponse A HTTP response
      * @param aThrowable A throwable exception
      */
-    private void returnError(final HttpServerResponse aResponse, final Throwable aThrowable) {
+    private void returnError(final HttpServerResponse aResponse, final int aStatusCode, final Throwable aThrowable) {
         final String exceptionMessage = aThrowable.getMessage();
         final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_103, exceptionMessage);
 
         LOGGER.error(aThrowable, errorMessage);
 
-        aResponse.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
+        aResponse.setStatusCode(aStatusCode);
         aResponse.setStatusMessage(exceptionMessage);
         aResponse.putHeader(Constants.CONTENT_TYPE, Constants.HTML_MEDIA_TYPE);
         aResponse.end(StringUtils.format(myExceptionPage, errorMessage));

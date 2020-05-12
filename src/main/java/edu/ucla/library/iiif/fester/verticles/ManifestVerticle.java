@@ -1,26 +1,18 @@
 
 package edu.ucla.library.iiif.fester.verticles;
 
-import static edu.ucla.library.iiif.fester.ObjectType.COLLECTION;
-import static edu.ucla.library.iiif.fester.ObjectType.PAGE;
-import static edu.ucla.library.iiif.fester.ObjectType.WORK;
-
 import java.io.IOException;
-import java.io.Reader;
-import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
-import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 
 import info.freelibrary.iiif.presentation.Canvas;
@@ -42,13 +34,14 @@ import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.CsvHeaders;
 import edu.ucla.library.iiif.fester.CsvMetadata;
+import edu.ucla.library.iiif.fester.CsvParser;
 import edu.ucla.library.iiif.fester.CsvParsingException;
+import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.ImageInfoLookup;
 import edu.ucla.library.iiif.fester.ImageNotFoundException;
 import edu.ucla.library.iiif.fester.LockedManifest;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.Op;
-import edu.ucla.library.iiif.fester.utils.CodeUtils;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
 import edu.ucla.library.iiif.fester.utils.ItemSequenceComparator;
 import io.vertx.core.CompositeFuture;
@@ -98,72 +91,49 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                 final Path filePath = Paths.get(messageBody.getString(Constants.CSV_FILE_PATH));
                 final Optional<String> imageHost = Optional.ofNullable(messageBody.getString(Constants.IIIF_HOST));
 
-                try (Reader reader = Files.newBufferedReader(filePath); CSVReader csvReader = new CSVReader(reader)) {
-                    final Map<String, List<String[]>> pages = new HashMap<>();
-                    final Map<String, List<Collection.Manifest>> works = new HashMap<>();
-                    final List<String[]> worksMetadata = new ArrayList<>();
-                    final CsvMetadata csvMetadata = new CsvMetadata(works, worksMetadata, pages);
-
-                    CsvHeaders csvHeaders = null;
-                    Collection collection = null;
-
-                    // Read through the CSV data and create store info about collections, works, and pages
-                    for (final String[] row : csvReader.readAll()) {
-                        // The first row should be our headers row
-                        if (csvHeaders == null) {
-                            // Throw a CsvParsingException here if one of our 'required' headers is missing
-                            csvHeaders = new CsvHeaders(row);
-                        } else {
-                            final int objectTypeIndex = csvHeaders.getObjectTypeIndex();
-
-                            if (COLLECTION.equals(row[objectTypeIndex])) {
-                                collection = getCollection(row, csvHeaders);
-                            } else if (WORK.equals(row[objectTypeIndex])) {
-                                extractWorkMetadata(row, csvHeaders, works, worksMetadata);
-                            } else if (PAGE.equals(row[objectTypeIndex])) {
-                                extractPageMetadata(row, csvHeaders, pages);
-                            }
-                        }
-                    }
+                try {
+                    final CsvParser csvParser = new CsvParser().parse(filePath);
+                    final Optional<Collection> collection = csvParser.getCollection();
+                    final CsvHeaders csvHeaders = csvParser.getCsvHeaders();
+                    final CsvMetadata csvMetadata = csvParser.getCsvMetadata();
 
                     // If we have a collection record in the CSV we're processing, create a collection manifest
-                    if (collection != null) {
+                    if (collection.isPresent()) {
                         LOGGER.debug(MessageCodes.MFS_122, filePath, collection);
-                        buildCollectionManifest(collection, csvHeaders, csvMetadata, imageHost, message);
-                    } else if (worksMetadata.size() > 0) {
-                        final String collectionID = worksMetadata.get(0)[csvHeaders.getParentArkIndex()];
+                        buildCollectionManifest(collection.get(), csvHeaders, csvMetadata, imageHost, message);
+                    } else if (csvMetadata.hasWorks()) {
+                        final Optional<String> id = csvMetadata.getCollectionID(csvHeaders.getParentArkIndex());
 
                         LOGGER.debug(MessageCodes.MFS_043, filePath);
-                        updateWorks(collectionID, csvHeaders, csvMetadata, imageHost, message);
-                    } else if (pages.size() > 0) {
-                        // All our page-only CSVs, at this point, have pages from only one work
-                        final String workID = pages.keySet().iterator().next();
-                        final List<String[]> pagesList = pages.values().iterator().next();
+                        updateWorks(id.get(), csvHeaders, csvMetadata, imageHost, message);
+                    } else if (csvMetadata.hasPages()) {
+                        // All our page-only CSVs, at this point, have pages from only one work [Cf. IIIF-830]
+                        final Iterator<Entry<String, List<String[]>>> iterator = csvMetadata.getPageIterator();
+                        final Entry<String, List<String[]>> pageEntry = iterator.next();
+                        final List<String[]> pagesList = pageEntry.getValue();
+                        final String workID = pageEntry.getKey();
 
                         LOGGER.debug(MessageCodes.MFS_069, filePath);
                         updatePages(workID, csvHeaders, pagesList, imageHost, message);
                     } else {
-                        final CsvParsingException details = new CsvParsingException(MessageCodes.MFS_042);
+                        final Exception details = new CsvParsingException(MessageCodes.MFS_042);
 
                         LOGGER.error(details, details.getMessage());
-                        message.fail(CodeUtils.getInt(MessageCodes.MFS_000), details.getMessage());
+                        message.fail(HTTP.BAD_REQUEST, details.getMessage());
                     }
                 } catch (final IOException details) {
                     LOGGER.error(details, details.getMessage());
-                    message.fail(CodeUtils.getInt(MessageCodes.MFS_000), details.getMessage());
-                } catch (final CsvParsingException details) {
+                    message.fail(HTTP.INTERNAL_SERVER_ERROR, details.getMessage());
+                } catch (final CsvParsingException | CsvException details) {
                     LOGGER.error(details, details.getMessage());
-                    message.fail(CodeUtils.getInt(MessageCodes.MFS_000), details.getMessage());
-                } catch (final CsvException details) {
-                    LOGGER.error(details, details.getMessage());
-                    message.fail(CodeUtils.getInt(MessageCodes.MFS_000), details.getMessage());
+                    message.fail(HTTP.BAD_REQUEST, details.getMessage());
                 }
             } else {
                 final String jsonMsg = message.toString();
                 final String verticleName = getClass().getSimpleName();
                 final String errorMessage = StringUtils.format(MessageCodes.MFS_139, verticleName, jsonMsg, action);
 
-                message.fail(CodeUtils.getInt(MessageCodes.MFS_139), errorMessage);
+                message.fail(HTTP.INTERNAL_SERVER_ERROR, errorMessage);
             }
         });
 
@@ -193,10 +163,9 @@ public class ManifestVerticle extends AbstractFesterVerticle {
 
                 // If the work doesn't already have any sequences, create one for it
                 if (sequences.size() == 0) {
-                    final String sequenceID = StringUtils.format(SEQUENCE_URI, Constants.URL_PLACEHOLDER,
-                            encodedWorkID);
+                    final String seqID = StringUtils.format(SEQUENCE_URI, Constants.URL_PLACEHOLDER, encodedWorkID);
 
-                    sequence = new Sequence().setID(sequenceID);
+                    sequence = new Sequence().setID(seqID);
                     manifest.addSequence(sequence);
                 } else {
                     // For now we're just dealing with single sequence works
@@ -219,16 +188,16 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                             final String errorMessage = details.getMessage();
 
                             LOGGER.error(details, MessageCodes.MFS_052, errorMessage);
-                            aMessage.fail(CodeUtils.getInt(MessageCodes.MFS_052), errorMessage);
+                            aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, errorMessage);
                         }
                     });
                 } catch (final IOException details) {
-                    aMessage.fail(CodeUtils.getInt(MessageCodes.MFS_052), details.getMessage());
+                    aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, details.getMessage());
                 } finally {
                     lockedManifest.release();
                 }
             } else {
-                aMessage.fail(CodeUtils.getInt(MessageCodes.MFS_052), handler.cause().getMessage());
+                aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, handler.cause().getMessage());
             }
         });
 
@@ -266,11 +235,11 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                     if (update.succeeded()) {
                         processWorks(aCsvHeaders, aCsvMetadata, aImageHost, aMessage);
                     } else {
-                        aMessage.fail(CodeUtils.getInt(MessageCodes.MFS_052), update.cause().getMessage());
+                        aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, update.cause().getMessage());
                     }
                 });
             } else {
-                aMessage.fail(CodeUtils.getInt(MessageCodes.MFS_052), handler.cause().getMessage());
+                aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, handler.cause().getMessage());
             }
         });
 
@@ -333,7 +302,8 @@ public class ManifestVerticle extends AbstractFesterVerticle {
             if (lockRequest.succeeded()) {
                 try {
                     final JsonObject message = new JsonObject();
-                    final DeliveryOptions options = new DeliveryOptions().addHeader(Constants.NO_REWRITE_URLS, "true");
+                    final DeliveryOptions options = new DeliveryOptions().addHeader(Constants.NO_REWRITE_URLS,
+                            "true");
 
                     if (aCollDoc) {
                         message.put(Constants.COLLECTION_NAME, aID);
@@ -399,11 +369,10 @@ public class ManifestVerticle extends AbstractFesterVerticle {
             if (handler.succeeded()) {
                 processWorks(aCsvHeaders, aCsvMetadata, aImageHost, aMessage);
             } else {
-                final int failCode = CodeUtils.getInt(MessageCodes.MFS_125);
                 final String failMessage = handler.cause().getMessage();
 
                 LOGGER.error(MessageCodes.MFS_125, failMessage);
-                aMessage.fail(failCode, failMessage);
+                aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, failMessage);
             }
         });
 
@@ -438,7 +407,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                 final String message = LOGGER.getMessage(MessageCodes.MFS_131, cause.getMessage());
 
                 LOGGER.error(cause, message);
-                aMessage.fail(CodeUtils.getInt(MessageCodes.MFS_131), message);
+                aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, message);
             }
         });
     }
@@ -475,6 +444,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                     manifest.setViewingDirection(ViewingDirection.fromString(viewingDirection));
                 }
             }
+
             if (aCsvHeaders.hasViewingHintIndex()) {
                 final String viewingHint = StringUtils.trimToNull(aWork[aCsvHeaders.getViewingHintIndex()]);
 
@@ -482,6 +452,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                     manifest.setViewingHint(new ViewingHint(viewingHint));
                 }
             }
+
             if (aCsvHeaders.hasRepositoryNameIndex()) {
                 final String repositoryName = StringUtils.trimToNull(aWork[aCsvHeaders.getRepositoryNameIndex()]);
 
@@ -489,14 +460,16 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                     metadata.add(Constants.REPOSITORY_NAME_METADATA_LABEL, repositoryName);
                 }
             }
+
             if (aCsvHeaders.hasLocalRightsStatementIndex()) {
-                final String localRightsStatement = StringUtils
-                        .trimToNull(aWork[aCsvHeaders.getLocalRightsStatementIndex()]);
+                final String localRightsStatement = StringUtils.trimToNull(aWork[aCsvHeaders
+                        .getLocalRightsStatementIndex()]);
 
                 if (localRightsStatement != null) {
                     manifest.setAttribution(new Attribution(localRightsStatement));
                 }
             }
+
             if (aCsvHeaders.hasRightsContactIndex()) {
                 final String rightsContact = StringUtils.trimToNull(aWork[aCsvHeaders.getRightsContactIndex()]);
 
@@ -504,6 +477,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                     metadata.add(Constants.RIGHTS_CONTACT_METADATA_LABEL, rightsContact);
                 }
             }
+
             if (metadata.getEntries().size() > 0) {
                 manifest.setMetadata(metadata);
             }
@@ -634,130 +608,6 @@ public class ManifestVerticle extends AbstractFesterVerticle {
             }
 
             aSequence.addCanvas(canvas);
-        }
-    }
-
-    /**
-     * Add a Work manifest.
-     *
-     * @param aRow A CSV row representing a Work
-     * @param aHeaders The CSV headers
-     * @param aWorksMap A collection of Work manifests
-     * @throws CsvParsingException If there is trouble getting the necessary info from the CSV
-     */
-    private void extractWorkMetadata(final String[] aRow, final CsvHeaders aHeaders,
-            final Map<String, List<Collection.Manifest>> aWorksMap, final List<String[]> aWorksList)
-                    throws CsvParsingException {
-        final String id = StringUtils.trimToNull(aRow[aHeaders.getItemArkIndex()]);
-        final String parentID = StringUtils.trimToNull(aRow[aHeaders.getParentArkIndex()]);
-        final String label = StringUtils.trimToNull(aRow[aHeaders.getTitleIndex()]);
-
-        // Store the work data for full manifest creation
-        aWorksList.add(aRow);
-
-        // Create a brief work manifest for inclusion in the collection manifest
-        if (id != null && label != null) {
-            final URI resourceURI = IDUtils.getResourceURI(Constants.URL_PLACEHOLDER, IDUtils.getWorkS3Key(id));
-            final Collection.Manifest manifest = new Collection.Manifest(resourceURI.toString(), label);
-
-            LOGGER.debug(MessageCodes.MFS_119, id, parentID);
-
-            if (parentID != null) {
-                if (aWorksMap.containsKey(parentID)) {
-                    aWorksMap.get(parentID).add(manifest);
-                } else {
-                    final List<Collection.Manifest> manifests = new ArrayList<>();
-
-                    manifests.add(manifest);
-                    aWorksMap.put(parentID, manifests);
-                }
-            } else {
-                throw new CsvParsingException(MessageCodes.MFS_107);
-            }
-        } else {
-            throw new CsvParsingException(MessageCodes.MFS_108);
-        }
-    }
-
-    /**
-     * Add a page's metadata to our pages map for later processing.
-     *
-     * @param aRow A metadata row
-     * @param aHeaders A CSV headers object
-     * @param aPageMap A map of pages
-     * @throws CsvParsingException
-     */
-    private void extractPageMetadata(final String[] aRow, final CsvHeaders aHeaders,
-            final Map<String, List<String[]>> aPageMap) throws CsvParsingException {
-        final String parentID = StringUtils.trimToNull(aRow[aHeaders.getParentArkIndex()]);
-
-        if (parentID != null) {
-            if (aPageMap.containsKey(parentID)) {
-                aPageMap.get(parentID).add(aRow);
-            } else {
-                final List<String[]> page = new ArrayList<>();
-
-                page.add(aRow);
-                aPageMap.put(parentID, page);
-            }
-        } else {
-            throw new CsvParsingException(MessageCodes.MFS_121);
-        }
-    }
-
-    /**
-     * Get the collection object from the collection row.
-     *
-     * @param aRow A row of collection metadata
-     * @param aHeaders A CSV headers object
-     * @return A collection
-     */
-    private Collection getCollection(final String[] aRow, final CsvHeaders aHeaders) throws CsvParsingException {
-        final String id = StringUtils.trimToNull(aRow[aHeaders.getItemArkIndex()]);
-
-        if (id != null) {
-            final URI resourceURI = IDUtils.getResourceURI(Constants.URL_PLACEHOLDER,
-                    IDUtils.getCollectionS3Key(id));
-            final String label = StringUtils.trimToNull(aRow[aHeaders.getTitleIndex()]);
-            final Metadata metadata = new Metadata();
-            final String repositoryName;
-            final String localRightsStatement;
-            final String rightsContact;
-            final Collection collection;
-
-            if (label == null) {
-                throw new CsvParsingException(MessageCodes.MFS_104);
-            }
-            collection = new Collection(resourceURI.toString(), label);
-
-            // Add optional properties
-            if (aHeaders.hasRepositoryNameIndex()) {
-                repositoryName = StringUtils.trimToNull(aRow[aHeaders.getRepositoryNameIndex()]);
-
-                if (repositoryName != null) {
-                    metadata.add(Constants.REPOSITORY_NAME_METADATA_LABEL, repositoryName);
-                }
-            }
-            if (aHeaders.hasLocalRightsStatementIndex()) {
-                localRightsStatement = StringUtils.trimToNull(aRow[aHeaders.getLocalRightsStatementIndex()]);
-
-                if (localRightsStatement != null) {
-                    collection.setAttribution(new Attribution(localRightsStatement));
-                }
-            }
-            if (aHeaders.hasRightsContactIndex()) {
-                rightsContact = StringUtils.trimToNull(aRow[aHeaders.getRightsContactIndex()]);
-
-                if (rightsContact != null) {
-                    metadata.add(Constants.RIGHTS_CONTACT_METADATA_LABEL, rightsContact);
-                }
-            }
-            if (metadata.getEntries().size() > 0) {
-                collection.setMetadata(metadata);
-            }
-            return collection;
-        } else {
-            throw new CsvParsingException(MessageCodes.MFS_106);
         }
     }
 }

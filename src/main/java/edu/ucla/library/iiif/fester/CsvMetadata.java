@@ -1,8 +1,11 @@
 
 package edu.ucla.library.iiif.fester;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 
 import info.freelibrary.iiif.presentation.Collection;
 
@@ -50,6 +53,29 @@ public class CsvMetadata {
     }
 
     /**
+     * Returns whether our metadata has works.
+     *
+     * @return True if our metadata has works; else, false
+     */
+    public boolean hasWorks() {
+        return myWorksList.size() > 0;
+    }
+
+    /**
+     * Gets the collection ID, if there is one.
+     *
+     * @param aIndex The position of the parent ARK in the row
+     * @return An optional collection ID
+     */
+    public Optional<String> getCollectionID(final int aIndex) {
+        if (hasWorks()) {
+            return Optional.ofNullable(myWorksList.get(0)[aIndex]);
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    /**
      * Gets the metadata for the manifest pages.
      *
      * @return The metadata for the manifest pages
@@ -58,4 +84,21 @@ public class CsvMetadata {
         return myPagesMap;
     }
 
+    /**
+     * Tests whether the CSV metadata has page data.
+     *
+     * @return True if pages are found; else, false
+     */
+    public boolean hasPages() {
+        return myPagesMap.size() > 0;
+    }
+
+    /**
+     * Returns an page iterator that has the work ID as the entry key.
+     *
+     * @return A page iterator
+     */
+    public Iterator<Entry<String, List<String[]>>> getPageIterator() {
+        return myPagesMap.entrySet().iterator();
+    }
 }
