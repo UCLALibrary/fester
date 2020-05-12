@@ -128,7 +128,7 @@ public class CsvParserTest {
      * @param aFixtureName The test fixture's name
      * @return The path to the test fixture
      */
-    private final Path getTestPath(final String aFixtureName) {
+    private Path getTestPath(final String aFixtureName) {
         return Paths.get(new File(DIR, aFixtureName).getAbsolutePath());
     }
 }
