@@ -83,6 +83,25 @@ public class CsvParserTest {
     }
 
     /**
+     * Tests getting headers that contain non-EOL whitespace from the CSV file.
+     *
+     * @throws CsvParsingException If there is an error while parsing the CSV data
+     * @throws CsvException If there is a generic CSV error
+     * @throws IOException If there is trouble reading the CSV data
+     */
+    @Test
+    public final void testGetCsvHeadersWhitespace() throws CsvParsingException, IOException, CsvException {
+        final CsvHeaders csvHeaders = myCsvParser.parse(getTestPath("headers_whitespace.csv")).getCsvHeaders();
+
+        assertEquals(1, csvHeaders.getItemArkIndex());
+        assertEquals(2, csvHeaders.getParentArkIndex());
+        assertEquals(3, csvHeaders.getObjectTypeIndex());
+        assertEquals(4, csvHeaders.getFileNameIndex());
+        assertEquals(5, csvHeaders.getItemSequenceIndex());
+        assertEquals(12, csvHeaders.getTitleIndex());
+    }
+
+    /**
      * Tests getting the CSV metadata from the parsing process.
      *
      * @throws CsvParsingException If there is an error while parsing the CSV data

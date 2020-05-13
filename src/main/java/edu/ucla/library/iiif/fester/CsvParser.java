@@ -67,6 +67,9 @@ public class CsvParser {
                 checkForEOLs(row);
 
                 if (myCsvHeaders == null) {
+                    for (int index = 0; index < row.length; index++) {
+                        row[index] = row[index].trim();
+                    }
                     myCsvHeaders = new CsvHeaders(row); // CsvParsingException if a 'required' header is missing
                 } else {
                     final int objectTypeIndex = myCsvHeaders.getObjectTypeIndex();
