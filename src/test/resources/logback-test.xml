@@ -4,7 +4,7 @@
   
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-      <level>${testLogLevel}</level>
+      <level>${logLevel}</level>
     </filter>
     <encoder>
       <pattern>[%level] %logger{45}:%X{line} | %msg%n</pattern>

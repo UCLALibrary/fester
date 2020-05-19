@@ -62,6 +62,10 @@ public class CsvParser {
         reset();
 
         try (CSVReader csvReader = new CSVReader(Files.newBufferedReader(aPath))) {
+            int rowsRead = 0;
+            int works = 0;
+            int pages = 0;
+
             // The first row should be the CSV headers row
             for (final String[] row : csvReader.readAll()) {
                 checkForEOLs(row);
@@ -70,6 +74,7 @@ public class CsvParser {
                     for (int index = 0; index < row.length; index++) {
                         row[index] = row[index].trim();
                     }
+
                     myCsvHeaders = new CsvHeaders(row); // CsvParsingException if a 'required' header is missing
                 } else {
                     final int objectTypeIndex = myCsvHeaders.getObjectTypeIndex();
@@ -79,15 +84,23 @@ public class CsvParser {
                         myCollection = getCollection(row);
                     } else if (ObjectType.WORK.equals(row[objectTypeIndex])) {
                         extractWorkMetadata(row);
+                        works += 1;
                     } else if (ObjectType.PAGE.equals(row[objectTypeIndex])) {
                         extractPageMetadata(row);
+                        pages += 1;
                     } else if (ObjectType.MISSING.equals(StringUtils.trimTo(row[objectTypeIndex], Constants.EMPTY))) {
                         // skip
                     } else {
                         throw new CsvParsingException(MessageCodes.MFS_094, row[objectTypeIndex]);
                     }
+
+                    rowsRead += 1;
                 }
             }
+
+            LOGGER.debug(MessageCodes.MFS_095, rowsRead, works, pages, myPagesMap.size());
+        } catch (final RuntimeException details) {
+            throw new CsvParsingException(details);
         }
 
         return this;
@@ -143,30 +156,33 @@ public class CsvParser {
      * @throws CsvParsingException If there is trouble getting the necessary info from the CSV
      */
     private void extractWorkMetadata(final String[] aRow) throws CsvParsingException {
-        final Optional<String> parentID = getMetadata(aRow[myCsvHeaders.getParentArkIndex()]);
-        final Optional<String> workID = getMetadata(aRow[myCsvHeaders.getItemArkIndex()]);
-        final Optional<String> label = getMetadata(aRow[myCsvHeaders.getTitleIndex()]);
+        final Optional<String> parentIdOpt = getMetadata(aRow[myCsvHeaders.getParentArkIndex()]);
+        final Optional<String> workIdOpt = getMetadata(aRow[myCsvHeaders.getItemArkIndex()]);
+        final Optional<String> labelOpt = getMetadata(aRow[myCsvHeaders.getTitleIndex()]);
 
         // Store the work data for full manifest creation
         myWorksList.add(aRow);
 
         // Create a brief work manifest for inclusion in the collection manifest
-        if (workID.isPresent() && label.isPresent()) {
-            final URI uri = IDUtils.getResourceURI(Constants.URL_PLACEHOLDER, IDUtils.getWorkS3Key(workID.get()));
-            final Collection.Manifest manifest = new Collection.Manifest(uri.toString(), label.get());
+        if (workIdOpt.isPresent() && labelOpt.isPresent()) {
+            final String workID = workIdOpt.get();
+            final URI uri = IDUtils.getResourceURI(Constants.URL_PLACEHOLDER, IDUtils.getWorkS3Key(workID));
+            final Collection.Manifest manifest = new Collection.Manifest(uri.toString(), labelOpt.get());
 
-            LOGGER.debug(MessageCodes.MFS_119, workID, parentID);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug(MessageCodes.MFS_119, workID, parentIdOpt.orElse(Constants.EMPTY));
+            }
 
-            if (parentID.isPresent()) {
-                final String id = parentID.get();
+            if (parentIdOpt.isPresent()) {
+                final String parentID = parentIdOpt.get();
 
-                if (myWorksMap.containsKey(id)) {
-                    myWorksMap.get(id).add(manifest);
+                if (myWorksMap.containsKey(parentID)) {
+                    myWorksMap.get(parentID).add(manifest);
                 } else {
                     final List<Collection.Manifest> manifests = new ArrayList<>();
 
                     manifests.add(manifest);
-                    myWorksMap.put(id, manifests);
+                    myWorksMap.put(parentID, manifests);
                 }
             } else {
                 throw new CsvParsingException(MessageCodes.MFS_107);
@@ -185,18 +201,18 @@ public class CsvParser {
      * @throws CsvParsingException
      */
     private void extractPageMetadata(final String[] aRow) throws CsvParsingException {
-        final Optional<String> parentID = getMetadata(aRow[myCsvHeaders.getParentArkIndex()]);
+        final Optional<String> workIdOpt = getMetadata(aRow[myCsvHeaders.getParentArkIndex()]);
 
-        if (parentID.isPresent()) {
-            final String id = parentID.get();
+        if (workIdOpt.isPresent()) {
+            final String workID = workIdOpt.get();
             final List<String[]> page;
 
-            if (myPagesMap.containsKey(id)) {
-                myPagesMap.get(id).add(aRow);
+            if (myPagesMap.containsKey(workID)) {
+                myPagesMap.get(workID).add(aRow);
             } else {
                 page = new ArrayList<>();
                 page.add(aRow);
-                myPagesMap.put(id, page);
+                myPagesMap.put(workID, page);
             }
         } else {
             throw new CsvParsingException(MessageCodes.MFS_121);
