@@ -316,7 +316,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                 try {
                     final JsonObject message = new JsonObject();
                     final DeliveryOptions options = new DeliveryOptions().addHeader(Constants.NO_REWRITE_URLS,
-                            "true");
+                            Boolean.TRUE.toString());
 
                     if (aCollDoc) {
                         message.put(Constants.COLLECTION_NAME, aID);
