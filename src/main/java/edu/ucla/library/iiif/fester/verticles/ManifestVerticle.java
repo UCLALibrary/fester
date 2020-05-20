@@ -107,14 +107,29 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                         LOGGER.debug(MessageCodes.MFS_043, filePath);
                         updateWorks(id.get(), csvHeaders, csvMetadata, imageHost, message);
                     } else if (csvMetadata.hasPages()) {
-                        // All our page-only CSVs, at this point, have pages from only one work [Cf. IIIF-830]
                         final Iterator<Entry<String, List<String[]>>> iterator = csvMetadata.getPageIterator();
-                        final Entry<String, List<String[]>> pageEntry = iterator.next();
-                        final List<String[]> pagesList = pageEntry.getValue();
-                        final String workID = pageEntry.getKey();
+                        final List<Future> futures = new ArrayList<>();
 
                         LOGGER.debug(MessageCodes.MFS_069, filePath);
-                        updatePages(workID, csvHeaders, pagesList, imageHost, message);
+
+                        while (iterator.hasNext()) {
+                            final Entry<String, List<String[]>> pageEntry = iterator.next();
+                            final List<String[]> pagesList = pageEntry.getValue();
+                            final String workID = pageEntry.getKey();
+
+                            futures.add(updatePages(workID, csvHeaders, pagesList, imageHost, Promise.promise()));
+                        }
+
+                        CompositeFuture.all(futures).setHandler(pagesHandler -> {
+                            if (pagesHandler.succeeded()) {
+                                message.reply(Op.SUCCESS);
+                            } else {
+                                final Throwable throwable = pagesHandler.cause();
+
+                                LOGGER.error(throwable, throwable.getMessage());
+                                message.fail(HTTP.INTERNAL_SERVER_ERROR, throwable.getMessage());
+                            }
+                        });
                     } else {
                         final Exception details = new CsvParsingException(MessageCodes.MFS_042);
 
@@ -147,8 +162,8 @@ public class ManifestVerticle extends AbstractFesterVerticle {
      * @param aPagesList A list of pages
      * @param aMessage A message
      */
-    private void updatePages(final String aWorkID, final CsvHeaders aCsvHeaders, final List<String[]> aPagesList,
-            final Optional<String> aImageHost, final Message<JsonObject> aMessage) {
+    private Future<Void> updatePages(final String aWorkID, final CsvHeaders aCsvHeaders,
+            final List<String[]> aPagesList, final Optional<String> aImageHost, final Promise<Void> aPromise) {
         final Promise<LockedManifest> promise = Promise.promise();
         final String encodedWorkID = URLEncoder.encode(aWorkID, StandardCharsets.UTF_8);
 
@@ -172,6 +187,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                     sequence = sequences.get(0);
                 }
 
+                sequence.getCanvases().clear(); // overwrite whatever is on the manifest already
                 aPagesList.sort(new ItemSequenceComparator(aCsvHeaders.getItemSequenceIndex()));
 
                 try {
@@ -182,26 +198,23 @@ public class ManifestVerticle extends AbstractFesterVerticle {
 
                     sendMessage(S3BucketVerticle.class.getName(), message, options, send -> {
                         if (send.succeeded()) {
-                            aMessage.reply(Op.SUCCESS);
+                            aPromise.complete();
                         } else {
-                            final Throwable details = send.cause();
-                            final String errorMessage = details.getMessage();
-
-                            LOGGER.error(details, MessageCodes.MFS_052, errorMessage);
-                            aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, errorMessage);
+                            aPromise.fail(send.cause());
                         }
                     });
                 } catch (final IOException details) {
-                    aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, details.getMessage());
+                    aPromise.fail(details);
                 } finally {
                     lockedManifest.release();
                 }
             } else {
-                aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, handler.cause().getMessage());
+                aPromise.fail(handler.cause());
             }
         });
 
         getLockedManifest(aWorkID, false, promise);
+        return aPromise.future();
     }
 
     /**
@@ -303,7 +316,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                 try {
                     final JsonObject message = new JsonObject();
                     final DeliveryOptions options = new DeliveryOptions().addHeader(Constants.NO_REWRITE_URLS,
-                            "true");
+                            Boolean.TRUE.toString());
 
                     if (aCollDoc) {
                         message.put(Constants.COLLECTION_NAME, aID);

@@ -1,3 +1,4 @@
+
 package edu.ucla.library.iiif.fester.fit;
 
 import java.io.File;
@@ -16,6 +17,9 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 
+import info.freelibrary.util.Logger;
+import info.freelibrary.util.LoggerFactory;
+
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.ImageInfoLookup;
@@ -23,8 +27,6 @@ import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
 import edu.ucla.library.iiif.fester.utils.LinkUtils;
 import edu.ucla.library.iiif.fester.utils.LinkUtilsTest;
-import info.freelibrary.util.Logger;
-import info.freelibrary.util.LoggerFactory;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -48,8 +50,8 @@ public class PostCsvFIT {
             "src/test/resources/json/ark%3A%2F21198%2Fzz0009gsq9.json");
 
     /* Uploaded CSV files are named with a UUID */
-    private static final String UPLOADED_FILE_PATH_REGEX = "(" + BodyHandler.DEFAULT_UPLOADS_DIRECTORY + "\\/"
-            + "[0-9a-f\\-]+" + ")";
+    private static final String UPLOADED_FILE_PATH_REGEX = "(" + BodyHandler.DEFAULT_UPLOADS_DIRECTORY + "\\/" +
+            "[0-9a-f\\-]+" + ")";
 
     /**
      * Functional tests for the CSV upload feature.
@@ -70,9 +72,10 @@ public class PostCsvFIT {
             super.cleanUpTest();
 
             // Delete the S3 bucket
-            for (final S3ObjectSummary s : myS3Client.listObjectsV2(BUCKET).getObjectSummaries()) {
-                myS3Client.deleteObject(BUCKET, s.getKey());
+            for (final S3ObjectSummary summary : myS3Client.listObjectsV2(BUCKET).getObjectSummaries()) {
+                myS3Client.deleteObject(BUCKET, summary.getKey());
             }
+
             myS3Client.deleteBucket(BUCKET);
         }
 
@@ -81,7 +84,7 @@ public class PostCsvFIT {
          *
          * @param aContext A test context
          * @throws IOException If there is trouble reading a manifest
-         * @throws CsvException Ifparq there is trouble reading the CSV data
+         * @throws CsvException If there is trouble reading the CSV data
          */
         @Test
         @SuppressWarnings("checkstyle:indentation")
@@ -90,11 +93,11 @@ public class PostCsvFIT {
 
             final String filename = ALL_IN_ONE_CSV.getName();
             final String pathname = ALL_IN_ONE_CSV.getAbsolutePath();
-            final MultipartForm form = MultipartForm.create()
-                    .textFileUpload(Constants.CSV_FILE, filename, pathname, Constants.CSV_MEDIA_TYPE);
+            final MultipartForm form = MultipartForm.create().textFileUpload(Constants.CSV_FILE, filename, pathname,
+                    Constants.CSV_MEDIA_TYPE);
 
-            myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE).sendMultipartForm(form,
-                    post -> {
+            myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE).sendMultipartForm(
+                    form, post -> {
                         if (post.succeeded()) {
                             final HttpResponse<Buffer> response = post.result();
                             final int statusCode = response.statusCode();
@@ -132,7 +135,6 @@ public class PostCsvFIT {
                     });
         }
 
-
         /**
          * Tests the single-upload workflow by posting an "all-in-one" CSV with a supplied IIIF host.
          *
@@ -147,12 +149,11 @@ public class PostCsvFIT {
 
             final String filename = ALL_IN_ONE_CSV.getName();
             final String pathname = ALL_IN_ONE_CSV.getAbsolutePath();
-            final MultipartForm form = MultipartForm.create()
-                    .textFileUpload(Constants.CSV_FILE, filename, pathname, Constants.CSV_MEDIA_TYPE)
-                    .attribute(Constants.IIIF_HOST, ImageInfoLookup.FAKE_IIIF_SERVER);
+            final MultipartForm form = MultipartForm.create().textFileUpload(Constants.CSV_FILE, filename, pathname,
+                    Constants.CSV_MEDIA_TYPE).attribute(Constants.IIIF_HOST, ImageInfoLookup.FAKE_IIIF_SERVER);
 
-            myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE).sendMultipartForm(form,
-                    post -> {
+            myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE).sendMultipartForm(
+                    form, post -> {
                         if (post.succeeded()) {
                             final HttpResponse<Buffer> response = post.result();
                             final int statusCode = response.statusCode();
@@ -207,8 +208,8 @@ public class PostCsvFIT {
             final MultipartForm form = MultipartForm.create().textFileUpload(Constants.CSV_FILE, filename, pathname,
                     Constants.CSV_MEDIA_TYPE);
 
-            myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE).sendMultipartForm(form,
-                    post -> {
+            myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE).sendMultipartForm(
+                    form, post -> {
                         if (post.succeeded()) {
                             final HttpResponse<Buffer> response = post.result();
                             final int statusCode = response.statusCode();
@@ -261,15 +262,15 @@ public class PostCsvFIT {
 
             final String filename = WORKS_CSV_NO_COLLECTION.getName();
             final String pathname = WORKS_CSV_NO_COLLECTION.getAbsolutePath();
-            final MultipartForm form = MultipartForm.create().textFileUpload(Constants.CSV_FILE, filename,
-                    pathname, Constants.CSV_MEDIA_TYPE);
+            final MultipartForm form = MultipartForm.create().textFileUpload(Constants.CSV_FILE, filename, pathname,
+                    Constants.CSV_MEDIA_TYPE);
 
             // Put a collection manifest in Fester
             myS3Client.putObject(BUCKET, IDUtils.getCollectionS3Key("ark:/21198/zz0009gsq9"),
                     HATHAWAY_COLLECTION_MANIFEST);
 
-            myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE).sendMultipartForm(form,
-                    post -> {
+            myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE).sendMultipartForm(
+                    form, post -> {
                         if (post.succeeded()) {
                             final HttpResponse<Buffer> response = post.result();
                             final int statusCode = response.statusCode();
@@ -325,17 +326,16 @@ public class PostCsvFIT {
             final MultipartForm form = MultipartForm.create().textFileUpload(Constants.CSV_FILE, filename, pathname,
                     Constants.CSV_MEDIA_TYPE);
 
-            myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE).sendMultipartForm(form,
-                    post -> {
+            myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE).sendMultipartForm(
+                    form, post -> {
                         if (post.succeeded()) {
                             final HttpResponse<Buffer> response = post.result();
 
                             aContext.assertEquals(response.statusCode(), HTTP.INTERNAL_SERVER_ERROR);
                             aContext.assertEquals(response.getHeader(Constants.CONTENT_TYPE),
                                     Constants.HTML_MEDIA_TYPE);
-                            LOGGER.info(response.bodyAsString());
-                            aContext.assertTrue(
-                                    response.bodyAsString().contains("Manifest generation failed: Not Found"));
+                            aContext.assertTrue(response.bodyAsString().contains(
+                                    "Manifest generation failed: Not Found"));
 
                             if (!asyncTask.isCompleted()) {
                                 asyncTask.complete();
@@ -366,8 +366,8 @@ public class PostCsvFIT {
                     Constants.CSV_MEDIA_TYPE);
             final List<String[]> expected = LinkUtilsTest.read(ALL_IN_ONE_CSV.getAbsolutePath());
 
-            myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE).sendMultipartForm(form,
-                    post -> {
+            myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE).sendMultipartForm(
+                    form, post -> {
                         if (post.succeeded()) {
                             final HttpResponse<Buffer> response = post.result();
                             final int statusCode = response.statusCode();
@@ -392,8 +392,8 @@ public class PostCsvFIT {
                                     final Long timerDelay = 500L;
 
                                     VERTX_INSTANCE.setTimer(timerDelay, timerId -> {
-                                        final boolean isDeleted = !VERTX_INSTANCE.fileSystem()
-                                                .existsBlocking(uploadedFilePath);
+                                        final boolean isDeleted = !VERTX_INSTANCE.fileSystem().existsBlocking(
+                                                uploadedFilePath);
                                         try {
                                             aContext.assertTrue(isDeleted);
                                         } catch (final AssertionError details) {

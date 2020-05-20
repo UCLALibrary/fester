@@ -105,7 +105,8 @@
     <seeLogsIT>false</seeLogsIT>
     <seeLogsFfT>false</seeLogsFfT>
 
-    <!-- What level of logging we want to see, by default, in our tests -->
+    <!-- What level of logging we want to see, by default, in our tests and default container config -->
+    <logLevel>ERROR</logLevel>
     <testLogLevel>ERROR</testLogLevel>
 
     <!-- AWS configuration properties -->
@@ -978,8 +979,14 @@
                       <directory>${basedir}/src/main/resources</directory>
                       <filtering>true</filtering>
                       <includes>
-                        <include>logback.xml</include>
                         <include>fester.yaml</include>
+                      </includes>
+                    </resource>
+                    <resource>
+                      <directory>${basedir}</directory>
+                      <filtering>true</filtering>
+                      <includes>
+                        <include>logback-test.xml</include>
                       </includes>
                     </resource>
                   </resources>
@@ -1055,8 +1062,14 @@
                       <directory>${basedir}/src/main/resources</directory>
                       <filtering>true</filtering>
                       <includes>
-                        <include>logback.xml</include>
                         <include>fester.yaml</include>
+                      </includes>
+                    </resource>
+                    <resource>
+                      <directory>${basedir}</directory>
+                      <filtering>true</filtering>
+                      <includes>
+                        <include>logback-test.xml</include>
                       </includes>
                     </resource>
                   </resources>

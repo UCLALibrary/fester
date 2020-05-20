@@ -54,14 +54,20 @@ public class GetManifestHandler extends AbstractFesterHandler {
                 response.end(manifest);
             } else {
                 final ReplyException failure = (ReplyException) send.cause();
-                final int statusCode = failure.failureCode();
                 final String statusMessage = failure.getMessage();
-                final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_009, manifestID, statusCode,
-                        statusMessage);
+                final String errorMessage;
 
+                int responseCode = failure.failureCode();
+
+                errorMessage = LOGGER.getMessage(MessageCodes.MFS_009, manifestID, responseCode, statusMessage);
                 LOGGER.error(errorMessage);
 
-                response.setStatusCode(statusCode);
+                // If the browser stops the request we'll get back a -1 code which causes setStatusCode to error
+                if (responseCode == -1) {
+                    responseCode = HTTP.SERVICE_UNAVAILABLE;
+                }
+
+                response.setStatusCode(responseCode);
                 response.setStatusMessage(statusMessage);
                 response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
                 response.end(errorMessage);

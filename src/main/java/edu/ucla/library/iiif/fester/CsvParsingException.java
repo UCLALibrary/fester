@@ -16,6 +16,15 @@ public class CsvParsingException extends I18nException {
     /**
      * Creates a new CSV parsing exception.
      *
+     * @param aThrowable A underlying cause of the exception
+     */
+    public CsvParsingException(final Throwable aThrowable) {
+        super(aThrowable);
+    }
+
+    /**
+     * Creates a new CSV parsing exception.
+     *
      * @param aMessageCode A message code
      */
     public CsvParsingException(final String aMessageCode) {
