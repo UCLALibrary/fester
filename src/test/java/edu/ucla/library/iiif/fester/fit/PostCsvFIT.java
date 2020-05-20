@@ -88,11 +88,9 @@ public class PostCsvFIT {
          * Tests the single-upload workflow by posting an "all-in-one" CSV.
          *
          * @param aContext A test context
-         * @throws IOException If there is trouble reading a manifest
-         * @throws CsvException If there is trouble reading the CSV data
          */
         @Test
-        public final void testFullCSV(final TestContext aContext) throws CsvException, IOException {
+        public final void testFullCSV(final TestContext aContext) {
             final Async asyncTask = aContext.async();
 
             postCSV(ALL_IN_ONE_CSV, post -> {
@@ -153,55 +151,6 @@ public class PostCsvFIT {
                     }
                 } else {
                     aContext.fail(post.cause());
-                }
-            });
-        }
-
-        /**
-         * Tests the single-upload workflow by posting an "all-in-one" CSV with a supplied IIIF host.
-         *
-         * @param aContext A test context
-         * @throws IOException If there is trouble reading a manifest
-         * @throws CsvException If there is trouble reading the CSV data
-         */
-        @Test
-        public final void testFullCsvWithIiifHost(final TestContext aContext) {
-            final Async asyncTask = aContext.async();
-
-            postCSV(ALL_IN_ONE_CSV, post -> {
-                if (post.succeeded()) {
-                    final HttpResponse<Buffer> response = post.result();
-                    final int statusCode = response.statusCode();
-                    final String statusMessage = response.statusMessage();
-
-                    if (statusCode == HTTP.CREATED) {
-                        final Buffer actual = response.body();
-                        final String contentType = response.getHeader(Constants.CONTENT_TYPE);
-                        final List<String[]> expected;
-
-                        // Check that what we get back is the same as what we sent
-                        try {
-                            expected = LinkUtilsTest.read(ALL_IN_ONE_CSV.getAbsolutePath());
-                            check(aContext, LinkUtils.addManifests(FESTER_URL, expected), actual);
-                        } catch (CsvException | IOException aDetails) {
-                            LOGGER.error(aDetails, aDetails.getMessage());
-                            aContext.fail(aDetails);
-                        }
-
-                        // Check that what we get back has the correct media type
-                        aContext.assertEquals(Constants.CSV_MEDIA_TYPE, contentType);
-
-                        if (!asyncTask.isCompleted()) {
-                            asyncTask.complete();
-                        }
-                    } else {
-                        aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, statusCode, statusMessage));
-                    }
-                } else {
-                    final Throwable exception = post.cause();
-
-                    LOGGER.error(exception, exception.getMessage());
-                    aContext.fail(exception);
                 }
             });
         }
