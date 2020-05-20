@@ -76,6 +76,8 @@ public class CsvParser {
                     }
 
                     myCsvHeaders = new CsvHeaders(row); // CsvParsingException if a 'required' header is missing
+                } else if (row.length <= 1) {
+                    // skip blank rows
                 } else {
                     final int objectTypeIndex = myCsvHeaders.getObjectTypeIndex();
 
