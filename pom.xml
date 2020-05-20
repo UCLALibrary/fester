@@ -107,6 +107,7 @@
 
     <!-- What level of logging we want to see, by default, in our tests and default container config -->
     <logLevel>ERROR</logLevel>
+    <testLogLevel>ERROR</testLogLevel>
 
     <!-- AWS configuration properties -->
     <fester.s3.region>us-east-1</fester.s3.region>
