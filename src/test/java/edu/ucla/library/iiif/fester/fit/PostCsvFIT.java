@@ -27,6 +27,8 @@ import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
 import edu.ucla.library.iiif.fester.utils.LinkUtils;
 import edu.ucla.library.iiif.fester.utils.LinkUtilsTest;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -40,14 +42,17 @@ public class PostCsvFIT {
     /* A logger for the tests */
     private static final Logger LOGGER = LoggerFactory.getLogger(PostCsvFIT.class, Constants.MESSAGES);
 
-    private static final File ALL_IN_ONE_CSV = new File("src/test/resources/csv/hathaway.csv");
+    private static final File DIR = new File("src/test/resources");
 
-    private static final File WORKS_CSV_COLLECTION = new File("src/test/resources/csv/hathaway/batch1/works.csv");
+    private static final File ALL_IN_ONE_CSV = new File(DIR, "csv/hathaway.csv");
 
-    private static final File WORKS_CSV_NO_COLLECTION = new File("src/test/resources/csv/hathaway/batch2/works.csv");
+    private static final File WORKS_CSV_COLLECTION = new File(DIR, "csv/hathaway/batch1/works.csv");
 
-    private static final File HATHAWAY_COLLECTION_MANIFEST = new File(
-            "src/test/resources/json/ark%3A%2F21198%2Fzz0009gsq9.json");
+    private static final File WORKS_CSV_NO_COLLECTION = new File(DIR, "csv/hathaway/batch2/works.csv");
+
+    private static final File HATHAWAY_COLLECTION_MANIFEST = new File(DIR, "json/ark%3A%2F21198%2Fzz0009gsq9.json");
+
+    private static final File BLANK_LINE_CSV = new File(DIR, "csv/blankline.csv");
 
     /* Uploaded CSV files are named with a UUID */
     private static final String UPLOADED_FILE_PATH_REGEX = "(" + BodyHandler.DEFAULT_UPLOADS_DIRECTORY + "\\/" +
@@ -83,112 +88,71 @@ public class PostCsvFIT {
          * Tests the single-upload workflow by posting an "all-in-one" CSV.
          *
          * @param aContext A test context
-         * @throws IOException If there is trouble reading a manifest
-         * @throws CsvException If there is trouble reading the CSV data
          */
         @Test
-        @SuppressWarnings("checkstyle:indentation")
-        public final void testFullCSV(final TestContext aContext) throws CsvException, IOException {
+        public final void testFullCSV(final TestContext aContext) {
             final Async asyncTask = aContext.async();
 
-            final String filename = ALL_IN_ONE_CSV.getName();
-            final String pathname = ALL_IN_ONE_CSV.getAbsolutePath();
-            final MultipartForm form = MultipartForm.create().textFileUpload(Constants.CSV_FILE, filename, pathname,
-                    Constants.CSV_MEDIA_TYPE);
+            postCSV(ALL_IN_ONE_CSV, post -> {
+                if (post.succeeded()) {
+                    final HttpResponse<Buffer> response = post.result();
+                    final int statusCode = response.statusCode();
+                    final String statusMessage = response.statusMessage();
 
-            myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE).sendMultipartForm(
-                    form, post -> {
-                        if (post.succeeded()) {
-                            final HttpResponse<Buffer> response = post.result();
-                            final int statusCode = response.statusCode();
-                            final String statusMessage = response.statusMessage();
+                    if (statusCode == HTTP.CREATED) {
+                        final Buffer actual = response.body();
+                        final String contentType = response.getHeader(Constants.CONTENT_TYPE);
+                        final List<String[]> expected;
 
-                            if (statusCode == HTTP.CREATED) {
-                                final Buffer actual = response.body();
-                                final String contentType = response.getHeader(Constants.CONTENT_TYPE);
-                                final List<String[]> expected;
-
-                                // Check that what we get back is the same as what we sent
-                                try {
-                                    expected = LinkUtilsTest.read(ALL_IN_ONE_CSV.getAbsolutePath());
-                                    check(aContext, LinkUtils.addManifests(FESTER_URL, expected), actual);
-                                } catch (CsvException | IOException aDetails) {
-                                    LOGGER.error(aDetails, aDetails.getMessage());
-                                    aContext.fail(aDetails);
-                                }
-
-                                // Check that what we get back has the correct media type
-                                aContext.assertEquals(Constants.CSV_MEDIA_TYPE, contentType);
-
-                                if (!asyncTask.isCompleted()) {
-                                    asyncTask.complete();
-                                }
-                            } else {
-                                aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, statusCode, statusMessage));
-                            }
-                        } else {
-                            final Throwable exception = post.cause();
-
-                            LOGGER.error(exception, exception.getMessage());
-                            aContext.fail(exception);
+                        // Check that what we get back is the same as what we sent
+                        try {
+                            expected = LinkUtilsTest.read(ALL_IN_ONE_CSV.getAbsolutePath());
+                            check(aContext, LinkUtils.addManifests(FESTER_URL, expected), actual);
+                        } catch (CsvException | IOException aDetails) {
+                            LOGGER.error(aDetails, aDetails.getMessage());
+                            aContext.fail(aDetails);
                         }
-                    });
+
+                        // Check that what we get back has the correct media type
+                        aContext.assertEquals(Constants.CSV_MEDIA_TYPE, contentType);
+
+                        if (!asyncTask.isCompleted()) {
+                            asyncTask.complete();
+                        }
+                    } else {
+                        aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, statusCode, statusMessage));
+                    }
+                } else {
+                    final Throwable exception = post.cause();
+
+                    LOGGER.error(exception, exception.getMessage());
+                    aContext.fail(exception);
+                }
+            });
         }
 
         /**
-         * Tests the single-upload workflow by posting an "all-in-one" CSV with a supplied IIIF host.
+         * Tests submitting a CSV file with a blank line. This should succeed with the blank line being ignored.
          *
-         * @param aContext A test context
-         * @throws IOException If there is trouble reading a manifest
-         * @throws CsvException If there is trouble reading the CSV data
+         * @param aContext A testing context
          */
         @Test
-        @SuppressWarnings("checkstyle:indentation")
-        public final void testFullCsvWithIiifHost(final TestContext aContext) {
+        public final void testCsvWithBlankLine(final TestContext aContext) {
             final Async asyncTask = aContext.async();
 
-            final String filename = ALL_IN_ONE_CSV.getName();
-            final String pathname = ALL_IN_ONE_CSV.getAbsolutePath();
-            final MultipartForm form = MultipartForm.create().textFileUpload(Constants.CSV_FILE, filename, pathname,
-                    Constants.CSV_MEDIA_TYPE).attribute(Constants.IIIF_HOST, ImageInfoLookup.FAKE_IIIF_SERVER);
+            postCSV(BLANK_LINE_CSV, post -> {
+                if (post.succeeded()) {
+                    final HttpResponse<Buffer> response = post.result();
 
-            myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE).sendMultipartForm(
-                    form, post -> {
-                        if (post.succeeded()) {
-                            final HttpResponse<Buffer> response = post.result();
-                            final int statusCode = response.statusCode();
-                            final String statusMessage = response.statusMessage();
+                    aContext.assertEquals(HTTP.CREATED, response.statusCode(), response.statusMessage());
 
-                            if (statusCode == HTTP.CREATED) {
-                                final Buffer actual = response.body();
-                                final String contentType = response.getHeader(Constants.CONTENT_TYPE);
-                                final List<String[]> expected;
-
-                                // Check that what we get back is the same as what we sent
-                                try {
-                                    expected = LinkUtilsTest.read(ALL_IN_ONE_CSV.getAbsolutePath());
-                                    check(aContext, LinkUtils.addManifests(FESTER_URL, expected), actual);
-                                } catch (CsvException | IOException aDetails) {
-                                    LOGGER.error(aDetails, aDetails.getMessage());
-                                    aContext.fail(aDetails);
-                                }
-
-                                // Check that what we get back has the correct media type
-                                aContext.assertEquals(Constants.CSV_MEDIA_TYPE, contentType);
-
-                                if (!asyncTask.isCompleted()) {
-                                    asyncTask.complete();
-                                }
-                            } else {
-                                aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, statusCode, statusMessage));
-                            }
-                        } else {
-                            final Throwable exception = post.cause();
-
-                            LOGGER.error(exception, exception.getMessage());
-                            aContext.fail(exception);
-                        }
-                    });
+                    if (!asyncTask.isCompleted()) {
+                        asyncTask.complete();
+                    }
+                } else {
+                    aContext.fail(post.cause());
+                }
+            });
         }
 
         /**
@@ -199,52 +163,45 @@ public class PostCsvFIT {
          * @throws CsvException If there is trouble reading the CSV data
          */
         @Test
-        @SuppressWarnings("checkstyle:indentation")
         public final void testWorksCSV(final TestContext aContext) {
             final Async asyncTask = aContext.async();
 
-            final String filename = WORKS_CSV_COLLECTION.getName();
-            final String pathname = WORKS_CSV_COLLECTION.getAbsolutePath();
-            final MultipartForm form = MultipartForm.create().textFileUpload(Constants.CSV_FILE, filename, pathname,
-                    Constants.CSV_MEDIA_TYPE);
+            postCSV(WORKS_CSV_COLLECTION, post -> {
+                if (post.succeeded()) {
+                    final HttpResponse<Buffer> response = post.result();
+                    final int statusCode = response.statusCode();
+                    final String statusMessage = response.statusMessage();
 
-            myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE).sendMultipartForm(
-                    form, post -> {
-                        if (post.succeeded()) {
-                            final HttpResponse<Buffer> response = post.result();
-                            final int statusCode = response.statusCode();
-                            final String statusMessage = response.statusMessage();
+                    if (statusCode == HTTP.CREATED) {
+                        final Buffer actual = response.body();
+                        final String contentType = response.getHeader(Constants.CONTENT_TYPE);
+                        final List<String[]> expected;
 
-                            if (statusCode == HTTP.CREATED) {
-                                final Buffer actual = response.body();
-                                final String contentType = response.getHeader(Constants.CONTENT_TYPE);
-                                final List<String[]> expected;
-
-                                // Check that what we get back is the same as what we sent
-                                try {
-                                    expected = LinkUtilsTest.read(WORKS_CSV_COLLECTION.getAbsolutePath());
-                                    check(aContext, LinkUtils.addManifests(FESTER_URL, expected), actual);
-                                } catch (CsvException | IOException aDetails) {
-                                    LOGGER.error(aDetails, aDetails.getMessage());
-                                    aContext.fail(aDetails);
-                                }
-
-                                // Check that what we get back has the correct media type
-                                aContext.assertEquals(Constants.CSV_MEDIA_TYPE, contentType);
-
-                                if (!asyncTask.isCompleted()) {
-                                    asyncTask.complete();
-                                }
-                            } else {
-                                aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, statusCode, statusMessage));
-                            }
-                        } else {
-                            final Throwable exception = post.cause();
-
-                            LOGGER.error(exception, exception.getMessage());
-                            aContext.fail(exception);
+                        // Check that what we get back is the same as what we sent
+                        try {
+                            expected = LinkUtilsTest.read(WORKS_CSV_COLLECTION.getAbsolutePath());
+                            check(aContext, LinkUtils.addManifests(FESTER_URL, expected), actual);
+                        } catch (CsvException | IOException aDetails) {
+                            LOGGER.error(aDetails, aDetails.getMessage());
+                            aContext.fail(aDetails);
                         }
-                    });
+
+                        // Check that what we get back has the correct media type
+                        aContext.assertEquals(Constants.CSV_MEDIA_TYPE, contentType);
+
+                        if (!asyncTask.isCompleted()) {
+                            asyncTask.complete();
+                        }
+                    } else {
+                        aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, statusCode, statusMessage));
+                    }
+                } else {
+                    final Throwable exception = post.cause();
+
+                    LOGGER.error(exception, exception.getMessage());
+                    aContext.fail(exception);
+                }
+            });
         }
 
         /**
@@ -256,56 +213,49 @@ public class PostCsvFIT {
          * @throws CsvException If there is trouble reading the CSV data
          */
         @Test
-        @SuppressWarnings("checkstyle:indentation")
         public final void testWorksCSVNoCollectionRow(final TestContext aContext) {
             final Async asyncTask = aContext.async();
-
-            final String filename = WORKS_CSV_NO_COLLECTION.getName();
-            final String pathname = WORKS_CSV_NO_COLLECTION.getAbsolutePath();
-            final MultipartForm form = MultipartForm.create().textFileUpload(Constants.CSV_FILE, filename, pathname,
-                    Constants.CSV_MEDIA_TYPE);
 
             // Put a collection manifest in Fester
             myS3Client.putObject(BUCKET, IDUtils.getCollectionS3Key("ark:/21198/zz0009gsq9"),
                     HATHAWAY_COLLECTION_MANIFEST);
 
-            myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE).sendMultipartForm(
-                    form, post -> {
-                        if (post.succeeded()) {
-                            final HttpResponse<Buffer> response = post.result();
-                            final int statusCode = response.statusCode();
-                            final String statusMessage = response.statusMessage();
+            postCSV(WORKS_CSV_NO_COLLECTION, post -> {
+                if (post.succeeded()) {
+                    final HttpResponse<Buffer> response = post.result();
+                    final int statusCode = response.statusCode();
+                    final String statusMessage = response.statusMessage();
 
-                            if (statusCode == HTTP.CREATED) {
-                                final Buffer actual = response.body();
-                                final String contentType = response.getHeader(Constants.CONTENT_TYPE);
-                                final List<String[]> expected;
+                    if (statusCode == HTTP.CREATED) {
+                        final Buffer actual = response.body();
+                        final String contentType = response.getHeader(Constants.CONTENT_TYPE);
+                        final List<String[]> expected;
 
-                                // Check that what we get back is the same as what we sent
-                                try {
-                                    expected = LinkUtilsTest.read(WORKS_CSV_NO_COLLECTION.getAbsolutePath());
-                                    check(aContext, LinkUtils.addManifests(FESTER_URL, expected), actual);
-                                } catch (CsvException | IOException aDetails) {
-                                    LOGGER.error(aDetails, aDetails.getMessage());
-                                    aContext.fail(aDetails);
-                                }
-
-                                // Check that what we get back has the correct media type
-                                aContext.assertEquals(Constants.CSV_MEDIA_TYPE, contentType);
-
-                                if (!asyncTask.isCompleted()) {
-                                    asyncTask.complete();
-                                }
-                            } else {
-                                aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, statusCode, statusMessage));
-                            }
-                        } else {
-                            final Throwable exception = post.cause();
-
-                            LOGGER.error(exception, exception.getMessage());
-                            aContext.fail(exception);
+                        // Check that what we get back is the same as what we sent
+                        try {
+                            expected = LinkUtilsTest.read(WORKS_CSV_NO_COLLECTION.getAbsolutePath());
+                            check(aContext, LinkUtils.addManifests(FESTER_URL, expected), actual);
+                        } catch (CsvException | IOException aDetails) {
+                            LOGGER.error(aDetails, aDetails.getMessage());
+                            aContext.fail(aDetails);
                         }
-                    });
+
+                        // Check that what we get back has the correct media type
+                        aContext.assertEquals(Constants.CSV_MEDIA_TYPE, contentType);
+
+                        if (!asyncTask.isCompleted()) {
+                            asyncTask.complete();
+                        }
+                    } else {
+                        aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, statusCode, statusMessage));
+                    }
+                } else {
+                    final Throwable exception = post.cause();
+
+                    LOGGER.error(exception, exception.getMessage());
+                    aContext.fail(exception);
+                }
+            });
         }
 
         /**
@@ -317,36 +267,27 @@ public class PostCsvFIT {
          * @throws CsvException If there is trouble reading the CSV data
          */
         @Test
-        @SuppressWarnings("checkstyle:indentation")
         public final void testWorksCSVNoCollectionRow500(final TestContext aContext) {
             final Async asyncTask = aContext.async();
 
-            final String filename = WORKS_CSV_NO_COLLECTION.getName();
-            final String pathname = WORKS_CSV_NO_COLLECTION.getAbsolutePath();
-            final MultipartForm form = MultipartForm.create().textFileUpload(Constants.CSV_FILE, filename, pathname,
-                    Constants.CSV_MEDIA_TYPE);
+            postCSV(WORKS_CSV_NO_COLLECTION, post -> {
+                if (post.succeeded()) {
+                    final HttpResponse<Buffer> response = post.result();
 
-            myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE).sendMultipartForm(
-                    form, post -> {
-                        if (post.succeeded()) {
-                            final HttpResponse<Buffer> response = post.result();
+                    aContext.assertEquals(response.statusCode(), HTTP.INTERNAL_SERVER_ERROR);
+                    aContext.assertEquals(response.getHeader(Constants.CONTENT_TYPE), Constants.HTML_MEDIA_TYPE);
+                    aContext.assertTrue(response.bodyAsString().contains("Manifest generation failed: Not Found"));
 
-                            aContext.assertEquals(response.statusCode(), HTTP.INTERNAL_SERVER_ERROR);
-                            aContext.assertEquals(response.getHeader(Constants.CONTENT_TYPE),
-                                    Constants.HTML_MEDIA_TYPE);
-                            aContext.assertTrue(response.bodyAsString().contains(
-                                    "Manifest generation failed: Not Found"));
+                    if (!asyncTask.isCompleted()) {
+                        asyncTask.complete();
+                    }
+                } else {
+                    final Throwable exception = post.cause();
 
-                            if (!asyncTask.isCompleted()) {
-                                asyncTask.complete();
-                            }
-                        } else {
-                            final Throwable exception = post.cause();
-
-                            LOGGER.error(exception, exception.getMessage());
-                            aContext.fail(exception);
-                        }
-                    });
+                    LOGGER.error(exception, exception.getMessage());
+                    aContext.fail(exception);
+                }
+            });
         }
 
         /**
@@ -357,68 +298,62 @@ public class PostCsvFIT {
          * @throws CsvException If there is trouble reading the CSV data
          */
         @Test
-        @SuppressWarnings("checkstyle:indentation")
         public final void testDeleteUploadedFilesOnEnd(final TestContext aContext) throws IOException, CsvException {
-            final String filename = ALL_IN_ONE_CSV.getName();
-            final String pathname = ALL_IN_ONE_CSV.getAbsolutePath();
             final Async asyncTask = aContext.async();
-            final MultipartForm form = MultipartForm.create().textFileUpload(Constants.CSV_FILE, filename, pathname,
-                    Constants.CSV_MEDIA_TYPE);
             final List<String[]> expected = LinkUtilsTest.read(ALL_IN_ONE_CSV.getAbsolutePath());
 
-            myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE).sendMultipartForm(
-                    form, post -> {
-                        if (post.succeeded()) {
-                            final HttpResponse<Buffer> response = post.result();
-                            final int statusCode = response.statusCode();
-                            final String statusMessage = response.statusMessage();
+            postCSV(ALL_IN_ONE_CSV, post -> {
+                if (post.succeeded()) {
+                    final HttpResponse<Buffer> response = post.result();
+                    final int statusCode = response.statusCode();
+                    final String statusMessage = response.statusMessage();
 
-                            if (statusCode == HTTP.CREATED) {
-                                final Buffer actual = response.body();
-                                final String contentType = response.getHeader(Constants.CONTENT_TYPE);
-                                final Matcher uploadedFilePathMatcher = Pattern.compile(UPLOADED_FILE_PATH_REGEX)
-                                        .matcher(statusMessage);
+                    if (statusCode == HTTP.CREATED) {
+                        final Buffer actual = response.body();
+                        final String contentType = response.getHeader(Constants.CONTENT_TYPE);
+                        final Matcher uploadedFilePathMatcher = Pattern.compile(UPLOADED_FILE_PATH_REGEX).matcher(
+                                statusMessage);
 
-                                // Check that what we get back is the same as what we sent
-                                check(aContext, LinkUtils.addManifests(FESTER_URL, expected), actual);
+                        // Check that what we get back is the same as what we sent
+                        check(aContext, LinkUtils.addManifests(FESTER_URL, expected), actual);
 
-                                // Check that what we get back has the correct media type
-                                aContext.assertEquals(Constants.CSV_MEDIA_TYPE, contentType);
+                        // Check that what we get back has the correct media type
+                        aContext.assertEquals(Constants.CSV_MEDIA_TYPE, contentType);
 
-                                if (uploadedFilePathMatcher.find()) {
-                                    final String uploadedFilePath = uploadedFilePathMatcher.group(1);
-                                    // Wait for the file to get deleted; 500 ms should be long enough,
-                                    /// unless the file is huge
-                                    final Long timerDelay = 500L;
+                        if (uploadedFilePathMatcher.find()) {
+                            final String uploadedFilePath = uploadedFilePathMatcher.group(1);
+                            // Wait for the file to get deleted; 500 ms should be long enough,
+                            /// unless the file is huge
+                            final Long timerDelay = 500L;
 
-                                    VERTX_INSTANCE.setTimer(timerDelay, timerId -> {
-                                        final boolean isDeleted = !VERTX_INSTANCE.fileSystem().existsBlocking(
-                                                uploadedFilePath);
-                                        try {
-                                            aContext.assertTrue(isDeleted);
-                                        } catch (final AssertionError details) {
-                                            aContext.fail(LOGGER.getMessage(MessageCodes.MFS_134, uploadedFilePath,
-                                                    timerDelay));
-                                        }
-
-                                        if (!asyncTask.isCompleted()) {
-                                            asyncTask.complete();
-                                        }
-                                    });
-                                } else {
-                                    aContext.fail(LOGGER.getMessage(MessageCodes.MFS_135, UPLOADED_FILE_PATH_REGEX,
-                                            statusMessage));
+                            VERTX_INSTANCE.setTimer(timerDelay, timerId -> {
+                                final boolean isDeleted = !VERTX_INSTANCE.fileSystem().existsBlocking(
+                                        uploadedFilePath);
+                                try {
+                                    aContext.assertTrue(isDeleted);
+                                } catch (final AssertionError details) {
+                                    aContext.fail(LOGGER.getMessage(MessageCodes.MFS_134, uploadedFilePath,
+                                            timerDelay));
                                 }
-                            } else {
-                                aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, statusCode, statusMessage));
-                            }
-                        } else {
-                            final Throwable exception = post.cause();
 
-                            LOGGER.error(exception, exception.getMessage());
-                            aContext.fail(exception);
+                                if (!asyncTask.isCompleted()) {
+                                    asyncTask.complete();
+                                }
+                            });
+                        } else {
+                            aContext.fail(LOGGER.getMessage(MessageCodes.MFS_135, UPLOADED_FILE_PATH_REGEX,
+                                    statusMessage));
                         }
-                    });
+                    } else {
+                        aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, statusCode, statusMessage));
+                    }
+                } else {
+                    final Throwable exception = post.cause();
+
+                    LOGGER.error(exception, exception.getMessage());
+                    aContext.fail(exception);
+                }
+            });
         }
 
         /**
@@ -447,6 +382,21 @@ public class PostCsvFIT {
             } catch (IOException | CsvException details) {
                 aContext.fail(details);
             }
+        }
+
+        /**
+         * Handles posting the test CSV file to the test Fester service.
+         *
+         * @param aTestFile A CSV file being POSTed
+         * @param aHandler A handler to handle the result of the post
+         */
+        private void postCSV(final File aTestFile, final Handler<AsyncResult<HttpResponse<Buffer>>> aHandler) {
+            final MultipartForm form = MultipartForm.create().textFileUpload(Constants.CSV_FILE, aTestFile.getName(),
+                    aTestFile.getAbsolutePath(), Constants.CSV_MEDIA_TYPE).attribute(Constants.IIIF_HOST,
+                            ImageInfoLookup.FAKE_IIIF_SERVER);
+
+            myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE).sendMultipartForm(
+                    form, aHandler);
         }
     }
 }

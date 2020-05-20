@@ -57,7 +57,7 @@
   </logger>
   <logger name="🐳 [quay.io/testcontainers/sshd:1.0.0]" level="WARN">
     <appender-ref ref="STDOUT" />
-    <appender-ref ref="STDOUT" />
+    <appender-ref ref="FILEOUT" />
   </logger>
 
   <!-- Default logging level for everything else -->
