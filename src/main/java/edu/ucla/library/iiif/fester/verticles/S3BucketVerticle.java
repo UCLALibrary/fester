@@ -129,20 +129,24 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
      * @param aMessage A event queue message
      */
     private void get(final String aS3Key, final Message<JsonObject> aMessage) {
-
         myS3Client.get(myS3Bucket, aS3Key, get -> {
             final int statusCode = get.statusCode();
             final String statusMessage = get.statusMessage();
+
+            // This lets us know at what time we received a response, in addition to the code
+            LOGGER.debug(MessageCodes.MFS_096, statusCode);
 
             if (statusCode == HTTP.OK) {
                 get.bodyHandler(body -> {
                     final String serializedJson = body.toString(StandardCharsets.UTF_8);
                     final String manifest;
+
                     if (aMessage.headers().get(Constants.NO_REWRITE_URLS) != null) {
                         manifest = serializedJson;
                     } else {
                         manifest = serializedJson.replaceAll(myUrlPlaceholderPattern, myUrl);
                     }
+
                     aMessage.reply(new JsonObject(manifest));
                 });
             } else if (statusCode == HTTP.NOT_FOUND) {
@@ -150,6 +154,9 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
             } else {
                 aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, statusMessage);
             }
+        }, exception -> {
+            LOGGER.error(exception, MessageCodes.MFS_097, aS3Key, exception.getMessage());
+            aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, exception.getMessage());
         });
     }
 
@@ -178,11 +185,8 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
                 final int statusCode = response.statusCode();
 
                 response.exceptionHandler(exception -> {
-                    final String details = exception.getMessage();
-
-                    LOGGER.error(exception, details);
-
-                    sendReply(aMessage, CodeUtils.getInt(MessageCodes.MFS_052), details);
+                    LOGGER.error(exception, exception.getMessage());
+                    sendReply(aMessage, CodeUtils.getInt(MessageCodes.MFS_052), exception.getMessage());
                 });
 
                 // If we get a successful upload response code, send a reply to indicate so
@@ -203,10 +207,7 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
                     if (statusCode == HTTP.INTERNAL_SERVER_ERROR) {
                         sendReply(aMessage, 0, Op.RETRY);
                     } else {
-                        final String errorMessage = statusCode + " - " + response.statusMessage();
-
-                        LOGGER.warn(MessageCodes.MFS_055, errorMessage);
-
+                        LOGGER.warn(MessageCodes.MFS_055, statusCode + " - " + response.statusMessage());
                         retryUpload(manifestID, aMessage);
                     }
                 }
