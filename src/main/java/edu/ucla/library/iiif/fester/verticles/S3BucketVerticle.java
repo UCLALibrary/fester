@@ -134,7 +134,7 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
             final String statusMessage = get.statusMessage();
 
             // This lets us know at what time we received a response, in addition to the code
-            LOGGER.debug(MessageCodes.MFS_096, statusCode);
+            LOGGER.debug(MessageCodes.MFS_096, aS3Key, statusCode);
 
             if (statusCode == HTTP.OK) {
                 get.bodyHandler(body -> {
