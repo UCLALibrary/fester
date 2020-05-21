@@ -128,6 +128,7 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
      * @param aS3Key The S3 key to use for the manifest
      * @param aMessage A event queue message
      */
+    @SuppressWarnings("checkstyle:indentation")
     private void get(final String aS3Key, final Message<JsonObject> aMessage) {
         myS3Client.get(myS3Bucket, aS3Key, get -> {
             final int statusCode = get.statusCode();
