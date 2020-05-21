@@ -109,8 +109,8 @@
   <entry key="MFS-093">CSV data contains a forbidden hard return: {}</entry>
   <entry key="MFS-094">Unexpected object type: {}</entry>
   <entry key="MFS-095">CSV rows read: {} [{} works, {} pages, referenced works: {}]</entry>
-  <entry key="MFS-096"></entry>
-  <entry key="MFS-097"></entry>
+  <entry key="MFS-096">S3 GET request response code for '{}': {}</entry>
+  <entry key="MFS-097">S3 GET request error message for '{}': {}</entry>
   <entry key="MFS-098"></entry>
   <entry key="MFS-099"></entry>
   <entry key="MFS-100">Stopping the {} verticle [id: {}]</entry>
