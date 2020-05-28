@@ -70,11 +70,12 @@ public class CsvHeaders {
      * Create a new CSV headers object.
      *
      * @param aRow CSV header data
-     * @throws CsvParsingException If there is trouble parsing the headers
      */
-    public CsvHeaders(final String[] aRow) throws CsvParsingException {
+    public CsvHeaders(final String[] aRow) {
         for (int index = 0; index < aRow.length; index++) {
-            switch (aRow[index]) {
+
+            // Trim whitespace before attempting to match
+            switch (aRow[index].trim()) {
                 case CSV.TITLE:
                     setTitleIndex(index);
                     break;
@@ -115,24 +116,6 @@ public class CsvHeaders {
                     // Our default is to ignore things we don't care about
             }
         }
-
-        // Check to make sure we have the data components that we need to build a manifest
-        if (!hasItemArkIndex()) {
-            throw new CsvParsingException(MessageCodes.MFS_113);
-        } else if (!hasParentArkIndex()) {
-            throw new CsvParsingException(MessageCodes.MFS_114);
-        } else if (!hasObjectTypeIndex()) {
-            throw new CsvParsingException(MessageCodes.MFS_115);
-        } else if (!hasTitleIndex()) {
-            throw new CsvParsingException(MessageCodes.MFS_111);
-        } else if (!hasFileNameIndex()) {
-            throw new CsvParsingException(MessageCodes.MFS_112);
-        } else if (!hasItemSequenceIndex()) {
-            throw new CsvParsingException(MessageCodes.MFS_123);
-        }
-
-        // The following columns are optional: IIIF Access URL, viewingHint, viewingDirection, Name.repository,
-        // Rights.statementLocal, Rights.servicesContact
     }
 
     /**

@@ -1,18 +1,25 @@
 
 package edu.ucla.library.iiif.fester;
 
+import static edu.ucla.library.iiif.fester.Constants.EMPTY;
+
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
 
+import com.opencsv.CSVIterator;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 
@@ -48,10 +55,16 @@ public class CsvParser {
      * Creates a new CsvParser.
      */
     public CsvParser() {
+
     }
 
     /**
      * Parses the CSV file at the supplied path. This is not thread-safe.
+     *
+     * Optional CSV columns:
+     *
+     *   IIIF Access URL, Item Sequence (if the CSV contains no page rows), viewingHint, viewingDirection,
+     *   Name.repository, Rights.statementLocal, Rights.servicesContact,
      *
      * @param aPath A path to a CSV file
      * @throws IOException If there is trouble reading or writing data
@@ -66,38 +79,65 @@ public class CsvParser {
             int works = 0;
             int pages = 0;
 
-            // The first row should be the CSV headers row
-            for (final String[] row : csvReader.readAll()) {
+            final CSVIterator csvIterator = new CSVIterator(csvReader);
+            final List<String[]> rows = new LinkedList<>();
+            final Set<ObjectType> csvObjectTypes;
+
+            while (csvIterator.hasNext()) {
+                final String[] nextRow = csvIterator.next();
+
+                // Skip blank rows
+                if (!(nextRow.length == 1 && EMPTY.equals(nextRow[0].trim()))) {
+                    rows.add(nextRow);
+                }
+            }
+
+            // Remove the header row from the list of rows
+            myCsvHeaders = new CsvHeaders(checkForEOLs(rows.remove(0)));
+
+            // Get the set of object types that we'll be mapping CSV rows to
+            csvObjectTypes = getObjectTypes(rows);
+
+            // Required CSV columns
+            if (!myCsvHeaders.hasItemArkIndex()) {
+                throw new CsvParsingException(MessageCodes.MFS_113);
+            } else if (!myCsvHeaders.hasParentArkIndex()) {
+                throw new CsvParsingException(MessageCodes.MFS_114);
+            } else if (!myCsvHeaders.hasTitleIndex()) {
+                throw new CsvParsingException(MessageCodes.MFS_111);
+            } else if (!myCsvHeaders.hasFileNameIndex()) {
+                throw new CsvParsingException(MessageCodes.MFS_112);
+            } else if (!myCsvHeaders.hasItemSequenceIndex() && csvObjectTypes.contains(ObjectType.PAGE)) {
+                throw new CsvParsingException(MessageCodes.MFS_123);
+            }
+
+            for (final String[] row : rows) {
+                final ObjectType objectType;
+
                 checkForEOLs(row);
+                objectType = getObjectType(row);
 
-                if (myCsvHeaders == null) {
-                    for (int index = 0; index < row.length; index++) {
-                        row[index] = row[index].trim();
-                    }
-
-                    myCsvHeaders = new CsvHeaders(row); // CsvParsingException if a 'required' header is missing
-                } else if (row.length <= 1) {
-                    // skip blank rows
-                } else {
-                    final int objectTypeIndex = myCsvHeaders.getObjectTypeIndex();
-
-                    // Handle each metadata object type and disallow unknown types
-                    if (ObjectType.COLLECTION.equals(row[objectTypeIndex])) {
+                switch (objectType) {
+                    case COLLECTION: {
                         myCollection = getCollection(row);
-                    } else if (ObjectType.WORK.equals(row[objectTypeIndex])) {
+                        break;
+                    }
+                    case WORK: {
                         extractWorkMetadata(row);
                         works += 1;
-                    } else if (ObjectType.PAGE.equals(row[objectTypeIndex])) {
+                        break;
+                    }
+                    case PAGE: {
                         extractPageMetadata(row);
                         pages += 1;
-                    } else if (ObjectType.MISSING.equals(StringUtils.trimTo(row[objectTypeIndex], Constants.EMPTY))) {
-                        // skip
-                    } else {
-                        throw new CsvParsingException(MessageCodes.MFS_094, row[objectTypeIndex]);
+                        break;
                     }
-
-                    rowsRead += 1;
+                    default: {
+                        // MISSING, so skip
+                        break;
+                    }
                 }
+                rowsRead += 1;
             }
 
             LOGGER.debug(MessageCodes.MFS_095, rowsRead, works, pages, myPagesMap.size());
@@ -283,16 +323,70 @@ public class CsvParser {
     }
 
     /**
-     * Check for hard returns in metadata values.
+     * Checks for hard returns in metadata values, and returns the row if none are found.
      *
      * @param aRow A row from the metadata CSV
+     * @return The row
      * @throws CsvParsingException If the metadata contains a hard return
      */
-    private void checkForEOLs(final String[] aRow) throws CsvParsingException {
+    private String[] checkForEOLs(final String[] aRow) throws CsvParsingException {
         for (int index = 0; index < aRow.length; index++) {
             if (EOL_PATTERN.matcher(aRow[index]).find()) {
                 throw new CsvParsingException(MessageCodes.MFS_093, aRow[index]);
             }
         }
+        return aRow;
+    }
+
+    /**
+     * Gets the type of the object represented by a CSV row.
+     *
+     * @param aRow A row from the metadata CSV
+     * @return The object type
+     * @throws CsvParsingException If object type isn't included in the CSV headers, or the object type index is out of
+     * bounds of the CSV row, or the metadata contains an unknown object type
+     */
+    private ObjectType getObjectType(final String[] aRow) throws CsvParsingException {
+        if (myCsvHeaders.hasObjectTypeIndex()) {
+            final int objectTypeIndex = myCsvHeaders.getObjectTypeIndex();
+
+            if (aRow.length > objectTypeIndex) {
+                final String objectType = aRow[objectTypeIndex];
+
+                if (ObjectType.COLLECTION.equals(objectType)) {
+                    return ObjectType.COLLECTION;
+                } else if (ObjectType.WORK.equals(objectType)) {
+                    return ObjectType.WORK;
+                } else if (ObjectType.PAGE.equals(objectType)) {
+                    return ObjectType.PAGE;
+                } else if (ObjectType.MISSING.equals(StringUtils.trimTo(objectType, Constants.EMPTY))) {
+                    return ObjectType.MISSING;
+                } else {
+                    // Disallow unknown types
+                    throw new CsvParsingException(MessageCodes.MFS_094, objectType);
+                }
+            } else {
+                throw new CsvParsingException(MessageCodes.MFS_098, objectTypeIndex, Arrays.toString(aRow));
+            }
+        } else {
+            throw new CsvParsingException(MessageCodes.MFS_115);
+        }
+    }
+
+    /**
+     * Gets the types of the objects represented by the CSV rows.
+     *
+     * @param aCsvRows A list of rows from the metadata CSV
+     * @return The set of object types
+     * @throws CsvParsingException If object type isn't included in the CSV headers, or the object type index is out of
+     * bounds of the CSV row, or the metadata contains an unknown object type
+     */
+    private Set<ObjectType> getObjectTypes(final List<String[]> aCsvRows) throws CsvParsingException {
+        final Set<ObjectType> objectTypes = EnumSet.noneOf(ObjectType.class);
+
+        for (final String[] row : aCsvRows) {
+            objectTypes.add(getObjectType(row));
+        }
+        return objectTypes;
     }
 }
