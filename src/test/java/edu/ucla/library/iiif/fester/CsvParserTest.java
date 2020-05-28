@@ -142,6 +142,46 @@ public class CsvParserTest {
     }
 
     /**
+     * Tests the parser's required CSV headers check on a works CSV without the Item Sequence column.
+     *
+     * @throws CsvParsingException If there is an error while parsing the CSV data
+     * @throws CsvException If there is a generic CSV error
+     * @throws IOException If there is trouble reading the CSV data
+     */
+    @Test
+    public final void testWorkCsvNoItemSequence() throws CsvParsingException, CsvException, IOException {
+        myCsvParser.parse(getTestPath("hathaway_batch2_works_no_item_seq.csv"));
+
+        assertEquals(4, myCsvParser.getCsvMetadata().getWorksList().size());
+        assertEquals(1, myCsvParser.getCsvMetadata().getWorksMap().size());
+        assertEquals(0, myCsvParser.getCsvMetadata().getPagesMap().size());
+    }
+
+    /**
+     * Tests the parser's required CSV headers check on a pages CSV without the Item Sequence column.
+     *
+     * @throws CsvParsingException If there is an error while parsing the CSV data
+     * @throws CsvException If there is a generic CSV error
+     * @throws IOException If there is trouble reading the CSV data
+     */
+    @Test(expected = CsvParsingException.class)
+    public final void testPageCsvNoItemSequence() throws CsvParsingException, CsvException, IOException {
+        myCsvParser.parse(getTestPath("hathaway5_pages_no_item_seq.csv"));
+    }
+
+    /**
+     * Tests the parser's required CSV headers check on a "combined" CSV without the Item Sequence column.
+     *
+     * @throws CsvParsingException If there is an error while parsing the CSV data
+     * @throws CsvException If there is a generic CSV error
+     * @throws IOException If there is trouble reading the CSV data
+     */
+    @Test(expected = CsvParsingException.class)
+    public final void testCollectionWorkPageCsvNoItemSequence() throws CsvParsingException, CsvException, IOException {
+        myCsvParser.parse(getTestPath("hathaway_combined_no_item_seq.csv"));
+    }
+
+    /**
      * Gets the test fixture's path.
      *
      * @param aFixtureName The test fixture's name
