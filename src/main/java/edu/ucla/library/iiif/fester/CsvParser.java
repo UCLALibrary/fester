@@ -1,6 +1,8 @@
 
 package edu.ucla.library.iiif.fester;
 
+import static edu.ucla.library.iiif.fester.Constants.EMPTY;
+
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
@@ -53,6 +55,7 @@ public class CsvParser {
      * Creates a new CsvParser.
      */
     public CsvParser() {
+
     }
 
     /**
@@ -84,7 +87,7 @@ public class CsvParser {
                 final String[] nextRow = csvIterator.next();
 
                 // Skip blank rows
-                if (!(nextRow.length == 1 && "".equals(nextRow[0].trim()))) {
+                if (!(nextRow.length == 1 && EMPTY.equals(nextRow[0].trim()))) {
                     rows.add(nextRow);
                 }
             }
