@@ -111,7 +111,7 @@
   <entry key="MFS-095">CSV rows read: {} [{} works, {} pages, referenced works: {}]</entry>
   <entry key="MFS-096">S3 GET request response code for '{}': {}</entry>
   <entry key="MFS-097">S3 GET request error message for '{}': {}</entry>
-  <entry key="MFS-098"></entry>
+  <entry key="MFS-098">Object type index ({}) is out of bounds of the CSV row: {}</entry>
   <entry key="MFS-099"></entry>
   <entry key="MFS-100">Stopping the {} verticle [id: {}]</entry>
   <entry key="MFS-101">Getting message consumer for: {}</entry>
