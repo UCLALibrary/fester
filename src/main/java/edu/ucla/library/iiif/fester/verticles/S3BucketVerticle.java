@@ -257,7 +257,7 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
     private void shouldRetry(final String aManifestID, final Handler<AsyncResult<Boolean>> aHandler) {
         final Promise<Boolean> promise = Promise.promise();
 
-        promise.future().setHandler(aHandler);
+        promise.future().onComplete(aHandler);
 
         vertx.sharedData().getLocalCounter(aManifestID, getCounter -> {
             if (getCounter.succeeded()) {

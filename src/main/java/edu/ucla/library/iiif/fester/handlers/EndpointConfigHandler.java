@@ -67,7 +67,7 @@ public class EndpointConfigHandler implements Handler<AsyncResult<OpenAPI3Router
 
         if (aConfiguration.succeeded()) {
             final OpenAPI3RouterFactory factory = aConfiguration.result();
-            final Promise<Boolean> featureConfigPromise = Promise.promise();
+            final Promise<Boolean> promise = Promise.promise();
 
             // We need to associate endpoint handlers with routes from our specification
             factory.addHandlerByOperationId(Op.GET_STATUS, new GetStatusHandler());
@@ -78,7 +78,7 @@ public class EndpointConfigHandler implements Handler<AsyncResult<OpenAPI3Router
             factory.addHandlerByOperationId(Op.PUT_COLLECTION, new PutCollectionHandler(myVertx, myConfig));
 
             // After the batch ingest feature is configured (or not), we complete the router configuration
-            featureConfigPromise.future().setHandler(handler -> {
+            promise.future().onComplete(handler -> {
                 if (handler.succeeded()) {
                     configureRouter(factory, handler.result());
                 } else {
@@ -89,13 +89,13 @@ public class EndpointConfigHandler implements Handler<AsyncResult<OpenAPI3Router
             // If we have a feature checker, check it; else, go ahead and configure the ingest endpoint
             featureFlagChecker.ifPresentOrElse(checker -> {
                 if (checker.isFeatureEnabled(Features.BATCH_INGEST)) {
-                    configureBatchIngest(factory, myConfig, featureConfigPromise);
+                    configureBatchIngest(factory, myConfig, promise);
                 } else {
                     LOGGER.info(MessageCodes.MFS_086, Features.getDisplayName(Features.BATCH_INGEST));
-                    configureBatchIngestPlaceholder(factory, featureConfigPromise);
+                    configureBatchIngestPlaceholder(factory, promise);
                 }
             }, () -> {
-                configureBatchIngest(factory, myConfig, featureConfigPromise);
+                configureBatchIngest(factory, myConfig, promise);
             });
         } else {
             myPromise.fail(aConfiguration.cause());
