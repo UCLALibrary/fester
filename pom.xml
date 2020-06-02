@@ -61,7 +61,7 @@
   </developers>
 
   <properties>
-    <vertx.version>3.8.5</vertx.version>
+    <vertx.version>3.9.1</vertx.version>
     <opencsv.version>5.0</opencsv.version>
     <moirai.version>2.0.0</moirai.version>
     <slf4j.ext.version>1.7.26</slf4j.ext.version>
@@ -69,12 +69,12 @@
     <commons.lang.version>3.9</commons.lang.version>
     <freelib.utils.version>1.0.2</freelib.utils.version>
     <freelib.maven.version>0.0.3</freelib.maven.version>
-    <vertx.super.s3.version>1.2.1</vertx.super.s3.version>
+    <vertx.super.s3.version>1.3.3</vertx.super.s3.version>
     <jiiify.presentation.version>0.3.0</jiiify.presentation.version>
 
     <!-- Versions of tools used for testing -->
     <jsoup.version>1.13.1</jsoup.version>
-    <aws.sdk.version>1.11.478</aws.sdk.version>
+    <aws.sdk.version>1.11.793</aws.sdk.version>
     <localstack.version>1.13.0</localstack.version>
     <testcontainers.version>1.12.5</testcontainers.version>
     <jcip.annotations.version>1.0-1</jcip.annotations.version>
@@ -206,11 +206,6 @@
       <version>${freelib.utils.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.amazonaws</groupId>
-      <artifactId>aws-java-sdk-s3</artifactId>
-      <version>${aws.sdk.version}</version>
-    </dependency>
-    <dependency>
       <groupId>info.freelibrary</groupId>
       <artifactId>vertx-super-s3</artifactId>
       <version>${vertx.super.s3.version}</version>
@@ -224,6 +219,11 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
       <version>${commons.lang.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>aws-java-sdk-s3</artifactId>
+      <version>${aws.sdk.version}</version>
     </dependency>
 
     <!-- Below dependencies only used for testing -->
@@ -1135,6 +1135,6 @@
   <parent>
     <artifactId>freelib-parent</artifactId>
     <groupId>info.freelibrary</groupId>
-    <version>3.8.3</version>
+    <version>3.8.6</version>
   </parent>
 </project>

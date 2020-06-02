@@ -198,8 +198,8 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
         }
 
         final File collectionFile = new File(TEST_COLLECTION_FILE);
-        final JsonObject expected = new JsonObject(
-                StringUtils.read(collectionFile).replaceAll(myUrlPlaceholderPattern, myUrl));
+        final JsonObject expected = new JsonObject(StringUtils.read(collectionFile).replaceAll(
+                myUrlPlaceholderPattern, myUrl));
         final JsonObject message = new JsonObject();
         final DeliveryOptions options = new DeliveryOptions();
         final Async asyncTask = aContext.async();

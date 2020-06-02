@@ -64,6 +64,7 @@ public class ContainerConfig {
      *
      * @param aContainerName A container name
      * @param aContainerPort A container port
+     * @param aS3Container A container that provides a test S3 environment
      */
     public ContainerConfig(final String aContainerName, final int aContainerPort,
             final LocalStackContainer aS3Container) {

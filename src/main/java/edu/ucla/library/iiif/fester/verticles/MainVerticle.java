@@ -54,7 +54,7 @@ public class MainVerticle extends AbstractVerticle {
                 config.mergeIn(config());
 
                 // Set up the server after we've configured the router
-                promise.future().setHandler(handler -> {
+                promise.future().onComplete(handler -> {
                     if (handler.succeeded()) {
                         final int port = config.getInteger(Config.HTTP_PORT, DEFAULT_PORT);
                         final HttpServer server = vertx.createHttpServer();
@@ -118,7 +118,7 @@ public class MainVerticle extends AbstractVerticle {
         futures.add(deployVerticle(S3BucketVerticle.class.getName(), uploaderOptions, Promise.promise()));
 
         // Confirm all our verticles were successfully deployed
-        CompositeFuture.all(futures).setHandler(handler -> {
+        CompositeFuture.all(futures).onComplete(handler -> {
             if (handler.succeeded()) {
                 aPromise.complete();
             } else {
