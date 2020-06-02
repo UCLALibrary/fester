@@ -15,6 +15,8 @@ public class ItemSequenceComparator implements Comparator<String[]> {
 
     /**
      * Creates an Item Sequence comparator from the supplied array index position.
+     *
+     * @param aIndex The index position of a field to compare
      */
     public ItemSequenceComparator(final int aIndex) {
         myIndex = aIndex;

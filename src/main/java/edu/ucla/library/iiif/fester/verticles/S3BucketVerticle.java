@@ -71,6 +71,7 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
             } else {
                 final URI s3URI = URI.create(endpoint);
 
+                // TODO: make sure host has no http(s) but that the right setSSL is set
                 httpOptions.setDefaultHost(s3URI.getHost());
                 httpOptions.setDefaultPort(s3URI.getPort());
 
