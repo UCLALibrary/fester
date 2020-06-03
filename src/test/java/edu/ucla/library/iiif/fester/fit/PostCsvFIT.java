@@ -17,6 +17,7 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 
+import info.freelibrary.iiif.presentation.Collection;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
@@ -27,9 +28,11 @@ import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
 import edu.ucla.library.iiif.fester.utils.LinkUtils;
 import edu.ucla.library.iiif.fester.utils.LinkUtilsTest;
+import edu.ucla.library.iiif.fester.utils.ManifestLabelComparator;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -53,6 +56,10 @@ public class PostCsvFIT {
     private static final File HATHAWAY_COLLECTION_MANIFEST = new File(DIR, "json/ark%3A%2F21198%2Fzz0009gsq9.json");
 
     private static final File BLANK_LINE_CSV = new File(DIR, "csv/blankline.csv");
+
+    private static final File WORKS_CSV_PROTESTA_1 = new File(DIR, "csv/lat_newspapers/protesta/protesta_works_1.csv");
+
+    private static final File PROTESTA_COLLECTION_MANIFEST = new File(DIR, "json/ark%3A%2F21198%2Fzz0025hqmb.json");
 
     /* Uploaded CSV files are named with a UUID */
     private static final String UPLOADED_FILE_PATH_REGEX = "(" + BodyHandler.DEFAULT_UPLOADS_DIRECTORY + "\\/" +
@@ -352,6 +359,72 @@ public class PostCsvFIT {
 
                     LOGGER.error(exception, exception.getMessage());
                     aContext.fail(exception);
+                }
+            });
+        }
+
+        /**
+         * Tests the alpha-numeric sorting of manifests on a collection.
+         *
+         * @param aContext A test context
+         */
+        @Test
+        public final void testCollectionManifestWorkSorting(final TestContext aContext) {
+            final Async asyncTask = aContext.async();
+            final String collectionS3Key = IDUtils.getCollectionS3Key("ark:/21198/zz0025hqmb");
+
+            // PUT a collection manifest (that already has work manifests on it) in S3
+            myS3Client.putObject(BUCKET, collectionS3Key, PROTESTA_COLLECTION_MANIFEST);
+
+            // POST a work CSV with randomly sorted rows; all work manifests generated from these rows should be ordered
+            // before all those already existing on the collection manifest
+            postCSV(WORKS_CSV_PROTESTA_1, post -> {
+                if (post.succeeded()) {
+                    final HttpResponse<Buffer> postResponse = post.result();
+                    final int postStatusCode = postResponse.statusCode();
+                    final String postStatusMessage = postResponse.statusMessage();
+
+                    if (postStatusCode == HTTP.CREATED) {
+                        final String getPath = IDUtils.getResourceURIPath(collectionS3Key);
+
+                        // Retrieve the updated manifest and check it
+                        myWebClient.get(FESTER_PORT, Constants.UNSPECIFIED_HOST, getPath).send(get -> {
+                            if (get.succeeded()) {
+                                final HttpResponse<Buffer> getResponse = get.result();
+                                final int getStatusCode = getResponse.statusCode();
+                                final String getStatusMessage = getResponse.statusMessage();
+
+                                if (getStatusCode == HTTP.OK) {
+                                    final JsonObject json = get.result().bodyAsJsonObject();
+                                    final List<Collection.Manifest> works = Collection.fromJSON(json).getManifests();
+                                    final ManifestLabelComparator comparator = new ManifestLabelComparator();
+
+                                    for (int i = 0; i < works.size() - 1; i++) {
+                                        aContext.assertTrue(comparator.compare(works.get(i), works.get(i + 1)) < 0);
+                                    }
+
+                                    if (!asyncTask.isCompleted()) {
+                                        asyncTask.complete();
+                                    }
+                                } else {
+                                    aContext.fail(
+                                            LOGGER.getMessage(MessageCodes.MFS_097, collectionS3Key, getStatusMessage));
+                                }
+                            } else {
+                                final Throwable getException = get.cause();
+
+                                LOGGER.error(getException, getException.getMessage());
+                                aContext.fail(getException);
+                            }
+                        });
+                    } else {
+                        aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, postStatusCode, postStatusMessage));
+                    }
+                } else {
+                    final Throwable postException = post.cause();
+
+                    LOGGER.error(postException, postException.getMessage());
+                    aContext.fail(postException);
                 }
             });
         }
