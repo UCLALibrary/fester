@@ -371,10 +371,10 @@ public class PostCsvFIT {
         @Test
         public final void testCollectionManifestWorkSorting(final TestContext aContext) {
             final Async asyncTask = aContext.async();
-            final String collectionS3Key = IDUtils.getCollectionS3Key("ark:/21198/zz0025hqmb");
+            final String s3Key = IDUtils.getCollectionS3Key("ark:/21198/zz0025hqmb");
 
             // PUT a collection manifest (that already has work manifests on it) in S3
-            myS3Client.putObject(BUCKET, collectionS3Key, PROTESTA_COLLECTION_MANIFEST);
+            myS3Client.putObject(BUCKET, s3Key, PROTESTA_COLLECTION_MANIFEST);
 
             // POST a work CSV with randomly sorted rows; all work manifests generated from these rows should be ordered
             // before all those already existing on the collection manifest
@@ -385,7 +385,7 @@ public class PostCsvFIT {
                     final String postStatusMessage = postResponse.statusMessage();
 
                     if (postStatusCode == HTTP.CREATED) {
-                        final String getPath = IDUtils.getResourceURIPath(collectionS3Key);
+                        final String getPath = IDUtils.getResourceURIPath(s3Key);
 
                         // Retrieve the updated manifest and check it
                         myWebClient.get(FESTER_PORT, Constants.UNSPECIFIED_HOST, getPath).send(get -> {
@@ -407,8 +407,7 @@ public class PostCsvFIT {
                                         asyncTask.complete();
                                     }
                                 } else {
-                                    aContext.fail(
-                                            LOGGER.getMessage(MessageCodes.MFS_097, collectionS3Key, getStatusMessage));
+                                    aContext.fail(LOGGER.getMessage(MessageCodes.MFS_097, s3Key, getStatusMessage));
                                 }
                             } else {
                                 final Throwable getException = get.cause();
