@@ -91,13 +91,13 @@ public class PagesManifestFT extends BaseFesterFT {
         final Promise<Void> pagesPromise = Promise.promise();
 
         // Check the result of the collection manifest ingest
-        collectionPromise.future().setHandler(collectionHandler -> {
+        collectionPromise.future().onComplete(collectionHandler -> {
             if (collectionHandler.succeeded()) {
                 // Check the result of the works manifest ingest
-                worksPromise.future().setHandler(worksHandler -> {
+                worksPromise.future().onComplete(worksHandler -> {
                     if (worksHandler.succeeded()) {
                         // Check the result of the pages manifest ingest
-                        pagesPromise.future().setHandler(pagesHandler -> {
+                        pagesPromise.future().onComplete(pagesHandler -> {
                             if (pagesHandler.succeeded()) {
                                 // Check that pages have been added to the works manifests
                                 checkResults(asyncTask, aContext);

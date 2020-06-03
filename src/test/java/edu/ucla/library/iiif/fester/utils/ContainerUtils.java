@@ -1,6 +1,7 @@
 
 package edu.ucla.library.iiif.fester.utils;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static edu.ucla.library.iiif.fester.utils.ContainerConfig.S3_ALIAS;
 
 import java.util.Locale;
@@ -18,6 +19,7 @@ import info.freelibrary.util.LoggerFactory;
 import info.freelibrary.util.StringUtils;
 
 import edu.ucla.library.iiif.fester.Config;
+import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.TestConstants;
 
 /**
@@ -43,17 +45,18 @@ public final class ContainerUtils {
     public static GenericContainer getFesterContainer(final ContainerConfig aConfig) {
         final String containerTag = toTag(System.getProperty(TestConstants.CONTAINER_IMAGE));
         final GenericContainer<?> container = new GenericContainer(containerTag);
-        final String accessKey = System.getProperty(Config.S3_ACCESS_KEY, aConfig.getS3AccessKey());
-        final String secretKey = System.getProperty(Config.S3_SECRET_KEY, aConfig.getS3SecretKey());
+        final String accessKey = checkNotNull(System.getProperty(Config.S3_ACCESS_KEY, aConfig.getS3AccessKey()));
+        final String secretKey = checkNotNull(System.getProperty(Config.S3_SECRET_KEY, aConfig.getS3SecretKey()));
         final String endpoint = System.getProperty(Config.S3_ENDPOINT, StringUtils.format(HOST, aConfig.getS3Port()));
-        final String region = System.getProperty(Config.S3_REGION, aConfig.getS3Region());
-        final String bucket = System.getProperty(Config.S3_BUCKET);
+        final String region = checkNotNull(System.getProperty(Config.S3_REGION, aConfig.getS3Region()));
+        final String bucket = checkNotNull(System.getProperty(Config.S3_BUCKET));
         final String featureFlagsURL = System.getProperty(Config.FEATURE_FLAGS);
         final String featureFlags = featureFlagsURL == null ? Config.FEATURE_FLAGS : toEnv(Config.FEATURE_FLAGS);
+        final String containerPort = checkNotNull(Integer.toString(aConfig.getContainerPort()));
         final Map<String, String> envMap = Map.of(toEnv(Config.S3_ACCESS_KEY), accessKey, toEnv(Config.S3_SECRET_KEY),
                 secretKey, toEnv(Config.S3_REGION), region, toEnv(Config.S3_ENDPOINT), endpoint, toEnv(
-                        Config.HTTP_PORT), Integer.toString(aConfig.getContainerPort()), toEnv(Config.S3_BUCKET),
-                bucket, featureFlags, featureFlagsURL);
+                        Config.HTTP_PORT), containerPort, toEnv(Config.S3_BUCKET), bucket, featureFlags,
+                featureFlagsURL != null ? featureFlagsURL : Constants.EMPTY);
         final String jdwpHostPort = System.getProperty(Config.JDWP_HOST_PORT);
 
         // Check to see if we want to output our Fester container logs when we run; the default is "no"

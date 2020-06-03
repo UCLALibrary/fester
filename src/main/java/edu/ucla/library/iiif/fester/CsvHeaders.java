@@ -130,7 +130,8 @@ public class CsvHeaders {
     /**
      * Sets the Item ARK index position.
      *
-     * @param aItemArkIndex The position of the Item ARK header.
+     * @param aItemArkIndex The position of the Item ARK header
+     * @return This CSV headers
      */
     public CsvHeaders setItemArkIndex(final int aItemArkIndex) {
         myItemArkIndex = aItemArkIndex;
@@ -158,7 +159,8 @@ public class CsvHeaders {
     /**
      * Sets the image access URL index position.
      *
-     * @param aImageAccessUrlIndex The position of the image access URL header.
+     * @param aImageAccessUrlIndex The position of the image access URL header
+     * @return This CSV headers
      */
     public CsvHeaders setImageAccessUrlIndex(final int aImageAccessUrlIndex) {
         myImageAccessUrlIndex = aImageAccessUrlIndex;
@@ -187,6 +189,7 @@ public class CsvHeaders {
      * Sets the Parent ARK index position.
      *
      * @param aParentArkIndex The index position of the Parent ARK
+     * @return This CSV headers
      */
     public CsvHeaders setParentArkIndex(final int aParentArkIndex) {
         myParentArkIndex = aParentArkIndex;
@@ -215,6 +218,7 @@ public class CsvHeaders {
      * Sets the Title index position.
      *
      * @param aTitleIndex The index position of the Title
+     * @return This CSV headers
      */
     public CsvHeaders setTitleIndex(final int aTitleIndex) {
         myTitleIndex = aTitleIndex;
@@ -243,6 +247,7 @@ public class CsvHeaders {
      * Sets the Object Type index position.
      *
      * @param aObjectTypeIndex The index position of the Object Type
+     * @return This CSV headers
      */
     public CsvHeaders setObjectTypeIndex(final int aObjectTypeIndex) {
         myObjectTypeIndex = aObjectTypeIndex;
@@ -271,6 +276,7 @@ public class CsvHeaders {
      * Sets the File Name index position.
      *
      * @param aFileNameIndex The index position of the File Name
+     * @return This CSV headers
      */
     public CsvHeaders setFileNameIndex(final int aFileNameIndex) {
         myFileNameIndex = aFileNameIndex;
@@ -290,7 +296,7 @@ public class CsvHeaders {
      * Sets the Item Sequence index position.
      *
      * @param aItemSequenceIndex
-     * @return
+     * @return This CSV headers
      */
     public CsvHeaders setItemSequenceIndex(final int aItemSequenceIndex) {
         myItemSequenceIndex = aItemSequenceIndex;
@@ -299,6 +305,8 @@ public class CsvHeaders {
 
     /**
      * Gets the Item Sequence header position.
+     *
+     * @return The item sequence header position
      */
     public int getItemSequenceIndex() {
         return myItemSequenceIndex;
@@ -306,6 +314,8 @@ public class CsvHeaders {
 
     /**
      * Checks whether the CSV headers have a item sequence position registered.
+     *
+     * @return True if the headers have an item sequence position; else, false
      */
     public boolean hasItemSequenceIndex() {
         return myItemSequenceIndex != -1;
@@ -323,7 +333,8 @@ public class CsvHeaders {
     /**
      * Sets the viewingHint index position.
      *
-     * @param aViewingHintIndex The position of the viewingHint header.
+     * @param aViewingHintIndex The position of the viewingHint header
+     * @return This CSV headers
      */
     public CsvHeaders setViewingHintIndex(final int aViewingHintIndex) {
         myViewingHintIndex = aViewingHintIndex;
@@ -351,7 +362,8 @@ public class CsvHeaders {
     /**
      * Sets the viewingDirection index position.
      *
-     * @param aViewingDirectionIndex The position of the viewingDirection header.
+     * @param aViewingDirectionIndex The position of the viewingDirection header
+     * @return This CSV headers
      */
     public CsvHeaders setViewingDirectionIndex(final int aViewingDirectionIndex) {
         myViewingDirectionIndex = aViewingDirectionIndex;
@@ -379,7 +391,8 @@ public class CsvHeaders {
     /**
      * Sets the repository name index position.
      *
-     * @param aRepositoryNameIndex The position of the repository name header.
+     * @param aRepositoryNameIndex The position of the repository name header
+     * @return This CSV headers
      */
     public CsvHeaders setRepositoryNameIndex(final int aRepositoryNameIndex) {
         myRepositoryNameIndex = aRepositoryNameIndex;
@@ -407,7 +420,8 @@ public class CsvHeaders {
     /**
      * Sets the local rights statement index position.
      *
-     * @param aLocalRightsStatementIndex The position of the local rights statement header.
+     * @param aLocalRightsStatementIndex The position of the local rights statement header
+     * @return This CSV headers
      */
     public CsvHeaders setLocalRightsStatementIndex(final int aLocalRightsStatementIndex) {
         myLocalRightsStatementIndex = aLocalRightsStatementIndex;
@@ -435,7 +449,8 @@ public class CsvHeaders {
     /**
      * Sets the rights contact index position.
      *
-     * @param aRightsContactIndex The position of the rights contact header.
+     * @param aRightsContactIndex The position of the rights contact header
+     * @return This CSV headers
      */
     public CsvHeaders setRightsContactIndex(final int aRightsContactIndex) {
         myRightsContactIndex = aRightsContactIndex;

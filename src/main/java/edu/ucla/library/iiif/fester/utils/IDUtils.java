@@ -42,6 +42,8 @@ public final class IDUtils {
     /**
      * Gets a list of unique IDs.
      *
+     * @param aCount A number of IDs to generate
+     * @param aIDLength The length of an ID to generate
      * @return A list of unique IDs
      */
     public static List<String> getIDs(final int aCount, final int aIDLength) {

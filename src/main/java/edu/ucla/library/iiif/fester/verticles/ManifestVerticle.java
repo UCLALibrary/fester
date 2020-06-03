@@ -126,11 +126,11 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                             futures.add(updatePages(workID, csvHeaders, pagesList, imageHost, Promise.promise()));
                         }
 
-                        CompositeFuture.all(futures).setHandler(pagesHandler -> {
-                            if (pagesHandler.succeeded()) {
+                        CompositeFuture.all(futures).onComplete(handler -> {
+                            if (handler.succeeded()) {
                                 message.reply(Op.SUCCESS);
                             } else {
-                                final Throwable throwable = pagesHandler.cause();
+                                final Throwable throwable = handler.cause();
 
                                 LOGGER.error(throwable, throwable.getMessage());
                                 message.fail(HTTP.INTERNAL_SERVER_ERROR, throwable.getMessage());
@@ -173,7 +173,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
         final Promise<LockedManifest> promise = Promise.promise();
         final String encodedWorkID = URLEncoder.encode(aWorkID, StandardCharsets.UTF_8);
 
-        promise.future().setHandler(handler -> {
+        promise.future().onComplete(handler -> {
             if (handler.succeeded()) {
                 final LockedManifest lockedManifest = handler.result();
                 final Manifest manifest = lockedManifest.getWork();
@@ -237,7 +237,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
         final Promise<LockedManifest> promise = Promise.promise();
 
         // If we were able to get a lock on the manifest, update it with our new works
-        promise.future().setHandler(handler -> {
+        promise.future().onComplete(handler -> {
             if (handler.succeeded()) {
                 final LockedManifest lockedManifest = handler.result();
                 final Collection collectionToUpdate = lockedManifest.getCollection();
@@ -373,7 +373,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
         options.addHeader(Constants.ACTION, Op.PUT_COLLECTION);
 
         // Create a handler to handle generating work manifests after the collection manage has been uploaded
-        promise.future().setHandler(handler -> {
+        promise.future().onComplete(handler -> {
             if (handler.succeeded()) {
                 processWorks(aCsvHeaders, aCsvMetadata, aImageHost, aMessage);
             } else {
@@ -407,11 +407,11 @@ public class ManifestVerticle extends AbstractFesterVerticle {
         }
 
         // Keep track of our progress and fail our promise if we don't succeed
-        CompositeFuture.all(futures).setHandler(worksHandler -> {
-            if (worksHandler.succeeded()) {
+        CompositeFuture.all(futures).onComplete(handler -> {
+            if (handler.succeeded()) {
                 aMessage.reply(LOGGER.getMessage(MessageCodes.MFS_126));
             } else {
-                final Throwable cause = worksHandler.cause();
+                final Throwable cause = handler.cause();
                 final String message = LOGGER.getMessage(MessageCodes.MFS_131, cause.getMessage());
 
                 LOGGER.error(cause, message);

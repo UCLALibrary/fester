@@ -22,6 +22,7 @@ public class LockedManifest {
      * Creates a locked manifest.
      *
      * @param aManifest A manifest in JSON form
+     * @param aCollection A collection document
      * @param aLock A Vertx lock
      */
     public LockedManifest(final JsonObject aManifest, final boolean aCollection, final Lock aLock) {
