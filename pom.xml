@@ -70,7 +70,7 @@
     <freelib.utils.version>1.0.2</freelib.utils.version>
     <freelib.maven.version>0.0.3</freelib.maven.version>
     <vertx.super.s3.version>1.3.3</vertx.super.s3.version>
-    <jiiify.presentation.version>0.3.0</jiiify.presentation.version>
+    <jiiify.presentation.version>0.3.1</jiiify.presentation.version>
     <alphanumeric-comparator.version>1.4.1</alphanumeric-comparator.version>
 
     <!-- Versions of tools used for testing -->
