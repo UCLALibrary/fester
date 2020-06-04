@@ -2,16 +2,21 @@
 package edu.ucla.library.iiif.fester.verticles;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import com.opencsv.exceptions.CsvException;
 
@@ -44,6 +49,7 @@ import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
 import edu.ucla.library.iiif.fester.utils.ItemSequenceComparator;
+import edu.ucla.library.iiif.fester.utils.ManifestLabelComparator;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -267,35 +273,24 @@ public class ManifestVerticle extends AbstractFesterVerticle {
      */
     private JsonObject updateCollection(final Collection aCollection,
             final Map<String, List<Collection.Manifest>> aWorksMap) {
-        final List<Collection.Manifest> manifestList = aCollection.getManifests();
-        final String collectionID = IDUtils.getResourceID(aCollection.getID());
-        final List<Collection.Manifest> manifests = aWorksMap.get(collectionID);
 
-        for (int manifestIndex = 0; manifestIndex < manifests.size(); manifestIndex++) {
-            final Collection.Manifest manifest = manifests.get(manifestIndex);
-            final String manifestID = IDUtils.getResourceID(manifest.getID());
+        // Keep track of the manifests we want to add to, or update on, the IIIF collection
+        final Map<URI, Collection.Manifest> manifestMap = new HashMap<>();
+        final SortedSet<Collection.Manifest> sortedManifestSet = new TreeSet<>(new ManifestLabelComparator());
 
-            boolean found = false;
+        // First, add the old manifests to the map
+        manifestMap.putAll(aCollection.getManifests().stream()
+                .collect(Collectors.toMap(Collection.Manifest::getID, collection -> collection)));
 
-            for (int listIndex = 0; listIndex < manifestList.size(); listIndex++) {
-                final Collection.Manifest existingManifest = manifestList.get(listIndex);
-                final String existingID = IDUtils.getResourceID(existingManifest.getID());
+        // Next, add the new manifests to the map, replacing any that already exist
+        manifestMap.putAll(aWorksMap.get(IDUtils.getResourceID(aCollection.getID())).stream()
+                .collect(Collectors.toMap(Collection.Manifest::getID, collection -> collection)));
 
-                if (existingID.equals(manifestID)) {
-                    final String removedID = manifestList.remove(listIndex).getID().toString();
+        // Update the manifest list with the manifests in the map, ordered by their label
+        sortedManifestSet.addAll(manifestMap.values());
 
-                    manifestList.add(listIndex, manifest);
-                    found = true;
-
-                    LOGGER.debug(MessageCodes.MFS_132, removedID, manifest.getID().toString());
-                    break;
-                }
-            }
-
-            if (!found) {
-                manifestList.add(manifest);
-            }
-        }
+        aCollection.getManifests().clear();
+        aCollection.getManifests().addAll(sortedManifestSet);
 
         return aCollection.toJSON();
     }
