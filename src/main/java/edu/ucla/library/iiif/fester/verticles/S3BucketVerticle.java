@@ -67,7 +67,7 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
             if (endpoint == null || Constants.S3_ENDPOINT.equals(endpoint)) {
                 httpOptions.setDefaultHost(RegionUtils.getRegion(s3RegionName).getServiceEndpoint("s3"));
 
-                LOGGER.debug(MessageCodes.MFS_034, httpOptions.getDefaultHost());
+                LOGGER.debug(MessageCodes.MFS_034, httpOptions.getDefaultHost(), "default");
             } else {
                 final URI s3URI = URI.create(endpoint);
 
@@ -75,7 +75,8 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
                 httpOptions.setDefaultHost(s3URI.getHost());
                 httpOptions.setDefaultPort(s3URI.getPort());
 
-                LOGGER.debug(MessageCodes.MFS_034, httpOptions.getDefaultHost() + ':' + httpOptions.getDefaultPort());
+                LOGGER.debug(MessageCodes.MFS_034, httpOptions.getDefaultHost() + ':' + httpOptions.getDefaultPort(),
+                        "supplied");
             }
 
             myS3Client = new S3Client(getVertx(), s3AccessKey, s3SecretKey, httpOptions);
@@ -84,6 +85,7 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
             // Trace is only for developer use; don't turn on when running on a server
             LOGGER.trace(MessageCodes.MFS_046, s3AccessKey, s3SecretKey);
             LOGGER.debug(MessageCodes.MFS_047, s3RegionName);
+            LOGGER.debug(MessageCodes.MFS_132, myS3Bucket);
         }
 
         getJsonConsumer().handler(message -> {

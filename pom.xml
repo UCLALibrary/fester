@@ -117,7 +117,7 @@
     <fester.s3.secret_key>YOUR_SECRET_KEY</fester.s3.secret_key>
 
     <!-- Don't touch below unless you are using something other than S3 -->
-    <fester.s3.endpoint>s3.amazonaws.com</fester.s3.endpoint>
+    <fester.s3.endpoint>https://s3.amazonaws.com</fester.s3.endpoint>
 
     <!-- The IIIF base URL (including service prefix) -->
     <iiif.base.url>https://iiif.library.ucla.edu/iiif/2</iiif.base.url>
