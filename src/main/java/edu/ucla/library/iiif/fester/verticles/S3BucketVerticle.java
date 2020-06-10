@@ -25,7 +25,6 @@ import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.http.ConnectionPoolTooBusyException;
-import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.Counter;
 
@@ -59,27 +58,21 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
         if (myS3Client == null) {
             final String s3AccessKey = config.getString(Config.S3_ACCESS_KEY);
             final String s3SecretKey = config.getString(Config.S3_SECRET_KEY);
-            final String s3RegionName = config.getString(Config.S3_REGION);
+            final String s3RegionName = config.getString(Config.S3_REGION, "us-east-1");
             final String endpoint = config.getString(Config.S3_ENDPOINT);
-            final HttpClientOptions httpOptions = new HttpClientOptions();
 
             // Check to see that we're not overriding the default S3 endpoint
             if (endpoint == null || Constants.S3_ENDPOINT.equals(endpoint)) {
-                httpOptions.setDefaultHost(RegionUtils.getRegion(s3RegionName).getServiceEndpoint("s3"));
+                final String regionEndpoint = RegionUtils.getRegion(s3RegionName).getServiceEndpoint("s3");
 
-                LOGGER.debug(MessageCodes.MFS_034, httpOptions.getDefaultHost(), "default");
+                LOGGER.debug(MessageCodes.MFS_034, regionEndpoint, "default");
+                myS3Client = new S3Client(getVertx(), s3AccessKey, s3SecretKey, "https://" + regionEndpoint);
             } else {
-                final URI s3URI = URI.create(endpoint);
-
-                // TODO: make sure host has no http(s) but that the right setSSL is set
-                httpOptions.setDefaultHost(s3URI.getHost());
-                httpOptions.setDefaultPort(s3URI.getPort());
-
-                LOGGER.debug(MessageCodes.MFS_034, httpOptions.getDefaultHost() + ':' + httpOptions.getDefaultPort(),
-                        "supplied");
+                LOGGER.debug(MessageCodes.MFS_034, endpoint, "supplied");
+                myS3Client = new S3Client(getVertx(), s3AccessKey, s3SecretKey, endpoint);
             }
 
-            myS3Client = new S3Client(getVertx(), s3AccessKey, s3SecretKey, httpOptions);
+            myS3Client.useV2Signature(true);
             myS3Bucket = config.getString(Config.S3_BUCKET);
 
             // Trace is only for developer use; don't turn on when running on a server
@@ -156,6 +149,10 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
             } else if (statusCode == HTTP.NOT_FOUND) {
                 aMessage.fail(HTTP.NOT_FOUND, statusMessage);
             } else {
+                get.bodyHandler(body -> {
+                    LOGGER.error(body.toString(StandardCharsets.UTF_8));
+                });
+
                 aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, statusMessage);
             }
         }, exception -> {

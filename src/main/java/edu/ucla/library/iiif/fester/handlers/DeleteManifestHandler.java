@@ -65,13 +65,13 @@ public class DeleteManifestHandler extends AbstractFesterHandler {
 
                     break;
                 default:
-                    final String genericErrorMessage = LOGGER.getMessage(MessageCodes.MFS_013, manifestID);
+                    final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_013, statusCode, manifestID);
 
-                    LOGGER.warn(genericErrorMessage);
+                    LOGGER.warn(errorMessage);
 
                     response.setStatusCode(statusCode);
                     response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
-                    response.end(genericErrorMessage);
+                    response.end(errorMessage);
             }
         });
     }
