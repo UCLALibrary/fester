@@ -117,7 +117,7 @@
     <fester.s3.secret_key>YOUR_SECRET_KEY</fester.s3.secret_key>
 
     <!-- Don't touch below unless you are using something other than S3 -->
-    <fester.s3.endpoint>s3.amazonaws.com</fester.s3.endpoint>
+    <fester.s3.endpoint>https://s3.amazonaws.com</fester.s3.endpoint>
 
     <!-- The IIIF base URL (including service prefix) -->
     <iiif.base.url>https://iiif.library.ucla.edu/iiif/2</iiif.base.url>
@@ -808,6 +808,7 @@
                   <exclude>info.freelibrary:freelib-utils</exclude>
                   <exclude>info.freelibrary:jiiify-presentation</exclude>
                   <exclude>info.freelibrary:vertx-pairtree</exclude>
+                  <exclude>info.freelibrary:vertx-super-s3</exclude>
                   <exclude>io.netty:netty-buffer</exclude>
                   <exclude>io.netty:netty-codec-dns</exclude>
                   <exclude>io.netty:netty-codec-http2</exclude>
@@ -897,7 +898,7 @@
                   <exclude>org.yaml:snakeyaml</exclude>
                   <exclude>se.sawano.java:alphanumeric-comparator</exclude>
                   <exclude>software.amazon.ion:ion-java</exclude>
-                  <exclude>info.freelibrary:vertx-super-s3</exclude>
+                  <exclude>uk.co.lucasweb:aws-v4-signer-java</exclude>
                 </excludes>
               </artifactSet>
               <outputFile>${project.build.directory}/build-artifact/${project.artifactId}-${project.version}.jar</outputFile>
