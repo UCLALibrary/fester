@@ -45,6 +45,7 @@ import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.ImageInfoLookup;
 import edu.ucla.library.iiif.fester.ImageNotFoundException;
 import edu.ucla.library.iiif.fester.LockedManifest;
+import edu.ucla.library.iiif.fester.ManifestNotFoundException;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
@@ -328,10 +329,9 @@ public class ManifestVerticle extends AbstractFesterVerticle {
 
                             aPromise.complete(new LockedManifest(manifest, aCollDoc, lock));
                         } else {
-                            final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_146,
-                                    aCollDoc ? "collection" : "work", aID);
                             lockRequest.result().release();
-                            aPromise.fail(new Exception(errorMessage, handler.cause()));
+                            aPromise.fail(new ManifestNotFoundException(handler.cause(), MessageCodes.MFS_146,
+                                    aCollDoc ? "collection" : "work", aID));
                         }
                     });
                 } catch (final NullPointerException | IndexOutOfBoundsException details) {
