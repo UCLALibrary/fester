@@ -12,6 +12,16 @@ After Fester creates or updates any IIIF collections or manifests, it updates an
 
 The returned CSVs are updated to contain URLs (in a `IIIF Manifest URL` column) of the IIIF collections and manifests that correspond to any collection or work rows found in the CSV.
 
+Note that the order of operations is important. The following will result in an error:
+
+1. Running `festerize` with a CSV containing works that are part of a collection for which there no IIIF collection has been created (i.e., the work's corresponding collection hasn't been festerized yet)
+
+    - **Solution**: add a collection row to the CSV and re-run `festerize` with it, or run `festerize` with another CSV that contains the collection row
+
+1. Running `festerize` with a CSV containing pages that are part of a work for which no IIIF manifest has been created (i.e., the page's corresponding work hasn't been festerized yet)
+
+    - **Solution**: run `festerize` with another CSV that contains a row for the work
+
 ## Installation
 
 First, ensure that you have Bash, cURL, Python 3 and Pip installed on your system.
@@ -49,6 +59,24 @@ Usage: festerize [OPTIONS] SRC...
   The returned CSVs are updated to contain URLs (in a `IIIF Manifest URL`
   column) of the IIIF collections and manifests that correspond to any
   collection or work rows found in the CSV.
+
+  Note that the order of operations is important. The following will result
+  in an error:
+
+      1. Running `festerize` with a CSV containing works that are part of a
+      collection for which there no IIIF collection has been created (i.e.,
+      the work's corresponding collection hasn't been festerized yet)
+
+          - Solution: add a collection row to the CSV and re-run `festerize`
+          with it, or run `festerize` with another CSV that contains the
+          collection row
+
+      2. Running `festerize` with a CSV containing pages that are part of a
+      work for which no IIIF manifest has been created (i.e., the page's
+      corresponding work hasn't been festerized yet)
+
+          - Solution: run `festerize` with another CSV that contains a row
+          for the work
 
   Arguments:
 
