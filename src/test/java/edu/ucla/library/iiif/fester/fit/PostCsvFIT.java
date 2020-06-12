@@ -53,6 +53,8 @@ public class PostCsvFIT {
 
     private static final File WORKS_CSV_NO_COLLECTION = new File(DIR, "csv/hathaway/batch2/works.csv");
 
+    private static final String HATHAWAY_COLLECTION_ARK = "ark:/21198/zz0009gsq9";
+
     private static final File HATHAWAY_COLLECTION_MANIFEST = new File(DIR, "json/ark%3A%2F21198%2Fzz0009gsq9.json");
 
     private static final File BLANK_LINE_CSV = new File(DIR, "csv/blankline.csv");
@@ -224,7 +226,7 @@ public class PostCsvFIT {
             final Async asyncTask = aContext.async();
 
             // Put a collection manifest in Fester
-            myS3Client.putObject(BUCKET, IDUtils.getCollectionS3Key("ark:/21198/zz0009gsq9"),
+            myS3Client.putObject(BUCKET, IDUtils.getCollectionS3Key(HATHAWAY_COLLECTION_ARK),
                     HATHAWAY_COLLECTION_MANIFEST);
 
             postCSV(WORKS_CSV_NO_COLLECTION, post -> {
@@ -280,10 +282,12 @@ public class PostCsvFIT {
             postCSV(WORKS_CSV_NO_COLLECTION, post -> {
                 if (post.succeeded()) {
                     final HttpResponse<Buffer> response = post.result();
+                    final String expectedErrorMessage = LOGGER.getMessage(MessageCodes.MFS_103,
+                            LOGGER.getMessage(MessageCodes.MFS_146, "collection", HATHAWAY_COLLECTION_ARK));
 
                     aContext.assertEquals(response.statusCode(), HTTP.INTERNAL_SERVER_ERROR);
                     aContext.assertEquals(response.getHeader(Constants.CONTENT_TYPE), Constants.HTML_MEDIA_TYPE);
-                    aContext.assertTrue(response.bodyAsString().contains("Manifest generation failed: Not Found"));
+                    aContext.assertTrue(response.bodyAsString().contains(expectedErrorMessage));
 
                     if (!asyncTask.isCompleted()) {
                         asyncTask.complete();
