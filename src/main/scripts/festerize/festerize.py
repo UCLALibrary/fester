@@ -20,12 +20,27 @@ import requests
 @click.option('--iiifhost', default=None, help='IIIF image server URL (optional)', )
 @click.option('--loglevel', type=click.Choice(['INFO', 'DEBUG', 'ERROR']), default='INFO', show_default=True)
 def cli(src, server, endpoint, out, iiifhost, loglevel):
-    """Uploads CSV files to the Fester IIIF manifest service.
+    """Uploads CSV files to the Fester IIIF manifest service for processing.
 
-    After Fester processes the CSVs in order to create or update any IIIF collections or manifests, it updates and returns those CSV files to the user.
-    The returned CSVs are updated to contain URLs of the IIIF collections and (work) manifests that correspond to any collection or work rows found in the CSV.
+    Any collection rows found in the CSV are used to create a IIIF collection.
 
-    SRC is either a path to a CSV file or a Unix-style glob like '*.csv'.
+    Any work rows are used to expand or revise a previously created IIIF
+    collection (corresponding to the collection that the work is a part of),
+    as well as create a IIIF manifest corresponding to the work.
+
+    Any page rows are likewise used to expand or revise a previously created
+    IIIF manifest (corresponding to the work that the page is a part of).
+
+    After Fester creates or updates any IIIF collections or manifests, it
+    updates and returns the CSV files to the user.
+
+    The returned CSVs are updated to contain URLs (in a `IIIF Manifest URL`
+    column) of the IIIF collections and manifests that correspond to any
+    collection or work rows found in the CSV.
+
+    Arguments:
+
+        SRC is either a path to a CSV file or a Unix-style glob like '*.csv'.
     """
     if not os.path.exists(out):
         click.echo('Output directory {} not found, creating it.'.format(out))
