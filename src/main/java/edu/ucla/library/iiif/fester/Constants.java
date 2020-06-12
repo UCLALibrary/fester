@@ -19,7 +19,7 @@ public final class Constants {
     /**
      * The default S3 endpoint.
      */
-    public static final String S3_ENDPOINT = "s3.amazonaws.com";
+    public static final String S3_ENDPOINT = "https://s3.amazonaws.com";
 
     /**
      * The message header key associated with the Fester operation (HTTP request) that caused the message send.
@@ -118,8 +118,8 @@ public final class Constants {
     public static final String NO_REWRITE_URLS = "no-rewrite-urls";
 
     /**
-     * A unique random placeholder URL that prefixes all IIIF Presentation API resource URLs in all manifests at rest in
-     * S3. It gets replaced with Constants.URL on each GET request.
+     * A unique random placeholder URL that prefixes all IIIF Presentation API resource URLs in all manifests at rest
+     * in S3. It gets replaced with Constants.URL on each GET request.
      */
     public static final String URL_PLACEHOLDER = "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu";
 
