@@ -331,7 +331,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                             final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_146,
                                     aCollDoc ? "collection" : "work", aID);
                             lockRequest.result().release();
-                            aPromise.fail(new Throwable(errorMessage));
+                            aPromise.fail(new Exception(errorMessage, handler.cause()));
                         }
                     });
                 } catch (final NullPointerException | IndexOutOfBoundsException details) {
