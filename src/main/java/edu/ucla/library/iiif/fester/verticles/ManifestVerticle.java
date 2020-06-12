@@ -328,8 +328,10 @@ public class ManifestVerticle extends AbstractFesterVerticle {
 
                             aPromise.complete(new LockedManifest(manifest, aCollDoc, lock));
                         } else {
+                            final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_146,
+                                    (aCollDoc ? "collection" : "work"), aID);
                             lockRequest.result().release();
-                            aPromise.fail(handler.cause());
+                            aPromise.fail(new Throwable(errorMessage));
                         }
                     });
                 } catch (final NullPointerException | IndexOutOfBoundsException details) {

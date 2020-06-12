@@ -7,6 +7,7 @@ setup (
     version='0.1',
     py_modules=['festerize'],
     install_requires=[
+        'beautifulsoup4',
         'click',
         'requests'
     ],

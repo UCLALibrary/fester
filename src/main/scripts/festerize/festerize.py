@@ -7,6 +7,7 @@ import pathlib
 import random
 import sys
 
+from bs4 import BeautifulSoup
 import click
 import requests
 
@@ -71,7 +72,7 @@ def cli(src, server, endpoint, out, iiifhost, loglevel):
             r = requests.post(request_url, files=files, data=payload)
 
             # Handle the response.
-            if r.status_code == 201 :
+            if r.status_code == 201:
                 # Send an awesome message to the user.
                 border_char = extra_satisfaction[random.randint(0, len(extra_satisfaction) - 1)]
                 border_length = 2 + (20 + len(csv_filename)) // 2
@@ -84,10 +85,10 @@ def cli(src, server, endpoint, out, iiifhost, loglevel):
                 out_file = click.open_file(os.path.join(out, csv_filename), 'wb')
                 out_file.write(r.content)
             else:
-                error_msg = 'Failed to upload {}: {}'.format(csv_filename, r.status_code)
+                error_cause = BeautifulSoup(r.text, features='html.parser').find(id='error-message').string
+                error_msg = 'Failed to upload {}: {} (HTTP {})'.format(csv_filename, error_cause, r.status_code)
                 click.echo(error_msg)
                 logging.error(error_msg)
-                logging.error(r.text)
                 logging.error('--------------------------------------------')
         else:
             error_msg = 'File {} is not a CSV, skipping'.format(csv_filename)
