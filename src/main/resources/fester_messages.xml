@@ -159,5 +159,5 @@
   <entry key="MFS-143">URI path '{}' does not contain a required subpath: {} or {}</entry>
   <entry key="MFS-144">S3 key already starts with the prefix to be added: {}</entry>
   <entry key="MFS-145">S3 key already ends with .json extension: {}</entry>
-  <entry key="MFS-146"></entry>
+  <entry key="MFS-146">Could not find {} manifest '{}' to update</entry>
 </properties>
