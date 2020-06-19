@@ -568,10 +568,10 @@ public class ManifestVerticle extends AbstractFesterVerticle {
             final String pageURI = StringUtils.format(SIMPLE_URI, imageHost, encodedPageID);
             final String annotationURI = StringUtils.format(ANNOTATION_URI, Constants.URL_PLACEHOLDER, aWorkID,
                     idPart);
-            final ImageContent imageContent;
 
             String resourceURI = pageURI + StringUtils.format(DEFAULT_THUMBNAIL_URI, DEFAULT_THUMBNAIL_SIZE);
             ImageResource imageResource = new ImageResource(resourceURI, new ImageInfoService(pageURI));
+            ImageContent imageContent;
             Canvas canvas;
 
             try {
@@ -581,6 +581,9 @@ public class ManifestVerticle extends AbstractFesterVerticle {
 
                 // Create a canvas using the width and height of the related image
                 canvas = new Canvas(canvasID, pageLabel, width, height);
+                imageContent = new ImageContent(annotationURI, canvas);
+                imageContent.addResource(imageResource);
+                canvas.addImageContent(imageContent);
             } catch (final ImageNotFoundException details) {
                 LOGGER.info(MessageCodes.MFS_078, pageID);
 
@@ -597,21 +600,24 @@ public class ManifestVerticle extends AbstractFesterVerticle {
 
                         // Create a canvas using the width and height of the placeholder image
                         canvas = new Canvas(canvasID, pageLabel, width, height);
+                        imageContent = new ImageContent(annotationURI, canvas);
+                        imageContent.addResource(imageResource);
+                        canvas.addImageContent(imageContent);
                     } catch (final ImageNotFoundException additionalDetails) {
                         // We couldn't find the placeholder image so we create an empty canvas
-                        canvas = new Canvas(canvasID, pageLabel, 293, 393);
+                        canvas = new Canvas(canvasID, pageLabel, 0, 0);
                         LOGGER.error(additionalDetails, additionalDetails.getMessage());
+
+                        // No image content added to canvas when we couldn't find any
                     }
                 } else {
                     // We couldn't find the placeholder image so we create an empty canvas
-                    canvas = new Canvas(canvasID, pageLabel, 293, 393);
+                    canvas = new Canvas(canvasID, pageLabel, 0, 0);
                     LOGGER.info(MessageCodes.MFS_099, pageID);
+
+                    // No image content added to canvas when we couldn't find any
                 }
             }
-
-            imageContent = new ImageContent(annotationURI, canvas);
-            imageContent.addResource(imageResource);
-            canvas.addImageContent(imageContent);
 
             if (aCsvHeaders.hasViewingHintIndex()) {
                 final String viewingHint = StringUtils.trimToNull(columns[aCsvHeaders.getViewingHintIndex()]);
