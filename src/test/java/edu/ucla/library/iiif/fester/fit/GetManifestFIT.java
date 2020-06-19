@@ -127,8 +127,11 @@ public class GetManifestFIT {
             final String apiPath = StringUtils.format(API_PATH, myID);
             final Async asyncTask = aContext.async();
 
-            // Set up what we're going to test
-            myS3Client.createBucket(BUCKET);
+            // Set up what we're going to test; our bucket in the real S3 may already exist
+            if (!myS3Client.doesBucketExistV2(BUCKET)) {
+                myS3Client.createBucket(BUCKET);
+            }
+
             myS3Client.putObject(BUCKET, s3ManifestKey, testData);
 
             // Run our test of the GET manifest handler

@@ -30,6 +30,9 @@ public final class Config {
     /* The base IIIF server URL that is used to get width and height for canvases */
     public static final String IIIF_BASE_URL = "iiif.base.url";
 
+    /* The placeholder image URL, used for images that are missing */
+    public static final String PLACEHOLDER_IMAGE = "fester.placeholder.url";
+
     /* The S3 endpoint that's used when storing and retrieving manifests */
     public static final String S3_ENDPOINT = "fester.s3.endpoint";
 

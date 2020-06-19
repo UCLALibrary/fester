@@ -10,6 +10,9 @@ OPENAPI_SPEC_PATH=fester.yaml
 ## The URL Fester is available at
 FESTER_URL=http://localhost:8888
 
+## The IIIF server URL to use for missing images
+FESTER_PLACEHOLDER_URL=
+
 ## Configures the port on which Fester microservice listens
 FESTER_HTTP_PORT=8888
 
