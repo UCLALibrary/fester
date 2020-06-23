@@ -125,6 +125,9 @@
     <!-- The URL Fester is available at -->
     <fester.url>http://localhost:${fester.http.port}</fester.url>
 
+    <!-- The missing image placeholder URL -->
+    <fester.placeholder.url>https://iiif.library.ucla.edu/iiif/2/blank</fester.placeholder.url>
+
     <!-- The port Fester listens on -->
     <fester.http.port>8888</fester.http.port>
 
@@ -676,6 +679,7 @@
               <systemPropertyVariables>
                 <fester.logs.output>${seeLogsFT}</fester.logs.output>
                 <fester.s3.bucket>${fester.s3.bucket}</fester.s3.bucket>
+                <fester.placeholder.url>${fester.placeholder.url}</fester.placeholder.url>
                 <fester.container.tag>${docker.registry.account}${project.artifactId}:${project.version}</fester.container.tag>
                 <jdwp.host.port>${jdwp.host.port}</jdwp.host.port>
                 <jdwp.client.config>${jdwp.client.config}</jdwp.client.config>

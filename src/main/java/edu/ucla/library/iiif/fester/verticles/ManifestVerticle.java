@@ -75,9 +75,13 @@ public class ManifestVerticle extends AbstractFesterVerticle {
 
     private static final String SIMPLE_URI = "{}/{}";
 
-    private static final String DEFAULT_IMAGE_URI = "/full/600,/0/default.jpg";
+    private static final String DEFAULT_THUMBNAIL_URI = "/full/{},/0/default.jpg";
+
+    private static final int DEFAULT_THUMBNAIL_SIZE = 600;
 
     private static final String MANIFEST_URI = "{}/{}/manifest";
+
+    private String myPlaceholderImage;
 
     private String myImageHost;
 
@@ -88,6 +92,10 @@ public class ManifestVerticle extends AbstractFesterVerticle {
     public void start(final Promise<Void> aPromise) {
         if (myImageHost == null) {
             myImageHost = config().getString(Config.IIIF_BASE_URL);
+        }
+
+        if (myPlaceholderImage == null) {
+            myPlaceholderImage = config().getString(Config.PLACEHOLDER_IMAGE);
         }
 
         getJsonConsumer().handler(message -> {
@@ -272,6 +280,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
      * @param aCollection A collection to be updated
      * @return The updated collection
      */
+    @SuppressWarnings("checkstyle:indentation")
     private JsonObject updateCollection(final Collection aCollection,
             final Map<String, List<Collection.Manifest>> aWorksMap) {
 
@@ -280,12 +289,12 @@ public class ManifestVerticle extends AbstractFesterVerticle {
         final SortedSet<Collection.Manifest> sortedManifestSet = new TreeSet<>(new ManifestLabelComparator());
 
         // First, add the old manifests to the map
-        manifestMap.putAll(aCollection.getManifests().stream()
-                .collect(Collectors.toMap(Collection.Manifest::getID, collection -> collection)));
+        manifestMap.putAll(aCollection.getManifests().stream().collect(Collectors.toMap(Collection.Manifest::getID,
+                collection -> collection)));
 
         // Next, add the new manifests to the map, replacing any that already exist
-        manifestMap.putAll(aWorksMap.get(IDUtils.getResourceID(aCollection.getID())).stream()
-                .collect(Collectors.toMap(Collection.Manifest::getID, collection -> collection)));
+        manifestMap.putAll(aWorksMap.get(IDUtils.getResourceID(aCollection.getID())).stream().collect(Collectors
+                .toMap(Collection.Manifest::getID, collection -> collection)));
 
         // Update the manifest list with the manifests in the map, ordered by their label
         sortedManifestSet.addAll(manifestMap.values());
@@ -549,8 +558,6 @@ public class ManifestVerticle extends AbstractFesterVerticle {
         final Iterator<String[]> iterator = aPageList.iterator();
         final String imageHost = aImageHost.orElse(myImageHost);
 
-        Canvas lastCanvas = null;
-
         while (iterator.hasNext()) {
             final String[] columns = iterator.next();
             final String pageID = columns[aCsvHeaders.getItemArkIndex()];
@@ -561,53 +568,56 @@ public class ManifestVerticle extends AbstractFesterVerticle {
             final String pageURI = StringUtils.format(SIMPLE_URI, imageHost, encodedPageID);
             final String annotationURI = StringUtils.format(ANNOTATION_URI, Constants.URL_PLACEHOLDER, aWorkID,
                     idPart);
-            final String resourceURI = pageURI + DEFAULT_IMAGE_URI; // Copying Samvera's default image link
-            final ImageResource imageResource = new ImageResource(resourceURI, new ImageInfoService(pageURI));
-            final ImageContent imageContent;
 
+            String resourceURI = pageURI + StringUtils.format(DEFAULT_THUMBNAIL_URI, DEFAULT_THUMBNAIL_SIZE);
+            ImageResource imageResource = new ImageResource(resourceURI, new ImageInfoService(pageURI));
+            ImageContent imageContent;
             Canvas canvas;
 
             try {
                 final ImageInfoLookup infoLookup = new ImageInfoLookup(pageURI);
+                final int width = infoLookup.getWidth();
+                final int height = infoLookup.getHeight();
 
                 // Create a canvas using the width and height of the related image
-                canvas = new Canvas(canvasID, pageLabel, infoLookup.getWidth(), infoLookup.getHeight());
-            } catch (final ImageNotFoundException details) {
-                final int width;
-                final int height;
-
-                // Note that we couldn't find the image and are trying to provide a workaround
-                LOGGER.debug(MessageCodes.MFS_078);
-
-                // First check the last canvas that we've processed (if there is one)
-                if (lastCanvas != null) {
-                    width = lastCanvas.getWidth();
-                    height = lastCanvas.getHeight();
-                } else {
-                    // If we've not processed any, check the sequence to find one
-                    final List<Canvas> canvases = aSequence.getCanvases();
-
-                    // If there is one use that; else, just use zeros for the w/h values
-                    if (canvases.size() != 0) {
-                        final Canvas altLastCanvas = canvases.get(canvases.size() - 1);
-
-                        width = altLastCanvas.getWidth();
-                        height = altLastCanvas.getHeight();
-                    } else {
-                        LOGGER.warn(MessageCodes.MFS_073, pageURI);
-
-                        width = 0;
-                        height = 0;
-                    }
-                }
-
                 canvas = new Canvas(canvasID, pageLabel, width, height);
-                lastCanvas = canvas;
-            }
+                imageContent = new ImageContent(annotationURI, canvas);
+                imageContent.addResource(imageResource);
+                canvas.addImageContent(imageContent);
+            } catch (final ImageNotFoundException details) {
+                LOGGER.info(MessageCodes.MFS_078, pageID);
 
-            imageContent = new ImageContent(annotationURI, canvas);
-            imageContent.addResource(imageResource);
-            canvas.addImageContent(imageContent);
+                if (myPlaceholderImage != null) {
+                    try {
+                        final ImageInfoLookup placeholderLookup = new ImageInfoLookup(myPlaceholderImage);
+                        final int width = placeholderLookup.getWidth();
+                        final int height = placeholderLookup.getHeight();
+                        final int size = width >= DEFAULT_THUMBNAIL_SIZE ? DEFAULT_THUMBNAIL_SIZE : width;
+
+                        // If placeholder image found, use its URL for image resource and service
+                        resourceURI = myPlaceholderImage + StringUtils.format(DEFAULT_THUMBNAIL_URI, size);
+                        imageResource = new ImageResource(resourceURI, new ImageInfoService(myPlaceholderImage));
+
+                        // Create a canvas using the width and height of the placeholder image
+                        canvas = new Canvas(canvasID, pageLabel, width, height);
+                        imageContent = new ImageContent(annotationURI, canvas);
+                        imageContent.addResource(imageResource);
+                        canvas.addImageContent(imageContent);
+                    } catch (final ImageNotFoundException additionalDetails) {
+                        // We couldn't find the placeholder image so we create an empty canvas
+                        canvas = new Canvas(canvasID, pageLabel, 0, 0);
+                        LOGGER.error(additionalDetails, additionalDetails.getMessage());
+
+                        // No image content added to canvas when we couldn't find any
+                    }
+                } else {
+                    // We couldn't find the placeholder image so we create an empty canvas
+                    canvas = new Canvas(canvasID, pageLabel, 0, 0);
+                    LOGGER.info(MessageCodes.MFS_099, pageID);
+
+                    // No image content added to canvas when we couldn't find any
+                }
+            }
 
             if (aCsvHeaders.hasViewingHintIndex()) {
                 final String viewingHint = StringUtils.trimToNull(columns[aCsvHeaders.getViewingHintIndex()]);
