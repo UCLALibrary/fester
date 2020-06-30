@@ -75,7 +75,7 @@
 
     <!-- Versions of tools used for testing -->
     <jsoup.version>1.13.1</jsoup.version>
-    <aws.sdk.version>1.11.793</aws.sdk.version>
+    <aws.sdk.version>1.11.813</aws.sdk.version>
     <localstack.version>1.13.0</localstack.version>
     <testcontainers.version>1.12.5</testcontainers.version>
     <jcip.annotations.version>1.0-1</jcip.annotations.version>
