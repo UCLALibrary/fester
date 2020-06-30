@@ -41,6 +41,8 @@ public class PostCsvHandler extends AbstractFesterHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostCsvHandler.class, Constants.MESSAGES);
 
+    private static final String BR_TAG = "<br>";
+
     private final String myExceptionPage;
 
     private final String myUrl;
@@ -144,14 +146,14 @@ public class PostCsvHandler extends AbstractFesterHandler {
      * @param aThrowable A throwable exception
      */
     private void returnError(final HttpServerResponse aResponse, final int aStatusCode, final Throwable aThrowable) {
-        final String exceptionMessage = aThrowable.getMessage();
-        final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_103, exceptionMessage);
+        final String error = aThrowable.getMessage();
+        final String body = LOGGER.getMessage(MessageCodes.MFS_103, error.replaceAll(Constants.EOL_REGEX, BR_TAG));
 
-        LOGGER.error(aThrowable, errorMessage);
+        LOGGER.error(aThrowable, LOGGER.getMessage(MessageCodes.MFS_103, error));
 
         aResponse.setStatusCode(aStatusCode);
-        aResponse.setStatusMessage(exceptionMessage);
+        aResponse.setStatusMessage(error.replaceAll(Constants.EOL_REGEX, ""));
         aResponse.putHeader(Constants.CONTENT_TYPE, Constants.HTML_MEDIA_TYPE);
-        aResponse.end(StringUtils.format(myExceptionPage, errorMessage));
+        aResponse.end(StringUtils.format(myExceptionPage, body));
     }
 }

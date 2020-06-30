@@ -59,6 +59,8 @@ public class PostCsvFIT {
 
     private static final File BLANK_LINE_CSV = new File(DIR, "csv/blankline.csv");
 
+    private static final File EOL_CHECK_CSV = new File(DIR, "csv/eolcheck.csv");
+
     private static final File WORKS_CSV_PROTESTA_1 = new File(DIR, "csv/lat_newspapers/protesta/protesta_works_1.csv");
 
     private static final File PROTESTA_COLLECTION_MANIFEST = new File(DIR, "json/ark%3A%2F21198%2Fzz0025hqmb.json");
@@ -124,10 +126,7 @@ public class PostCsvFIT {
 
                         // Check that what we get back has the correct media type
                         aContext.assertEquals(Constants.CSV_MEDIA_TYPE, contentType);
-
-                        if (!asyncTask.isCompleted()) {
-                            asyncTask.complete();
-                        }
+                        complete(asyncTask);
                     } else {
                         aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, statusCode, statusMessage));
                     }
@@ -136,6 +135,36 @@ public class PostCsvFIT {
 
                     LOGGER.error(exception, exception.getMessage());
                     aContext.fail(exception);
+                }
+            });
+        }
+
+        /**
+         * Tests submitting a CSV file with an end of line character. This should result in the spreadsheet being
+         * rejected with a 400 error.
+         *
+         * @param aContext A testing context
+         */
+        @Test
+        public final void testCsvWithEolCharacter(final TestContext aContext) {
+            final Async asyncTask = aContext.async();
+
+            postCSV(EOL_CHECK_CSV, post -> {
+                if (post.succeeded()) {
+                    final HttpResponse<Buffer> response = post.result();
+
+                    aContext.assertEquals(HTTP.BAD_REQUEST, response.statusCode());
+
+                    // The body should have a break inserted to replace the EOL
+                    aContext.assertTrue(response.body().toString().contains("<br>"));
+
+                    // The line break would be between "of" and "Persian"
+                    aContext.assertTrue(response.statusMessage().startsWith(
+                            "CSV data contains a forbidden hard return: Minasian (Caro) Collection of Persian"));
+
+                    complete(asyncTask);
+                } else {
+                    aContext.fail(post.cause());
                 }
             });
         }
@@ -154,10 +183,7 @@ public class PostCsvFIT {
                     final HttpResponse<Buffer> response = post.result();
 
                     aContext.assertEquals(HTTP.CREATED, response.statusCode(), response.statusMessage());
-
-                    if (!asyncTask.isCompleted()) {
-                        asyncTask.complete();
-                    }
+                    complete(asyncTask);
                 } else {
                     aContext.fail(post.cause());
                 }
@@ -197,10 +223,7 @@ public class PostCsvFIT {
 
                         // Check that what we get back has the correct media type
                         aContext.assertEquals(Constants.CSV_MEDIA_TYPE, contentType);
-
-                        if (!asyncTask.isCompleted()) {
-                            asyncTask.complete();
-                        }
+                        complete(asyncTask);
                     } else {
                         aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, statusCode, statusMessage));
                     }
@@ -251,10 +274,7 @@ public class PostCsvFIT {
 
                         // Check that what we get back has the correct media type
                         aContext.assertEquals(Constants.CSV_MEDIA_TYPE, contentType);
-
-                        if (!asyncTask.isCompleted()) {
-                            asyncTask.complete();
-                        }
+                        complete(asyncTask);
                     } else {
                         aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, statusCode, statusMessage));
                     }
@@ -282,16 +302,14 @@ public class PostCsvFIT {
             postCSV(WORKS_CSV_NO_COLLECTION, post -> {
                 if (post.succeeded()) {
                     final HttpResponse<Buffer> response = post.result();
-                    final String expectedErrorMessage = LOGGER.getMessage(MessageCodes.MFS_103,
-                            LOGGER.getMessage(MessageCodes.MFS_146, "collection", HATHAWAY_COLLECTION_ARK));
+                    final String expectedErrorMessage = LOGGER.getMessage(MessageCodes.MFS_103, LOGGER.getMessage(
+                            MessageCodes.MFS_146, "collection", HATHAWAY_COLLECTION_ARK));
 
                     aContext.assertEquals(response.statusCode(), HTTP.INTERNAL_SERVER_ERROR);
                     aContext.assertEquals(response.getHeader(Constants.CONTENT_TYPE), Constants.HTML_MEDIA_TYPE);
                     aContext.assertTrue(response.bodyAsString().contains(expectedErrorMessage));
 
-                    if (!asyncTask.isCompleted()) {
-                        asyncTask.complete();
-                    }
+                    complete(asyncTask);
                 } else {
                     final Throwable exception = post.cause();
 
@@ -333,13 +351,11 @@ public class PostCsvFIT {
 
                         if (uploadedFilePathMatcher.find()) {
                             final String uploadedFilePath = uploadedFilePathMatcher.group(1);
-                            // Wait for the file to get deleted; 500 ms should be long enough,
-                            /// unless the file is huge
+                            // Wait for the file to get deleted; 500ms should be long enough, unless the file is huge
                             final Long timerDelay = 500L;
 
                             VERTX_INSTANCE.setTimer(timerDelay, timerId -> {
-                                final boolean isDeleted = !VERTX_INSTANCE.fileSystem().existsBlocking(
-                                        uploadedFilePath);
+                                final boolean isDeleted = !VERTX_INSTANCE.fileSystem().existsBlocking(uploadedFilePath);
                                 try {
                                     aContext.assertTrue(isDeleted);
                                 } catch (final AssertionError details) {
@@ -347,9 +363,7 @@ public class PostCsvFIT {
                                             timerDelay));
                                 }
 
-                                if (!asyncTask.isCompleted()) {
-                                    asyncTask.complete();
-                                }
+                                complete(asyncTask);
                             });
                         } else {
                             aContext.fail(LOGGER.getMessage(MessageCodes.MFS_135, UPLOADED_FILE_PATH_REGEX,
@@ -380,8 +394,8 @@ public class PostCsvFIT {
             // PUT a collection manifest (that already has work manifests on it) in S3
             myS3Client.putObject(BUCKET, s3Key, PROTESTA_COLLECTION_MANIFEST);
 
-            // POST a work CSV with randomly sorted rows; all work manifests generated from these rows should be ordered
-            // before all those already existing on the collection manifest
+            // POST a work CSV with randomly sorted rows; all work manifests generated from these rows should be
+            // ordered before all those already existing on the collection manifest
             postCSV(WORKS_CSV_PROTESTA_1, post -> {
                 if (post.succeeded()) {
                     final HttpResponse<Buffer> postResponse = post.result();
@@ -407,9 +421,7 @@ public class PostCsvFIT {
                                         aContext.assertTrue(comparator.compare(works.get(i), works.get(i + 1)) < 0);
                                     }
 
-                                    if (!asyncTask.isCompleted()) {
-                                        asyncTask.complete();
-                                    }
+                                    complete(asyncTask);
                                 } else {
                                     aContext.fail(LOGGER.getMessage(MessageCodes.MFS_097, s3Key, getStatusMessage));
                                 }
@@ -471,8 +483,8 @@ public class PostCsvFIT {
                     aTestFile.getAbsolutePath(), Constants.CSV_MEDIA_TYPE).attribute(Constants.IIIF_HOST,
                             ImageInfoLookup.FAKE_IIIF_SERVER);
 
-            myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE).sendMultipartForm(
-                    form, aHandler);
+            myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE).sendMultipartForm(form,
+                    aHandler);
         }
     }
 }
