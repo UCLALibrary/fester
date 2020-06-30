@@ -4,7 +4,7 @@ services: docker
 # We want all PRs built but only merges on master branch
 branches:
   only:
-  - master
+  - main
 
 jobs:
   include:
