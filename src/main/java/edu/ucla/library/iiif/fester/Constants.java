@@ -68,7 +68,7 @@ public final class Constants {
     public static final String PLAIN_TEXT_TYPE = "text/plain";
 
     /**
-     * COR header for allowing access to our manifests to the world
+     * COR header for allowing access to our manifests to the world.
      */
     public static final String CORS_HEADER = "Access-Control-Allow-Origin";
 
@@ -88,12 +88,17 @@ public final class Constants {
     public static final String DOT = ".";
 
     /**
-     * Just a empty string, useful
+     * Just a empty string, useful.
      */
     public static final String EMPTY = "";
 
     /**
-     * The file extension for JSON files
+     * A regular expression representing end of line character(s).
+     */
+    public static final String EOL_REGEX = "\\r|\\n|\\r\\n";
+
+    /**
+     * The file extension for JSON files.
      */
     public static final String JSON_EXT = "json";
 
@@ -169,7 +174,7 @@ public final class Constants {
     public static final String S3_REQUEST_COUNT = "s3-request-count";
 
     /**
-     * Manifest content, stored as a JSON object
+     * Manifest content, stored as a JSON object.
      */
     public static final String MANIFEST_CONTENT = "manifest-content";
 
