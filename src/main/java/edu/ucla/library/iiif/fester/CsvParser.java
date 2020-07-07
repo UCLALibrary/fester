@@ -348,7 +348,8 @@ public class CsvParser {
      */
     private String[] trimValues(final String[] aRow) {
         for (int index = 0; index < aRow.length; index++) {
-		aRow[index] = aRow[index].trim();
+		if ( aRow[index] != null )
+			aRow[index] = aRow[index].trim();
         }
         return aRow;
     }
