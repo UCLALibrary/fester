@@ -21,9 +21,52 @@ import requests
 @click.option('--iiifhost', default=None, help='IIIF image server URL (optional)', )
 @click.option('--loglevel', type=click.Choice(['INFO', 'DEBUG', 'ERROR']), default='INFO', show_default=True)
 def cli(src, server, endpoint, out, iiifhost, loglevel):
-    """Uploads CSV files to the Fester IIIF manifest service.
+    """Uploads CSV files to the Fester IIIF manifest service for processing.
 
-    SRC is either a path to a CSV file or a Unix-style glob like '*.csv'.
+    Uploads CSV files to the Fester IIIF manifest service for processing.
+
+    Any rows with an `Object Type` of `Collection` (i.e., "collection row")
+    found in the CSV are used to create a IIIF collection.
+
+    Any rows with an `Object Type` of `Work` (i.e., "work row") are used to
+    expand or revise a previously created IIIF collection (corresponding to
+    the collection that the work is a part of), as well as create a IIIF
+    manifest corresponding to the work. A "work" is conceived of as a discrete
+    object (e.g., a book or a photograph) that one would access as an
+    individual item.
+
+    Any rows with an `Object Type` of `Page` (i.e., "page row") are likewise
+    used to expand or revise a previously created IIIF manifest (corresponding
+    to the work that the page is a part of).
+
+    After Fester creates or updates any IIIF collections or manifests, it
+    updates and returns the CSV files to the user.
+
+    The returned CSVs are updated to contain URLs (in a `IIIF Manifest URL`
+    column) of the IIIF collections and manifests that correspond to any
+    collection or work rows found in the CSV.
+
+    Note that the order of operations is important. The following will result
+    in an error:
+
+        1. Running `festerize` with a CSV containing works that are part of a
+        collection for which no IIIF collection has been created (i.e., the
+        work's corresponding collection hasn't been festerized yet)
+
+            - Solution: add a collection row to the CSV and re-run `festerize`
+            with it, or run `festerize` with another CSV that contains the
+            collection row
+
+        2. Running `festerize` with a CSV containing pages that are part of a
+        work for which no IIIF manifest has been created (i.e., the page's
+        corresponding work hasn't been festerized yet)
+
+            - Solution: add a work row to the CSV and re-run `festerize` with
+            it, or run `festerize` with another CSV that contains the work row
+
+    Arguments:
+
+        SRC is either a path to a CSV file or a Unix-style glob like '*.csv'.
     """
     if not os.path.exists(out):
         click.echo('Output directory {} not found, creating it.'.format(out))
