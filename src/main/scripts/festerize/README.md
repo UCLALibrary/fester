@@ -2,11 +2,11 @@
 
 Uploads CSV files to the Fester IIIF manifest service for processing.
 
-Any collection rows found in the CSV are used to create a IIIF collection.
+Any rows with an `Object Type` of `Collection` (i.e., "collection row") found in the CSV are used to create a IIIF collection.
 
-Any work rows are used to expand or revise a previously created IIIF collection (corresponding to the collection that the work is a part of), as well as create a IIIF manifest corresponding to the work. A "work" is conceived of as a discrete object (e.g., a book or a photograph) that one would access as an individual item.
+Any rows with an `Object Type` of `Work` (i.e., "work row") are used to expand or revise a previously created IIIF collection (corresponding to the collection that the work is a part of), as well as create a IIIF manifest corresponding to the work. A "work" is conceived of as a discrete object (e.g., a book or a photograph) that one would access as an individual item.
 
-Any page rows are likewise used to expand or revise a previously created IIIF manifest (corresponding to the work that the page is a part of).
+Any rows with an `Object Type` of `Page` (i.e., "page row") are likewise used to expand or revise a previously created IIIF manifest (corresponding to the work that the page is a part of).
 
 After Fester creates or updates any IIIF collections or manifests, it updates and returns the CSV files to the user.
 
@@ -44,16 +44,19 @@ Usage: festerize [OPTIONS] SRC...
 
   Uploads CSV files to the Fester IIIF manifest service for processing.
 
-  Any collection rows found in the CSV are used to create a IIIF collection.
+  Any rows with an `Object Type` of `Collection` (i.e., "collection row")
+  found in the CSV are used to create a IIIF collection.
 
-  Any work rows are used to expand or revise a previously created IIIF
-  collection (corresponding to the collection that the work is a part of),
-  as well as create a IIIF manifest corresponding to the work. A "work" is
-  conceived of as a discrete object (e.g., a book or a photograph) that one
-  would access as an individual item.
+  Any rows with an `Object Type` of `Work` (i.e., "work row") are used to
+  expand or revise a previously created IIIF collection (corresponding to
+  the collection that the work is a part of), as well as create a IIIF
+  manifest corresponding to the work. A "work" is conceived of as a discrete
+  object (e.g., a book or a photograph) that one would access as an
+  individual item.
 
-  Any page rows are likewise used to expand or revise a previously created
-  IIIF manifest (corresponding to the work that the page is a part of).
+  Any rows with an `Object Type` of `Page` (i.e., "page row") are likewise
+  used to expand or revise a previously created IIIF manifest (corresponding
+  to the work that the page is a part of).
 
   After Fester creates or updates any IIIF collections or manifests, it
   updates and returns the CSV files to the user.
