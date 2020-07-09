@@ -46,6 +46,18 @@ public class CsvParserTest {
     }
 
     /**
+     * Tests handling spaces in non-header rows in a CSV file.
+     *
+     * @throws CsvParsingException If there is an error while parsing the CSV data
+     * @throws CsvException If there is a generic CSV error
+     * @throws IOException If there is trouble reading the CSV data
+     */
+    @Test
+    public final void testParseSpaces() throws CsvParsingException, CsvException, IOException {
+        myCsvParser.parse(getTestPath("spaces.csv"));
+    }
+
+    /**
      * Tests catching an EOL in a CSV file.
      *
      * @throws CsvParsingException If there is an error while parsing the CSV data
