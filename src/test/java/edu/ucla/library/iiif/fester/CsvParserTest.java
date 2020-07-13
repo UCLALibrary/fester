@@ -56,7 +56,7 @@ public class CsvParserTest {
     @Test
     public final void testParseSpaces() throws CsvParsingException, CsvException, IOException {
         final CsvMetadata metadata = myCsvParser.parse(getTestPath("spaces.csv")).getCsvMetadata();
-        final String first = metadata.getWorksList().get(8)[0];
+        final String first = metadata.getWorksList().get(7)[0];
         assertTrue(first.startsWith("C"));
     }
 

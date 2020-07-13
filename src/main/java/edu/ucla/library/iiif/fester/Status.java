@@ -12,6 +12,9 @@ public final class Status {
     /* Total memory property */
     public static final String TOTAL_MEMORY = "total_mem";
 
+    /* Used memory property */
+    public static final String USED_MEMORY = "used_mem";
+
     /* Memory category for property values */
     public static final String MEMORY = "memory";
 

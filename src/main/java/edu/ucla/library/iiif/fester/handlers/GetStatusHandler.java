@@ -27,10 +27,11 @@ public class GetStatusHandler implements Handler<RoutingContext> {
             final Runtime runtime = Runtime.getRuntime();
             final long totalMem = runtime.totalMemory() / MB;
             final long freeMem = runtime.freeMemory() / MB;
+            final long usedMem = totalMem - freeMem;
             final JsonObject memory = new JsonObject();
 
             status.put(Status.STATUS, Status.OK).put(Status.MEMORY, memory);
-            memory.put(Status.TOTAL_MEMORY, totalMem).put(Status.FREE_MEMORY, freeMem);
+            memory.put(Status.TOTAL_MEMORY, totalMem).put(Status.FREE_MEMORY, freeMem).put(Status.USED_MEMORY, usedMem);
 
             response.setStatusCode(200);
             response.putHeader(Constants.CONTENT_TYPE, Constants.JSON_MEDIA_TYPE).end(status.encodePrettily());
