@@ -58,6 +58,14 @@
       <organizationUrl>http://github.com/uclalibrary</organizationUrl>
       <timezone>America/Los_Angeles</timezone>
     </developer>
+    <developer>
+      <id>DRickard</id>
+      <name>David Rickard</name>
+      <email>drickard1967@library.ucla.edu</email>
+      <organization>UCLA Library</organization>
+      <organizationUrl>http://github.com/uclalibrary</organizationUrl>
+      <timezone>America/Los_Angeles</timezone>
+    </developer>
   </developers>
 
   <properties>
