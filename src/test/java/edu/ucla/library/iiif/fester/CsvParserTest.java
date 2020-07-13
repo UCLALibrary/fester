@@ -3,6 +3,7 @@ package edu.ucla.library.iiif.fester;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,7 +55,9 @@ public class CsvParserTest {
      */
     @Test
     public final void testParseSpaces() throws CsvParsingException, CsvException, IOException {
-        myCsvParser.parse(getTestPath("spaces.csv"));
+        final CsvMetadata metadata = myCsvParser.parse(getTestPath("spaces.csv")).getCsvMetadata();
+        final String first = metadata.getWorksList().get(8)[0];
+        assertTrue(first.startsWith("C"));
     }
 
     /**
