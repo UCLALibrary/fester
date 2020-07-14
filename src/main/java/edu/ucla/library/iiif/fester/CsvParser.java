@@ -116,6 +116,7 @@ public class CsvParser {
                 final ObjectType objectType;
 
                 checkForEOLs(row);
+                trimValues(row);
                 objectType = getObjectType(row);
 
                 switch (objectType) {
@@ -334,6 +335,21 @@ public class CsvParser {
         for (int index = 0; index < aRow.length; index++) {
             if (EOL_PATTERN.matcher(aRow[index]).find()) {
                 throw new CsvParsingException(MessageCodes.MFS_093, aRow[index]);
+            }
+        }
+        return aRow;
+    }
+
+    /**
+     * Removes leading/trailing whitespace from row entries
+     *
+     * @param aRow A row from the metadata CSV
+     * @return The row
+     */
+    private String[] trimValues(final String[] aRow) {
+        for (int index = 0; index < aRow.length; index++) {
+            if (aRow[index] != null) {
+                aRow[index] = aRow[index].trim();
             }
         }
         return aRow;

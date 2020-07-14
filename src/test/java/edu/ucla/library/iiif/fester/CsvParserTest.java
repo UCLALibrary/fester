@@ -3,6 +3,7 @@ package edu.ucla.library.iiif.fester;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,6 +44,20 @@ public class CsvParserTest {
     @Test
     public final void testParse() throws CsvParsingException, CsvException, IOException {
         myCsvParser.parse(getTestPath(GOOD_CSV));
+    }
+
+    /**
+     * Tests handling spaces in non-header rows in a CSV file.
+     *
+     * @throws CsvParsingException If there is an error while parsing the CSV data
+     * @throws CsvException If there is a generic CSV error
+     * @throws IOException If there is trouble reading the CSV data
+     */
+    @Test
+    public final void testParseSpaces() throws CsvParsingException, CsvException, IOException {
+        final CsvMetadata metadata = myCsvParser.parse(getTestPath("spaces.csv")).getCsvMetadata();
+        final String first = metadata.getWorksList().get(7)[0];
+        assertTrue(first.startsWith("C"));
     }
 
     /**
