@@ -183,6 +183,10 @@ This will prepare the code for release by making two commits to Git. The first w
 
 The actual release will be done by the Travis build. When a non-snapshot version is built by Travis, a Docker image will be uploaded to the Docker registry.
 
+## Festerize
+
+[Festerize](https://github.com/UCLALibrary/festerize) may be used to interact with Fester, as an alternative to the built-in CSV upload form.
+
 ## Contact
 
 We use an internal ticketing system, but we've left the GitHub [issues](https://github.com/UCLALibrary/fester/issues) open in case you'd like to file a ticket or make a suggestion. You can also contact Kevin S. Clarke at <a href="mailto:ksclarke@ksclarke.io">ksclarke@ksclarke.io</a> if you have a question about the project.
