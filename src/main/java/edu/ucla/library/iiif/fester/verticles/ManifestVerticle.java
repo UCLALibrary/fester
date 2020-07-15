@@ -20,6 +20,10 @@ import java.util.stream.Collectors;
 
 import com.opencsv.exceptions.CsvException;
 
+import info.freelibrary.util.Logger;
+import info.freelibrary.util.LoggerFactory;
+import info.freelibrary.util.StringUtils;
+
 import info.freelibrary.iiif.presentation.Canvas;
 import info.freelibrary.iiif.presentation.Collection;
 import info.freelibrary.iiif.presentation.ImageContent;
@@ -31,9 +35,6 @@ import info.freelibrary.iiif.presentation.properties.Metadata;
 import info.freelibrary.iiif.presentation.properties.ViewingDirection;
 import info.freelibrary.iiif.presentation.properties.ViewingHint;
 import info.freelibrary.iiif.presentation.services.ImageInfoService;
-import info.freelibrary.util.Logger;
-import info.freelibrary.util.LoggerFactory;
-import info.freelibrary.util.StringUtils;
 
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
@@ -51,6 +52,7 @@ import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
 import edu.ucla.library.iiif.fester.utils.ItemSequenceComparator;
 import edu.ucla.library.iiif.fester.utils.ManifestLabelComparator;
+
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -91,11 +93,11 @@ public class ManifestVerticle extends AbstractFesterVerticle {
     @Override
     public void start(final Promise<Void> aPromise) {
         if (myImageHost == null) {
-            myImageHost = config().getString(Config.IIIF_BASE_URL);
+            myImageHost = StringUtils.trimToNull(config().getString(Config.IIIF_BASE_URL));
         }
 
         if (myPlaceholderImage == null) {
-            myPlaceholderImage = config().getString(Config.PLACEHOLDER_IMAGE);
+            myPlaceholderImage = StringUtils.trimToNull(config().getString(Config.PLACEHOLDER_IMAGE));
         }
 
         getJsonConsumer().handler(message -> {
@@ -293,8 +295,8 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                 collection -> collection)));
 
         // Next, add the new manifests to the map, replacing any that already exist
-        manifestMap.putAll(aWorksMap.get(IDUtils.getResourceID(aCollection.getID())).stream().collect(Collectors
-                .toMap(Collection.Manifest::getID, collection -> collection)));
+        manifestMap.putAll(aWorksMap.get(IDUtils.getResourceID(aCollection.getID())).stream().collect(Collectors.toMap(
+                Collection.Manifest::getID, collection -> collection)));
 
         // Update the manifest list with the manifests in the map, ordered by their label
         sortedManifestSet.addAll(manifestMap.values());
@@ -339,8 +341,8 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                             aPromise.complete(new LockedManifest(manifest, aCollDoc, lock));
                         } else {
                             lockRequest.result().release();
-                            aPromise.fail(new ManifestNotFoundException(handler.cause(), MessageCodes.MFS_146,
-                                    aCollDoc ? "collection" : "work", aID));
+                            aPromise.fail(new ManifestNotFoundException(handler.cause(), MessageCodes.MFS_146, aCollDoc
+                                    ? "collection" : "work", aID));
                         }
                     });
                 } catch (final NullPointerException | IndexOutOfBoundsException details) {
@@ -441,8 +443,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
      * @return The future result of our promise
      */
     private Future buildWorkManifest(final CsvHeaders aCsvHeaders, final String[] aWork,
-            final Map<String, List<String[]>> aPages, final Optional<String> aImageHost,
-            final Promise<Void> aPromise) {
+            final Map<String, List<String[]>> aPages, final Optional<String> aImageHost, final Promise<Void> aPromise) {
         final String workID = aWork[aCsvHeaders.getItemArkIndex()];
         final String urlEncodedWorkID = URLEncoder.encode(workID, StandardCharsets.UTF_8);
         final String workLabel = aWork[aCsvHeaders.getTitleIndex()];
@@ -566,8 +567,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
             final String pageLabel = columns[aCsvHeaders.getTitleIndex()];
             final String canvasID = StringUtils.format(CANVAS_URI, Constants.URL_PLACEHOLDER, aWorkID, idPart);
             final String pageURI = StringUtils.format(SIMPLE_URI, imageHost, encodedPageID);
-            final String annotationURI = StringUtils.format(ANNOTATION_URI, Constants.URL_PLACEHOLDER, aWorkID,
-                    idPart);
+            final String annotationURI = StringUtils.format(ANNOTATION_URI, Constants.URL_PLACEHOLDER, aWorkID, idPart);
 
             String resourceURI = pageURI + StringUtils.format(DEFAULT_THUMBNAIL_URI, DEFAULT_THUMBNAIL_SIZE);
             ImageResource imageResource = new ImageResource(resourceURI, new ImageInfoService(pageURI));
