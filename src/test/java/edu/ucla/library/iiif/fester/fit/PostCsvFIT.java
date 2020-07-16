@@ -37,6 +37,8 @@ import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.ext.web.client.HttpResponse;
+import io.vertx.ext.web.client.WebClient;
+import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.multipart.MultipartForm;
 
@@ -440,6 +442,33 @@ public class PostCsvFIT {
 
                     LOGGER.error(postException, postException.getMessage());
                     aContext.fail(postException);
+                }
+            });
+        }
+
+        /**
+         * Tests submitting a CSV using an outdated version of Festerize.
+         *
+         * @param aContext A testing context
+         */
+        @Test
+        public final void testOutdatedFesterizeVersion(final TestContext aContext) {
+            final Async asyncTask = aContext.async();
+
+            // Create a fake Festerize client for this test only
+            myWebClient.close();
+            myWebClient = WebClient.create(VERTX_INSTANCE, new WebClientOptions().setUserAgent("Festerize/0.0.0"));
+
+            postCSV(WORKS_CSV_COLLECTION, post -> {
+                if (post.succeeded()) {
+                    final HttpResponse<Buffer> response = post.result();
+
+                    aContext.assertEquals(HTTP.BAD_REQUEST, response.statusCode());
+                    aContext.assertTrue(response.body().toString().contains("Festerize is outdated, please upgrade"));
+
+                    complete(asyncTask);
+                } else {
+                    aContext.fail(post.cause());
                 }
             });
         }
