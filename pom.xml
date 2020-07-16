@@ -139,6 +139,9 @@
     <!-- The port Fester listens on -->
     <fester.http.port>8888</fester.http.port>
 
+    <!-- The version of Festerize that is compatible with this version of Fester -->
+    <festerize.version>0.1.0</festerize.version>
+
     <!-- The port a debugger may attach to when Fester is running in debug mode -->
     <fester.debug.port>5555</fester.debug.port>
 
@@ -689,6 +692,7 @@
                 <fester.s3.bucket>${fester.s3.bucket}</fester.s3.bucket>
                 <fester.placeholder.url>${fester.placeholder.url}</fester.placeholder.url>
                 <fester.container.tag>${docker.registry.account}${project.artifactId}:${project.version}</fester.container.tag>
+                <festerize.version>${festerize.version}</festerize.version>
                 <jdwp.host.port>${jdwp.host.port}</jdwp.host.port>
                 <jdwp.client.config>${jdwp.client.config}</jdwp.client.config>
               </systemPropertyVariables>

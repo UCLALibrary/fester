@@ -160,4 +160,5 @@
   <entry key="MFS-144">S3 key already starts with the prefix to be added: {}</entry>
   <entry key="MFS-145">S3 key already ends with .json extension: {}</entry>
   <entry key="MFS-146">Could not find {} manifest '{}' to update</entry>
+  <entry key="MFS-147">Festerize is outdated, please upgrade to v{} (see README for instructions)</entry>
 </properties>
