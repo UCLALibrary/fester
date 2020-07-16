@@ -6,6 +6,8 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
@@ -47,6 +49,10 @@ public class PostCsvHandler extends AbstractFesterHandler {
 
     private final String myUrl;
 
+    private final String myFesterizeVersion;
+
+    private final Pattern myFesterizeUserAgentPattern;
+
     /**
      * Creates a handler to handle POSTs to generate collection manifests.
      *
@@ -61,16 +67,31 @@ public class PostCsvHandler extends AbstractFesterHandler {
 
         myExceptionPage = new String(bytes, StandardCharsets.UTF_8);
         myUrl = aConfig.getString(Config.FESTER_URL);
+        myFesterizeVersion = aConfig.getString(Config.FESTERIZE_VERSION);
+        myFesterizeUserAgentPattern = Pattern.compile("Festerize/(?<version>\\d+\\.\\d+\\.\\d+)");
     }
 
     @Override
     public void handle(final RoutingContext aContext) {
+        final HttpServerRequest request = aContext.request();
         final HttpServerResponse response = aContext.response();
         final Set<FileUpload> csvUploads = aContext.fileUploads();
+        final String festerizeUserAgent = StringUtils.trimTo(request.getHeader("User-Agent"), Constants.EMPTY);
+        final Matcher festerizeUserAgentMatcher = myFesterizeUserAgentPattern.matcher(festerizeUserAgent);
+        final String errorMessage;
 
         // An uploaded CSV is required
         if (csvUploads.size() == 0) {
-            final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_037);
+            errorMessage = LOGGER.getMessage(MessageCodes.MFS_037);
+
+            response.setStatusCode(HTTP.BAD_REQUEST);
+            response.setStatusMessage(errorMessage);
+            response.putHeader(Constants.CONTENT_TYPE, Constants.HTML_MEDIA_TYPE);
+            response.end(StringUtils.format(myExceptionPage, errorMessage));
+        } else if (festerizeUserAgentMatcher.matches()
+                && !festerizeUserAgentMatcher.group("version").equals(myFesterizeVersion)) {
+            // Festerize version mismatch
+            errorMessage = LOGGER.getMessage(MessageCodes.MFS_147, myFesterizeVersion);
 
             response.setStatusCode(HTTP.BAD_REQUEST);
             response.setStatusMessage(errorMessage);
@@ -82,7 +103,6 @@ public class PostCsvHandler extends AbstractFesterHandler {
             final String fileName = csvFile.fileName();
             final JsonObject message = new JsonObject();
             final DeliveryOptions options = new DeliveryOptions();
-            final HttpServerRequest request = aContext.request();
             final String iiifHost = StringUtils.trimToNull(request.getFormAttribute(Constants.IIIF_HOST));
 
             // Store the information that the manifest generator will need
