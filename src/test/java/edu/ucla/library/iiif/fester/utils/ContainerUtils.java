@@ -46,6 +46,7 @@ public final class ContainerUtils {
         final String containerTag = toTag(System.getProperty(TestConstants.CONTAINER_IMAGE));
         final GenericContainer<?> container = new GenericContainer<>(containerTag);
         final String placeholder = checkNotNull(System.getProperty(Config.PLACEHOLDER_IMAGE, Constants.EMPTY));
+        final String festerizeVersion = checkNotNull(System.getProperty(Config.FESTERIZE_VERSION, Constants.EMPTY));
         final String accessKey = checkNotNull(System.getProperty(Config.S3_ACCESS_KEY, aConfig.getS3AccessKey()));
         final String secretKey = checkNotNull(System.getProperty(Config.S3_SECRET_KEY, aConfig.getS3SecretKey()));
         final String endpoint = System.getProperty(Config.S3_ENDPOINT, StringUtils.format(HOST, aConfig.getS3Port()));
@@ -58,7 +59,7 @@ public final class ContainerUtils {
                 secretKey, toEnv(Config.S3_REGION), region, toEnv(Config.S3_ENDPOINT), endpoint, toEnv(
                         Config.HTTP_PORT), containerPort, toEnv(Config.S3_BUCKET), bucket, featureFlags,
                 featureFlagsURL != null ? featureFlagsURL : Constants.EMPTY, toEnv(Config.PLACEHOLDER_IMAGE),
-                placeholder);
+                placeholder, toEnv(Config.FESTERIZE_VERSION), festerizeVersion);
         final String jdwpHostPort = System.getProperty(Config.JDWP_HOST_PORT);
 
         // Check to see if we want to output our Fester container logs when we run; the default is "no"

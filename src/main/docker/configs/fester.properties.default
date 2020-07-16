@@ -24,3 +24,6 @@ FESTER_S3_REGION=us-west-2
 FESTER_S3_ENDPOINT=https://s3.amazonaws.com
 
 IIIF_BASE_URL=https://iiif.library.ucla.edu/iiif/2
+
+# The version of Festerize that is compatible with this version of Fester
+FESTERIZE_VERSION=

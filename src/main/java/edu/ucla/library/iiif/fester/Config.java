@@ -45,6 +45,9 @@ public final class Config {
     /* The port a debugger may listen on to debug a containerized Fester instance */
     public static final String JDWP_HOST_PORT = "jdwp.host.port";
 
+    /* The version of Festerize that is compatible with this version of Fester */
+    public static final String FESTERIZE_VERSION = "festerize.version";
+
     /**
      * Private constructor for the Constants class.
      */
