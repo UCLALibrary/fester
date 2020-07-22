@@ -12,6 +12,12 @@ public final class Status {
     /* Total memory property */
     public static final String TOTAL_MEMORY = "total_mem";
 
+    /* Used memory property */
+    public static final String USED_MEMORY = "used_mem";
+
+    /* Percentage memory ((used/total)*100) property */
+    public static final String PERCENT_MEMORY = "%_used_mem";
+
     /* Memory category for property values */
     public static final String MEMORY = "memory";
 
@@ -20,6 +26,12 @@ public final class Status {
 
     /* The okay status response */
     public static final String OK = "ok";
+
+    /* The warn status response */
+    public static final String WARN = "warn";
+
+    /* The error status response */
+    public static final String ERROR = "error";
 
     private Status() {
     }
