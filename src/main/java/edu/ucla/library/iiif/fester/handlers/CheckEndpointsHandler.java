@@ -46,18 +46,21 @@ public class CheckEndpointsHandler extends AbstractFesterHandler {
         try {
             myS3Client.put(myS3Bucket, UPLOAD_KEY, Buffer.buffer(upload.toJSON().encodePrettily()), putResponse -> {
                 final int statusCode = putResponse.statusCode();
+                LOGGER.info("PUT response = " + statusCode);
                 endpoints.put(Status.PUT_RESPONSE, statusCode);
                 determineEndpointStatus(statusCode,endpoints);
             });
 
             myS3Client.get(myS3Bucket, UPLOAD_KEY, getResponse -> {
                 final int statusCode = getResponse.statusCode();
+                LOGGER.info("GET response = " + statusCode);
                 endpoints.put(Status.GET_RESPONSE, statusCode);
                 determineEndpointStatus(statusCode,endpoints);
             });
 
             myS3Client.delete(myS3Bucket, UPLOAD_KEY, deleteResponse -> {
                 final int statusCode = deleteResponse.statusCode();
+                LOGGER.info("DELETE response = " + statusCode);
                 endpoints.put(Status.DELETE_RESPONSE, statusCode);
                 determineEndpointStatus(statusCode,endpoints);
             });
