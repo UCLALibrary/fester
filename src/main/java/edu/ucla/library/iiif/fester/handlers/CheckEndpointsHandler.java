@@ -76,13 +76,8 @@ public class CheckEndpointsHandler extends AbstractFesterHandler {
             } ).onFailure( failure -> {
                 response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
                 response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
-                response.end("failed somehow\n"); //handler.cause());
+                response.end("failed somehow\n");
             } );
-
-            /*status.put( Status.STATUS, determineOverallStatus(endpoints) ).put( Status.ENDPOINTS, endpoints );
-
-            response.setStatusCode(200);
-            response.putHeader(Constants.CONTENT_TYPE, Constants.JSON_MEDIA_TYPE).end(status.encodePrettily());*/
 
         } catch (final Throwable aThrowable) {
             final String exceptionMessage = aThrowable.getMessage();
@@ -104,7 +99,6 @@ public class CheckEndpointsHandler extends AbstractFesterHandler {
             aMessage.put(Status.STATUS, Status.ERROR);
             aPromise.fail("5XX error");
         } else {
-            //aMessage.put(Status.STATUS, Status.OK);
             aPromise.complete();
         }
     }
