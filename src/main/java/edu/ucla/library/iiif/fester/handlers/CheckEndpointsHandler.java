@@ -3,6 +3,7 @@ package edu.ucla.library.iiif.fester.handlers;
 
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
+import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.Status;
 
 import info.freelibrary.iiif.presentation.Manifest;
@@ -25,7 +26,7 @@ public class CheckEndpointsHandler extends AbstractFesterHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CheckEndpointsHandler.class, Constants.MESSAGES);
     private static final String UPLOAD_KEY = "test_load.json";
-
+    private static final String APPEND = " : ";
     /**
      *  Creates a handler that checks S3 endpoint statuses.
      *
@@ -47,23 +48,26 @@ public class CheckEndpointsHandler extends AbstractFesterHandler {
             final Future<Object> composite = Future.future( put -> {
                 myS3Client.put(myS3Bucket, UPLOAD_KEY, Buffer.buffer(upload.toJSON().encodePrettily()), putResponse -> {
                     final int statusCode = putResponse.statusCode();
+                    final String statusMessage = putResponse.statusMessage();
                     endpoints.put(Status.PUT_RESPONSE, statusCode);
-                    determineEndpointStatus(statusCode,endpoints,put);
+                    determineEndpointStatus(statusCode,statusMessage,endpoints,put);
                 });
             } ).compose( addGet -> {
                 return Future.future( get -> {
                     myS3Client.get(myS3Bucket, UPLOAD_KEY, getResponse -> {
                         final int statusCode = getResponse.statusCode();
+                        final String statusMessage = getResponse.statusMessage();
                         endpoints.put(Status.GET_RESPONSE, statusCode);
-                        determineEndpointStatus(statusCode,endpoints,get);
+                        determineEndpointStatus(statusCode,statusMessage,endpoints,get);
                     });
                 } );
             } ).compose( addDel -> {
                 return Future.future( delete -> {
                     myS3Client.delete(myS3Bucket, UPLOAD_KEY, deleteResponse -> {
                         final int statusCode = deleteResponse.statusCode();
+                        final String statusMessage = deleteResponse.statusMessage();
                         endpoints.put(Status.DELETE_RESPONSE, statusCode);
-                        determineEndpointStatus(statusCode,endpoints,delete);
+                        determineEndpointStatus(statusCode,statusMessage,endpoints,delete);
                     });
                 } );
             } );
@@ -74,9 +78,12 @@ public class CheckEndpointsHandler extends AbstractFesterHandler {
                 response.setStatusCode(HTTP.OK);
                 response.putHeader(Constants.CONTENT_TYPE, Constants.JSON_MEDIA_TYPE).end(status.encodePrettily());
             } ).onFailure( failure -> {
+                final String statusMessage = failure.getMessage();
+                final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_148, statusMessage);
+                LOGGER.error(errorMessage);
                 response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
                 response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
-                response.end("failed somehow\n");
+                response.end(errorMessage);
             } );
 
         } catch (final Throwable aThrowable) {
@@ -91,13 +98,16 @@ public class CheckEndpointsHandler extends AbstractFesterHandler {
 
     }
 
-    private void determineEndpointStatus(final int aCode, final JsonObject aMessage, final Promise<Object> aPromise) {
+    private void determineEndpointStatus(final int aCode, final String aStatus,
+                                         final JsonObject aMessage, final Promise<Object> aPromise) {
         if (aCode >= HTTP.BAD_REQUEST && aCode < HTTP.INTERNAL_SERVER_ERROR) {
-            aMessage.put(Status.STATUS, Status.WARN);
-            aPromise.fail("4XX error");
+            final String failMessage = LOGGER.getMessage(MessageCodes.MFS_149, aStatus);
+            aMessage.put(Status.STATUS, Status.WARN + APPEND + aStatus);
+            aPromise.fail("4XX error: " + failMessage);
         } else if (aCode >= HTTP.INTERNAL_SERVER_ERROR) {
-            aMessage.put(Status.STATUS, Status.ERROR);
-            aPromise.fail("5XX error");
+            final String failMessage = LOGGER.getMessage(MessageCodes.MFS_149, aStatus);
+            aMessage.put(Status.STATUS, Status.ERROR + APPEND + aStatus);
+            aPromise.fail("5XX error: " + failMessage);
         } else {
             aPromise.complete();
         }
