@@ -18,7 +18,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 
 /**
- * @author drickard1967
+ * Handler that checks S3 endpoint status
  *
  */
 public class CheckEndpointsHandler extends AbstractFesterHandler {
@@ -50,7 +50,7 @@ public class CheckEndpointsHandler extends AbstractFesterHandler {
                     endpoints.put(Status.PUT_RESPONSE, statusCode);
                     determineEndpointStatus(statusCode,endpoints,put);
                 });
-            } ).compose( v2 -> {
+            } ).compose( addGet -> {
                 return Future.future( get -> {
                     myS3Client.get(myS3Bucket, UPLOAD_KEY, getResponse -> {
                         final int statusCode = getResponse.statusCode();
@@ -58,7 +58,7 @@ public class CheckEndpointsHandler extends AbstractFesterHandler {
                         determineEndpointStatus(statusCode,endpoints,get);
                     });
                 } );
-            } ).compose( v3 -> {
+            } ).compose( addDel -> {
                 return Future.future( delete -> {
                     myS3Client.delete(myS3Bucket, UPLOAD_KEY, deleteResponse -> {
                         final int statusCode = deleteResponse.statusCode();
@@ -71,7 +71,7 @@ public class CheckEndpointsHandler extends AbstractFesterHandler {
             composite.onSuccess( success -> {
                 status.put( Status.STATUS, determineOverallStatus(endpoints) ).put( Status.ENDPOINTS, endpoints );
 
-                response.setStatusCode(200);
+                response.setStatusCode(HTTP.OK);
                 response.putHeader(Constants.CONTENT_TYPE, Constants.JSON_MEDIA_TYPE).end(status.encodePrettily());
             } ).onFailure( failure -> {
                 response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
@@ -92,10 +92,10 @@ public class CheckEndpointsHandler extends AbstractFesterHandler {
     }
 
     private void determineEndpointStatus(final int aCode, final JsonObject aMessage, final Promise<Object> aPromise) {
-        if (aCode >= 400 && aCode < 500 ) {
+        if (aCode >= HTTP.BAD_REQUEST && aCode < HTTP.INTERNAL_SERVER_ERROR) {
             aMessage.put(Status.STATUS, Status.WARN);
             aPromise.fail("4XX error");
-        } else if (aCode >= 500) {
+        } else if (aCode >= HTTP.INTERNAL_SERVER_ERROR) {
             aMessage.put(Status.STATUS, Status.ERROR);
             aPromise.fail("5XX error");
         } else {
