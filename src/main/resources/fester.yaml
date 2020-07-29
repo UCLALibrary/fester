@@ -46,6 +46,26 @@ paths:
                 schema:
                   type: string
                   example: The status request failed because the slithy toves did gyre
+  /fester/endpoints:
+    get:
+        tags: [Utility]
+        summary: Get S3 Endpoints Status
+        description: "This endpoint returns a JSON object with information about the status of the S3 endpoints."
+        operationId: checkEndpoints
+        responses:
+          '200':
+            description: A JSON object with status information
+            content:
+              application/json:
+                schema:
+                  type: object
+          '500':
+            description: There was an internal server error
+            content:
+              text/plain:
+                schema:
+                  type: string
+                  example: The status request failed because the slithy toves did gyre
   /collections:
     post:
       tags: [Collection]

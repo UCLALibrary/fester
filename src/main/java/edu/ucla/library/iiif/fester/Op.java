@@ -17,6 +17,8 @@ public final class Op {
 
     public static final String DELETE_COLLECTION = "deleteCollection";
 
+    public static final String CHECK_ENDPOINTS = "checkEndpoints";
+
     public static final String POST_CSV = "postCSV";
 
     public static final String SUCCESS = "success";

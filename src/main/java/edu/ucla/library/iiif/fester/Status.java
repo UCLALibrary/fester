@@ -24,6 +24,9 @@ public final class Status {
     /* The main status property */
     public static final String STATUS = "status";
 
+    /* The main endpoints status property */
+    public static final String ENDPOINTS = "endpoints";
+
     /* The okay status response */
     public static final String OK = "ok";
 
@@ -32,6 +35,15 @@ public final class Status {
 
     /* The error status response */
     public static final String ERROR = "error";
+
+    /* The PUT response HTTP code */
+    public static final String PUT_RESPONSE = "put.response";
+
+    /* The GET response HTTP code */
+    public static final String GET_RESPONSE = "get.response";
+
+    /* The DELETE response HTTP code */
+    public static final String DELETE_RESPONSE = "delete.response";
 
     private Status() {
     }
