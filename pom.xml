@@ -69,18 +69,21 @@
   </developers>
 
   <properties>
-    <vertx.version>3.9.1</vertx.version>
+    <vertx.version>3.9.2</vertx.version>
     <opencsv.version>5.0</opencsv.version>
     <moirai.version>2.0.0</moirai.version>
     <slf4j.ext.version>1.7.26</slf4j.ext.version>
     <jcl.over.slf4j.version>1.7.30</jcl.over.slf4j.version>
     <commons.lang.version>3.9</commons.lang.version>
-    <commons.codec.version>1.14</commons.codec.version>
     <freelib.utils.version>1.0.2</freelib.utils.version>
     <freelib.maven.version>0.0.3</freelib.maven.version>
     <vertx.super.s3.version>1.3.3</vertx.super.s3.version>
     <jiiify.presentation.version>0.3.1</jiiify.presentation.version>
     <alphanumeric-comparator.version>1.4.1</alphanumeric-comparator.version>
+
+    <!-- Exclusions/Replacements -->
+    <snakeyaml.version>1.26</snakeyaml.version>
+    <commons.codec.version>1.14</commons.codec.version>
 
     <!-- Versions of tools used for testing -->
     <jsoup.version>1.13.1</jsoup.version>
@@ -194,9 +197,20 @@
 
     <!-- OpenAPI for Vert.x - https://vertx.io/docs/vertx-web-api-contract/java/ -->
     <dependency>
+      <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <version>${snakeyaml.version}</version>
+    </dependency>
+    <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-web-api-contract</artifactId>
       <version>${vertx.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.yaml</groupId>
+          <artifactId>snakeyaml</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <!-- Below is a dependency that needs updating due to security issue (may be able to remove in future) -->
     <dependency>
