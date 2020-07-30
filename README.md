@@ -13,7 +13,7 @@ There are just a few prerequisites that must be installed, and configured correc
 
 These packages may also be available through your system's package repository. If they are, it's better to install from that source so that they will be kept up to date for you.
 
-You will also need an account on AWS and have the ability to create IAM accounts and S3 buckets.
+You will also need an account on AWS and have the ability to create [IAM](https://aws.amazon.com/iam/) accounts and [S3](https://aws.amazon.com/s3/) buckets.
 
 ## Configuring the Build
 
