@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -23,6 +24,7 @@ import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.Timeout;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.multipart.MultipartForm;
@@ -45,6 +47,10 @@ public class PagesManifestFT extends BaseFesterFT {
         "works/ark:/21198/zz000wrh7t.json" };
 
     private static final int[] CANVAS_COUNTS = new int[] { 42, 26, 46, 39, 36 };
+
+    /* Slower systems may have trouble finishing within the default timeout */
+    @Rule
+    public Timeout myTimeoutRule = Timeout.seconds(3600);
 
     /**
      * Sets up testing environment.
