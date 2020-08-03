@@ -2,6 +2,19 @@
 
 A microservice for facilitating the creation, storage, and retrieval of IIIF manifests and collections.
 
+## Prerequisites
+
+There are just a few prerequisites that must be installed, and configured correctly, in order to build Fester:
+
+* [Java Development Kit (JDK)](https://openjdk.java.net/install/): version 11 or greater
+* [Docker](https://docs.docker.com/get-docker/): version 19.03 or greater
+* [Maven](https://maven.apache.org/download.cgi): version 3.6 or greater
+* [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html) [Not required, but useful]
+
+These packages may also be available through your system's package repository. If they are, it's better to install from that source so that they will be kept up to date for you.
+
+You will also need an account on AWS and have the ability to create [IAM](https://aws.amazon.com/iam/) accounts and [S3](https://aws.amazon.com/s3/) buckets.
+
 ## Configuring the Build
 
 Fester uses an S3 bucket for back-end storage. To be able to run the project's tests, several configuration values must be supplied:
