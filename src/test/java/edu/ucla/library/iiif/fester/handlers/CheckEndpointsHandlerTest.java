@@ -34,7 +34,6 @@ public class CheckEndpointsHandlerTest extends AbstractFesterHandlerTest {
      */
     @Test
     public void testCheckEndpointsHandler(final TestContext aContext) {
-        final String expectedStatus = Status.OK;
         final Async asyncTask = aContext.async();
         final String requestPath = "/fester/endpoints";
         final WebClient webClient = WebClient.create(myVertx);
@@ -50,8 +49,8 @@ public class CheckEndpointsHandlerTest extends AbstractFesterHandlerTest {
                 final int statusCode = ar.result().statusCode();
 
                 if (ar.succeeded()) {
-                    final JsonObject aResult = ar.result().body();
-                    aContext.assertEquals(expectedStatus, aResult.getValue(Status.STATUS));
+                    final JsonObject result = ar.result().body();
+                    aContext.assertEquals(Status.OK, result.getValue(Status.STATUS));
                 } else {
                     aContext.fail(LOGGER.getMessage(MessageCodes.MFS_003, HTTP.OK, statusCode));
                 }
