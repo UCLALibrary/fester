@@ -81,9 +81,13 @@
     <jiiify.presentation.version>0.3.1</jiiify.presentation.version>
     <alphanumeric-comparator.version>1.4.1</alphanumeric-comparator.version>
 
+    <!-- Exclusions/Replacements -->
+    <snakeyaml.version>1.26</snakeyaml.version>
+    <commons.codec.version>1.14</commons.codec.version>
+
     <!-- Versions of tools used for testing -->
     <jsoup.version>1.13.1</jsoup.version>
-    <aws.sdk.version>1.11.813</aws.sdk.version>
+    <aws.sdk.version>1.11.830</aws.sdk.version>
     <localstack.version>1.13.0</localstack.version>
     <testcontainers.version>1.12.5</testcontainers.version>
     <jcip.annotations.version>1.0-1</jcip.annotations.version>
@@ -193,9 +197,20 @@
 
     <!-- OpenAPI for Vert.x - https://vertx.io/docs/vertx-web-api-contract/java/ -->
     <dependency>
+      <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <version>${snakeyaml.version}</version>
+    </dependency>
+    <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-web-api-contract</artifactId>
       <version>${vertx.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.yaml</groupId>
+          <artifactId>snakeyaml</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <!-- Below is a dependency that needs updating due to security issue (may be able to remove in future) -->
     <dependency>
@@ -236,9 +251,20 @@
       <version>${commons.lang.version}</version>
     </dependency>
     <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>${commons.codec.version}</version>
+    </dependency>
+    <dependency>
       <groupId>com.amazonaws</groupId>
       <artifactId>aws-java-sdk-s3</artifactId>
       <version>${aws.sdk.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-codec</groupId>
+          <artifactId>commons-codec</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>se.sawano.java</groupId>
