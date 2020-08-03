@@ -11,9 +11,13 @@ import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.Status;
 import edu.ucla.library.iiif.fester.MessageCodes;
+
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.web.client.WebClient;
+import io.vertx.ext.web.client.predicate.ResponsePredicate;
+import io.vertx.ext.web.codec.BodyCodec;
 
 /**
  * A test class to evaluate CheckEndpointsHandler
@@ -29,32 +33,34 @@ public class CheckEndpointsHandlerTest extends AbstractFesterHandlerTest {
      * @param aContext A testing context
      */
     @Test
-    @SuppressWarnings("deprecation")
     public void testCheckEndpointsHandler(final TestContext aContext) {
         final String expectedStatus = Status.OK;
         final Async asyncTask = aContext.async();
-        final int port = aContext.get(Config.HTTP_PORT);
         final String requestPath = "/fester/endpoints";
-        final int expectedPutStatus = HTTP.OK;
+        final WebClient webClient = WebClient.create(myVertx);
+        final int port = aContext.get(Config.HTTP_PORT);
 
         LOGGER.debug(MessageCodes.MFS_150, requestPath);
 
-        myVertx.createHttpClient().getNow(port, Constants.UNSPECIFIED_HOST, requestPath, response -> {
-            final int statusCode = response.statusCode();
+        webClient
+            .get(port, Constants.UNSPECIFIED_HOST, requestPath)
+            .expect(ResponsePredicate.SC_SUCCESS)
+            .as(BodyCodec.jsonObject())
+            .send(ar -> {
+                final int statusCode = ar.result().statusCode();
 
-            if (response.statusCode() == HTTP.OK) {
-                response.bodyHandler(body -> {
-                    final JsonObject aResult = body.toJsonObject();
+                if (ar.succeeded()) {
+                    final JsonObject aResult = ar.result().body();
                     aContext.assertEquals(expectedStatus, aResult.getValue(Status.STATUS));
-                });
-            } else {
-                aContext.fail(LOGGER.getMessage(MessageCodes.MFS_003, HTTP.OK, statusCode));
-            }
+                } else {
+                    aContext.fail(LOGGER.getMessage(MessageCodes.MFS_003, HTTP.OK, statusCode));
+                }
 
-            if (!asyncTask.isCompleted()) {
-                asyncTask.complete();
-            }
-        });
+                if (!asyncTask.isCompleted()) {
+                    asyncTask.complete();
+                }
+            });
+
     }
 
 }
