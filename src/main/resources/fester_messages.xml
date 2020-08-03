@@ -161,7 +161,7 @@
   <entry key="MFS-145">S3 key already ends with .json extension: {}</entry>
   <entry key="MFS-146">Could not find {} manifest '{}' to update</entry>
   <entry key="MFS-147">Festerize is outdated, please upgrade to v{} (see README for instructions)</entry>
-  <entry key="MFS-148">S3 endpoints healthcheck failed: {})</entry>
-  <entry key="MFS-149">S3 endpoint response issue: {})</entry>
-  <entry key="MFS-150">Test CheckEndpointsHandler with request path: {})</entry>
+  <entry key="MFS-148">S3 endpoints healthcheck failed: {}</entry>
+  <entry key="MFS-149">S3 endpoint response issue: {}</entry>
+  <entry key="MFS-150">Test CheckEndpointsHandler with request path: {}</entry>
 </properties>
