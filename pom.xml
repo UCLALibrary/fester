@@ -97,7 +97,6 @@
     <deploy.plugin.version>2.8.2</deploy.plugin.version>
     <netty.epoll.version>4.1.37.Final</netty.epoll.version>
     <vertx.plugin.version>1.0.18</vertx.plugin.version>
-    <codacy.plugin.version>1.0.2</codacy.plugin.version>
     <xml.maven.plugin.version>1.0.2</xml.maven.plugin.version>
     <docker.maven.plugin.version>0.33.0</docker.maven.plugin.version>
 
@@ -569,13 +568,6 @@
         </executions>
       </plugin>
 
-      <!-- Codacy runs automated code reviews and code analytics -->
-      <plugin>
-        <groupId>com.gavinmogan</groupId>
-        <artifactId>codacy-maven-plugin</artifactId>
-        <version>${codacy.plugin.version}</version>
-      </plugin>
-
       <!-- Maven dependency helps freelib-resources copy files into the project -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -636,8 +628,7 @@
           </systemPropertyVariables>
           <argLine>${jacoco.agent.arg}</argLine>
           <skipTests>${skipUTs}</skipTests>
-          <forkCount>0</forkCount><!-- Multiple forks result in multiple containers -->
-          <useSystemClassLoader>false</useSystemClassLoader> <!-- Override parent project setting -->
+          <forkCount>1</forkCount><!-- Multiple forks result in multiple containers -->
         </configuration>
         <executions>
           <execution>
@@ -1185,6 +1176,6 @@
   <parent>
     <artifactId>freelib-parent</artifactId>
     <groupId>info.freelibrary</groupId>
-    <version>3.8.6</version>
+    <version>4.0.0</version>
   </parent>
 </project>
