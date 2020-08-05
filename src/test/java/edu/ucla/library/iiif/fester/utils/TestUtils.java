@@ -10,8 +10,6 @@ import io.vertx.core.Vertx;
  */
 public final class TestUtils {
 
-    private static final String JSON_EXT = ".json";
-
     private TestUtils() {
     }
 

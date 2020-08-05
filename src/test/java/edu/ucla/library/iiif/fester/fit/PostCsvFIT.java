@@ -17,7 +17,7 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 
-import info.freelibrary.iiif.presentation.Collection;
+import info.freelibrary.iiif.presentation.v2.Collection;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
@@ -28,7 +28,7 @@ import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
 import edu.ucla.library.iiif.fester.utils.LinkUtils;
 import edu.ucla.library.iiif.fester.utils.LinkUtilsTest;
-import edu.ucla.library.iiif.fester.utils.ManifestLabelComparator;
+import edu.ucla.library.iiif.fester.utils.V2ManifestLabelComparator;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
@@ -63,7 +63,8 @@ public class PostCsvFIT {
 
     private static final File EOL_CHECK_CSV = new File(DIR, "csv/eolcheck.csv");
 
-    private static final File WORKS_CSV_PROTESTA_1 = new File(DIR, "csv/lat_newspapers/protesta/protesta_works_1.csv");
+    private static final File WORKS_CSV_PROTESTA_1 = new File(DIR,
+            "csv/lat_newspapers/protesta/protesta_works_1.csv");
 
     private static final File PROTESTA_COLLECTION_MANIFEST = new File(DIR, "json/ark%3A%2F21198%2Fzz0025hqmb.json");
 
@@ -357,7 +358,8 @@ public class PostCsvFIT {
                             final Long timerDelay = 500L;
 
                             VERTX_INSTANCE.setTimer(timerDelay, timerId -> {
-                                final boolean isDeleted = !VERTX_INSTANCE.fileSystem().existsBlocking(uploadedFilePath);
+                                final boolean isDeleted = !VERTX_INSTANCE.fileSystem().existsBlocking(
+                                        uploadedFilePath);
                                 try {
                                     aContext.assertTrue(isDeleted);
                                 } catch (final AssertionError details) {
@@ -417,10 +419,13 @@ public class PostCsvFIT {
                                 if (getStatusCode == HTTP.OK) {
                                     final JsonObject json = get.result().bodyAsJsonObject();
                                     final List<Collection.Manifest> works = Collection.fromJSON(json).getManifests();
-                                    final ManifestLabelComparator comparator = new ManifestLabelComparator();
+                                    final V2ManifestLabelComparator comparator = new V2ManifestLabelComparator();
 
-                                    for (int i = 0; i < works.size() - 1; i++) {
-                                        aContext.assertTrue(comparator.compare(works.get(i), works.get(i + 1)) < 0);
+                                    for (int index = 0; index < works.size() - 1; index++) {
+                                        final Collection.Manifest work1 = works.get(index);
+                                        final Collection.Manifest work2 = works.get(index + 1);
+
+                                        aContext.assertTrue(comparator.compare(work1, work2) < 0);
                                     }
 
                                     complete(asyncTask);
@@ -512,8 +517,8 @@ public class PostCsvFIT {
                     aTestFile.getAbsolutePath(), Constants.CSV_MEDIA_TYPE).attribute(Constants.IIIF_HOST,
                             ImageInfoLookup.FAKE_IIIF_SERVER);
 
-            myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE).sendMultipartForm(form,
-                    aHandler);
+            myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE).sendMultipartForm(
+                    form, aHandler);
         }
     }
 }

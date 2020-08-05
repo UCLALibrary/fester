@@ -3,10 +3,7 @@
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 
 <!--<![CDATA[
-  To process this file outside of a full build, run:
-    mvn info.freelibrary:freelib-utils:generate-codes -DmessageFiles=src/main/resources/fester_messages.xml
-  Bash shell users can run the shorter form:
-    mvn info.freelibrary:freelib-utils:generate-codes -DmessageFiles=$(find src -name *_messages.xml)
+  To process this file outside of a full build, run: mvn info.freelibrary:freelib-utils:generate-codes
 ]]>-->
 
 <properties>
@@ -135,7 +132,7 @@
   <entry key="MFS-119">Creating brief Work manifest ({}) to associate with collection manifest ({})</entry>
   <entry key="MFS-120">Sending {} CSV to {}</entry>
   <entry key="MFS-121">Page row in the CSV is missing its &quot;Parent ARK&quot; value</entry>
-  <entry key="MFS-122">Manifesting a collection ({}): {}</entry>
+  <entry key="MFS-122">Manifesting a collection: {}</entry>
   <entry key="MFS-123">Uploaded CSV's &quot;Item Sequence&quot; header could not be found</entry>
   <entry key="MFS-124">FakeS3BucketVerticle received a storage request: {}</entry>
   <entry key="MFS-125">Failed to upload collection manifest: {}</entry>
@@ -161,4 +158,5 @@
   <entry key="MFS-145">S3 key already ends with .json extension: {}</entry>
   <entry key="MFS-146">Could not find {} manifest '{}' to update</entry>
   <entry key="MFS-147">Festerize is outdated, please upgrade to v{} (see README for instructions)</entry>
+  <entry key="MFS-148">Could not read pages list value: {}</entry>
 </properties>

@@ -13,10 +13,10 @@ import org.junit.runner.RunWith;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.opencsv.exceptions.CsvException;
 
-import info.freelibrary.iiif.presentation.Canvas;
-import info.freelibrary.iiif.presentation.ImageResource;
-import info.freelibrary.iiif.presentation.Manifest;
-import info.freelibrary.iiif.presentation.Sequence;
+import info.freelibrary.iiif.presentation.v2.Canvas;
+import info.freelibrary.iiif.presentation.v2.ImageResource;
+import info.freelibrary.iiif.presentation.v2.Manifest;
+import info.freelibrary.iiif.presentation.v2.Sequence;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 

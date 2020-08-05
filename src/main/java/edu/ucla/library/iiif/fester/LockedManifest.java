@@ -1,9 +1,6 @@
 
 package edu.ucla.library.iiif.fester;
 
-import info.freelibrary.iiif.presentation.Collection;
-import info.freelibrary.iiif.presentation.Manifest;
-
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.Lock;
 
@@ -23,7 +20,7 @@ public class LockedManifest {
      *
      * @param aManifest A manifest in JSON form
      * @param aCollection A collection document
-     * @param aLock A Vertx lock
+     * @param aLock A Vert.x lock
      */
     public LockedManifest(final JsonObject aManifest, final boolean aCollection, final Lock aLock) {
         myManifestIsCollection = aCollection;
@@ -32,7 +29,7 @@ public class LockedManifest {
     }
 
     /**
-     * Gets whether this is a collection (or a work).
+     * Gets whether this is a collection document.
      *
      * @return True if the manifest is for a collection
      */
@@ -41,21 +38,21 @@ public class LockedManifest {
     }
 
     /**
-     * Gets the manifest content as a work manifest object.
+     * Return the JSON encoded manifest.
      *
-     * @return The manifest's contents
+     * @return The JSON representation of a IIIF presentation manifest
      */
-    public Manifest getWork() {
-        return Manifest.fromJSON(myManifest);
+    public JsonObject toJSON() {
+        return myManifest;
     }
 
     /**
-     * Gets the manifest content as a Collection object.
+     * Gets whether this is a work manifest.
      *
-     * @return The manifest's contents
+     * @return True if the manifest is for a work
      */
-    public Collection getCollection() {
-        return Collection.fromJSON(myManifest);
+    public boolean isWork() {
+        return !myManifestIsCollection;
     }
 
     /**

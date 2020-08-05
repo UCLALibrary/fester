@@ -7,6 +7,8 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,11 +18,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import info.freelibrary.iiif.presentation.Manifest;
-import info.freelibrary.iiif.presentation.Sequence;
-import info.freelibrary.iiif.presentation.io.Manifestor;
-import info.freelibrary.iiif.presentation.properties.ViewingDirection;
-import info.freelibrary.iiif.presentation.properties.ViewingHint;
+import info.freelibrary.iiif.presentation.v2.Manifest;
+import info.freelibrary.iiif.presentation.v2.Sequence;
+import info.freelibrary.iiif.presentation.v2.io.Manifestor;
+import info.freelibrary.iiif.presentation.v2.properties.ViewingDirection;
+import info.freelibrary.iiif.presentation.v2.properties.ViewingHint;
 import info.freelibrary.util.FileUtils;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
@@ -34,7 +36,10 @@ import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
 import io.vertx.config.ConfigRetriever;
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.file.FileSystem;
@@ -52,6 +57,10 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 public class ManifestVerticleTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ManifestVerticleTest.class, Constants.MESSAGES);
+
+    private static final String[] TEST_VERTICLES = new String[] { ManifestVerticle.class.getName(),
+        V2ManifestVerticle.class.getName(), V3ManifestVerticle.class.getName(), FakeS3BucketVerticle.class
+                .getName() };
 
     private static final String WORKS_CSV = "src/test/resources/csv/{}/batch1/{}1.csv";
 
@@ -91,33 +100,43 @@ public class ManifestVerticleTest {
         myVertx = Vertx.vertx();
         ConfigRetriever.create(myVertx).getConfig(getConfig -> {
             if (getConfig.succeeded()) {
+                @SuppressWarnings("rawtypes")
+                final List<Future> futures = new ArrayList<>();
+
                 options.setConfig(config.put(Config.IIIF_BASE_URL, getConfig.result().getString(
                         Config.IIIF_BASE_URL)));
 
-                myVertx.deployVerticle(ManifestVerticle.class.getName(), options, manifestorDeployment -> {
-                    if (manifestorDeployment.succeeded()) {
-                        myVertx.deployVerticle(FakeS3BucketVerticle.class.getName(), options, s3BucketDeployment -> {
-                            if (s3BucketDeployment.succeeded()) {
-                                final LocalMap<String, String> map = myVertx.sharedData().getLocalMap(
-                                        Constants.VERTICLE_MAP);
-                                final String deploymentKey = FakeS3BucketVerticle.class.getSimpleName();
+                for (String verticleName : Arrays.asList(TEST_VERTICLES)) {
+                    final Promise<String> promise = Promise.promise();
 
-                                if (map.containsKey(deploymentKey)) {
-                                    try {
-                                        myJsonFiles = getS3TempDir(map.get(deploymentKey));
-                                        asyncTask.complete();
-                                    } catch (final FileNotFoundException details) {
-                                        aContext.fail(details);
-                                    }
-                                } else {
-                                    aContext.fail(LOGGER.getMessage(MessageCodes.MFS_077, deploymentKey));
-                                }
-                            } else {
-                                aContext.fail(s3BucketDeployment.cause());
+                    myVertx.deployVerticle(verticleName, options, deployment -> {
+                        if (deployment.succeeded()) {
+                            promise.complete(deployment.result());
+                        } else {
+                            promise.fail(deployment.cause());
+                        }
+                    });
+
+                    futures.add(promise.future());
+                }
+
+                CompositeFuture.all(futures).onComplete(startup -> {
+                    if (startup.succeeded()) {
+                        final LocalMap<String, String> map = myVertx.sharedData().getLocalMap(Constants.VERTICLE_MAP);
+                        final String deploymentKey = FakeS3BucketVerticle.class.getSimpleName();
+
+                        if (map.containsKey(deploymentKey)) {
+                            try {
+                                myJsonFiles = getS3TempDir(map.get(deploymentKey));
+                                asyncTask.complete();
+                            } catch (final FileNotFoundException details) {
+                                aContext.fail(details);
                             }
-                        });
+                        } else {
+                            aContext.fail(LOGGER.getMessage(MessageCodes.MFS_077, deploymentKey));
+                        }
                     } else {
-                        aContext.fail(manifestorDeployment.cause());
+
                     }
                 });
 
