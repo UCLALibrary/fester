@@ -11,7 +11,8 @@ buildNumber.properties
 .mvn/timing.properties
 .editorconfig
 .checkstyle
-src/main/tools
+src/main/tools/eclipse
+src/main/tools/travis
 src/main/generated
 src/main/jbake/
 logback-test.xml
