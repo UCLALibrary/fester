@@ -5,6 +5,7 @@ services: docker
 branches:
   only:
   - main
+  - version-fester
 
 jobs:
   include:
