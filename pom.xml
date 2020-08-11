@@ -93,7 +93,7 @@
     <deploy.plugin.version>2.8.2</deploy.plugin.version>
     <netty.epoll.version>4.1.37.Final</netty.epoll.version>
     <vertx.plugin.version>1.0.18</vertx.plugin.version>
-    <codacy.plugin.version>1.0.2</codacy.plugin.version>
+    <codacy.plugin.version>1.2.0</codacy.plugin.version>
     <xml.maven.plugin.version>1.0.2</xml.maven.plugin.version>
     <docker.maven.plugin.version>0.33.0</docker.maven.plugin.version>
 
