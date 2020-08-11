@@ -44,7 +44,6 @@ import edu.ucla.library.iiif.fester.ImageNotFoundException;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.MetadataLabels;
 import edu.ucla.library.iiif.fester.Op;
-import edu.ucla.library.iiif.fester.utils.CodeUtils;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
 import edu.ucla.library.iiif.fester.utils.ItemSequenceComparator;
 import edu.ucla.library.iiif.fester.utils.V2ManifestLabelComparator;
@@ -158,11 +157,7 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
             if (send.succeeded()) {
                 aMessage.reply(new JsonObject());
             } else {
-                final Throwable throwable = send.cause();
-                final String logMessage = LOGGER.getMessage(MessageCodes.MFS_125, throwable.getMessage());
-
-                LOGGER.error(throwable, logMessage);
-                aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, logMessage);
+                error(aMessage, send.cause(), MessageCodes.MFS_125, send.cause().getMessage());
             }
         });
     }
@@ -245,7 +240,7 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
             if (send.succeeded()) {
                 aMessage.reply(jsonManifest);
             } else {
-                aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, send.cause().getMessage());
+                error(aMessage, send.cause(), MessageCodes.MFS_151, send.cause().getMessage());
             }
         });
     }
@@ -291,7 +286,7 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
             if (update.succeeded()) {
                 aMessage.reply(collection.toJSON());
             } else {
-                aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, update.cause().getMessage());
+                error(aMessage, update.cause(), MessageCodes.MFS_152, update.cause().getMessage());
             }
         });
     }
@@ -336,11 +331,7 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
             if (send.succeeded()) {
                 aMessage.reply(jsonManifest);
             } else {
-                final Throwable throwable = send.cause();
-                final String logMessage = LOGGER.getMessage(MessageCodes.MFS_054, workID, throwable.getMessage());
-
-                LOGGER.error(throwable, logMessage);
-                aMessage.fail(CodeUtils.getInt(MessageCodes.MFS_054), logMessage);
+                error(aMessage, send.cause(), MessageCodes.MFS_054, workID, send.cause().getMessage());
             }
         });
     }

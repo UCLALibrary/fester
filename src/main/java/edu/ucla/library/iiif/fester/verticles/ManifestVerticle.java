@@ -101,11 +101,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                             if (creation.succeeded()) {
                                 createWorks(csvHeaders, csvMetadata, imageHost, iiifVersion, message);
                             } else {
-                                final Throwable throwable = creation.cause();
-                                final String log = LOGGER.getMessage(MessageCodes.MFS_125, throwable.getMessage());
-
-                                LOGGER.error(throwable, log);
-                                message.fail(HTTP.INTERNAL_SERVER_ERROR, log);
+                                error(message, creation.cause(), MessageCodes.MFS_125, creation.cause().getMessage());
                             }
                         });
 
@@ -136,10 +132,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                             if (handler.succeeded()) {
                                 message.reply(Op.SUCCESS);
                             } else {
-                                final Throwable throwable = handler.cause();
-
-                                LOGGER.error(throwable, throwable.getMessage());
-                                message.fail(HTTP.INTERNAL_SERVER_ERROR, throwable.getMessage());
+                                error(message, handler.cause(), MessageCodes.MFS_149, handler.cause().getMessage());
                             }
                         });
                     } else {
@@ -288,13 +281,13 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                     message.put(Constants.COLLECTION_NAME, aCollectionID);
                     message.put(Constants.MANIFEST_CONTENT, new JsonObject(mapper.writeValueAsString(worksMap)));
 
-                    sendMessage(getManifestVerticleName(aApiVersion), message, options, collectionUpdate -> {
+                    sendMessage(getManifestVerticleName(aApiVersion), message, options, update -> {
                         lockedManifest.release();
 
-                        if (collectionUpdate.succeeded()) {
+                        if (update.succeeded()) {
                             createWorks(aCsvHeaders, aCsvMetadata, aImageHost, aApiVersion, aMessage);
                         } else {
-                            aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, collectionUpdate.cause().getMessage());
+                            error(aMessage, update.cause(), MessageCodes.MFS_150, update.cause().getMessage());
                         }
                     });
                 } catch (final JsonProcessingException details) {
@@ -350,11 +343,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
             if (handler.succeeded()) {
                 aMessage.reply(LOGGER.getMessage(MessageCodes.MFS_126));
             } else {
-                final Throwable cause = handler.cause();
-                final String message = LOGGER.getMessage(MessageCodes.MFS_131, cause.getMessage());
-
-                LOGGER.error(cause, message);
-                aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, message);
+                error(aMessage, handler.cause(), MessageCodes.MFS_131, handler.cause().getMessage());
             }
         });
     }
@@ -392,9 +381,12 @@ public class ManifestVerticle extends AbstractFesterVerticle {
 
                             aPromise.complete(new LockedManifest(manifest, aCollDoc, lock));
                         } else {
+                            final String type = aCollDoc ? Constants.COLLECTION : Constants.MANIFEST;
+                            final Throwable cause = handler.cause();
+
                             lockRequest.result().release();
-                            aPromise.fail(new ManifestNotFoundException(handler.cause(), MessageCodes.MFS_146,
-                                    aCollDoc ? "collection" : "work", aID));
+
+                            aPromise.fail(new ManifestNotFoundException(cause, MessageCodes.MFS_146, type, aID));
                         }
                     });
                 } catch (final NullPointerException | IndexOutOfBoundsException details) {

@@ -219,6 +219,16 @@ public final class Constants {
     public static final String ID = "@id";
 
     /**
+     * The collection type of resource.
+     */
+    public static final String COLLECTION = "collection";
+
+    /**
+     * The manifest type of resource.
+     */
+    public static final String MANIFEST = "work";
+
+    /**
      * Version 2 of the IIIF presentation API.
      */
     public static final String IIIF_API_V2 = "v2";

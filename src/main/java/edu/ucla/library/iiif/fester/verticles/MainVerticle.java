@@ -140,7 +140,6 @@ public class MainVerticle extends AbstractVerticle {
      */
     private Future<Void> deployVerticle(final String aVerticleName, final DeploymentOptions aOptions,
             final Promise<Void> aPromise) {
-        LOGGER.debug("Deploying {}", aVerticleName);
         vertx.deployVerticle(aVerticleName, aOptions, response -> {
             try {
                 final String verticleName = Class.forName(aVerticleName).getSimpleName();

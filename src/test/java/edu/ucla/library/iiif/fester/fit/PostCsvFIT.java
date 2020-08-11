@@ -306,7 +306,7 @@ public class PostCsvFIT {
                 if (post.succeeded()) {
                     final HttpResponse<Buffer> response = post.result();
                     final String expectedErrorMessage = LOGGER.getMessage(MessageCodes.MFS_103, LOGGER.getMessage(
-                            MessageCodes.MFS_146, "collection", HATHAWAY_COLLECTION_ARK));
+                            MessageCodes.MFS_146, Constants.COLLECTION, HATHAWAY_COLLECTION_ARK));
 
                     aContext.assertEquals(response.statusCode(), HTTP.INTERNAL_SERVER_ERROR);
                     aContext.assertEquals(response.getHeader(Constants.CONTENT_TYPE), Constants.HTML_MEDIA_TYPE);

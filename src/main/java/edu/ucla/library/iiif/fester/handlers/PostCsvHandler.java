@@ -175,7 +175,7 @@ public class PostCsvHandler extends AbstractFesterHandler {
         LOGGER.error(aThrowable, LOGGER.getMessage(MessageCodes.MFS_103, error));
 
         aResponse.setStatusCode(aStatusCode);
-        aResponse.setStatusMessage(error.replaceAll(Constants.EOL_REGEX, ""));
+        aResponse.setStatusMessage(error.replaceAll(Constants.EOL_REGEX, Constants.EMPTY));
         aResponse.putHeader(Constants.CONTENT_TYPE, Constants.HTML_MEDIA_TYPE);
         aResponse.end(StringUtils.format(myExceptionPage, body));
     }

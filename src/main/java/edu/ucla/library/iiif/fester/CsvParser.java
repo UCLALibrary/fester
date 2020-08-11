@@ -61,10 +61,10 @@ public class CsvParser {
      * Rights.statementLocal, Rights.servicesContact,
      *
      * @param aPath A path to a CSV file
+     * @return This CSV parser
      * @throws IOException If there is trouble reading or writing data
      * @throws CsvException If there is trouble reading the CSV data
      * @throws CsvParsingException If there is trouble parsing the CSV data
-     * @return This CSV parser
      */
     public CsvParser parse(final Path aPath) throws IOException, CsvException, CsvParsingException {
         reset();
