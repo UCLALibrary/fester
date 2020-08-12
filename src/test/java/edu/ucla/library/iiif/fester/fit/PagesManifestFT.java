@@ -3,16 +3,18 @@ package edu.ucla.library.iiif.fester.fit;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.opencsv.exceptions.CsvException;
 
-import info.freelibrary.iiif.presentation.Manifest;
+import info.freelibrary.iiif.presentation.v2.Manifest;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
@@ -23,6 +25,7 @@ import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.Timeout;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.multipart.MultipartForm;
@@ -45,6 +48,9 @@ public class PagesManifestFT extends BaseFesterFT {
         "works/ark:/21198/zz000wrh7t.json" };
 
     private static final int[] CANVAS_COUNTS = new int[] { 42, 26, 46, 39, 36 };
+
+    @Rule
+    public Timeout myTimeout = new Timeout(3, TimeUnit.MINUTES);
 
     /**
      * Sets up testing environment.

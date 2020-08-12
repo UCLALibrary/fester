@@ -5,6 +5,7 @@ import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
 import edu.ucla.library.iiif.fester.Constants;
+import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
@@ -12,6 +13,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
+import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
 
@@ -81,5 +83,29 @@ public abstract class AbstractFesterVerticle extends AbstractVerticle {
     protected void sendMessage(final String aVerticleName, final JsonObject aMessage, final DeliveryOptions aHeaders,
             final Handler<AsyncResult<Message<JsonObject>>> aHandler) {
         sendMessage(aVerticleName, aMessage, aHeaders, DeliveryOptions.DEFAULT_TIMEOUT, aHandler);
+    }
+
+    /**
+     * Wraps how exceptions are thrown in a reusable method.
+     *
+     * @param aMessage A event queue message
+     * @param aThrowable An exception to be thrown
+     * @param aMessageCode A message code for the exception
+     * @param aDetailsArray Additional details about the exception to be thrown
+     */
+    protected void error(final Message<JsonObject> aMessage, final Throwable aThrowable, final String aMessageCode,
+            final Object... aDetailsArray) {
+        if (aThrowable instanceof ReplyException) {
+            final ReplyException reply = (ReplyException) aThrowable;
+            final String log = LOGGER.getMessage(aMessageCode, aDetailsArray);
+
+            LOGGER.error(log);
+            aMessage.fail(reply.failureCode(), log);
+        } else {
+            final String log = LOGGER.getMessage(aMessageCode, aThrowable.getMessage());
+
+            LOGGER.error(aThrowable, log);
+            aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, log);
+        }
     }
 }

@@ -118,6 +118,11 @@ public final class Constants {
     public static final String IIIF_HOST = "iiif-host";
 
     /**
+     * The name of the IIIF presentation version parameter.
+     */
+    public static final String IIIF_API_VERSION = "iiif-version";
+
+    /**
      * Used as a message header when the sender wants the manifest returned from S3 without resource URLs re-written.
      */
     public static final String NO_REWRITE_URLS = "no-rewrite-urls";
@@ -179,6 +184,26 @@ public final class Constants {
     public static final String MANIFEST_CONTENT = "manifest-content";
 
     /**
+     * Collection content, stored as a JSON object.
+     */
+    public static final String COLLECTION_CONTENT = "collection-content";
+
+    /**
+     * Manifest pages, stored in list form.
+     */
+    public static final String MANIFEST_PAGES = "manifest-pages";
+
+    /**
+     * The placeholder image property name.
+     */
+    public static final String PLACEHOLDER_IMAGE = "placeholder-image";
+
+    /**
+     * CSV headers, stored as a JSON object.
+     */
+    public static final String CSV_HEADERS = "csv-headers";
+
+    /**
      * The POST parameter for uploading a CSV file.
      */
     public static final String CSV_FILE = "csv-file";
@@ -189,19 +214,29 @@ public final class Constants {
     public static final String VERTICLE_MAP = "fester-verticles";
 
     /**
-     * The ID property in a manifest (collection or work).
+     * The ID property in a collection or manifest.
      */
     public static final String ID = "@id";
 
     /**
-     * The label that should be displayed along with the repository name in the manifest metadata.
+     * The collection type of resource.
      */
-    public static final String REPOSITORY_NAME_METADATA_LABEL = "Repository";
+    public static final String COLLECTION = "collection";
 
     /**
-     * The label that should be displayed along with the rights contact in the manifest metadata.
+     * The manifest type of resource.
      */
-    public static final String RIGHTS_CONTACT_METADATA_LABEL = "Rights contact";
+    public static final String MANIFEST = "work";
+
+    /**
+     * Version 2 of the IIIF presentation API.
+     */
+    public static final String IIIF_API_V2 = "v2";
+
+    /**
+     * Version 3 of the IIIF presentation API.
+     */
+    public static final String IIIF_API_V3 = "v3";
 
     /**
      * Private constructor for Constants class.

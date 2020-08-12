@@ -82,36 +82,35 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
         }
 
         getJsonConsumer().handler(message -> {
-            final JsonObject msg = message.body();
-            final String manifestID;
-            final JsonObject manifest;
+            final JsonObject messageBody = message.body();
             final String action = message.headers().get(Constants.ACTION);
+            final JsonObject manifest;
+            final String manifestID;
 
             switch (action) {
                 case Op.GET_MANIFEST:
-                    manifestID = msg.getString(Constants.MANIFEST_ID);
+                    manifestID = messageBody.getString(Constants.MANIFEST_ID);
                     LOGGER.debug(MessageCodes.MFS_133, manifestID, myS3Bucket);
                     get(IDUtils.getWorkS3Key(manifestID), message);
                     break;
                 case Op.PUT_MANIFEST:
-                    manifestID = msg.getString(Constants.MANIFEST_ID);
-                    manifest = msg.getJsonObject(Constants.DATA);
+                    manifestID = messageBody.getString(Constants.MANIFEST_ID);
+                    manifest = messageBody.getJsonObject(Constants.DATA);
                     put(IDUtils.getWorkS3Key(manifestID), manifest, message);
                     break;
                 case Op.GET_COLLECTION:
-                    manifestID = msg.getString(Constants.COLLECTION_NAME);
+                    manifestID = messageBody.getString(Constants.COLLECTION_NAME);
                     LOGGER.debug(MessageCodes.MFS_133, manifestID, myS3Bucket);
                     get(IDUtils.getCollectionS3Key(manifestID), message);
                     break;
                 case Op.PUT_COLLECTION:
-                    manifestID = msg.getString(Constants.COLLECTION_NAME);
-                    manifest = msg.getJsonObject(Constants.DATA);
+                    manifestID = messageBody.getString(Constants.COLLECTION_NAME);
+                    manifest = messageBody.getJsonObject(Constants.DATA);
                     put(IDUtils.getCollectionS3Key(manifestID), manifest, message);
                     break;
                 default:
-                    final String errorMessage = StringUtils.format(MessageCodes.MFS_139, getClass().toString(),
-                            message.toString(), action);
-                    message.fail(CodeUtils.getInt(MessageCodes.MFS_139), errorMessage);
+                    message.fail(CodeUtils.getInt(MessageCodes.MFS_139), StringUtils.format(MessageCodes.MFS_139,
+                            getClass().toString(), message.toString(), action));
             }
         });
 

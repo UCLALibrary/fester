@@ -60,30 +60,30 @@ public class FakeS3BucketVerticle extends AbstractFesterVerticle {
                 new File("src/test/resources/json/ark%3A%2F21198%2Fz12f8rtw.json"));
 
         vertx.eventBus().<JsonObject>consumer(S3BucketVerticle.class.getName()).handler(message -> {
-            final JsonObject msg = message.body();
+            final JsonObject body = message.body();
             final String manifestID;
             final JsonObject manifest;
             final String action = message.headers().get(Constants.ACTION);
 
             switch (action) {
                 case Op.GET_MANIFEST:
-                    manifestID = msg.getString(Constants.MANIFEST_ID);
+                    manifestID = body.getString(Constants.MANIFEST_ID);
                     LOGGER.debug(MessageCodes.MFS_127, manifestID);
                     get(IDUtils.getWorkS3Key(manifestID), message);
                     break;
                 case Op.PUT_MANIFEST:
-                    manifestID = msg.getString(Constants.MANIFEST_ID);
-                    manifest = msg.getJsonObject(Constants.DATA);
+                    manifestID = body.getString(Constants.MANIFEST_ID);
+                    manifest = body.getJsonObject(Constants.DATA);
                     put(IDUtils.getWorkS3Key(manifestID), manifest, message);
                     break;
                 case Op.GET_COLLECTION:
-                    manifestID = msg.getString(Constants.COLLECTION_NAME);
+                    manifestID = body.getString(Constants.COLLECTION_NAME);
                     LOGGER.debug(MessageCodes.MFS_127, manifestID);
                     get(IDUtils.getCollectionS3Key(manifestID), message);
                     break;
                 case Op.PUT_COLLECTION:
-                    manifestID = msg.getString(Constants.COLLECTION_NAME);
-                    manifest = msg.getJsonObject(Constants.DATA);
+                    manifestID = body.getString(Constants.COLLECTION_NAME);
+                    manifest = body.getJsonObject(Constants.DATA);
                     put(IDUtils.getCollectionS3Key(manifestID), manifest, message);
                     break;
                 default:

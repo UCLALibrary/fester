@@ -23,9 +23,6 @@ import com.opencsv.CSVIterator;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 
-import info.freelibrary.iiif.presentation.Collection;
-import info.freelibrary.iiif.presentation.properties.Attribution;
-import info.freelibrary.iiif.presentation.properties.Metadata;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 import info.freelibrary.util.StringUtils;
@@ -41,13 +38,13 @@ public class CsvParser {
 
     private static final Pattern EOL_PATTERN = Pattern.compile(".*\\R");
 
-    private final Map<String, List<Collection.Manifest>> myWorksMap = new HashMap<>();
+    private final Map<String, List<String[]>> myWorksMap = new HashMap<>();
 
     private final Map<String, List<String[]>> myPagesMap = new LinkedHashMap<>();
 
     private final List<String[]> myWorksList = new ArrayList<>();
 
-    private Collection myCollection;
+    private String[] myCollectionData;
 
     private CsvHeaders myCsvHeaders;
 
@@ -59,18 +56,15 @@ public class CsvParser {
     }
 
     /**
-     * Parses the CSV file at the supplied path. This is not thread-safe.
-     *
-     * Optional CSV columns:
-     *
-     *   IIIF Access URL, Item Sequence (if the CSV contains no page rows), viewingHint, viewingDirection,
-     *   Name.repository, Rights.statementLocal, Rights.servicesContact,
+     * Parses the CSV file at the supplied path. This is not thread-safe. Optional CSV columns: IIIF Access URL, Item
+     * Sequence (if the CSV contains no page rows), viewingHint, viewingDirection, Name.repository,
+     * Rights.statementLocal, Rights.servicesContact,
      *
      * @param aPath A path to a CSV file
+     * @return This CSV parser
      * @throws IOException If there is trouble reading or writing data
      * @throws CsvException If there is trouble reading the CSV data
      * @throws CsvParsingException If there is trouble parsing the CSV data
-     * @return This CSV parser
      */
     public CsvParser parse(final Path aPath) throws IOException, CsvException, CsvParsingException {
         reset();
@@ -113,15 +107,12 @@ public class CsvParser {
             }
 
             for (final String[] row : rows) {
-                final ObjectType objectType;
-
                 checkForEOLs(row);
                 trimValues(row);
-                objectType = getObjectType(row);
 
-                switch (objectType) {
+                switch (getObjectType(row)) {
                     case COLLECTION: {
-                        myCollection = getCollection(row);
+                        extractCollectionMetadata(row);
                         break;
                     }
                     case WORK: {
@@ -139,6 +130,7 @@ public class CsvParser {
                         break;
                     }
                 }
+
                 rowsRead += 1;
             }
 
@@ -155,8 +147,8 @@ public class CsvParser {
      *
      * @return An optional collection
      */
-    public Optional<Collection> getCollection() {
-        return Optional.ofNullable(myCollection);
+    public Optional<String[]> getCsvCollection() {
+        return Optional.ofNullable(myCollectionData);
     }
 
     /**
@@ -181,14 +173,32 @@ public class CsvParser {
      * Reset the CSV parser.
      */
     private CsvParser reset() {
+        myCollectionData = null;
+        myCsvHeaders = null;
+
         myWorksList.clear();
         myPagesMap.clear();
         myWorksMap.clear();
 
-        myCsvHeaders = null;
-        myCollection = null;
-
         return this;
+    }
+
+    /**
+     * Extracts the collection metadata, checking that required properties are there.
+     *
+     * @param aRow The row of collection metadata
+     * @throws CsvParsingException If there is trouble parsing the data
+     */
+    private void extractCollectionMetadata(final String[] aRow) throws CsvParsingException {
+        if (getMetadata(aRow[myCsvHeaders.getItemArkIndex()]).isPresent()) {
+            if (getMetadata(aRow[myCsvHeaders.getTitleIndex()]).isEmpty()) {
+                throw new CsvParsingException(MessageCodes.MFS_104);
+            }
+
+            myCollectionData = aRow;
+        } else {
+            throw new CsvParsingException(MessageCodes.MFS_106);
+        }
     }
 
     /**
@@ -211,7 +221,7 @@ public class CsvParser {
         if (workIdOpt.isPresent() && labelOpt.isPresent()) {
             final String workID = workIdOpt.get();
             final URI uri = IDUtils.getResourceURI(Constants.URL_PLACEHOLDER, IDUtils.getWorkS3Key(workID));
-            final Collection.Manifest manifest = new Collection.Manifest(uri.toString(), labelOpt.get());
+            final String[] workData = new String[] { uri.toString(), labelOpt.get() };
 
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug(MessageCodes.MFS_119, workID, parentIdOpt.orElse(Constants.EMPTY));
@@ -221,12 +231,12 @@ public class CsvParser {
                 final String parentID = parentIdOpt.get();
 
                 if (myWorksMap.containsKey(parentID)) {
-                    myWorksMap.get(parentID).add(manifest);
+                    myWorksMap.get(parentID).add(workData);
                 } else {
-                    final List<Collection.Manifest> manifests = new ArrayList<>();
+                    final List<String[]> worksData = new ArrayList<>();
 
-                    manifests.add(manifest);
-                    myWorksMap.put(parentID, manifests);
+                    worksData.add(workData);
+                    myWorksMap.put(parentID, worksData);
                 }
             } else {
                 throw new CsvParsingException(MessageCodes.MFS_107);
@@ -261,67 +271,6 @@ public class CsvParser {
         } else {
             throw new CsvParsingException(MessageCodes.MFS_121);
         }
-    }
-
-    /**
-     * Get the collection object from the collection row.
-     *
-     * @param aRow A row of collection metadata
-     * @param aHeaders A CSV headers object
-     * @return A collection
-     */
-    private Collection getCollection(final String[] aRow) throws CsvParsingException {
-        final Optional<String> id = getMetadata(aRow[myCsvHeaders.getItemArkIndex()]);
-        final Collection collection;
-
-        if (id.isPresent()) {
-            final URI uri = IDUtils.getResourceURI(Constants.URL_PLACEHOLDER, IDUtils.getCollectionS3Key(id.get()));
-            final Optional<String> label = getMetadata(aRow[myCsvHeaders.getTitleIndex()]);
-            final Metadata metadata = new Metadata();
-
-            if (label.isEmpty()) {
-                throw new CsvParsingException(MessageCodes.MFS_104);
-            }
-
-            collection = new Collection(uri.toString(), label.get());
-
-            // Add optional properties
-            if (myCsvHeaders.hasRepositoryNameIndex()) {
-                final Optional<String> repoName = getMetadata(aRow[myCsvHeaders.getRepositoryNameIndex()]);
-
-                if (repoName.isPresent()) {
-                    metadata.add(Constants.REPOSITORY_NAME_METADATA_LABEL, repoName.get());
-                }
-            }
-
-            if (myCsvHeaders.hasLocalRightsStatementIndex()) {
-                final Optional<String> rights = getMetadata(aRow[myCsvHeaders.getLocalRightsStatementIndex()]);
-
-                if (rights.isPresent()) {
-                    collection.setAttribution(new Attribution(rights.get()));
-                }
-            }
-
-            if (myCsvHeaders.hasRightsContactIndex()) {
-                final Optional<String> contract = getMetadata(aRow[myCsvHeaders.getRightsContactIndex()]);
-
-                if (contract.isPresent()) {
-                    metadata.add(Constants.RIGHTS_CONTACT_METADATA_LABEL, contract.get());
-                }
-            }
-
-            if (metadata.getEntries().size() > 0) {
-                collection.setMetadata(metadata);
-            }
-
-            return collection;
-        } else {
-            throw new CsvParsingException(MessageCodes.MFS_106);
-        }
-    }
-
-    private Optional<String> getMetadata(final String aRowColumnValue) {
-        return Optional.ofNullable(StringUtils.trimToNull(aRowColumnValue));
     }
 
     /**
@@ -360,8 +309,8 @@ public class CsvParser {
      *
      * @param aRow A row from the metadata CSV
      * @return The object type
-     * @throws CsvParsingException If object type isn't included in the CSV headers, or the object type index is out of
-     * bounds of the CSV row, or the metadata contains an unknown object type
+     * @throws CsvParsingException If object type isn't included in the CSV headers, or the object type index is out
+     *         of bounds of the CSV row, or the metadata contains an unknown object type
      */
     private ObjectType getObjectType(final String[] aRow) throws CsvParsingException {
         if (myCsvHeaders.hasObjectTypeIndex()) {
@@ -395,8 +344,8 @@ public class CsvParser {
      *
      * @param aCsvRows A list of rows from the metadata CSV
      * @return The set of object types
-     * @throws CsvParsingException If object type isn't included in the CSV headers, or the object type index is out of
-     * bounds of the CSV row, or the metadata contains an unknown object type
+     * @throws CsvParsingException If object type isn't included in the CSV headers, or the object type index is out
+     *         of bounds of the CSV row, or the metadata contains an unknown object type
      */
     private Set<ObjectType> getObjectTypes(final List<String[]> aCsvRows) throws CsvParsingException {
         final Set<ObjectType> objectTypes = EnumSet.noneOf(ObjectType.class);
@@ -404,6 +353,11 @@ public class CsvParser {
         for (final String[] row : aCsvRows) {
             objectTypes.add(getObjectType(row));
         }
+
         return objectTypes;
+    }
+
+    private Optional<String> getMetadata(final String aRowColumnValue) {
+        return Optional.ofNullable(StringUtils.trimToNull(aRowColumnValue));
     }
 }

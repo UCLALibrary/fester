@@ -7,7 +7,7 @@ import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.MessageCodes;
 
 /**
- * Exception thrown when a request is missing a required media-type
+ * Exception thrown when a request is missing a required media-type.
  */
 public class MissingMediaTypeException extends I18nException {
 

@@ -34,7 +34,7 @@ public class BaseFesterFT extends AbstractFesterFIT {
     private static final ContainerConfig FESTER_CONFIG = new ContainerConfig(SERVICE_NAME, SERVICE_PORT, S3);
 
     /* The application's singleton container against which we're going to run our tests */
-    private static final GenericContainer FESTER_CONTAINER = ContainerUtils.getFesterContainer(FESTER_CONFIG);
+    private static final GenericContainer<?> FESTER_CONTAINER = ContainerUtils.getFesterContainer(FESTER_CONFIG);
 
     /**
      * Sets up our testing environment.
