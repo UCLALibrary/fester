@@ -163,4 +163,5 @@
   <entry key="MFS-150">Work update failed: {}</entry>
   <entry key="MFS-151">Work creation failed: {}</entry>
   <entry key="MFS-152">Collection update failed: {}</entry>
+  <entry key="MFS-153">Unexpected manifest action: {}</entry>
 </properties>

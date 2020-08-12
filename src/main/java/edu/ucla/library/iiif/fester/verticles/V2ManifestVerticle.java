@@ -99,7 +99,7 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
                         createWork(message);
                         break;
                     default:
-                        message.fail(HTTP.INTERNAL_SERVER_ERROR, "Unexpected manifest action");
+                        message.fail(HTTP.INTERNAL_SERVER_ERROR, LOGGER.getMessage(MessageCodes.MFS_153, action));
                 }
             } catch (JsonProcessingException details) {
                 LOGGER.error(details, details.getMessage());
@@ -111,10 +111,10 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
     }
 
     /**
-     * Create a new collection.
+     * Creates a new collection.
      *
      * @param aMessage An event queue message
-     * @throws JsonProcessingException If
+     * @throws JsonProcessingException If there is trouble deserializing message components
      */
     private void createCollection(final Message<JsonObject> aMessage) throws JsonProcessingException {
         final JsonObject body = aMessage.body();
@@ -246,7 +246,7 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
     }
 
     /**
-     * Update a collection with new works.
+     * Updates a collection with new works.
      *
      * @param aMessage A event queue message
      */
@@ -291,6 +291,12 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
         });
     }
 
+    /**
+     * Updates pages in a work.
+     *
+     * @param aMessage A message with information about the page updates
+     * @throws JsonProcessingException If there is trouble deserializing message components
+     */
     private void updatePages(final Message<JsonObject> aMessage) throws JsonProcessingException {
         final JsonObject body = aMessage.body();
         final String workID = body.getString(Constants.MANIFEST_ID);
@@ -425,6 +431,13 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
         return canvases.toArray(new Canvas[] {});
     }
 
+    /**
+     * Gets the metadata from the supplied row and index position.
+     *
+     * @param aRow A row of metadata
+     * @param aIndex An index position of the metadata to retrieve
+     * @return An optional metadata value
+     */
     private Optional<String> getMetadata(final String[] aRow, final int aIndex) {
         try {
             return Optional.ofNullable(StringUtils.trimToNull(aRow[aIndex]));

@@ -45,14 +45,29 @@ import io.vertx.core.shareddata.SharedData;
  */
 public class ManifestVerticle extends AbstractFesterVerticle {
 
+    /**
+     * An action value that indicates pages should be updated.
+     */
     public static final String UPDATE_PAGES = "update-pages";
 
+    /**
+     * An action value that indicates pages should be added.
+     */
     public static final String ADD_PAGES = "add-pages";
 
+    /**
+     * An action value that indicates a collection should be updated.
+     */
     public static final String UPDATE_COLLECTION = "update-collection";
 
+    /**
+     * An action value that indicates a collection should be created.
+     */
     public static final String CREATE_COLLECTION = "create-collection";
 
+    /**
+     * An action value that indicates a new work should be created.
+     */
     public static final String CREATE_WORK = "create-work";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ManifestVerticle.class, Constants.MESSAGES);
@@ -204,7 +219,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
     }
 
     /**
-     * Update work manifest pages with data from an uploaded CSV.
+     * Updates work manifest pages with data from an uploaded CSV.
      *
      * @param aWorkID A work ID
      * @param aPagesList A list of pages
@@ -254,7 +269,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
     }
 
     /**
-     * Update the works associated with a supplied collection.
+     * Updates the works associated with a supplied collection.
      *
      * @param aCollectionID A collection ID
      * @param aCsvHeaders Headers from the supplied CSV file
@@ -301,6 +316,15 @@ public class ManifestVerticle extends AbstractFesterVerticle {
         getLockedManifest(aCollectionID, true, promise);
     }
 
+    /**
+     * Creates manifest records for the supplied works.
+     *
+     * @param aCsvHeaders Headers from the CSV file
+     * @param aCsvMetadata Metadata from the supplied CSV file
+     * @param aImageHost The URL of the IIIF image server
+     * @param aApiVersion The version of the IIIF Presentation API being requested
+     * @param aMessage The event queue message
+     */
     private void createWorks(final CsvHeaders aCsvHeaders, final CsvMetadata aCsvMetadata, final String aImageHost,
             final String aApiVersion, final Message<JsonObject> aMessage) {
         final Map<String, List<String[]>> aPagesMap = aCsvMetadata.getPagesMap();
