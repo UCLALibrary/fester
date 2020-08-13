@@ -78,7 +78,8 @@
     <freelib.utils.version>1.1.0</freelib.utils.version>
     <freelib.maven.version>0.1.0</freelib.maven.version>
     <vertx.super.s3.version>1.3.3</vertx.super.s3.version>
-    <jiiify.presentation.version>v2-0.4.0</jiiify.presentation.version>
+    <jiiify.presentation.v2.version>0.5.3</jiiify.presentation.v2.version>
+    <jiiify.presentation.v3.version>0.5.2</jiiify.presentation.v3.version>
     <alphanumeric-comparator.version>1.4.1</alphanumeric-comparator.version>
 
     <!-- Versions of tools used for testing -->
@@ -184,11 +185,16 @@
       <version>${moirai.version}</version>
     </dependency>
 
-    <!-- Library for working with v.2 IIIF manifests -->
+    <!-- Library for working with v.2 and v.3 IIIF manifests -->
     <dependency>
       <groupId>info.freelibrary</groupId>
-      <artifactId>jiiify-presentation</artifactId>
-      <version>${jiiify.presentation.version}</version>
+      <artifactId>jiiify-presentation-v2</artifactId>
+      <version>${jiiify.presentation.v2.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>info.freelibrary</groupId>
+      <artifactId>jiiify-presentation-v3</artifactId>
+      <version>${jiiify.presentation.v3.version}</version>
     </dependency>
 
     <!-- OpenAPI for Vert.x - https://vertx.io/docs/vertx-web-api-contract/java/ -->
