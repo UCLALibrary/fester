@@ -1,4 +1,5 @@
-# Fester &nbsp;[![Build Status](https://api.travis-ci.com/uclalibrary/fester.svg?branch=master)](https://travis-ci.com/uclalibrary/fester) [![Known Vulnerabilities](https://snyk.io/test/github/uclalibrary/fester/badge.svg)](https://snyk.io/test/github/uclalibrary/fester)
+# Fester
+[![Build Status](https://api.travis-ci.com/uclalibrary/fester.svg?branch=master)](https://travis-ci.com/uclalibrary/fester) [![Codacy Badge](https://app.codacy.com/project/badge/Grade/990b5c316e0a45d092c83d58f148e0e8)](https://www.codacy.com/gh/UCLALibrary/fester?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=UCLALibrary/fester&amp;utm_campaign=Badge_Grade) [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/990b5c316e0a45d092c83d58f148e0e8)](https://www.codacy.com/gh/UCLALibrary/fester?utm_source=github.com&utm_medium=referral&utm_content=UCLALibrary/fester&utm_campaign=Badge_Coverage) [![Known Vulnerabilities](https://snyk.io/test/github/uclalibrary/fester/badge.svg)](https://snyk.io/test/github/uclalibrary/fester)
 
 A microservice for facilitating the creation, storage, and retrieval of IIIF manifests and collections.
 
