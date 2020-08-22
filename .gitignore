@@ -14,7 +14,6 @@ buildNumber.properties
 src/main/tools/eclipse
 src/main/tools/travis
 src/main/generated
-src/main/jbake/
 logback-test.xml
 
 ## Ignore project files created by IntelliJ IDEA
