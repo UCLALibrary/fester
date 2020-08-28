@@ -56,7 +56,7 @@ public class BaseFesterFT extends AbstractFesterFIT {
         s3ClientBuilder.withEndpointConfiguration(endpoint).withCredentials(s3Credentials);
         s3ClientBuilder.withClientConfiguration(new ClientConfiguration().withProtocol(Protocol.HTTP));
 
-        myS3Client = s3ClientBuilder.build();
+        myS3Client = s3ClientBuilder.withPathStyleAccessEnabled(true).build();
     }
 
 }

@@ -164,4 +164,5 @@
   <entry key="MFS-151">Work creation failed: {}</entry>
   <entry key="MFS-152">Collection update failed: {}</entry>
   <entry key="MFS-153">Unexpected manifest action: {}</entry>
+  <entry key="MFS-154">Failed to find expected S3 object for '{}'</entry>
 </properties>

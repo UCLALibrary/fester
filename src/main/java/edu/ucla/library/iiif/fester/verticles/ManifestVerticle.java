@@ -30,6 +30,7 @@ import edu.ucla.library.iiif.fester.LockedManifest;
 import edu.ucla.library.iiif.fester.ManifestNotFoundException;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.Op;
+
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -256,7 +257,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
 
                         lockedManifest.release();
                     });
-                } catch (JsonProcessingException details) {
+                } catch (final JsonProcessingException details) {
                     lockedManifest.release();
                     aPromise.fail(details);
                 }
@@ -387,8 +388,8 @@ public class ManifestVerticle extends AbstractFesterVerticle {
             if (lockRequest.succeeded()) {
                 try {
                     final JsonObject message = new JsonObject();
-                    final DeliveryOptions options = new DeliveryOptions().addHeader(Constants.NO_REWRITE_URLS,
-                            Boolean.TRUE.toString());
+                    final DeliveryOptions options =
+                            new DeliveryOptions().addHeader(Constants.NO_REWRITE_URLS, Boolean.TRUE.toString());
 
                     if (aCollDoc) {
                         message.put(Constants.COLLECTION_NAME, aID);

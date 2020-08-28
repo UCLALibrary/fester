@@ -20,6 +20,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import info.freelibrary.util.Logger;
+import info.freelibrary.util.LoggerFactory;
+import info.freelibrary.util.StringUtils;
+
 import info.freelibrary.iiif.presentation.v2.Canvas;
 import info.freelibrary.iiif.presentation.v2.Collection;
 import info.freelibrary.iiif.presentation.v2.ImageContent;
@@ -32,9 +36,6 @@ import info.freelibrary.iiif.presentation.v2.properties.Metadata;
 import info.freelibrary.iiif.presentation.v2.properties.ViewingDirection;
 import info.freelibrary.iiif.presentation.v2.properties.ViewingHint;
 import info.freelibrary.iiif.presentation.v2.services.ImageInfoService;
-import info.freelibrary.util.Logger;
-import info.freelibrary.util.LoggerFactory;
-import info.freelibrary.util.StringUtils;
 
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.CsvHeaders;
@@ -47,6 +48,7 @@ import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
 import edu.ucla.library.iiif.fester.utils.ItemSequenceComparator;
 import edu.ucla.library.iiif.fester.utils.V2ManifestLabelComparator;
+
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
@@ -101,7 +103,7 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
                     default:
                         message.fail(HTTP.INTERNAL_SERVER_ERROR, LOGGER.getMessage(MessageCodes.MFS_153, action));
                 }
-            } catch (JsonProcessingException details) {
+            } catch (final JsonProcessingException details) {
                 LOGGER.error(details, details.getMessage());
                 message.fail(HTTP.INTERNAL_SERVER_ERROR, details.getMessage());
             }
@@ -124,11 +126,12 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
         final String collectionName = body.getString(Constants.COLLECTION_NAME);
         final JsonArray collectionArray = body.getJsonArray(Constants.COLLECTION_CONTENT);
         final CsvHeaders csvHeaders = CsvHeaders.fromJSON(body.getJsonObject(Constants.CSV_HEADERS));
-        final TypeReference<String[]> typeRef = new TypeReference<String[]>() {};
-        final String[] collectionData = mapper.readValue(collectionArray.encode(), typeRef);
+        final TypeReference<String[]> arrayTypeRef = new TypeReference<>() {};
+        final String[] collectionData = mapper.readValue(collectionArray.encode(), arrayTypeRef);
         final String collectionID = collectionData[csvHeaders.getItemArkIndex()];
         final URI uri = IDUtils.getResourceURI(Constants.URL_PLACEHOLDER, IDUtils.getCollectionS3Key(collectionID));
         final Label label = new Label(collectionData[csvHeaders.getTitleIndex()]);
+        final Optional<String> manifests = Optional.ofNullable(body.getString(Constants.MANIFEST_CONTENT));
         final Collection collection = new Collection(uri, label);
         final Metadata metadata = new Metadata();
 
@@ -147,6 +150,18 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
 
         if (metadata.getEntries().size() > 0) {
             collection.setMetadata(metadata);
+        }
+
+        // If we have work manifests, add them to the collection
+        if (manifests.isPresent()) {
+            final SortedSet<Collection.Manifest> sortedSet = new TreeSet<>(new V2ManifestLabelComparator());
+            final TypeReference<List<String[]>> listTypeRef = new TypeReference<>() {};
+
+            for (final String[] workArray : mapper.readValue(manifests.get(), listTypeRef)) {
+                sortedSet.add(new Collection.Manifest(URI.create(workArray[0]), new Label(workArray[1])));
+            }
+
+            collection.getManifests().addAll(sortedSet);
         }
 
         options.addHeader(Constants.ACTION, Op.PUT_COLLECTION);
@@ -175,7 +190,7 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
         final JsonArray workArray = body.getJsonArray(Constants.MANIFEST_CONTENT);
         final String[] workRow = mapper.readValue(workArray.encode(), new TypeReference<String[]>() {});
         final JsonObject pagesJSON = body.getJsonObject(Constants.MANIFEST_PAGES);
-        final TypeReference<Map<String, List<String[]>>> type = new TypeReference<Map<String, List<String[]>>>() {};
+        final TypeReference<Map<String, List<String[]>>> type = new TypeReference<>() {};
         final Map<String, List<String[]>> pagesMap = mapper.readValue(pagesJSON.encode(), type);
         final String placeholderImage = body.getString(Constants.PLACEHOLDER_IMAGE);
         final String imageHost = body.getString(Constants.IIIF_HOST);
@@ -255,7 +270,7 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
         final String collectionName = body.getString(Constants.COLLECTION_NAME);
         final JsonObject worksJSON = body.getJsonObject(Constants.MANIFEST_CONTENT);
         final Collection collection = Collection.fromJSON(body.getJsonObject(Constants.COLLECTION_CONTENT));
-        final TypeReference<Map<String, List<String[]>>> type = new TypeReference<Map<String, List<String[]>>>() {};
+        final TypeReference<Map<String, List<String[]>>> type = new TypeReference<>() {};
         final Map<String, List<String[]>> worksMap = new ObjectMapper().readValue(worksJSON.encode(), type);
         final SortedSet<Collection.Manifest> sortedManifestSet = new TreeSet<>(new V2ManifestLabelComparator());
         final Map<URI, Collection.Manifest> manifestMap = new HashMap<>(); // Using to eliminate duplicates
@@ -305,7 +320,7 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
         final String encodedWorkID = URLEncoder.encode(workID, StandardCharsets.UTF_8);
         final Manifest manifest = Manifest.fromJSON(body.getJsonObject(Constants.MANIFEST_CONTENT));
         final CsvHeaders csvHeaders = CsvHeaders.fromJSON(body.getJsonObject(Constants.CSV_HEADERS));
-        final TypeReference<List<String[]>> typeRef = new TypeReference<List<String[]>>() {};
+        final TypeReference<List<String[]>> typeRef = new TypeReference<>() {};
         final JsonArray pagesArray = body.getJsonArray(Constants.MANIFEST_PAGES);
         final List<String[]> pagesList = new ObjectMapper().readValue(pagesArray.encode(), typeRef);
         final List<Sequence> sequences = manifest.getSequences();
