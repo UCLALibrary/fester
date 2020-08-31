@@ -84,9 +84,9 @@
 
     <!-- Versions of tools used for testing -->
     <jsoup.version>1.13.1</jsoup.version>
-    <aws.sdk.version>1.11.813</aws.sdk.version>
-    <localstack.version>1.13.0</localstack.version>
-    <testcontainers.version>1.12.5</testcontainers.version>
+    <aws.sdk.version>1.11.850</aws.sdk.version>
+    <localstack.version>1.14.3</localstack.version>
+    <testcontainers.version>1.14.3</testcontainers.version>
     <jcip.annotations.version>1.0-1</jcip.annotations.version>
 
     <!-- Build plug-in versions -->
@@ -549,13 +549,6 @@
         </executions>
       </plugin>
 
-      <!-- Codacy runs automated code reviews and code analytics -->
-      <plugin>
-        <groupId>com.gavinmogan</groupId>
-        <artifactId>codacy-maven-plugin</artifactId>
-        <version>${codacy.plugin.version}</version>
-      </plugin>
-
       <!-- Maven dependency helps freelib-resources copy files into the project -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -804,6 +797,7 @@
                   <exclude>com.fasterxml.jackson.datatype:jackson-datatype-jdk8</exclude>
                   <exclude>com.fasterxml.jackson.datatype:jackson-datatype-jsr310</exclude>
                   <exclude>com.github.dblock:oshi-core</exclude>
+                  <exclude>com.github.dpaukov:combinatoricslib3</exclude>
                   <exclude>com.github.fge:btf</exclude>
                   <exclude>com.github.fge:jackson-coreutils</exclude>
                   <exclude>com.github.fge:json-patch</exclude>
@@ -811,6 +805,7 @@
                   <exclude>com.github.fge:uri-template</exclude>
                   <exclude>com.github.java-json-tools:json-schema-core</exclude>
                   <exclude>com.github.java-json-tools:json-schema-validator</exclude>
+                  <exclude>com.github.tkurz:media-fragments-uri</exclude>
                   <exclude>com.google.code.findbugs:jsr305</exclude>
                   <exclude>com.google.errorprone:error_prone_annotations</exclude>
                   <exclude>com.google.guava:failureaccess</exclude>
@@ -828,7 +823,8 @@
                   <exclude>commons-io:commons-io</exclude>
                   <exclude>commons-logging:commons-logging</exclude>
                   <exclude>info.freelibrary:freelib-utils</exclude>
-                  <exclude>info.freelibrary:jiiify-presentation</exclude>
+                  <exclude>info.freelibrary:jiiify-presentation-v2</exclude>
+                  <exclude>info.freelibrary:jiiify-presentation-v3</exclude>
                   <exclude>info.freelibrary:vertx-pairtree</exclude>
                   <exclude>info.freelibrary:vertx-super-s3</exclude>
                   <exclude>io.netty:netty-buffer</exclude>

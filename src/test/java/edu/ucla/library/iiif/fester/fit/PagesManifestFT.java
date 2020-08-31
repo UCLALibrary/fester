@@ -14,13 +14,15 @@ import org.junit.runner.RunWith;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.opencsv.exceptions.CsvException;
 
-import info.freelibrary.iiif.presentation.v2.Manifest;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
+
+import info.freelibrary.iiif.presentation.v2.Manifest;
 
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
+
 import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.unit.Async;
@@ -50,7 +52,7 @@ public class PagesManifestFT extends BaseFesterFT {
     private static final int[] CANVAS_COUNTS = new int[] { 42, 26, 46, 39, 36 };
 
     @Rule
-    public Timeout myTimeout = new Timeout(3, TimeUnit.MINUTES);
+    public Timeout myTimeout = new Timeout(5, TimeUnit.MINUTES);
 
     /**
      * Sets up testing environment.
@@ -79,10 +81,10 @@ public class PagesManifestFT extends BaseFesterFT {
     }
 
     /**
-     * Tests that pages have been added to works manifests. Several things have to happen in sequential order before
-     * we can check the results of the test: the collection CSV must be loaded, the works CSV must be loaded, and
-     * finally the pages CSV must be loaded. After this has all happened, we can check the canvas counts in each of
-     * the work manifests to confirm all the pages were loaded.
+     * Tests that pages have been added to works manifests. Several things have to happen in sequential order before we
+     * can check the results of the test: the collection CSV must be loaded, the works CSV must be loaded, and finally
+     * the pages CSV must be loaded. After this has all happened, we can check the canvas counts in each of the work
+     * manifests to confirm all the pages were loaded.
      *
      * @param aContext A testing context
      * @throws CsvException If there is trouble parsing the CSV test fixtures

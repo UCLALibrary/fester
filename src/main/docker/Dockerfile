@@ -9,7 +9,7 @@ LABEL ContainerName=${project.name} ContainerSourceCode=${project.url}
 RUN apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -qq --no-install-recommends \
     openjdk-11-jre-headless=11.0.7+10-3ubuntu1 \
     python3=3.8.2-0ubuntu2 \
-    curl=7.68.0-1ubuntu2.1 \
+    curl=7.68.0-1ubuntu2.2 \
     < /dev/null > /dev/null && \
     rm -rf /var/lib/apt/lists/*
 

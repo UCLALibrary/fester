@@ -4,7 +4,9 @@ package edu.ucla.library.iiif.fester.fit;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,13 +15,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 
-import info.freelibrary.iiif.presentation.v2.Collection;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
+import info.freelibrary.util.StringUtils;
+
+import info.freelibrary.iiif.presentation.v2.Collection;
 
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
@@ -29,6 +34,7 @@ import edu.ucla.library.iiif.fester.utils.IDUtils;
 import edu.ucla.library.iiif.fester.utils.LinkUtils;
 import edu.ucla.library.iiif.fester.utils.LinkUtilsTest;
 import edu.ucla.library.iiif.fester.utils.V2ManifestLabelComparator;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
@@ -63,14 +69,13 @@ public class PostCsvFIT {
 
     private static final File EOL_CHECK_CSV = new File(DIR, "csv/eolcheck.csv");
 
-    private static final File WORKS_CSV_PROTESTA_1 = new File(DIR,
-            "csv/lat_newspapers/protesta/protesta_works_1.csv");
+    private static final File WORKS_CSV_PROTESTA_1 = new File(DIR, "csv/lat_newspapers/protesta/protesta_works_1.csv");
 
     private static final File PROTESTA_COLLECTION_MANIFEST = new File(DIR, "json/ark%3A%2F21198%2Fzz0025hqmb.json");
 
     /* Uploaded CSV files are named with a UUID */
-    private static final String UPLOADED_FILE_PATH_REGEX = "(" + BodyHandler.DEFAULT_UPLOADS_DIRECTORY + "\\/" +
-            "[0-9a-f\\-]+" + ")";
+    private static final String FILE_PATH_REGEX =
+            "(" + BodyHandler.DEFAULT_UPLOADS_DIRECTORY + "\\/" + "[0-9a-f\\-]+" + ")";
 
     /**
      * Functional tests for the CSV upload feature.
@@ -213,12 +218,21 @@ public class PostCsvFIT {
                     if (statusCode == HTTP.CREATED) {
                         final Buffer actual = response.body();
                         final String contentType = response.getHeader(Constants.CONTENT_TYPE);
+                        final Optional<JsonObject> optJsonObject;
                         final List<String[]> expected;
 
                         // Check that what we get back is the same as what we sent
                         try {
                             expected = LinkUtilsTest.read(WORKS_CSV_COLLECTION.getAbsolutePath());
                             check(aContext, LinkUtils.addManifests(FESTER_URL, expected), actual);
+                            optJsonObject = checkS3(HATHAWAY_COLLECTION_ARK, true);
+
+                            if (optJsonObject.isPresent()) {
+                                final JsonObject expectedJSON = readJsonFile(HATHAWAY_COLLECTION_MANIFEST);
+                                aContext.assertEquals(expectedJSON, optJsonObject.get());
+                            } else {
+                                aContext.fail(LOGGER.getMessage(MessageCodes.MFS_154, WORKS_CSV_COLLECTION));
+                            }
                         } catch (CsvException | IOException aDetails) {
                             LOGGER.error(aDetails, aDetails.getMessage());
                             aContext.fail(aDetails);
@@ -305,8 +319,8 @@ public class PostCsvFIT {
             postCSV(WORKS_CSV_NO_COLLECTION, post -> {
                 if (post.succeeded()) {
                     final HttpResponse<Buffer> response = post.result();
-                    final String expectedErrorMessage = LOGGER.getMessage(MessageCodes.MFS_103, LOGGER.getMessage(
-                            MessageCodes.MFS_146, Constants.COLLECTION, HATHAWAY_COLLECTION_ARK));
+                    final String expectedErrorMessage = LOGGER.getMessage(MessageCodes.MFS_103,
+                            LOGGER.getMessage(MessageCodes.MFS_146, Constants.COLLECTION, HATHAWAY_COLLECTION_ARK));
 
                     aContext.assertEquals(response.statusCode(), HTTP.INTERNAL_SERVER_ERROR);
                     aContext.assertEquals(response.getHeader(Constants.CONTENT_TYPE), Constants.HTML_MEDIA_TYPE);
@@ -343,8 +357,7 @@ public class PostCsvFIT {
                     if (statusCode == HTTP.CREATED) {
                         final Buffer actual = response.body();
                         final String contentType = response.getHeader(Constants.CONTENT_TYPE);
-                        final Matcher uploadedFilePathMatcher = Pattern.compile(UPLOADED_FILE_PATH_REGEX).matcher(
-                                statusMessage);
+                        final Matcher matcher = Pattern.compile(FILE_PATH_REGEX).matcher(statusMessage);
 
                         // Check that what we get back is the same as what we sent
                         check(aContext, LinkUtils.addManifests(FESTER_URL, expected), actual);
@@ -352,26 +365,21 @@ public class PostCsvFIT {
                         // Check that what we get back has the correct media type
                         aContext.assertEquals(Constants.CSV_MEDIA_TYPE, contentType);
 
-                        if (uploadedFilePathMatcher.find()) {
-                            final String uploadedFilePath = uploadedFilePathMatcher.group(1);
-                            // Wait for the file to get deleted; 500ms should be long enough, unless the file is huge
-                            final Long timerDelay = 500L;
+                        if (matcher.find()) {
+                            final String filePath = matcher.group(1);
+                            final Long timerDelay = 500L; // Wait 500msfor the file to get deleted
 
                             VERTX_INSTANCE.setTimer(timerDelay, timerId -> {
-                                final boolean isDeleted = !VERTX_INSTANCE.fileSystem().existsBlocking(
-                                        uploadedFilePath);
                                 try {
-                                    aContext.assertTrue(isDeleted);
+                                    aContext.assertTrue(!VERTX_INSTANCE.fileSystem().existsBlocking(filePath));
                                 } catch (final AssertionError details) {
-                                    aContext.fail(LOGGER.getMessage(MessageCodes.MFS_134, uploadedFilePath,
-                                            timerDelay));
+                                    aContext.fail(LOGGER.getMessage(MessageCodes.MFS_134, filePath, timerDelay));
                                 }
 
                                 complete(asyncTask);
                             });
                         } else {
-                            aContext.fail(LOGGER.getMessage(MessageCodes.MFS_135, UPLOADED_FILE_PATH_REGEX,
-                                    statusMessage));
+                            aContext.fail(LOGGER.getMessage(MessageCodes.MFS_135, FILE_PATH_REGEX, statusMessage));
                         }
                     } else {
                         aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, statusCode, statusMessage));
@@ -513,12 +521,56 @@ public class PostCsvFIT {
          * @param aHandler A handler to handle the result of the post
          */
         private void postCSV(final File aTestFile, final Handler<AsyncResult<HttpResponse<Buffer>>> aHandler) {
-            final MultipartForm form = MultipartForm.create().textFileUpload(Constants.CSV_FILE, aTestFile.getName(),
-                    aTestFile.getAbsolutePath(), Constants.CSV_MEDIA_TYPE).attribute(Constants.IIIF_HOST,
-                            ImageInfoLookup.FAKE_IIIF_SERVER);
+            final MultipartForm form =
+                    MultipartForm.create()
+                            .textFileUpload(Constants.CSV_FILE, aTestFile.getName(), aTestFile.getAbsolutePath(),
+                                    Constants.CSV_MEDIA_TYPE)
+                            .attribute(Constants.IIIF_HOST, ImageInfoLookup.FAKE_IIIF_SERVER);
 
-            myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE).sendMultipartForm(
-                    form, aHandler);
+            myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE).sendMultipartForm(form,
+                    aHandler);
+        }
+
+        /**
+         * Reads a test file into a JSON object.
+         *
+         * @param aTestFile A test file
+         * @return A JSON object from the contents of the supplied test file
+         * @throws IOException If there is trouble reading the file
+         */
+        private JsonObject readJsonFile(final File aTestFile) throws IOException {
+            return new JsonObject(StringUtils.read(aTestFile, StandardCharsets.UTF_8));
+        }
+
+        /**
+         * Checks out S3 to see if the expected file is there, and if it is the method returns it.
+         *
+         * @param aKey An S3 key
+         * @param aCollection Whether the key belongs to a collection; else, it's a work manifest's key
+         * @return An optional JSON object
+         */
+        private Optional<JsonObject> checkS3(final String aKey, final boolean aCollection) {
+            final String key;
+
+            if (aCollection) {
+                key = IDUtils.getCollectionS3Key(aKey);
+            } else {
+                key = IDUtils.getWorkS3Key(aKey);
+            }
+
+            if (myS3Client.doesObjectExist(BUCKET, key)) {
+                try {
+                    final S3Object s3Object = myS3Client.getObject(BUCKET, key);
+                    final byte[] bytes = s3Object.getObjectContent().readAllBytes();
+
+                    return Optional.of(new JsonObject(new String(bytes, StandardCharsets.UTF_8)));
+                } catch (final IOException details) {
+                    LOGGER.error(details, details.getMessage());
+                    return Optional.empty();
+                }
+            } else {
+                return Optional.empty();
+            }
         }
     }
 }
