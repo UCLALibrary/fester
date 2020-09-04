@@ -27,7 +27,7 @@
   </logger>
 
   <!-- Default logging level for everything else -->
-  <root level="INFO">
+  <root level="DEBUG">
     <appender-ref ref="STDOUT" />
     <appender-ref ref="FILEOUT" />
   </root>
