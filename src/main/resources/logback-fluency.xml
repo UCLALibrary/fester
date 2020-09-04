@@ -37,9 +37,6 @@
   <variable name="FLUENCY_TAG" value="${FLUENCY_TAG:-FLUENCY_TAG}" />
 
   <appender name="Fluency" class="ch.qos.logback.more.appenders.FluencyLogbackAppender">
-    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-      <level>${logLevel}</level>
-    </filter>
 
       <remoteHost>${FLUENCY_ENDPOINT}</remoteHost>
       <port>${FLUENCY_PORT}</port>
