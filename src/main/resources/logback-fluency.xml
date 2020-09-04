@@ -37,7 +37,7 @@
   <variable name="FLUENCY_TAG" value="${FLUENCY_TAG:-FLUENCY_TAG}" />
 
   <appender name="Fluency" class="ch.qos.logback.more.appenders.FluencyLogbackAppender">
-    <filter class="edu.illinois.library.cantaloupe.logging.ApplicationLogFilter" />
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter" />
 
       <remoteHost>${FLUENCY_ENDPOINT}</remoteHost>
       <port>${FLUENCY_PORT}</port>
@@ -67,7 +67,7 @@
   </appender>
 
   <appender name="FluencyError" class="ch.qos.logback.more.appenders.FluencyLogbackAppender">
-    <filter class="edu.illinois.library.cantaloupe.logging.ApplicationErrorLogFilter" />
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter" />
 
       <remoteHost>${FLUENCY_ENDPOINT}</remoteHost>
       <port>${FLUENCY_PORT}</port>
