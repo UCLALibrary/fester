@@ -17,31 +17,31 @@
 
   <appender name="FLUENCY" class="ch.qos.logback.more.appenders.FluencyLogbackAppender">
 
-      <remoteHost>${FLUENCY_ENDPOINT}</remoteHost>
-      <port>${FLUENCY_PORT}</port>
-      <tag>${FLUENCY_TAG}</tag>
+    <remoteHost>${FLUENCY_ENDPOINT}</remoteHost>
+    <port>${FLUENCY_PORT}</port>
+    <tag>${FLUENCY_TAG}</tag>
 
-      <!-- [Optional] Configurations to customize Fluency's behavior: https://github.com/komamitsu/fluency#usage  -->
-      <ackResponseMode>false</ackResponseMode>
-      <fileBackupDir>/tmp</fileBackupDir>
-      <!-- Initial chunk buffer size is 1MB (by default)-->
-      <bufferChunkInitialSize>2097152</bufferChunkInitialSize>
-      <!--Threshold chunk buffer size to flush is 4MB (by default)-->
-      <bufferChunkRetentionSize>16777216</bufferChunkRetentionSize>
-      <!-- Max total buffer size is 512MB (by default)-->
-      <maxBufferSize>268435456</maxBufferSize>
-      <!-- Max wait until all buffers are flushed is 10 seconds (by default)-->
-      <waitUntilBufferFlushed>30</waitUntilBufferFlushed>
-      <!-- Max wait until the flusher is terminated is 10 seconds (by default) -->
-      <waitUntilFlusherTerminated>40</waitUntilFlusherTerminated>
-      <!-- Max retry of sending events is 8 (by default) -->
-      <senderMaxRetryCount>12</senderMaxRetryCount>
-      <!-- [Optional] Enable/Disable use of EventTime to get sub second resolution of log event date-time -->
-      <useEventTime>true</useEventTime>
+    <!-- [Optional] Configurations to customize Fluency's behavior: https://github.com/komamitsu/fluency#usage  -->
+    <ackResponseMode>false</ackResponseMode>
+    <fileBackupDir>/tmp</fileBackupDir>
+    <!-- Initial chunk buffer size is 1MB (by default)-->
+    <bufferChunkInitialSize>2097152</bufferChunkInitialSize>
+    <!--Threshold chunk buffer size to flush is 4MB (by default)-->
+    <bufferChunkRetentionSize>16777216</bufferChunkRetentionSize>
+    <!-- Max total buffer size is 512MB (by default)-->
+    <maxBufferSize>268435456</maxBufferSize>
+    <!-- Max wait until all buffers are flushed is 10 seconds (by default)-->
+    <waitUntilBufferFlushed>30</waitUntilBufferFlushed>
+    <!-- Max wait until the flusher is terminated is 10 seconds (by default) -->
+    <waitUntilFlusherTerminated>40</waitUntilFlusherTerminated>
+    <!-- Max retry of sending events is 8 (by default) -->
+    <senderMaxRetryCount>12</senderMaxRetryCount>
+    <!-- [Optional] Enable/Disable use of EventTime to get sub second resolution of log event date-time -->
+    <useEventTime>true</useEventTime>
 
-      <encoder>
-          <pattern>%date %level [%thread] %logger{45} [%file:%line] %msg%n</pattern>
-      </encoder>
+    <encoder>
+        <pattern>%date %level [%thread] %logger{45} [%file:%line] %msg%n</pattern>
+    </encoder>
   </appender>
 
   <logger name="io.netty" level="ERROR" additivity="false">
