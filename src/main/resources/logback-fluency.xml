@@ -69,6 +69,5 @@
     <appender-ref ref="FLUENCY" />
   </root>
 
-
 </configuration>
 
