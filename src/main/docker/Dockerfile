@@ -37,6 +37,7 @@ ENV CACHE_DIR="-Dvertx.cacheDirBase=/tmp"
 ENV CONFIG_FILE="-Dvertx-config-path=/etc/${project.artifactId}/${project.artifactId}.properties"
 ENV JAVA_TOOL_OPTIONS="${jdwp.client.config}"
 ENV JAR_PATH="/usr/local/${project.artifactId}/${project.artifactId}-${project.version}.jar"
-CMD ["sh", "-c", "java $CACHE_DIR $CONFIG_FILE -Xmx2g -jar $JAR_PATH"]
+ENV LOGBACK_PATH="-Dlogback.configurationFile=/etc/fester/logback.xml"
+CMD ["sh", "-c", "java $CACHE_DIR $CONFIG_FILE -Xmx2g -jar $JAR_PATH $LOGBACK_PATH"]
 
 EXPOSE ${fester.http.port}
