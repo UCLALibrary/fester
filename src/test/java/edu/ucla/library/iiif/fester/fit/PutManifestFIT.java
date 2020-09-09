@@ -32,7 +32,7 @@ public class PutManifestFIT {
     private static final String API_PATH = "/{}/manifest";
 
     /* The manifest we're using to test */
-    private static final String TEST_FILE_PATH = "json/pages-ordered.json";
+    private static final String TEST_FILE_PATH = "json/v2/pages-ordered.json";
 
     /**
      * Functional tests related to the Fester PUT manifest endpoint.

@@ -76,7 +76,7 @@ public class PutManifestHandlerTest extends AbstractFesterHandlerTest {
     @Test
     @SuppressWarnings("deprecation")
     public void testPutManifestHandler(final TestContext aContext) throws IOException {
-        final String manifestPath = MANIFEST_FILE.getAbsolutePath();
+        final String manifestPath = V2_MANIFEST_FILE.getAbsolutePath();
         final Buffer manifest = myVertx.fileSystem().readFileBlocking(manifestPath);
         final Async asyncTask = aContext.async();
         final int port = aContext.get(Config.HTTP_PORT);
@@ -112,7 +112,7 @@ public class PutManifestHandlerTest extends AbstractFesterHandlerTest {
     @Test
     @SuppressWarnings("deprecation")
     public void testPutManifestHandlerMissingMediaType(final TestContext aContext) throws IOException {
-        final String manifestPath = MANIFEST_FILE.getAbsolutePath();
+        final String manifestPath = V2_MANIFEST_FILE.getAbsolutePath();
         final Buffer manifest = myVertx.fileSystem().readFileBlocking(manifestPath);
         final Async asyncTask = aContext.async();
         final int port = aContext.get(Config.HTTP_PORT);
@@ -150,7 +150,7 @@ public class PutManifestHandlerTest extends AbstractFesterHandlerTest {
     @Test
     @SuppressWarnings("deprecation")
     public void testPutManifestHandlerUnsupportedMediaType(final TestContext aContext) throws IOException {
-        final String manifestPath = MANIFEST_FILE.getAbsolutePath();
+        final String manifestPath = V2_MANIFEST_FILE.getAbsolutePath();
         final Buffer manifest = myVertx.fileSystem().readFileBlocking(manifestPath);
         final Async asyncTask = aContext.async();
         final int port = aContext.get(Config.HTTP_PORT);

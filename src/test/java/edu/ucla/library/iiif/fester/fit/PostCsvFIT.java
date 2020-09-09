@@ -63,7 +63,7 @@ public class PostCsvFIT {
 
     private static final String HATHAWAY_COLLECTION_ARK = "ark:/21198/zz0009gsq9";
 
-    private static final File HATHAWAY_COLLECTION_MANIFEST = new File(DIR, "json/ark%3A%2F21198%2Fzz0009gsq9.json");
+    private static final File HATHAWAY_COLLECTION_MANIFEST = new File(DIR, "json/v2/ark%3A%2F21198%2Fzz0009gsq9.json");
 
     private static final File BLANK_LINE_CSV = new File(DIR, "csv/blankline.csv");
 
@@ -71,7 +71,7 @@ public class PostCsvFIT {
 
     private static final File WORKS_CSV_PROTESTA_1 = new File(DIR, "csv/lat_newspapers/protesta/protesta_works_1.csv");
 
-    private static final File PROTESTA_COLLECTION_MANIFEST = new File(DIR, "json/ark%3A%2F21198%2Fzz0025hqmb.json");
+    private static final File PROTESTA_COLLECTION_MANIFEST = new File(DIR, "json/v2/ark%3A%2F21198%2Fzz0025hqmb.json");
 
     /* Uploaded CSV files are named with a UUID */
     private static final String FILE_PATH_REGEX =

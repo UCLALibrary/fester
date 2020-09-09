@@ -91,7 +91,7 @@ public class CsvParser {
             myCsvHeaders = new CsvHeaders(checkForEOLs(rows.remove(0)));
 
             // Get the set of object types that we'll be mapping CSV rows to
-            csvObjectTypes = getObjectTypes(rows);
+            csvObjectTypes = getObjectTypes(rows, myCsvHeaders);
 
             // Required CSV columns
             if (!myCsvHeaders.hasItemArkIndex()) {
@@ -110,7 +110,7 @@ public class CsvParser {
                 checkForEOLs(row);
                 trimValues(row);
 
-                switch (getObjectType(row)) {
+                switch (getObjectType(row, myCsvHeaders)) {
                     case COLLECTION: {
                         extractCollectionMetadata(row);
                         break;
@@ -308,13 +308,15 @@ public class CsvParser {
      * Gets the type of the object represented by a CSV row.
      *
      * @param aRow A row from the metadata CSV
+     * @param aCsvHeaders CSV header information
      * @return The object type
      * @throws CsvParsingException If object type isn't included in the CSV headers, or the object type index is out
      *         of bounds of the CSV row, or the metadata contains an unknown object type
      */
-    private ObjectType getObjectType(final String[] aRow) throws CsvParsingException {
-        if (myCsvHeaders.hasObjectTypeIndex()) {
-            final int objectTypeIndex = myCsvHeaders.getObjectTypeIndex();
+    public static ObjectType getObjectType(final String[] aRow, final CsvHeaders aCsvHeaders)
+            throws CsvParsingException {
+        if (aCsvHeaders.hasObjectTypeIndex()) {
+            final int objectTypeIndex = aCsvHeaders.getObjectTypeIndex();
 
             if (aRow.length > objectTypeIndex) {
                 final String objectType = aRow[objectTypeIndex];
@@ -343,15 +345,17 @@ public class CsvParser {
      * Gets the types of the objects represented by the CSV rows.
      *
      * @param aCsvRows A list of rows from the metadata CSV
+     * @param aCsvHeaders CSV header information
      * @return The set of object types
      * @throws CsvParsingException If object type isn't included in the CSV headers, or the object type index is out
      *         of bounds of the CSV row, or the metadata contains an unknown object type
      */
-    private Set<ObjectType> getObjectTypes(final List<String[]> aCsvRows) throws CsvParsingException {
+    public static Set<ObjectType> getObjectTypes(final List<String[]> aCsvRows, final CsvHeaders aCsvHeaders)
+            throws CsvParsingException {
         final Set<ObjectType> objectTypes = EnumSet.noneOf(ObjectType.class);
 
         for (final String[] row : aCsvRows) {
-            objectTypes.add(getObjectType(row));
+            objectTypes.add(getObjectType(row, aCsvHeaders));
         }
 
         return objectTypes;

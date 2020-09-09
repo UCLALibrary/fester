@@ -1,5 +1,5 @@
 {
-    "@context": "http://iiif.io/api/image/2/context.json",
+    "@context": "http://iiif.io/api/presentation/2/context.json",
     "@id": "http://bluemountain.princeton.edu/exist/restxq/iiif/bmtnaae_1918-12_01/manifest",
     "@type": "sc:Manifest",
     "attribution": "Provided by the Blue Mountain Project at Princeton University",

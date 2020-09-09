@@ -505,9 +505,9 @@ public class CsvHeaders {
     }
 
     /**
-     * Returns a JsonObject of the Manifest.
+     * Returns a JsonObject of the CsvHeaders.
      *
-     * @return A JsonObject of the Manifest
+     * @return A JsonObject of the CsvHeaders
      */
     public JsonObject toJSON() {
         return JsonObject.mapFrom(this);

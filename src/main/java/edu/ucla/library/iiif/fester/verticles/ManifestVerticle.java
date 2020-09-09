@@ -123,10 +123,8 @@ public class ManifestVerticle extends AbstractFesterVerticle {
 
                         createCollection(promise, csvCollection.get(), csvHeaders, csvMetadata, iiifVersion);
                     } else if (csvMetadata.hasWorks()) {
-                        final Optional<String> id = csvMetadata.getCollectionID(csvHeaders.getParentArkIndex());
-
                         LOGGER.debug(MessageCodes.MFS_043, filePath);
-                        updateWorks(id.get(), csvHeaders, csvMetadata, imageHost, iiifVersion, message);
+                        updateWorks(csvHeaders, csvMetadata, imageHost, iiifVersion, message);
                     } else if (csvMetadata.hasPages()) {
                         @SuppressWarnings("rawtypes")
                         final List<Future> futures = new ArrayList<>();
@@ -180,9 +178,10 @@ public class ManifestVerticle extends AbstractFesterVerticle {
      * Creates a collection manifest.
      *
      * @param aPromise A promise of future work to be done
-     * @param aCollection A collection ID and label
+     * @param aCsvCollection A collection ID and label
      * @param aCsvHeaders Headers from a CSV file
      * @param aCsvMetadata Metadata from a CSV file
+     * @param aApiVersion The version of the IIIF Presentation API being requested
      */
     private void createCollection(final Promise<Void> aPromise, final String[] aCsvCollection,
             final CsvHeaders aCsvHeaders, final CsvMetadata aCsvMetadata, final String aApiVersion)
@@ -222,9 +221,12 @@ public class ManifestVerticle extends AbstractFesterVerticle {
     /**
      * Updates work manifest pages with data from an uploaded CSV.
      *
+     * @param aPromise A promise
      * @param aWorkID A work ID
+     * @param aCsvHeaders Headers from the supplied CSV file
      * @param aPagesList A list of pages
-     * @param aMessage A message
+     * @param aImageHost An image host
+     * @param aApiVersion The version of the IIIF Presentation API being requested
      */
     private void updatePages(final Promise<Void> aPromise, final String aWorkID, final CsvHeaders aCsvHeaders,
             final List<String[]> aPagesList, final String aImageHost, final String aApiVersion) {
@@ -270,17 +272,18 @@ public class ManifestVerticle extends AbstractFesterVerticle {
     }
 
     /**
-     * Updates the works associated with a supplied collection.
+     * Updates the works associated with a collection.
      *
-     * @param aCollectionID A collection ID
      * @param aCsvHeaders Headers from the supplied CSV file
      * @param aCsvMetadata Metadata from the supplied CSV file
      * @param aImageHost An image host
+     * @param aApiVersion The version of the IIIF Presentation API being requested
      * @param aMessage A message
      */
-    private void updateWorks(final String aCollectionID, final CsvHeaders aCsvHeaders, final CsvMetadata aCsvMetadata,
-            final String aImageHost, final String aApiVersion, final Message<JsonObject> aMessage) {
+    private void updateWorks(final CsvHeaders aCsvHeaders, final CsvMetadata aCsvMetadata, final String aImageHost,
+            final String aApiVersion, final Message<JsonObject> aMessage) {
         final Promise<LockedManifest> promise = Promise.promise();
+        final String collectionID = aCsvMetadata.getFirstCollectionID(aCsvHeaders.getParentArkIndex()).get();
 
         // If we were able to get a lock on the manifest, update it with our new works
         promise.future().onComplete(handler -> {
@@ -294,7 +297,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                 try {
                     options.addHeader(Constants.ACTION, ManifestVerticle.UPDATE_COLLECTION);
                     message.put(Constants.COLLECTION_CONTENT, lockedManifest.toJSON());
-                    message.put(Constants.COLLECTION_NAME, aCollectionID);
+                    message.put(Constants.COLLECTION_NAME, collectionID);
                     message.put(Constants.MANIFEST_CONTENT, new JsonObject(mapper.writeValueAsString(worksMap)));
 
                     sendMessage(getManifestVerticleName(aApiVersion), message, options, update -> {
@@ -314,7 +317,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
             }
         });
 
-        getLockedManifest(aCollectionID, true, promise);
+        getLockedManifest(collectionID, true, promise);
     }
 
     /**

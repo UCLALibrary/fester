@@ -3,6 +3,9 @@ package edu.ucla.library.iiif.fester.verticles;
 
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
+import info.freelibrary.util.StringUtils;
+
+import java.util.Optional;
 
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
@@ -106,6 +109,22 @@ public abstract class AbstractFesterVerticle extends AbstractVerticle {
 
             LOGGER.error(aThrowable, log);
             aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, log);
+        }
+    }
+
+    /**
+     * Gets the metadata from the supplied row and index position.
+     *
+     * @param aRow A row of metadata
+     * @param aIndex An index position of the metadata to retrieve
+     * @return An optional metadata value
+     */
+    protected Optional<String> getMetadata(final String[] aRow, final int aIndex) {
+        try {
+            return Optional.ofNullable(StringUtils.trimToNull(aRow[aIndex]));
+        } catch (final IndexOutOfBoundsException details) {
+            // Checking for required metadata is done in the parser, not here
+            return Optional.empty();
         }
     }
 }
