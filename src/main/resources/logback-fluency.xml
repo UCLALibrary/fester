@@ -1,0 +1,73 @@
+<configuration debug="false">
+  <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+  <timestamp key="byDay" datePattern="yyyy-MM-dd" />
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>${logLevel}</level>
+    </filter>
+    <encoder>
+      <pattern>[%level] %logger{45}:%X{line} | %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <variable name="FLUENCY_ENDPOINT" value="${FLUENCY_ENDPOINT:-FLUENCY_ENDPOINT}" />
+  <variable name="FLUENCY_PORT" value="${FLUENCY_PORT:-FLUENCY_PORT}" />
+  <variable name="FLUENCY_TAG" value="${FLUENCY_TAG:-FLUENCY_TAG}" />
+
+  <appender name="FLUENCY" class="ch.qos.logback.more.appenders.FluencyLogbackAppender">
+
+    <remoteHost>${FLUENCY_ENDPOINT}</remoteHost>
+    <port>${FLUENCY_PORT}</port>
+    <tag>${FLUENCY_TAG}</tag>
+
+    <!-- [Optional] Configurations to customize Fluency's behavior: https://github.com/komamitsu/fluency#usage  -->
+    <ackResponseMode>false</ackResponseMode>
+    <fileBackupDir>/tmp</fileBackupDir>
+    <!-- Initial chunk buffer size is 1MB (by default)-->
+    <bufferChunkInitialSize>2097152</bufferChunkInitialSize>
+    <!--Threshold chunk buffer size to flush is 4MB (by default)-->
+    <bufferChunkRetentionSize>16777216</bufferChunkRetentionSize>
+    <!-- Max total buffer size is 512MB (by default)-->
+    <maxBufferSize>268435456</maxBufferSize>
+    <!-- Max wait until all buffers are flushed is 10 seconds (by default)-->
+    <waitUntilBufferFlushed>30</waitUntilBufferFlushed>
+    <!-- Max wait until the flusher is terminated is 10 seconds (by default) -->
+    <waitUntilFlusherTerminated>40</waitUntilFlusherTerminated>
+    <!-- Max retry of sending events is 8 (by default) -->
+    <senderMaxRetryCount>12</senderMaxRetryCount>
+    <!-- [Optional] Enable/Disable use of EventTime to get sub second resolution of log event date-time -->
+    <useEventTime>true</useEventTime>
+
+    <encoder>
+        <pattern>%date %level [%thread] %logger{45} [%file:%line] %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <logger name="io.netty" level="ERROR" additivity="false">
+    <appender-ref ref="STDOUT" />
+    <appender-ref ref="FILEOUT" />
+    <appender-ref ref="FLUENCY" />
+  </logger>
+  <logger name="io.vertx" level="ERROR" additivity="false">
+    <appender-ref ref="STDOUT" />
+    <appender-ref ref="FILEOUT" />
+    <appender-ref ref="FLUENCY" />
+  </logger>
+
+  <!-- Loggers for our application -->
+  <logger name="edu.ucla.library.iiif.fester" level="DEBUG" additivity="false">
+    <appender-ref ref="STDOUT" />
+    <appender-ref ref="FILEOUT" />
+    <appender-ref ref="FLUENCY" />
+  </logger>
+
+  <!-- Default logging level for everything else -->
+  <root level="INFO">
+    <appender-ref ref="STDOUT" />
+    <appender-ref ref="FILEOUT" />
+    <appender-ref ref="FLUENCY" />
+  </root>
+
+</configuration>
+
