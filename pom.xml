@@ -79,7 +79,7 @@
     <freelib.maven.version>0.1.0</freelib.maven.version>
     <vertx.super.s3.version>1.3.3</vertx.super.s3.version>
     <jiiify.presentation.v2.version>0.5.3</jiiify.presentation.v2.version>
-    <jiiify.presentation.v3.version>0.5.2</jiiify.presentation.v3.version>
+    <jiiify.presentation.v3.version>0.5.4</jiiify.presentation.v3.version>
     <alphanumeric-comparator.version>1.4.1</alphanumeric-comparator.version>
 
     <!-- Versions of tools used for testing -->
@@ -251,6 +251,11 @@
       <artifactId>alphanumeric-comparator</artifactId>
       <version>${alphanumeric-comparator.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.jsoup</groupId>
+      <artifactId>jsoup</artifactId>
+      <version>${jsoup.version}</version>
+    </dependency>
 
     <!-- Below dependencies only used for testing -->
     <dependency>
@@ -274,12 +279,6 @@
       <groupId>io.vertx</groupId>
       <artifactId>vertx-web-client</artifactId>
       <version>${vertx.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jsoup</groupId>
-      <artifactId>jsoup</artifactId>
-      <version>${jsoup.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>

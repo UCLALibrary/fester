@@ -48,9 +48,9 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(S3BucketVerticleTest.class, MESSAGES);
 
-    private static final String TEST_COLLECTION_FILE = "src/test/resources/json/ark%3A%2F21198%2Fzz0009gsq9.json";
+    private static final String TEST_COLLECTION_FILE = "src/test/resources/json/v2/ark%3A%2F21198%2Fzz0009gsq9.json";
 
-    private static final String MANIFEST_PATH = "src/test/resources/testManifest.json";
+    private static final String MANIFEST_PATH = "src/test/resources/json/v2/testManifest.json";
 
     private static final String DEFAULT_ACCESS_KEY = "YOUR_ACCESS_KEY";
 
@@ -254,7 +254,7 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
         final DeliveryOptions options = new DeliveryOptions();
 
         // Create a fake manifest ID/URI with our test manifest key
-        manifest.put(Constants.ID, myManifestUri.toString());
+        manifest.put(Constants.IIIF_PRESENTATION_ID_V2, myManifestUri.toString());
 
         message.put(Constants.MANIFEST_ID, myManifestID).put(Constants.DATA, manifest);
         options.addHeader(Constants.ACTION, Op.PUT_MANIFEST);
@@ -305,9 +305,9 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
         final DeliveryOptions options = new DeliveryOptions();
 
         // Create a fake manifest ID/URI with our collection key
-        manifest.put(Constants.ID, myCollectionUri.toString());
+        manifest.put(Constants.IIIF_PRESENTATION_ID_V2, myCollectionUri.toString());
 
-        LOGGER.debug(MessageCodes.MFS_130, manifest.getString(Constants.ID));
+        LOGGER.debug(MessageCodes.MFS_130, manifest.getString(Constants.IIIF_PRESENTATION_ID_V2));
 
         message.put(Constants.COLLECTION_NAME, myCollectionID).put(Constants.DATA, manifest);
         options.addHeader(Constants.ACTION, Op.PUT_COLLECTION);

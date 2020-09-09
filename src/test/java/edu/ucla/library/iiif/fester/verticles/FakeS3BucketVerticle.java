@@ -33,7 +33,7 @@ public class FakeS3BucketVerticle extends AbstractFesterVerticle {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FakeS3BucketVerticle.class, Constants.MESSAGES);
 
-    private static final Map<String, File> JSON_FILES = new HashMap<String, File>();
+    private static final Map<String, File> JSON_FILES = new HashMap<>();
 
     private File myTmpDir;
 
@@ -41,8 +41,12 @@ public class FakeS3BucketVerticle extends AbstractFesterVerticle {
 
     private final String myUrlPlaceholderPattern = Pattern.quote(Constants.URL_PLACEHOLDER);
 
+    private String myIiifApiVersion;
+
     @Override
     public void start() throws Exception {
+        myIiifApiVersion = config().getString(Constants.IIIF_API_VERSION);
+
         super.start();
 
         LOGGER.debug(MessageCodes.MFS_110, getClass().getName(), deploymentID());
@@ -52,12 +56,13 @@ public class FakeS3BucketVerticle extends AbstractFesterVerticle {
             myTmpDir = Files.createTempDirectory(deploymentID() + "_").toFile();
         }
 
-        JSON_FILES.put(IDUtils.getCollectionS3Key("ark:/21198/zz0009gsq9"),
-                new File("src/test/resources/json/ark%3A%2F21198%2Fzz0009gsq9.json"));
-        JSON_FILES.put(IDUtils.getWorkS3Key("ark:/21198/zz0009gv8j"),
-                new File("src/test/resources/json/ark%3A%2F21198%2Fzz0009gv8j.json"));
+        JSON_FILES.put(IDUtils.getCollectionS3Key("ark:/21198/zz0009gsq9"), new File(
+                StringUtils.format("src/test/resources/json/{}/ark%3A%2F21198%2Fzz0009gsq9.json", myIiifApiVersion)));
+        JSON_FILES.put(IDUtils.getWorkS3Key("ark:/21198/zz0009gv8j"), new File(
+                StringUtils.format("src/test/resources/json/{}/ark%3A%2F21198%2Fzz0009gv8j.json", myIiifApiVersion)));
         JSON_FILES.put(IDUtils.getWorkS3Key("ark:/21198/z12f8rtw"),
-                new File("src/test/resources/json/ark%3A%2F21198%2Fz12f8rtw.json"));
+                new File(StringUtils.format("src/test/resources/json/{}/ark%3A%2F21198%2Fz12f8rtw.json",
+                        myIiifApiVersion)));
 
         vertx.eventBus().<JsonObject>consumer(S3BucketVerticle.class.getName()).handler(message -> {
             final JsonObject body = message.body();
@@ -133,7 +138,18 @@ public class FakeS3BucketVerticle extends AbstractFesterVerticle {
         // URL-encoding makes it so we don't have to worry about creating subdirectories
         final String path = URLEncoder.encode(aS3Key, StandardCharsets.UTF_8);
         final File tmpFile = new File(myTmpDir, path);
-        final String derivedManifestS3Key = IDUtils.getResourceS3Key(URI.create(aManifest.getString(Constants.ID)));
+        final String idKey;
+        final String derivedManifestS3Key;
+
+        switch (myIiifApiVersion) {
+            case Constants.IIIF_API_V2:
+                idKey = Constants.IIIF_PRESENTATION_ID_V2;
+                break;
+            default: // Constants.IIIF_API_V3
+                idKey = Constants.IIIF_PRESENTATION_ID_V3;
+                break;
+        }
+        derivedManifestS3Key = IDUtils.getResourceS3Key(URI.create(aManifest.getString(idKey)));
 
         if (!aS3Key.equals(derivedManifestS3Key)) {
             LOGGER.warn(MessageCodes.MFS_138, aS3Key, derivedManifestS3Key);

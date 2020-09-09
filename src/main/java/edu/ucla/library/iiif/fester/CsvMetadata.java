@@ -60,12 +60,12 @@ public class CsvMetadata {
     }
 
     /**
-     * Gets the collection ID, if there is one.
+     * Gets the collection ID of the first work (if any) in the original CSV.
      *
      * @param aIndex The position of the parent ARK in the row
      * @return An optional collection ID
      */
-    public Optional<String> getCollectionID(final int aIndex) {
+    public Optional<String> getFirstCollectionID(final int aIndex) {
         if (hasWorks()) {
             return Optional.ofNullable(myWorksList.get(0)[aIndex]);
         } else {

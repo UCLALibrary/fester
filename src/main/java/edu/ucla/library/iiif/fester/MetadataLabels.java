@@ -16,6 +16,11 @@ public final class MetadataLabels {
      */
     public static final String RIGHTS_CONTACT = "Rights contact";
 
+    /**
+     * The label that should be displayed along with the required statement (attribution) in the manifest metadata.
+     */
+    public static final String ATTRIBUTION = "Attribution";
+
     // Private constructor for constants class
     private MetadataLabels() {
     }

@@ -45,10 +45,11 @@ abstract class AbstractFesterHandlerTest {
 
     protected static final String IIIF_URL = "http://0.0.0.0";
 
-    protected static final File MANIFEST_FILE = new File("src/test/resources/json/ark%3A%2F21198%2Fzz0009gv8j.json");
+    protected static final File V2_MANIFEST_FILE = new File(
+            "src/test/resources/json/v2/ark%3A%2F21198%2Fzz0009gv8j.json");
 
-    protected static final File COLLECTION_FILE = new File(
-            "src/test/resources/json/ark%3A%2F21198%2Fzz0009gsq9.json");
+    protected static final File V2_COLLECTION_FILE = new File(
+            "src/test/resources/json/v2/ark%3A%2F21198%2Fzz0009gsq9.json");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFesterHandlerTest.class, Constants.MESSAGES);
 
@@ -158,16 +159,19 @@ abstract class AbstractFesterHandlerTest {
                 // Our older handlers talk to S3 directly so we need to put some test files there
                 try {
                     LOGGER.debug(MessageCodes.MFS_006, myManifestS3Key, myS3Bucket);
-                    myS3Client.putObject(myS3Bucket, myManifestS3Key, MANIFEST_FILE);
+                    myS3Client.putObject(myS3Bucket, myManifestS3Key, V2_MANIFEST_FILE);
 
                     // We don't need to use the real S3BucketVerticle for our non-S3BucketVerticle tests though
                     myVertx.undeploy(s3BucketDeploymentId, undeployment -> {
                         if (undeployment.succeeded()) {
-                            myVertx.deployVerticle(FakeS3BucketVerticle.class.getName(), fakeS3VerticleDeployment -> {
-                                if (fakeS3VerticleDeployment.succeeded()) {
+                            final DeploymentOptions options = new DeploymentOptions()
+                                    .setConfig(new JsonObject().put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V2));
+
+                            myVertx.deployVerticle(FakeS3BucketVerticle.class.getName(), options, fakeDeployment -> {
+                                if (fakeDeployment.succeeded()) {
                                     aAsyncTask.complete();
                                 } else {
-                                    aContext.fail(fakeS3VerticleDeployment.cause());
+                                    aContext.fail(fakeDeployment.cause());
                                 }
                             });
                         } else {

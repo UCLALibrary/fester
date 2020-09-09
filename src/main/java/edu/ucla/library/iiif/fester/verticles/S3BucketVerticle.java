@@ -84,13 +84,14 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
         getJsonConsumer().handler(message -> {
             final JsonObject messageBody = message.body();
             final String action = message.headers().get(Constants.ACTION);
+            final String apiVersion = message.headers().get(Constants.IIIF_API_VERSION);
             final JsonObject manifest;
             final String manifestID;
 
             switch (action) {
                 case Op.GET_MANIFEST:
                     manifestID = messageBody.getString(Constants.MANIFEST_ID);
-                    LOGGER.debug(MessageCodes.MFS_133, manifestID, myS3Bucket);
+                    LOGGER.debug(MessageCodes.MFS_133, manifestID, apiVersion, myS3Bucket);
                     get(IDUtils.getWorkS3Key(manifestID), message);
                     break;
                 case Op.PUT_MANIFEST:
@@ -100,7 +101,7 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
                     break;
                 case Op.GET_COLLECTION:
                     manifestID = messageBody.getString(Constants.COLLECTION_NAME);
-                    LOGGER.debug(MessageCodes.MFS_133, manifestID, myS3Bucket);
+                    LOGGER.debug(MessageCodes.MFS_133, manifestID, apiVersion, myS3Bucket);
                     get(IDUtils.getCollectionS3Key(manifestID), message);
                     break;
                 case Op.PUT_COLLECTION:
@@ -171,7 +172,19 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
     private void put(final String aS3Key, final JsonObject aManifest, final Message<JsonObject> aMessage) {
         final Buffer manifestContent = aManifest.toBuffer();
         final String manifestID = IDUtils.getResourceID(aS3Key);
-        final String derivedManifestS3Key = IDUtils.getResourceS3Key(URI.create(aManifest.getString(Constants.ID)));
+        final String context = aManifest.getString("@context");
+        final String idKey;
+        final String derivedManifestS3Key;
+
+        switch (context) {
+            case Constants.IIIF_PRESENTATION_CONTEXT_V2:
+                idKey = Constants.IIIF_PRESENTATION_ID_V2;
+                break;
+            default: // Constants.IIIF_PRESENTATION_CONTEXT_V3
+                idKey = Constants.IIIF_PRESENTATION_ID_V3;
+                break;
+        }
+        derivedManifestS3Key = IDUtils.getResourceS3Key(URI.create(aManifest.getString(idKey)));
 
         LOGGER.debug(MessageCodes.MFS_051, aManifest, myS3Bucket);
         LOGGER.debug(MessageCodes.MFS_128, manifestID);

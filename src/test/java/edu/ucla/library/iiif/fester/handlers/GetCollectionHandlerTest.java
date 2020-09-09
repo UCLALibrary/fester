@@ -35,7 +35,7 @@ public class GetCollectionHandlerTest extends AbstractFesterHandlerTest {
     @Test
     @SuppressWarnings("deprecation")
     public void testGetCollectionHandler(final TestContext aContext) throws IOException {
-        final String expectedCollection = StringUtils.read(COLLECTION_FILE);
+        final String expectedCollection = StringUtils.read(V2_COLLECTION_FILE);
         final Async asyncTask = aContext.async();
         final int port = aContext.get(Config.HTTP_PORT);
         final String requestPath = IDUtils.getResourceURIPath(myCollectionS3Key);

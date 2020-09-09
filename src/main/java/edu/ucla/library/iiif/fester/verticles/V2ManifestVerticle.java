@@ -72,10 +72,6 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
 
     private static final String SIMPLE_URI = "{}/{}";
 
-    private static final String DEFAULT_THUMBNAIL_URI = "/full/{},/0/default.jpg";
-
-    private static final int DEFAULT_THUMBNAIL_SIZE = 600;
-
     /**
      * Starts a verticle to update pages on a manifest.
      */
@@ -382,7 +378,8 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
             final String pageURI = StringUtils.format(SIMPLE_URI, aImageHost, encodedPageID);
             final String contentURI = StringUtils.format(ANNOTATION_URI, Constants.URL_PLACEHOLDER, aWorkID, idPart);
 
-            String resourceURI = pageURI + StringUtils.format(DEFAULT_THUMBNAIL_URI, DEFAULT_THUMBNAIL_SIZE);
+            String resourceURI = StringUtils.format(Constants.DEFAULT_THUMBNAIL_URI_TEMPLATE, pageURI,
+                    Constants.DEFAULT_THUMBNAIL_SIZE);
             ImageResource imageResource = new ImageResource(resourceURI, new ImageInfoService(pageURI));
             ImageContent imageContent;
             Canvas canvas;
@@ -405,10 +402,17 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
                         final ImageInfoLookup placeholderLookup = new ImageInfoLookup(aPlaceholderImage);
                         final int width = placeholderLookup.getWidth();
                         final int height = placeholderLookup.getHeight();
-                        final int size = width >= DEFAULT_THUMBNAIL_SIZE ? DEFAULT_THUMBNAIL_SIZE : width;
+                        final int size;
+
+                        if (width >= Constants.DEFAULT_THUMBNAIL_SIZE) {
+                            size = Constants.DEFAULT_THUMBNAIL_SIZE;
+                        } else {
+                            size = width;
+                        }
 
                         // If placeholder image found, use its URL for image resource and service
-                        resourceURI = aPlaceholderImage + StringUtils.format(DEFAULT_THUMBNAIL_URI, size);
+                        resourceURI = StringUtils.format(Constants.DEFAULT_THUMBNAIL_URI_TEMPLATE, aPlaceholderImage,
+                                size);
                         imageResource = new ImageResource(resourceURI, new ImageInfoService(aPlaceholderImage));
 
                         // Create a canvas using the width and height of the placeholder image
@@ -444,21 +448,5 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
         }
 
         return canvases.toArray(new Canvas[] {});
-    }
-
-    /**
-     * Gets the metadata from the supplied row and index position.
-     *
-     * @param aRow A row of metadata
-     * @param aIndex An index position of the metadata to retrieve
-     * @return An optional metadata value
-     */
-    private Optional<String> getMetadata(final String[] aRow, final int aIndex) {
-        try {
-            return Optional.ofNullable(StringUtils.trimToNull(aRow[aIndex]));
-        } catch (final IndexOutOfBoundsException details) {
-            // Checking for required metadata is done in the parser, not here
-            return Optional.empty();
-        }
     }
 }

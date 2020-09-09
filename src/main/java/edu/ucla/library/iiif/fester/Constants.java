@@ -219,11 +219,6 @@ public final class Constants {
     public static final String VERTICLE_MAP = "fester-verticles";
 
     /**
-     * The ID property in a collection or manifest.
-     */
-    public static final String ID = "@id";
-
-    /**
      * The collection type of resource.
      */
     public static final String COLLECTION = "collection";
@@ -242,6 +237,36 @@ public final class Constants {
      * Version 3 of the IIIF presentation API.
      */
     public static final String IIIF_API_V3 = "v3";
+
+    /**
+     * The string template of default thumbnail URIs.
+     */
+    public static final String DEFAULT_THUMBNAIL_URI_TEMPLATE = "{}/full/{},/0/default.jpg";
+
+    /**
+     * The default size of thumbnails.
+     */
+    public static final int DEFAULT_THUMBNAIL_SIZE = 600;
+
+    /**
+     * The id property of a v2 IIIF resource.
+     */
+    public static final String IIIF_PRESENTATION_ID_V2 = "@id";
+
+    /**
+     * The id property of a v3 IIIF resource.
+     */
+    public static final String IIIF_PRESENTATION_ID_V3 = "id";
+
+    /**
+     * The context property of a v2 IIIF resource.
+     */
+    public static final String IIIF_PRESENTATION_CONTEXT_V2 = "http://iiif.io/api/presentation/2/context.json";
+
+    /**
+     * The context property of a v3 IIIF resource.
+     */
+    public static final String IIIF_PRESENTATION_CONTEXT_V3 = "http://iiif.io/api/presentation/3/context.json";
 
     /**
      * Private constructor for Constants class.
