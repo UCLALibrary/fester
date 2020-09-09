@@ -135,14 +135,13 @@ public class ManifestVerticleTest {
                             aContext.fail(LOGGER.getMessage(MessageCodes.MFS_077, deploymentKey));
                         }
                     } else {
-
+                        aContext.fail(startup.cause());
                     }
                 });
 
                 myRunID = UUID.randomUUID().toString();
             } else {
                 aContext.fail(getConfig.cause());
-                asyncTask.complete();
             }
         });
     }
