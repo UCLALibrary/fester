@@ -165,4 +165,7 @@
   <entry key="MFS-152">Collection update failed: {}</entry>
   <entry key="MFS-153">Unexpected manifest action: {}</entry>
   <entry key="MFS-154">Failed to find expected S3 object for '{}'</entry>
+  <entry key="MFS-155">S3 endpoints healthcheck failed: {}</entry>
+  <entry key="MFS-156">S3 endpoint response issue: {}</entry>
+  <entry key="MFS-157">Test CheckEndpointsHandler with request path: {}</entry>
 </properties>

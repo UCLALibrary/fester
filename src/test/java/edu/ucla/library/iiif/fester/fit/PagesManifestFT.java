@@ -51,6 +51,7 @@ public class PagesManifestFT extends BaseFesterFT {
 
     private static final int[] CANVAS_COUNTS = new int[] { 42, 26, 46, 39, 36 };
 
+    /* Slower systems may have trouble finishing within the default timeout */
     @Rule
     public Timeout myTimeout = new Timeout(5, TimeUnit.MINUTES);
 

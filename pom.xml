@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>fester</artifactId>
-  <version>0.11.3-SNAPSHOT</version>
+  <version>0.12.2-SNAPSHOT</version>
   <name>Fester</name>
   <description>A read/write interface for storing and retrieving IIIF manifests</description>
   <url>https://github.com/uclalibrary/fester</url>
@@ -80,7 +80,11 @@
     <vertx.super.s3.version>1.3.3</vertx.super.s3.version>
     <jiiify.presentation.v2.version>0.5.3</jiiify.presentation.v2.version>
     <jiiify.presentation.v3.version>0.5.4</jiiify.presentation.v3.version>
-    <alphanumeric-comparator.version>1.4.1</alphanumeric-comparator.version>
+    <alphanumeric.comparator.version>1.4.1</alphanumeric.comparator.version>
+
+    <!-- Exclusions/Replacements -->
+    <snakeyaml.version>1.26</snakeyaml.version>
+    <commons.codec.version>1.14</commons.codec.version>
 
     <!-- Versions of tools used for testing -->
     <jsoup.version>1.13.1</jsoup.version>
@@ -199,9 +203,20 @@
 
     <!-- OpenAPI for Vert.x - https://vertx.io/docs/vertx-web-api-contract/java/ -->
     <dependency>
+      <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <version>${snakeyaml.version}</version>
+    </dependency>
+    <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-web-api-contract</artifactId>
       <version>${vertx.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.yaml</groupId>
+          <artifactId>snakeyaml</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <!-- Below is a dependency that needs updating due to security issue (may be able to remove in future) -->
     <dependency>
@@ -242,14 +257,25 @@
       <version>${commons.lang.version}</version>
     </dependency>
     <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>${commons.codec.version}</version>
+    </dependency>
+    <dependency>
       <groupId>com.amazonaws</groupId>
       <artifactId>aws-java-sdk-s3</artifactId>
       <version>${aws.sdk.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-codec</groupId>
+          <artifactId>commons-codec</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>se.sawano.java</groupId>
       <artifactId>alphanumeric-comparator</artifactId>
-      <version>${alphanumeric-comparator.version}</version>
+      <version>${alphanumeric.comparator.version}</version>
     </dependency>
     <dependency>
       <groupId>org.jsoup</groupId>
@@ -608,8 +634,7 @@
           </systemPropertyVariables>
           <argLine>${jacoco.agent.arg}</argLine>
           <skipTests>${skipUTs}</skipTests>
-          <forkCount>0</forkCount><!-- Multiple forks result in multiple containers -->
-          <useSystemClassLoader>false</useSystemClassLoader> <!-- Override parent project setting -->
+          <forkCount>1</forkCount><!-- Multiple forks result in multiple containers -->
         </configuration>
         <executions>
           <execution>
@@ -1146,6 +1171,43 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <id>fluency</id>
+      <properties>
+        <fluency.core.version>2.4.1</fluency.core.version>
+        <fluency.fluentd.version>2.4.1</fluency.fluentd.version>
+        <msgpack.core.version>0.8.20</msgpack.core.version>
+        <jackson.dataformat.msgpack.version>0.8.20</jackson.dataformat.msgpack.version>
+        <logback.more.appenders.version>1.8.0</logback.more.appenders.version>
+      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>org.komamitsu</groupId>
+          <artifactId>fluency-core</artifactId>
+          <version>${fluency.core.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.komamitsu</groupId>
+          <artifactId>fluency-fluentd</artifactId>
+          <version>${fluency.fluentd.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.msgpack</groupId>
+          <artifactId>msgpack-core</artifactId>
+          <version>${msgpack.core.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.msgpack</groupId>
+          <artifactId>jackson-dataformat-msgpack</artifactId>
+          <version>${jackson.dataformat.msgpack.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>com.sndyuk</groupId>
+          <artifactId>logback-more-appenders</artifactId>
+          <version>${logback.more.appenders.version}</version>
+        </dependency>
+      </dependencies>
+    </profile>
   </profiles>
 
   <!-- Enables pushing project documentation up to an S3 bucket -->
@@ -1160,6 +1222,6 @@
   <parent>
     <artifactId>freelib-parent</artifactId>
     <groupId>info.freelibrary</groupId>
-    <version>4.0.0</version>
+    <version>4.0.1</version>
   </parent>
 </project>

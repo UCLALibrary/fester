@@ -47,6 +47,11 @@ public final class Op {
     public static final String POST_CSV = "postCSV";
 
     /**
+     * Get S3 endpoints status.
+     */
+    public static final String CHECK_ENDPOINTS = "checkEndpoints";
+
+    /**
      * A successful operation.
      */
     public static final String SUCCESS = "success";
