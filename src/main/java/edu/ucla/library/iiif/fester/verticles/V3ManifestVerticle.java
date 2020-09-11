@@ -91,6 +91,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                         break;
                     default:
                         message.fail(HTTP.INTERNAL_SERVER_ERROR, LOGGER.getMessage(MessageCodes.MFS_153, action));
+                        break;
                 }
             } catch (final JsonProcessingException details) {
                 LOGGER.error(details, details.getMessage());
@@ -349,7 +350,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
             final String encodedPageID = URLEncoder.encode(pageID, StandardCharsets.UTF_8);
             final String pageURI = StringUtils.format(SIMPLE_URI, aImageHost, encodedPageID);
 
-            String resourceURI = StringUtils.format(Constants.DEFAULT_THUMBNAIL_URI_TEMPLATE, pageURI,
+            String resourceURI = StringUtils.format(Constants.THUMBNAIL_URI_TEMPLATE, pageURI,
                     Constants.DEFAULT_THUMBNAIL_SIZE);
             Canvas canvas;
             ImageContent image;
@@ -381,8 +382,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                         }
 
                         // If placeholder image found, use its URL for image resource and service
-                        resourceURI = StringUtils.format(Constants.DEFAULT_THUMBNAIL_URI_TEMPLATE, aPlaceholderImage,
-                                size);
+                        resourceURI = StringUtils.format(Constants.THUMBNAIL_URI_TEMPLATE, aPlaceholderImage, size);
 
                         // Create a canvas using the width and height of the placeholder image
                         canvas = new Canvas(aMinter, pageLabel);

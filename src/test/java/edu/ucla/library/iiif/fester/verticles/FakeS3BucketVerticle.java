@@ -143,10 +143,10 @@ public class FakeS3BucketVerticle extends AbstractFesterVerticle {
 
         switch (myIiifApiVersion) {
             case Constants.IIIF_API_V2:
-                idKey = Constants.IIIF_PRESENTATION_ID_V2;
+                idKey = Constants.ID_V2;
                 break;
             default: // Constants.IIIF_API_V3
-                idKey = Constants.IIIF_PRESENTATION_ID_V3;
+                idKey = Constants.ID_V3;
                 break;
         }
         derivedManifestS3Key = IDUtils.getResourceS3Key(URI.create(aManifest.getString(idKey)));

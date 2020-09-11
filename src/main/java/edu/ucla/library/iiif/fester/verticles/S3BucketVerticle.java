@@ -176,10 +176,10 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
         final String idKey;
         final String derivedManifestS3Key;
 
-        if (context.equals(Constants.IIIF_PRESENTATION_CONTEXT_V2)) {
-            idKey = Constants.IIIF_PRESENTATION_ID_V2;
-        } else { // Constants.IIIF_PRESENTATION_CONTEXT_V3
-            idKey = Constants.IIIF_PRESENTATION_ID_V3;
+        if (context.equals(Constants.CONTEXT_V2)) {
+            idKey = Constants.ID_V2;
+        } else { // Constants.CONTEXT_V3
+            idKey = Constants.ID_V3;
         }
         derivedManifestS3Key = IDUtils.getResourceS3Key(URI.create(aManifest.getString(idKey)));
 

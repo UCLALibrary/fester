@@ -20,13 +20,15 @@ import io.vertx.ext.web.RoutingContext;
 
 /**
  * Handler that checks S3 endpoint status
- *
  */
 public class CheckEndpointsHandler extends AbstractFesterHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CheckEndpointsHandler.class, Constants.MESSAGES);
+
     private static final String UPLOAD_KEY = "test_load.json";
+
     private static final String APPEND = " : ";
+
     /**
      *  Creates a handler that checks S3 endpoint statuses.
      *
@@ -44,57 +46,45 @@ public class CheckEndpointsHandler extends AbstractFesterHandler {
         final JsonObject endpoints = new JsonObject();
         final JsonObject status = new JsonObject();
 
-        try {
-            final Future<Object> composite = Future.future( put -> {
-                myS3Client.put(myS3Bucket, UPLOAD_KEY, Buffer.buffer(upload.toJSON().encodePrettily()), putResponse -> {
-                    final int statusCode = putResponse.statusCode();
-                    final String statusMessage = putResponse.statusMessage();
-                    endpoints.put(Status.PUT_RESPONSE, statusCode);
-                    determineEndpointStatus(statusCode,statusMessage,endpoints,put);
+        Future.future(put -> {
+            myS3Client.put(myS3Bucket, UPLOAD_KEY, Buffer.buffer(upload.toJSON().encodePrettily()), putResponse -> {
+                final int statusCode = putResponse.statusCode();
+                final String statusMessage = putResponse.statusMessage();
+                endpoints.put(Status.PUT_RESPONSE, statusCode);
+                determineEndpointStatus(statusCode, statusMessage, endpoints, put);
+            });
+        }).compose(addGet -> {
+            return Future.future(get -> {
+                myS3Client.get(myS3Bucket, UPLOAD_KEY, getResponse -> {
+                    final int statusCode = getResponse.statusCode();
+                    final String statusMessage = getResponse.statusMessage();
+                    endpoints.put(Status.GET_RESPONSE, statusCode);
+                    determineEndpointStatus(statusCode, statusMessage, endpoints, get);
                 });
-            } ).compose( addGet -> {
-                return Future.future( get -> {
-                    myS3Client.get(myS3Bucket, UPLOAD_KEY, getResponse -> {
-                        final int statusCode = getResponse.statusCode();
-                        final String statusMessage = getResponse.statusMessage();
-                        endpoints.put(Status.GET_RESPONSE, statusCode);
-                        determineEndpointStatus(statusCode,statusMessage,endpoints,get);
-                    });
-                } );
-            } ).compose( addDel -> {
-                return Future.future( delete -> {
-                    myS3Client.delete(myS3Bucket, UPLOAD_KEY, deleteResponse -> {
-                        final int statusCode = deleteResponse.statusCode();
-                        final String statusMessage = deleteResponse.statusMessage();
-                        endpoints.put(Status.DELETE_RESPONSE, statusCode);
-                        determineEndpointStatus(statusCode,statusMessage,endpoints,delete);
-                    });
-                } );
             } );
-
-            composite.onSuccess( success -> {
-                status.put( Status.STATUS, determineOverallStatus(endpoints) ).put( Status.ENDPOINTS, endpoints );
-
-                response.setStatusCode(HTTP.OK);
-                response.putHeader(Constants.CONTENT_TYPE, Constants.JSON_MEDIA_TYPE).end(status.encodePrettily());
-            } ).onFailure( failure -> {
-                final String statusMessage = failure.getMessage();
-                final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_155, statusMessage);
-                LOGGER.error(errorMessage);
-                response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
-                response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
-                response.end(errorMessage);
+        }).compose(addDel -> {
+            return Future.future(delete -> {
+                myS3Client.delete(myS3Bucket, UPLOAD_KEY, deleteResponse -> {
+                    final int statusCode = deleteResponse.statusCode();
+                    final String statusMessage = deleteResponse.statusMessage();
+                    endpoints.put(Status.DELETE_RESPONSE, statusCode);
+                    determineEndpointStatus(statusCode, statusMessage, endpoints, delete);
+                });
             } );
+        }).onSuccess(success -> {
+            status.put(Status.STATUS, determineOverallStatus(endpoints)).put(Status.ENDPOINTS, endpoints);
 
-        } catch (final Throwable aThrowable) {
-            final String exceptionMessage = aThrowable.getMessage();
+            response.setStatusCode(HTTP.OK);
+            response.putHeader(Constants.CONTENT_TYPE, Constants.JSON_MEDIA_TYPE).end(status.encodePrettily());
+        }).onFailure(failure -> {
+            final String statusMessage = failure.getMessage();
+            final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_155, statusMessage);
 
-            LOGGER.error(aThrowable, exceptionMessage);
-
+            LOGGER.error(errorMessage);
             response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
             response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
-            response.end(exceptionMessage);
-        }
+            response.end(errorMessage);
+        });
 
     }
 

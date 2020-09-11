@@ -241,7 +241,7 @@ public final class Constants {
     /**
      * The string template of default thumbnail URIs.
      */
-    public static final String DEFAULT_THUMBNAIL_URI_TEMPLATE = "{}/full/{},/0/default.jpg";
+    public static final String THUMBNAIL_URI_TEMPLATE = "{}/full/{},/0/default.jpg";
 
     /**
      * The default size of thumbnails.
@@ -251,22 +251,22 @@ public final class Constants {
     /**
      * The id property of a v2 IIIF resource.
      */
-    public static final String IIIF_PRESENTATION_ID_V2 = "@id";
+    public static final String ID_V2 = "@id";
 
     /**
      * The id property of a v3 IIIF resource.
      */
-    public static final String IIIF_PRESENTATION_ID_V3 = "id";
+    public static final String ID_V3 = "id";
 
     /**
      * The context property of a v2 IIIF resource.
      */
-    public static final String IIIF_PRESENTATION_CONTEXT_V2 = "http://iiif.io/api/presentation/2/context.json";
+    public static final String CONTEXT_V2 = "http://iiif.io/api/presentation/2/context.json";
 
     /**
      * The context property of a v3 IIIF resource.
      */
-    public static final String IIIF_PRESENTATION_CONTEXT_V3 = "http://iiif.io/api/presentation/3/context.json";
+    public static final String CONTEXT_V3 = "http://iiif.io/api/presentation/3/context.json";
 
     /**
      * Private constructor for Constants class.

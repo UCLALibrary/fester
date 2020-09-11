@@ -254,7 +254,7 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
         final DeliveryOptions options = new DeliveryOptions();
 
         // Create a fake manifest ID/URI with our test manifest key
-        manifest.put(Constants.IIIF_PRESENTATION_ID_V2, myManifestUri.toString());
+        manifest.put(Constants.ID_V2, myManifestUri.toString());
 
         message.put(Constants.MANIFEST_ID, myManifestID).put(Constants.DATA, manifest);
         options.addHeader(Constants.ACTION, Op.PUT_MANIFEST);
@@ -305,9 +305,9 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
         final DeliveryOptions options = new DeliveryOptions();
 
         // Create a fake manifest ID/URI with our collection key
-        manifest.put(Constants.IIIF_PRESENTATION_ID_V2, myCollectionUri.toString());
+        manifest.put(Constants.ID_V2, myCollectionUri.toString());
 
-        LOGGER.debug(MessageCodes.MFS_130, manifest.getString(Constants.IIIF_PRESENTATION_ID_V2));
+        LOGGER.debug(MessageCodes.MFS_130, manifest.getString(Constants.ID_V2));
 
         message.put(Constants.COLLECTION_NAME, myCollectionID).put(Constants.DATA, manifest);
         options.addHeader(Constants.ACTION, Op.PUT_COLLECTION);
