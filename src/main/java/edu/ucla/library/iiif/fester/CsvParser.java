@@ -189,7 +189,7 @@ public class CsvParser {
      * @param aRow The row of collection metadata
      * @throws CsvParsingException If there is trouble parsing the data
      */
-    private void extractCollectionMetadata(final String[] aRow) throws CsvParsingException {
+    private void extractCollectionMetadata(final String... aRow) throws CsvParsingException {
         if (getMetadata(aRow[myCsvHeaders.getItemArkIndex()]).isPresent()) {
             if (getMetadata(aRow[myCsvHeaders.getTitleIndex()]).isEmpty()) {
                 throw new CsvParsingException(MessageCodes.MFS_104);
@@ -209,7 +209,7 @@ public class CsvParser {
      * @param aWorksMap A collection of Work manifests
      * @throws CsvParsingException If there is trouble getting the necessary info from the CSV
      */
-    private void extractWorkMetadata(final String[] aRow) throws CsvParsingException {
+    private void extractWorkMetadata(final String... aRow) throws CsvParsingException {
         final Optional<String> parentIdOpt = getMetadata(aRow[myCsvHeaders.getParentArkIndex()]);
         final Optional<String> workIdOpt = getMetadata(aRow[myCsvHeaders.getItemArkIndex()]);
         final Optional<String> labelOpt = getMetadata(aRow[myCsvHeaders.getTitleIndex()]);
@@ -254,7 +254,7 @@ public class CsvParser {
      * @param aPageMap A map of pages
      * @throws CsvParsingException
      */
-    private void extractPageMetadata(final String[] aRow) throws CsvParsingException {
+    private void extractPageMetadata(final String... aRow) throws CsvParsingException {
         final Optional<String> workIdOpt = getMetadata(aRow[myCsvHeaders.getParentArkIndex()]);
 
         if (workIdOpt.isPresent()) {
@@ -280,7 +280,7 @@ public class CsvParser {
      * @return The row
      * @throws CsvParsingException If the metadata contains a hard return
      */
-    private String[] checkForEOLs(final String[] aRow) throws CsvParsingException {
+    private String[] checkForEOLs(final String... aRow) throws CsvParsingException {
         for (int index = 0; index < aRow.length; index++) {
             if (EOL_PATTERN.matcher(aRow[index]).find()) {
                 throw new CsvParsingException(MessageCodes.MFS_093, aRow[index]);
@@ -295,7 +295,7 @@ public class CsvParser {
      * @param aRow A row from the metadata CSV
      * @return The row
      */
-    private String[] trimValues(final String[] aRow) {
+    private String[] trimValues(final String... aRow) {
         for (int index = 0; index < aRow.length; index++) {
             if (aRow[index] != null) {
                 aRow[index] = aRow[index].trim();
