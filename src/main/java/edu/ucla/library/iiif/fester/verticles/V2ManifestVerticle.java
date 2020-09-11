@@ -326,7 +326,7 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
         final Sequence sequence;
 
         // If the work doesn't already have any sequences, create one for it
-        if (sequences.size() == 0) {
+        if (sequences.isEmpty()) {
             final String sequenceID = StringUtils.format(SEQUENCE_URI, Constants.URL_PLACEHOLDER, encodedWorkID);
 
             sequence = new Sequence().setID(sequenceID);

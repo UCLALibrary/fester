@@ -23,14 +23,14 @@ public class V3CollectionItemLabelComparator implements Comparator<Collection.It
         final String firstLabel;
         final String secondLabel;
 
-        if (firstType == secondType) {
+        if (firstType.equals(secondType)) {
             firstLabel = aFirstCollectionItem.getLabel().getString();
             secondLabel = aSecondCollectionItem.getLabel().getString();
 
             return myComparator.compare(firstLabel, secondLabel);
         } else {
             // Sort Collections before Manifests
-            if (firstType == Collection.Item.Type.Collection && secondType == Collection.Item.Type.Manifest) {
+            if (firstType.equals(Collection.Item.Type.Collection) && secondType.equals(Collection.Item.Type.Manifest)) {
                 return -1;
             } else {
                 return 1;

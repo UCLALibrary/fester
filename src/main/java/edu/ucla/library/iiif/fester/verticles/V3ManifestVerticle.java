@@ -215,7 +215,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
             final Canvas[] canvases;
 
             pageList.sort(new ItemSequenceComparator(csvHeaders.getItemSequenceIndex()));
-            canvases = createCanvases(csvHeaders, pageList, imageHost, placeholderImage, encodedWorkID, minter);
+            canvases = createCanvases(csvHeaders, pageList, imageHost, placeholderImage, minter);
             manifest.addCanvas(canvases);
         } else {
             getMetadata(workRow, csvHeaders.getImageAccessUrlIndex()).ifPresent(accessURL -> {
@@ -223,7 +223,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                 final Canvas[] canvases;
 
                 pageList.add(workRow);
-                canvases = createCanvases(csvHeaders, pageList, imageHost, placeholderImage, encodedWorkID, minter);
+                canvases = createCanvases(csvHeaders, pageList, imageHost, placeholderImage, minter);
                 manifest.addCanvas(canvases);
             });
         }
@@ -300,7 +300,6 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         final String workID = body.getString(Constants.MANIFEST_ID);
         final String imageHost = body.getString(Constants.IIIF_HOST);
         final String placeholderImage = body.getString(Constants.PLACEHOLDER_IMAGE);
-        final String encodedWorkID = URLEncoder.encode(workID, StandardCharsets.UTF_8);
         final Manifest manifest = Manifest.fromJSON(body.getJsonObject(Constants.MANIFEST_CONTENT));
         final Minter minter = MinterFactory.getMinter(manifest);
         final CsvHeaders csvHeaders = CsvHeaders.fromJSON(body.getJsonObject(Constants.CSV_HEADERS));
@@ -313,7 +312,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
 
         manifest.getCanvases().clear(); // Overwrite whatever canvases are on the manifest
         pagesList.sort(new ItemSequenceComparator(csvHeaders.getItemSequenceIndex()));
-        manifest.addCanvas(createCanvases(csvHeaders, pagesList, imageHost, placeholderImage, encodedWorkID, minter));
+        manifest.addCanvas(createCanvases(csvHeaders, pagesList, imageHost, placeholderImage, minter));
 
         jsonManifest = manifest.toJSON();
         message.put(Constants.DATA, jsonManifest);
@@ -336,11 +335,10 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
      * @param aPageList A list of pages to add
      * @param aSequence A sequence to add pages to
      * @param aImageHost An image host for image links
-     * @param aWorkID A URL encoded work ID
      * @param aMinter An ID minter
      */
     private Canvas[] createCanvases(final CsvHeaders aCsvHeaders, final List<String[]> aPageList,
-            final String aImageHost, final String aPlaceholderImage, final String aWorkID, final Minter aMinter) {
+            final String aImageHost, final String aPlaceholderImage, final Minter aMinter) {
         final Iterator<String[]> iterator = aPageList.iterator();
         final List<Canvas> canvases = new ArrayList<>();
 
