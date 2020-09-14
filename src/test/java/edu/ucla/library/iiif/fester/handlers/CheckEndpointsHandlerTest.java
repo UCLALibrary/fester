@@ -39,7 +39,7 @@ public class CheckEndpointsHandlerTest extends AbstractFesterHandlerTest {
         final WebClient webClient = WebClient.create(myVertx);
         final int port = aContext.get(Config.HTTP_PORT);
 
-        LOGGER.debug(MessageCodes.MFS_150, requestPath);
+        LOGGER.debug(MessageCodes.MFS_157, requestPath);
 
         webClient
             .get(port, Constants.UNSPECIFIED_HOST, requestPath)

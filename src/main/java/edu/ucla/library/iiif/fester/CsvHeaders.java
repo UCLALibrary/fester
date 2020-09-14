@@ -1,6 +1,13 @@
 
 package edu.ucla.library.iiif.fester;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSetter;
+
+import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
+
 /**
  * The CSV file's headers.
  */
@@ -119,10 +126,18 @@ public class CsvHeaders {
     }
 
     /**
+     * A constructor used by Jackson for deserialization.
+     */
+    @SuppressWarnings("unused")
+    private CsvHeaders() {
+    }
+
+    /**
      * Gets the Item ARK index position.
      *
      * @return The Item ARK index position
      */
+    @JsonGetter
     public int getItemArkIndex() {
         return myItemArkIndex;
     }
@@ -133,6 +148,7 @@ public class CsvHeaders {
      * @param aItemArkIndex The position of the Item ARK header
      * @return This CSV headers
      */
+    @JsonSetter
     public CsvHeaders setItemArkIndex(final int aItemArkIndex) {
         myItemArkIndex = aItemArkIndex;
         return this;
@@ -152,6 +168,7 @@ public class CsvHeaders {
      *
      * @return The image access URL index position
      */
+    @JsonGetter
     public int getImageAccessUrlIndex() {
         return myImageAccessUrlIndex;
     }
@@ -162,6 +179,7 @@ public class CsvHeaders {
      * @param aImageAccessUrlIndex The position of the image access URL header
      * @return This CSV headers
      */
+    @JsonSetter
     public CsvHeaders setImageAccessUrlIndex(final int aImageAccessUrlIndex) {
         myImageAccessUrlIndex = aImageAccessUrlIndex;
         return this;
@@ -181,6 +199,7 @@ public class CsvHeaders {
      *
      * @return The Parent ARK index position
      */
+    @JsonGetter
     public int getParentArkIndex() {
         return myParentArkIndex;
     }
@@ -191,6 +210,7 @@ public class CsvHeaders {
      * @param aParentArkIndex The index position of the Parent ARK
      * @return This CSV headers
      */
+    @JsonSetter
     public CsvHeaders setParentArkIndex(final int aParentArkIndex) {
         myParentArkIndex = aParentArkIndex;
         return this;
@@ -210,6 +230,7 @@ public class CsvHeaders {
      *
      * @return The Title index position
      */
+    @JsonGetter
     public int getTitleIndex() {
         return myTitleIndex;
     }
@@ -220,6 +241,7 @@ public class CsvHeaders {
      * @param aTitleIndex The index position of the Title
      * @return This CSV headers
      */
+    @JsonSetter
     public CsvHeaders setTitleIndex(final int aTitleIndex) {
         myTitleIndex = aTitleIndex;
         return this;
@@ -239,6 +261,7 @@ public class CsvHeaders {
      *
      * @return The index position of the Object Type
      */
+    @JsonGetter
     public int getObjectTypeIndex() {
         return myObjectTypeIndex;
     }
@@ -249,6 +272,7 @@ public class CsvHeaders {
      * @param aObjectTypeIndex The index position of the Object Type
      * @return This CSV headers
      */
+    @JsonSetter
     public CsvHeaders setObjectTypeIndex(final int aObjectTypeIndex) {
         myObjectTypeIndex = aObjectTypeIndex;
         return this;
@@ -268,6 +292,7 @@ public class CsvHeaders {
      *
      * @return The index position of the File Name
      */
+    @JsonGetter
     public int getFileNameIndex() {
         return myFileNameIndex;
     }
@@ -278,6 +303,7 @@ public class CsvHeaders {
      * @param aFileNameIndex The index position of the File Name
      * @return This CSV headers
      */
+    @JsonSetter
     public CsvHeaders setFileNameIndex(final int aFileNameIndex) {
         myFileNameIndex = aFileNameIndex;
         return this;
@@ -293,23 +319,25 @@ public class CsvHeaders {
     }
 
     /**
+     * Gets the Item Sequence header position.
+     *
+     * @return The item sequence header position
+     */
+    @JsonGetter
+    public int getItemSequenceIndex() {
+        return myItemSequenceIndex;
+    }
+
+    /**
      * Sets the Item Sequence index position.
      *
      * @param aItemSequenceIndex
      * @return This CSV headers
      */
+    @JsonSetter
     public CsvHeaders setItemSequenceIndex(final int aItemSequenceIndex) {
         myItemSequenceIndex = aItemSequenceIndex;
         return this;
-    }
-
-    /**
-     * Gets the Item Sequence header position.
-     *
-     * @return The item sequence header position
-     */
-    public int getItemSequenceIndex() {
-        return myItemSequenceIndex;
     }
 
     /**
@@ -326,6 +354,7 @@ public class CsvHeaders {
      *
      * @return The viewingHint index position
      */
+    @JsonGetter
     public int getViewingHintIndex() {
         return myViewingHintIndex;
     }
@@ -336,6 +365,7 @@ public class CsvHeaders {
      * @param aViewingHintIndex The position of the viewingHint header
      * @return This CSV headers
      */
+    @JsonSetter
     public CsvHeaders setViewingHintIndex(final int aViewingHintIndex) {
         myViewingHintIndex = aViewingHintIndex;
         return this;
@@ -355,6 +385,7 @@ public class CsvHeaders {
      *
      * @return The viewingDirection index position
      */
+    @JsonGetter
     public int getViewingDirectionIndex() {
         return myViewingDirectionIndex;
     }
@@ -365,6 +396,7 @@ public class CsvHeaders {
      * @param aViewingDirectionIndex The position of the viewingDirection header
      * @return This CSV headers
      */
+    @JsonSetter
     public CsvHeaders setViewingDirectionIndex(final int aViewingDirectionIndex) {
         myViewingDirectionIndex = aViewingDirectionIndex;
         return this;
@@ -384,6 +416,7 @@ public class CsvHeaders {
      *
      * @return The repository name index position
      */
+    @JsonGetter
     public int getRepositoryNameIndex() {
         return myRepositoryNameIndex;
     }
@@ -394,6 +427,7 @@ public class CsvHeaders {
      * @param aRepositoryNameIndex The position of the repository name header
      * @return This CSV headers
      */
+    @JsonSetter
     public CsvHeaders setRepositoryNameIndex(final int aRepositoryNameIndex) {
         myRepositoryNameIndex = aRepositoryNameIndex;
         return this;
@@ -413,6 +447,7 @@ public class CsvHeaders {
      *
      * @return The local rights statement index position
      */
+    @JsonGetter
     public int getLocalRightsStatementIndex() {
         return myLocalRightsStatementIndex;
     }
@@ -423,6 +458,7 @@ public class CsvHeaders {
      * @param aLocalRightsStatementIndex The position of the local rights statement header
      * @return This CSV headers
      */
+    @JsonSetter
     public CsvHeaders setLocalRightsStatementIndex(final int aLocalRightsStatementIndex) {
         myLocalRightsStatementIndex = aLocalRightsStatementIndex;
         return this;
@@ -442,6 +478,7 @@ public class CsvHeaders {
      *
      * @return The rights contact index position
      */
+    @JsonGetter
     public int getRightsContactIndex() {
         return myRightsContactIndex;
     }
@@ -452,6 +489,7 @@ public class CsvHeaders {
      * @param aRightsContactIndex The position of the rights contact header
      * @return This CSV headers
      */
+    @JsonSetter
     public CsvHeaders setRightsContactIndex(final int aRightsContactIndex) {
         myRightsContactIndex = aRightsContactIndex;
         return this;
@@ -464,5 +502,41 @@ public class CsvHeaders {
      */
     public boolean hasRightsContactIndex() {
         return myRightsContactIndex != -1;
+    }
+
+    /**
+     * Returns a JsonObject of the CsvHeaders.
+     *
+     * @return A JsonObject of the CsvHeaders
+     */
+    public JsonObject toJSON() {
+        return JsonObject.mapFrom(this);
+    }
+
+    @Override
+    public String toString() {
+        return toJSON().encodePrettily();
+    }
+
+    /**
+     * Returns a CsvHeaders from its JSON representation.
+     *
+     * @param aJsonObject A CSV headers object in JSON form
+     * @return The CSV headers
+     */
+    @JsonIgnore
+    public static CsvHeaders fromJSON(final JsonObject aJsonObject) {
+        return Json.decodeValue(aJsonObject.toString(), CsvHeaders.class);
+    }
+
+    /**
+     * Returns a CsvHeaders from its JSON representation.
+     *
+     * @param aJsonString A CSV headers object in string form
+     * @return The CSV headers
+     */
+    @JsonIgnore
+    public static CsvHeaders fromString(final String aJsonString) {
+        return fromJSON(new JsonObject(aJsonString));
     }
 }

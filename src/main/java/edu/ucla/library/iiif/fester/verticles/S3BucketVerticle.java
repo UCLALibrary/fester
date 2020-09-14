@@ -82,36 +82,36 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
         }
 
         getJsonConsumer().handler(message -> {
-            final JsonObject msg = message.body();
-            final String manifestID;
-            final JsonObject manifest;
+            final JsonObject messageBody = message.body();
             final String action = message.headers().get(Constants.ACTION);
+            final String apiVersion = message.headers().get(Constants.IIIF_API_VERSION);
+            final JsonObject manifest;
+            final String manifestID;
 
             switch (action) {
                 case Op.GET_MANIFEST:
-                    manifestID = msg.getString(Constants.MANIFEST_ID);
-                    LOGGER.debug(MessageCodes.MFS_133, manifestID, myS3Bucket);
+                    manifestID = messageBody.getString(Constants.MANIFEST_ID);
+                    LOGGER.debug(MessageCodes.MFS_133, manifestID, apiVersion, myS3Bucket);
                     get(IDUtils.getWorkS3Key(manifestID), message);
                     break;
                 case Op.PUT_MANIFEST:
-                    manifestID = msg.getString(Constants.MANIFEST_ID);
-                    manifest = msg.getJsonObject(Constants.DATA);
+                    manifestID = messageBody.getString(Constants.MANIFEST_ID);
+                    manifest = messageBody.getJsonObject(Constants.DATA);
                     put(IDUtils.getWorkS3Key(manifestID), manifest, message);
                     break;
                 case Op.GET_COLLECTION:
-                    manifestID = msg.getString(Constants.COLLECTION_NAME);
-                    LOGGER.debug(MessageCodes.MFS_133, manifestID, myS3Bucket);
+                    manifestID = messageBody.getString(Constants.COLLECTION_NAME);
+                    LOGGER.debug(MessageCodes.MFS_133, manifestID, apiVersion, myS3Bucket);
                     get(IDUtils.getCollectionS3Key(manifestID), message);
                     break;
                 case Op.PUT_COLLECTION:
-                    manifestID = msg.getString(Constants.COLLECTION_NAME);
-                    manifest = msg.getJsonObject(Constants.DATA);
+                    manifestID = messageBody.getString(Constants.COLLECTION_NAME);
+                    manifest = messageBody.getJsonObject(Constants.DATA);
                     put(IDUtils.getCollectionS3Key(manifestID), manifest, message);
                     break;
                 default:
-                    final String errorMessage = StringUtils.format(MessageCodes.MFS_139, getClass().toString(),
-                            message.toString(), action);
-                    message.fail(CodeUtils.getInt(MessageCodes.MFS_139), errorMessage);
+                    message.fail(CodeUtils.getInt(MessageCodes.MFS_139), StringUtils.format(MessageCodes.MFS_139,
+                            getClass().toString(), message.toString(), action));
             }
         });
 
@@ -172,7 +172,16 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
     private void put(final String aS3Key, final JsonObject aManifest, final Message<JsonObject> aMessage) {
         final Buffer manifestContent = aManifest.toBuffer();
         final String manifestID = IDUtils.getResourceID(aS3Key);
-        final String derivedManifestS3Key = IDUtils.getResourceS3Key(URI.create(aManifest.getString(Constants.ID)));
+        final String context = aManifest.getString("@context");
+        final String idKey;
+        final String derivedManifestS3Key;
+
+        if (context.equals(Constants.CONTEXT_V2)) {
+            idKey = Constants.ID_V2;
+        } else { // Constants.CONTEXT_V3
+            idKey = Constants.ID_V3;
+        }
+        derivedManifestS3Key = IDUtils.getResourceS3Key(URI.create(aManifest.getString(idKey)));
 
         LOGGER.debug(MessageCodes.MFS_051, aManifest, myS3Bucket);
         LOGGER.debug(MessageCodes.MFS_128, manifestID);

@@ -105,15 +105,19 @@ public class MainVerticle extends AbstractVerticle {
      * @param aPromise A startup promise
      */
     private void startVerticles(final JsonObject aConfig, final Promise<Void> aPromise) {
+        @SuppressWarnings("rawtypes")
+        final List<Future> futures = new ArrayList<>();
         final DeploymentOptions uploaderOptions = new DeploymentOptions();
         final DeploymentOptions manifestorOptions = new DeploymentOptions();
-        final List<Future> futures = new ArrayList<>();
+        final int cores = Runtime.getRuntime().availableProcessors();
 
         uploaderOptions.setConfig(aConfig);
         manifestorOptions.setWorker(true).setWorkerPoolName(ManifestVerticle.class.getSimpleName());
-        manifestorOptions.setWorkerPoolSize(1).setConfig(aConfig);
+        manifestorOptions.setWorkerPoolSize(cores > 2 ? cores - 2 : 1).setConfig(aConfig);
 
         // Start up any necessary Fester verticles
+        futures.add(deployVerticle(V2ManifestVerticle.class.getName(), manifestorOptions, Promise.promise()));
+        futures.add(deployVerticle(V3ManifestVerticle.class.getName(), manifestorOptions, Promise.promise()));
         futures.add(deployVerticle(ManifestVerticle.class.getName(), manifestorOptions, Promise.promise()));
         futures.add(deployVerticle(S3BucketVerticle.class.getName(), uploaderOptions, Promise.promise()));
 

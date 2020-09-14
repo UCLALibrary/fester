@@ -32,7 +32,7 @@ public class GetManifestFIT {
     private static final String API_PATH = "/{}/manifest";
 
     /* The path to the test file we using in testing */
-    private static final String TEST_FILE_PATH = "json/pages-ordered.json";
+    private static final String TEST_FILE_PATH = "json/v2/pages-ordered.json";
 
     /**
      * Functional tests run against a local S3 clone.

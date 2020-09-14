@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.junit.After;
 import org.junit.Before;
@@ -18,11 +20,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import info.freelibrary.iiif.presentation.v2.Manifest;
-import info.freelibrary.iiif.presentation.v2.Sequence;
-import info.freelibrary.iiif.presentation.v2.io.Manifestor;
-import info.freelibrary.iiif.presentation.v2.properties.ViewingDirection;
-import info.freelibrary.iiif.presentation.v2.properties.ViewingHint;
+import info.freelibrary.iiif.presentation.v3.Manifest;
+import info.freelibrary.iiif.presentation.v3.properties.ViewingDirection;
+import info.freelibrary.iiif.presentation.v3.properties.behaviors.ManifestBehavior;
+import info.freelibrary.iiif.presentation.v3.utils.Manifestor;
 import info.freelibrary.util.FileUtils;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
@@ -54,12 +55,12 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
  * Tests run against the ManifestVerticle.
  */
 @RunWith(VertxUnitRunner.class)
-public class ManifestVerticleTest {
+public class V3ManifestVerticleTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ManifestVerticleTest.class, Constants.MESSAGES);
+    private static final Logger LOGGER = LoggerFactory.getLogger(V3ManifestVerticleTest.class, Constants.MESSAGES);
 
-    private static final String[] TEST_VERTICLES = new String[] { ManifestVerticle.class.getName(),
-        V2ManifestVerticle.class.getName(), FakeS3BucketVerticle.class.getName() };
+    private static final String[] TEST_VERTICLES = new String[] { V3ManifestVerticle.class.getName(),
+        ManifestVerticle.class.getName(), FakeS3BucketVerticle.class.getName() };
 
     private static final String WORKS_CSV = "src/test/resources/csv/{}/batch1/{}1.csv";
 
@@ -103,7 +104,7 @@ public class ManifestVerticleTest {
                 final List<Future> futures = new ArrayList<>();
 
                 options.setConfig(config.put(Config.IIIF_BASE_URL, getConfig.result().getString(
-                        Config.IIIF_BASE_URL)).put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V2));
+                        Config.IIIF_BASE_URL)).put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V3));
 
                 for (final String verticleName : Arrays.asList(TEST_VERTICLES)) {
                     final Promise<String> promise = Promise.promise();
@@ -168,7 +169,8 @@ public class ManifestVerticleTest {
         final DeliveryOptions options = new DeliveryOptions();
         final Async asyncTask = aContext.async();
 
-        message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, SINAI_WORKS_CSV);
+        message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, SINAI_WORKS_CSV)
+        .put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V3);
         options.addHeader(Constants.ACTION, Op.POST_CSV);
 
         LOGGER.debug(MessageCodes.MFS_120, SINAI, ManifestVerticle.class.getName());
@@ -176,9 +178,10 @@ public class ManifestVerticleTest {
         myVertx.eventBus().request(ManifestVerticle.class.getName(), message, options, request -> {
             if (request.succeeded()) {
                 final JsonObject manifest = new JsonObject(myVertx.fileSystem().readFileBlocking(jsonFile));
+                final String paged = ManifestBehavior.PAGED.toString();
                 final String rightToLeft = ViewingDirection.RIGHT_TO_LEFT.toString();
 
-                aContext.assertEquals(ViewingHint.Option.PAGED.toString(), manifest.getString("viewingHint"));
+                aContext.assertEquals(paged, manifest.getJsonArray("behavior").getString(0));
                 aContext.assertEquals(rightToLeft, manifest.getString("viewingDirection"));
 
                 if (!asyncTask.isCompleted()) {
@@ -202,7 +205,8 @@ public class ManifestVerticleTest {
         final DeliveryOptions options = new DeliveryOptions();
         final Async asyncTask = aContext.async();
 
-        message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, filePath);
+        message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, filePath)
+        .put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V3);
         options.addHeader(Constants.ACTION, Op.POST_CSV);
         options.setSendTimeout(60000);
 
@@ -230,7 +234,8 @@ public class ManifestVerticleTest {
         final DeliveryOptions options = new DeliveryOptions();
         final Async asyncTask = aContext.async();
 
-        message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, filePath);
+        message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, filePath)
+        .put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V3);
         options.addHeader(Constants.ACTION, Op.POST_CSV);
 
         LOGGER.debug(MessageCodes.MFS_120, POSTCARDS, ManifestVerticle.class.getName());
@@ -238,13 +243,9 @@ public class ManifestVerticleTest {
         myVertx.eventBus().request(ManifestVerticle.class.getName(), message, options, request -> {
             if (request.succeeded()) {
                 final Manifest foundManifest = new Manifestor().readManifest(new File(foundFile));
-                final List<Sequence> sequences = foundManifest.getSequences();
-
-                // Check that the sequence was added to this manifest
-                aContext.assertEquals(1, sequences.size());
 
                 // Check that the canvas was added to this sequence
-                aContext.assertEquals(1, sequences.get(0).getCanvases().size());
+                aContext.assertEquals(1, foundManifest.getCanvases().size());
 
                 if (!asyncTask.isCompleted()) {
                     asyncTask.complete();
@@ -268,7 +269,8 @@ public class ManifestVerticleTest {
         final DeliveryOptions options = new DeliveryOptions();
         final Async asyncTask = aContext.async();
 
-        message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, filePath);
+        message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, filePath)
+        .put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V3);
         options.addHeader(Constants.ACTION, Op.POST_CSV);
 
         LOGGER.debug(MessageCodes.MFS_120, hathawayWorks, ManifestVerticle.class.getName());
@@ -294,7 +296,8 @@ public class ManifestVerticleTest {
         final DeliveryOptions options = new DeliveryOptions();
         final Async asyncTask = aContext.async();
 
-        message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, filePath);
+        message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, filePath)
+        .put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V3);
         options.addHeader(Constants.ACTION, Op.POST_CSV);
 
         LOGGER.debug(MessageCodes.MFS_120, WORKS, ManifestVerticle.class.getName());
@@ -316,13 +319,14 @@ public class ManifestVerticleTest {
     @Test
     public final void testPageOrder(final TestContext aContext) {
         final String foundFile = myJsonFiles + getTestFilePath("ark:/21198/z12f8rtw");
-        final String expectedFile = "src/test/resources/json/v2/pages-ordered.json";
+        final String expectedFile = "src/test/resources/json/ara249-page-labels-ordered.json";
         final String filePath = "src/test/resources/csv/sinai_del1/ara249.csv";
         final JsonObject message = new JsonObject();
         final DeliveryOptions options = new DeliveryOptions();
         final Async asyncTask = aContext.async();
 
-        message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, filePath);
+        message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, filePath)
+        .put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V3);
         message.put(Constants.IIIF_HOST, ImageInfoLookup.FAKE_IIIF_SERVER);
         options.addHeader(Constants.ACTION, Op.POST_CSV);
 
@@ -332,9 +336,15 @@ public class ManifestVerticleTest {
             if (request.succeeded()) {
                 try {
                     final FileSystem fileSystem = myVertx.fileSystem();
+                    final Function<JsonObject, String> getCanvasLabel = canvas -> canvas.getJsonObject("label")
+                            .getJsonArray("none").getString(0);
 
-                    final JsonObject expected = new JsonObject(fileSystem.readFileBlocking(expectedFile));
-                    final JsonObject found = new JsonObject(fileSystem.readFileBlocking(foundFile));
+                    @SuppressWarnings("unchecked")
+                    final List<String> expected = new JsonObject(fileSystem.readFileBlocking(expectedFile))
+                            .getJsonArray("labels").getList();
+                    final List<String> found = new JsonObject(fileSystem.readFileBlocking(foundFile))
+                            .getJsonArray("items").stream().map(canvas -> getCanvasLabel.apply((JsonObject) canvas))
+                            .collect(Collectors.toList());
 
                     // Confirm that the order of our pages is what we expect it to be
                     aContext.assertEquals(expected, found);

@@ -2,39 +2,22 @@
 package edu.ucla.library.iiif.fester.verticles;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.exceptions.CsvException;
 
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 import info.freelibrary.util.StringUtils;
-
-import info.freelibrary.iiif.presentation.Canvas;
-import info.freelibrary.iiif.presentation.Collection;
-import info.freelibrary.iiif.presentation.ImageContent;
-import info.freelibrary.iiif.presentation.ImageResource;
-import info.freelibrary.iiif.presentation.Manifest;
-import info.freelibrary.iiif.presentation.Sequence;
-import info.freelibrary.iiif.presentation.properties.Attribution;
-import info.freelibrary.iiif.presentation.properties.Metadata;
-import info.freelibrary.iiif.presentation.properties.ViewingDirection;
-import info.freelibrary.iiif.presentation.properties.ViewingHint;
-import info.freelibrary.iiif.presentation.services.ImageInfoService;
 
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
@@ -43,52 +26,61 @@ import edu.ucla.library.iiif.fester.CsvMetadata;
 import edu.ucla.library.iiif.fester.CsvParser;
 import edu.ucla.library.iiif.fester.CsvParsingException;
 import edu.ucla.library.iiif.fester.HTTP;
-import edu.ucla.library.iiif.fester.ImageInfoLookup;
-import edu.ucla.library.iiif.fester.ImageNotFoundException;
 import edu.ucla.library.iiif.fester.LockedManifest;
 import edu.ucla.library.iiif.fester.ManifestNotFoundException;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.Op;
-import edu.ucla.library.iiif.fester.utils.IDUtils;
-import edu.ucla.library.iiif.fester.utils.ItemSequenceComparator;
-import edu.ucla.library.iiif.fester.utils.ManifestLabelComparator;
 
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.Lock;
 import io.vertx.core.shareddata.SharedData;
 
 /**
- * A creator of manifests (collection and work).
+ * A verticle to parse the incoming CSV data and hand the request off to the appropriate manifester.
  */
 public class ManifestVerticle extends AbstractFesterVerticle {
 
+    /**
+     * An action value that indicates pages should be updated.
+     */
+    public static final String UPDATE_PAGES = "update-pages";
+
+    /**
+     * An action value that indicates pages should be added.
+     */
+    public static final String ADD_PAGES = "add-pages";
+
+    /**
+     * An action value that indicates a collection should be updated.
+     */
+    public static final String UPDATE_COLLECTION = "update-collection";
+
+    /**
+     * An action value that indicates a collection should be created.
+     */
+    public static final String CREATE_COLLECTION = "create-collection";
+
+    /**
+     * An action value that indicates a new work should be created.
+     */
+    public static final String CREATE_WORK = "create-work";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ManifestVerticle.class, Constants.MESSAGES);
 
-    private static final String SEQUENCE_URI = "{}/{}/manifest/sequence/normal";
-
-    private static final String CANVAS_URI = "{}/{}/manifest/canvas/{}";
-
-    private static final String ANNOTATION_URI = "{}/{}/annotation/{}";
-
-    private static final String SIMPLE_URI = "{}/{}";
-
-    private static final String DEFAULT_THUMBNAIL_URI = "/full/{},/0/default.jpg";
-
-    private static final int DEFAULT_THUMBNAIL_SIZE = 600;
-
-    private static final String MANIFEST_URI = "{}/{}/manifest";
+    private static final long TIMEOUT = Long.MAX_VALUE; // A temporary over the top setting for image lookups
 
     private String myPlaceholderImage;
 
     private String myImageHost;
 
     /**
-     * Starts the collection manifester.
+     * Starts a verticle to handle manifest creation requests.
      */
     @Override
     public void start(final Promise<Void> aPromise) {
@@ -97,54 +89,64 @@ public class ManifestVerticle extends AbstractFesterVerticle {
         }
 
         if (myPlaceholderImage == null) {
-            myPlaceholderImage = StringUtils.trimToNull(config().getString(Config.PLACEHOLDER_IMAGE));
+            myPlaceholderImage = StringUtils.trimTo(config().getString(Config.PLACEHOLDER_IMAGE), Constants.EMPTY);
         }
 
         getJsonConsumer().handler(message -> {
-            final JsonObject messageBody = message.body();
+            final JsonObject body = message.body();
             final String action = message.headers().get(Constants.ACTION);
 
             if (Op.POST_CSV.equals(action)) {
-                final Path filePath = Paths.get(messageBody.getString(Constants.CSV_FILE_PATH));
-                final Optional<String> imageHost = Optional.ofNullable(messageBody.getString(Constants.IIIF_HOST));
+                final Path filePath = Paths.get(body.getString(Constants.CSV_FILE_PATH));
+                final Optional<String> optImageHost = Optional.ofNullable(body.getString(Constants.IIIF_HOST));
+                final String iiifVersion = body.getString(Constants.IIIF_API_VERSION);
+                final String imageHost = optImageHost.orElse(myImageHost);
 
                 try {
                     final CsvParser csvParser = new CsvParser().parse(filePath);
-                    final Optional<Collection> collection = csvParser.getCollection();
+                    final Optional<String[]> csvCollection = csvParser.getCsvCollection();
                     final CsvHeaders csvHeaders = csvParser.getCsvHeaders();
                     final CsvMetadata csvMetadata = csvParser.getCsvMetadata();
 
                     // If we have a collection record in the CSV we're processing, create a collection manifest
-                    if (collection.isPresent()) {
-                        LOGGER.debug(MessageCodes.MFS_122, filePath, collection);
-                        buildCollectionManifest(collection.get(), csvHeaders, csvMetadata, imageHost, message);
-                    } else if (csvMetadata.hasWorks()) {
-                        final Optional<String> id = csvMetadata.getCollectionID(csvHeaders.getParentArkIndex());
+                    if (csvCollection.isPresent()) {
+                        final Promise<Void> promise = Promise.promise();
 
+                        // On completion of creating the collection doc, check to see if works need to be added
+                        promise.future().onComplete(creation -> {
+                            if (creation.succeeded()) {
+                                createWorks(csvHeaders, csvMetadata, imageHost, iiifVersion, message);
+                            } else {
+                                error(message, creation.cause(), MessageCodes.MFS_125, creation.cause().getMessage());
+                            }
+                        });
+
+                        createCollection(promise, csvCollection.get(), csvHeaders, csvMetadata, iiifVersion);
+                    } else if (csvMetadata.hasWorks()) {
                         LOGGER.debug(MessageCodes.MFS_043, filePath);
-                        updateWorks(id.get(), csvHeaders, csvMetadata, imageHost, message);
+                        updateWorks(csvHeaders, csvMetadata, imageHost, iiifVersion, message);
                     } else if (csvMetadata.hasPages()) {
-                        final Iterator<Entry<String, List<String[]>>> iterator = csvMetadata.getPageIterator();
+                        @SuppressWarnings("rawtypes")
                         final List<Future> futures = new ArrayList<>();
+                        final Iterator<Entry<String, List<String[]>>> iterator = csvMetadata.getPageIterator();
 
                         LOGGER.debug(MessageCodes.MFS_069, filePath);
 
                         while (iterator.hasNext()) {
                             final Entry<String, List<String[]>> pageEntry = iterator.next();
                             final List<String[]> pagesList = pageEntry.getValue();
+                            final Promise<Void> promise = Promise.promise();
                             final String workID = pageEntry.getKey();
 
-                            futures.add(updatePages(workID, csvHeaders, pagesList, imageHost, Promise.promise()));
+                            futures.add(promise.future());
+                            updatePages(promise, workID, csvHeaders, pagesList, imageHost, iiifVersion);
                         }
 
                         CompositeFuture.all(futures).onComplete(handler -> {
                             if (handler.succeeded()) {
                                 message.reply(Op.SUCCESS);
                             } else {
-                                final Throwable throwable = handler.cause();
-
-                                LOGGER.error(throwable, throwable.getMessage());
-                                message.fail(HTTP.INTERNAL_SERVER_ERROR, throwable.getMessage());
+                                error(message, handler.cause(), MessageCodes.MFS_149, handler.cause().getMessage());
                             }
                         });
                     } else {
@@ -173,57 +175,93 @@ public class ManifestVerticle extends AbstractFesterVerticle {
     }
 
     /**
-     * Update work manifest pages with data from an uploaded CSV.
+     * Creates a collection manifest.
      *
-     * @param aWorkID A work ID
-     * @param aPagesList A list of pages
-     * @param aMessage A message
+     * @param aPromise A promise of future work to be done
+     * @param aCsvCollection A collection ID and label
+     * @param aCsvHeaders Headers from a CSV file
+     * @param aCsvMetadata Metadata from a CSV file
+     * @param aApiVersion The version of the IIIF Presentation API being requested
      */
-    private Future<Void> updatePages(final String aWorkID, final CsvHeaders aCsvHeaders,
-            final List<String[]> aPagesList, final Optional<String> aImageHost, final Promise<Void> aPromise) {
+    private void createCollection(final Promise<Void> aPromise, final String[] aCsvCollection,
+            final CsvHeaders aCsvHeaders, final CsvMetadata aCsvMetadata, final String aApiVersion)
+            throws CsvParsingException {
+        final String collectionID = aCsvCollection[aCsvHeaders.getItemArkIndex()];
+        final List<String[]> csvWorks = aCsvMetadata.getWorksMap().get(collectionID);
+        final DeliveryOptions options = new DeliveryOptions();
+        final ObjectMapper mapper = new ObjectMapper();
+        final JsonObject message = new JsonObject();
+
+        try {
+            options.addHeader(Constants.ACTION, ManifestVerticle.CREATE_COLLECTION);
+            message.put(Constants.COLLECTION_CONTENT, new JsonArray(mapper.writeValueAsString(aCsvCollection)));
+            message.put(Constants.COLLECTION_NAME, collectionID);
+            message.put(Constants.CSV_HEADERS, aCsvHeaders.toJSON());
+
+            if (csvWorks != null) {
+                message.put(Constants.MANIFEST_CONTENT, mapper.writeValueAsString(csvWorks));
+            } else {
+                LOGGER.debug(MessageCodes.MFS_118, collectionID);
+            }
+
+            LOGGER.debug(MessageCodes.MFS_122, collectionID);
+
+            sendMessage(getManifestVerticleName(aApiVersion), message, options, collectionCreation -> {
+                if (collectionCreation.succeeded()) {
+                    aPromise.complete();
+                } else {
+                    aPromise.fail(collectionCreation.cause());
+                }
+            });
+        } catch (final JsonProcessingException details) {
+            aPromise.fail(details);
+        }
+    }
+
+    /**
+     * Updates work manifest pages with data from an uploaded CSV.
+     *
+     * @param aPromise A promise
+     * @param aWorkID A work ID
+     * @param aCsvHeaders Headers from the supplied CSV file
+     * @param aPagesList A list of pages
+     * @param aImageHost An image host
+     * @param aApiVersion The version of the IIIF Presentation API being requested
+     */
+    private void updatePages(final Promise<Void> aPromise, final String aWorkID, final CsvHeaders aCsvHeaders,
+            final List<String[]> aPagesList, final String aImageHost, final String aApiVersion) {
         final Promise<LockedManifest> promise = Promise.promise();
-        final String encodedWorkID = URLEncoder.encode(aWorkID, StandardCharsets.UTF_8);
 
         promise.future().onComplete(handler -> {
             if (handler.succeeded()) {
                 final LockedManifest lockedManifest = handler.result();
-                final Manifest manifest = lockedManifest.getWork();
-                final List<Sequence> sequences = manifest.getSequences();
-                final Sequence sequence;
-                final JsonObject message = new JsonObject();
                 final DeliveryOptions options = new DeliveryOptions();
+                final ObjectMapper mapper = new ObjectMapper();
+                final JsonObject message = new JsonObject();
 
-                // If the work doesn't already have any sequences, create one for it
-                if (sequences.size() == 0) {
-                    final String seqID = StringUtils.format(SEQUENCE_URI, Constants.URL_PLACEHOLDER, encodedWorkID);
-
-                    sequence = new Sequence().setID(seqID);
-                    manifest.addSequence(sequence);
-                } else {
-                    // For now we're just dealing with single sequence works
-                    sequence = sequences.get(0);
-                }
-
-                sequence.getCanvases().clear(); // overwrite whatever is on the manifest already
-                aPagesList.sort(new ItemSequenceComparator(aCsvHeaders.getItemSequenceIndex()));
+                options.addHeader(Constants.ACTION, ManifestVerticle.UPDATE_PAGES);
+                message.put(Constants.MANIFEST_ID, aWorkID);
+                message.put(Constants.PLACEHOLDER_IMAGE, myPlaceholderImage);
+                message.put(Constants.MANIFEST_CONTENT, lockedManifest.toJSON());
+                message.put(Constants.CSV_HEADERS, aCsvHeaders.toJSON());
+                message.put(Constants.IIIF_HOST, aImageHost);
 
                 try {
-                    addPages(aCsvHeaders, aPagesList, sequence, aImageHost, encodedWorkID);
+                    message.put(Constants.MANIFEST_PAGES, new JsonArray(mapper.writeValueAsString(aPagesList)));
 
-                    message.put(Constants.MANIFEST_ID, aWorkID).put(Constants.DATA, manifest.toJSON());
-                    options.addHeader(Constants.ACTION, Op.PUT_MANIFEST);
-
-                    sendMessage(S3BucketVerticle.class.getName(), message, options, send -> {
-                        if (send.succeeded()) {
+                    // Override default timeout because we look up image dimensions as a part of this process
+                    sendMessage(getManifestVerticleName(aApiVersion), message, options, TIMEOUT, update -> {
+                        if (update.succeeded()) {
                             aPromise.complete();
                         } else {
-                            aPromise.fail(send.cause());
+                            aPromise.fail(update.cause());
                         }
+
+                        lockedManifest.release();
                     });
-                } catch (final IOException details) {
-                    aPromise.fail(details);
-                } finally {
+                } catch (final JsonProcessingException details) {
                     lockedManifest.release();
+                    aPromise.fail(details);
                 }
             } else {
                 aPromise.fail(handler.cause());
@@ -231,80 +269,111 @@ public class ManifestVerticle extends AbstractFesterVerticle {
         });
 
         getLockedManifest(aWorkID, false, promise);
-        return aPromise.future();
     }
 
     /**
-     * Update the works associated with a supplied collection.
+     * Updates the works associated with a collection.
      *
-     * @param aCollectionID A collection ID
      * @param aCsvHeaders Headers from the supplied CSV file
      * @param aCsvMetadata Metadata from the supplied CSV file
      * @param aImageHost An image host
+     * @param aApiVersion The version of the IIIF Presentation API being requested
      * @param aMessage A message
      */
-    private void updateWorks(final String aCollectionID, final CsvHeaders aCsvHeaders, final CsvMetadata aCsvMetadata,
-            final Optional<String> aImageHost, final Message<JsonObject> aMessage) {
+    private void updateWorks(final CsvHeaders aCsvHeaders, final CsvMetadata aCsvMetadata, final String aImageHost,
+            final String aApiVersion, final Message<JsonObject> aMessage) {
         final Promise<LockedManifest> promise = Promise.promise();
+        final String collectionID = aCsvMetadata.getFirstCollectionID(aCsvHeaders.getParentArkIndex()).get();
 
         // If we were able to get a lock on the manifest, update it with our new works
         promise.future().onComplete(handler -> {
             if (handler.succeeded()) {
+                final Map<String, List<String[]>> worksMap = aCsvMetadata.getWorksMap();
                 final LockedManifest lockedManifest = handler.result();
-                final Collection collectionToUpdate = lockedManifest.getCollection();
-                final JsonObject manifestJSON = updateCollection(collectionToUpdate, aCsvMetadata.getWorksMap());
-                final JsonObject message = new JsonObject();
                 final DeliveryOptions options = new DeliveryOptions();
+                final ObjectMapper mapper = new ObjectMapper();
+                final JsonObject message = new JsonObject();
 
-                message.put(Constants.COLLECTION_NAME, aCollectionID).put(Constants.DATA, manifestJSON);
-                options.addHeader(Constants.ACTION, Op.PUT_COLLECTION);
+                try {
+                    options.addHeader(Constants.ACTION, ManifestVerticle.UPDATE_COLLECTION);
+                    message.put(Constants.COLLECTION_CONTENT, lockedManifest.toJSON());
+                    message.put(Constants.COLLECTION_NAME, collectionID);
+                    message.put(Constants.MANIFEST_CONTENT, new JsonObject(mapper.writeValueAsString(worksMap)));
 
-                sendMessage(S3BucketVerticle.class.getName(), message, options, update -> {
-                    lockedManifest.release();
+                    sendMessage(getManifestVerticleName(aApiVersion), message, options, update -> {
+                        lockedManifest.release();
 
-                    if (update.succeeded()) {
-                        processWorks(aCsvHeaders, aCsvMetadata, aImageHost, aMessage);
-                    } else {
-                        aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, update.cause().getMessage());
-                    }
-                });
+                        if (update.succeeded()) {
+                            createWorks(aCsvHeaders, aCsvMetadata, aImageHost, aApiVersion, aMessage);
+                        } else {
+                            error(aMessage, update.cause(), MessageCodes.MFS_150, update.cause().getMessage());
+                        }
+                    });
+                } catch (final JsonProcessingException details) {
+                    aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, details.getMessage());
+                }
             } else {
                 aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, handler.cause().getMessage());
             }
         });
 
-        getLockedManifest(aCollectionID, true, promise);
+        getLockedManifest(collectionID, true, promise);
     }
 
     /**
-     * Update a collection with new works.
+     * Creates manifest records for the supplied works.
      *
-     * @param aCollection A collection to be updated
-     * @return The updated collection
+     * @param aCsvHeaders Headers from the CSV file
+     * @param aCsvMetadata Metadata from the supplied CSV file
+     * @param aImageHost The URL of the IIIF image server
+     * @param aApiVersion The version of the IIIF Presentation API being requested
+     * @param aMessage The event queue message
      */
-    @SuppressWarnings("checkstyle:indentation")
-    private JsonObject updateCollection(final Collection aCollection,
-            final Map<String, List<Collection.Manifest>> aWorksMap) {
+    private void createWorks(final CsvHeaders aCsvHeaders, final CsvMetadata aCsvMetadata, final String aImageHost,
+            final String aApiVersion, final Message<JsonObject> aMessage) {
+        final Map<String, List<String[]>> aPagesMap = aCsvMetadata.getPagesMap();
+        final List<String[]> aWorksDataList = aCsvMetadata.getWorksList();
+        final DeliveryOptions options = new DeliveryOptions();
+        final ObjectMapper mapper = new ObjectMapper();
+        @SuppressWarnings("rawtypes")
+        final List<Future> futures = new ArrayList<>();
 
-        // Keep track of the manifests we want to add to, or update on, the IIIF collection
-        final Map<URI, Collection.Manifest> manifestMap = new HashMap<>();
-        final SortedSet<Collection.Manifest> sortedManifestSet = new TreeSet<>(new ManifestLabelComparator());
+        options.addHeader(Constants.ACTION, ManifestVerticle.CREATE_WORK);
 
-        // First, add the old manifests to the map
-        manifestMap.putAll(aCollection.getManifests().stream().collect(Collectors.toMap(Collection.Manifest::getID,
-                collection -> collection)));
+        // Cycle through the works creating a manifest for each
+        aWorksDataList.forEach(worksData -> {
+            final Promise<Void> promise = Promise.promise();
+            final JsonObject message = new JsonObject();
 
-        // Next, add the new manifests to the map, replacing any that already exist
-        manifestMap.putAll(aWorksMap.get(IDUtils.getResourceID(aCollection.getID())).stream().collect(Collectors.toMap(
-                Collection.Manifest::getID, collection -> collection)));
+            futures.add(promise.future());
 
-        // Update the manifest list with the manifests in the map, ordered by their label
-        sortedManifestSet.addAll(manifestMap.values());
+            try {
+                message.put(Constants.CSV_HEADERS, aCsvHeaders.toJSON());
+                message.put(Constants.MANIFEST_PAGES, new JsonObject(mapper.writeValueAsString(aPagesMap)));
+                message.put(Constants.MANIFEST_CONTENT, new JsonArray(mapper.writeValueAsString(worksData)));
+                message.put(Constants.IIIF_HOST, aImageHost);
 
-        aCollection.getManifests().clear();
-        aCollection.getManifests().addAll(sortedManifestSet);
+                // This is the call that looks up all the image dimensions; we need to bump default timeout
+                sendMessage(getManifestVerticleName(aApiVersion), message, options, TIMEOUT, workCreation -> {
+                    if (workCreation.succeeded()) {
+                        promise.complete();
+                    } else {
+                        promise.fail(workCreation.cause());
+                    }
+                });
+            } catch (final JsonProcessingException details) {
+                promise.fail(details);
+            }
+        });
 
-        return aCollection.toJSON();
+        // Keep track of our progress and fail our promise if we don't succeed
+        CompositeFuture.all(futures).onComplete(handler -> {
+            if (handler.succeeded()) {
+                aMessage.reply(LOGGER.getMessage(MessageCodes.MFS_126));
+            } else {
+                error(aMessage, handler.cause(), MessageCodes.MFS_131, handler.cause().getMessage());
+            }
+        });
     }
 
     /**
@@ -322,8 +391,8 @@ public class ManifestVerticle extends AbstractFesterVerticle {
             if (lockRequest.succeeded()) {
                 try {
                     final JsonObject message = new JsonObject();
-                    final DeliveryOptions options = new DeliveryOptions().addHeader(Constants.NO_REWRITE_URLS,
-                            Boolean.TRUE.toString());
+                    final DeliveryOptions options =
+                            new DeliveryOptions().addHeader(Constants.NO_REWRITE_URLS, Boolean.TRUE.toString());
 
                     if (aCollDoc) {
                         message.put(Constants.COLLECTION_NAME, aID);
@@ -340,9 +409,12 @@ public class ManifestVerticle extends AbstractFesterVerticle {
 
                             aPromise.complete(new LockedManifest(manifest, aCollDoc, lock));
                         } else {
+                            final String type = aCollDoc ? Constants.COLLECTION : Constants.MANIFEST;
+                            final Throwable cause = handler.cause();
+
                             lockRequest.result().release();
-                            aPromise.fail(new ManifestNotFoundException(handler.cause(), MessageCodes.MFS_146, aCollDoc
-                                    ? "collection" : "work", aID));
+
+                            aPromise.fail(new ManifestNotFoundException(cause, MessageCodes.MFS_146, type, aID));
                         }
                     });
                 } catch (final NullPointerException | IndexOutOfBoundsException details) {
@@ -359,275 +431,16 @@ public class ManifestVerticle extends AbstractFesterVerticle {
     }
 
     /**
-     * Builds the collection manifest.
+     * Gets a manifest verticle for the supplied version, falling back to v2 if the supplied version isn't recognized.
      *
-     * @param aCollection A collection
-     * @param aCsvHeaders Headers from a CSV file
-     * @param aCsvMetadata Metadata from a CSV file
-     * @param aMessage The verticle response message
+     * @param aApiVersion A version of the IIIF presentation specification
+     * @return The name of the manifest verticle that would handle requests for the supplied API version
      */
-    private void buildCollectionManifest(final Collection aCollection, final CsvHeaders aCsvHeaders,
-            final CsvMetadata aCsvMetadata, final Optional<String> aImageHost, final Message<JsonObject> aMessage) {
-        final List<Collection.Manifest> manifestList = aCollection.getManifests(); // Empty list
-        final String collectionID = IDUtils.getResourceID(aCollection.getID());
-        final List<Collection.Manifest> manifests = aCsvMetadata.getWorksMap().get(collectionID);
-        final Promise<Void> promise = Promise.promise();
-        final JsonObject message = new JsonObject();
-        final DeliveryOptions options = new DeliveryOptions();
-
-        // If we have work manifests, add them to the collection manifest
-        if (manifests != null) {
-            manifestList.addAll(manifests);
+    private String getManifestVerticleName(final String aApiVersion) {
+        if (Constants.IIIF_API_V3.equals(aApiVersion)) {
+            return V3ManifestVerticle.class.getName();
         } else {
-            LOGGER.warn(MessageCodes.MFS_118, collectionID);
-        }
-
-        message.put(Constants.COLLECTION_NAME, collectionID).put(Constants.DATA, aCollection.toJSON());
-        options.addHeader(Constants.ACTION, Op.PUT_COLLECTION);
-
-        // Create a handler to handle generating work manifests after the collection manage has been uploaded
-        promise.future().onComplete(handler -> {
-            if (handler.succeeded()) {
-                processWorks(aCsvHeaders, aCsvMetadata, aImageHost, aMessage);
-            } else {
-                final String failMessage = handler.cause().getMessage();
-
-                LOGGER.error(MessageCodes.MFS_125, failMessage);
-                aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, failMessage);
-            }
-        });
-
-        // Send collection manifest to S3
-        sendMessage(S3BucketVerticle.class.getName(), message, options, send -> {
-            if (send.succeeded()) {
-                promise.complete();
-            } else {
-                promise.fail(send.cause());
-            }
-        });
-    }
-
-    private void processWorks(final CsvHeaders aHeaders, final CsvMetadata aCsvMetadata,
-            final Optional<String> aImageHost, final Message<JsonObject> aMessage) {
-        final Map<String, List<String[]>> aPagesMap = aCsvMetadata.getPagesMap();
-        final List<String[]> aWorksDataList = aCsvMetadata.getWorksList();
-        final Iterator<String[]> iterator = aWorksDataList.iterator();
-        final List<Future> futures = new ArrayList<>();
-
-        // Request each work manifest be created
-        while (iterator.hasNext()) {
-            futures.add(buildWorkManifest(aHeaders, iterator.next(), aPagesMap, aImageHost, Promise.promise()));
-        }
-
-        // Keep track of our progress and fail our promise if we don't succeed
-        CompositeFuture.all(futures).onComplete(handler -> {
-            if (handler.succeeded()) {
-                aMessage.reply(LOGGER.getMessage(MessageCodes.MFS_126));
-            } else {
-                final Throwable cause = handler.cause();
-                final String message = LOGGER.getMessage(MessageCodes.MFS_131, cause.getMessage());
-
-                LOGGER.error(cause, message);
-                aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, message);
-            }
-        });
-    }
-
-    /**
-     * Build an individual work manifest.
-     *
-     * @param aCsvHeaders The CSV headers
-     * @param aWork A metadata array representing the work
-     * @param aPages A list of pages
-     * @param aPromise A promise we'll create the work manifest
-     * @return The future result of our promise
-     */
-    private Future buildWorkManifest(final CsvHeaders aCsvHeaders, final String[] aWork,
-            final Map<String, List<String[]>> aPages, final Optional<String> aImageHost, final Promise<Void> aPromise) {
-        final String workID = aWork[aCsvHeaders.getItemArkIndex()];
-        final String urlEncodedWorkID = URLEncoder.encode(workID, StandardCharsets.UTF_8);
-        final String workLabel = aWork[aCsvHeaders.getTitleIndex()];
-        final Metadata metadata = new Metadata();
-        final String manifestID = StringUtils.format(MANIFEST_URI, Constants.URL_PLACEHOLDER, urlEncodedWorkID);
-        final Manifest manifest = new Manifest(manifestID, workLabel);
-        final String sequenceID = StringUtils.format(SEQUENCE_URI, Constants.URL_PLACEHOLDER, urlEncodedWorkID);
-        final Sequence sequence = new Sequence().setID(sequenceID);
-        final JsonObject message = new JsonObject();
-        final DeliveryOptions options = new DeliveryOptions();
-
-        try {
-            // Add optional properties
-            if (aCsvHeaders.hasViewingDirectionIndex()) {
-                final String viewingDirection = StringUtils.trimToNull(aWork[aCsvHeaders.getViewingDirectionIndex()]);
-
-                if (viewingDirection != null) {
-                    manifest.setViewingDirection(ViewingDirection.fromString(viewingDirection));
-                }
-            }
-
-            if (aCsvHeaders.hasViewingHintIndex()) {
-                final String viewingHint = StringUtils.trimToNull(aWork[aCsvHeaders.getViewingHintIndex()]);
-
-                if (viewingHint != null) {
-                    manifest.setViewingHint(new ViewingHint(viewingHint));
-                }
-            }
-
-            if (aCsvHeaders.hasRepositoryNameIndex()) {
-                final String repositoryName = StringUtils.trimToNull(aWork[aCsvHeaders.getRepositoryNameIndex()]);
-
-                if (repositoryName != null) {
-                    metadata.add(Constants.REPOSITORY_NAME_METADATA_LABEL, repositoryName);
-                }
-            }
-
-            if (aCsvHeaders.hasLocalRightsStatementIndex()) {
-                final String localRightsStatement = StringUtils.trimToNull(aWork[aCsvHeaders
-                        .getLocalRightsStatementIndex()]);
-
-                if (localRightsStatement != null) {
-                    manifest.setAttribution(new Attribution(localRightsStatement));
-                }
-            }
-
-            if (aCsvHeaders.hasRightsContactIndex()) {
-                final String rightsContact = StringUtils.trimToNull(aWork[aCsvHeaders.getRightsContactIndex()]);
-
-                if (rightsContact != null) {
-                    metadata.add(Constants.RIGHTS_CONTACT_METADATA_LABEL, rightsContact);
-                }
-            }
-
-            if (metadata.getEntries().size() > 0) {
-                manifest.setMetadata(metadata);
-            }
-
-            // Check first for pages, then if the work itself is an image
-            if (aPages.containsKey(workID)) {
-                final List<String[]> pageList = aPages.get(workID);
-
-                manifest.addSequence(sequence);
-                pageList.sort(new ItemSequenceComparator(aCsvHeaders.getItemSequenceIndex()));
-
-                addPages(aCsvHeaders, pageList, sequence, aImageHost, urlEncodedWorkID);
-            } else if (aCsvHeaders.hasImageAccessUrlIndex()) {
-                final String accessURL = StringUtils.trimToNull(aWork[aCsvHeaders.getImageAccessUrlIndex()]);
-
-                if (accessURL != null) {
-                    final List<String[]> pageList = new ArrayList<>(1);
-
-                    pageList.add(aWork);
-                    manifest.addSequence(sequence);
-
-                    addPages(aCsvHeaders, pageList, sequence, aImageHost, urlEncodedWorkID);
-                }
-            }
-
-            message.put(Constants.MANIFEST_ID, workID).put(Constants.DATA, manifest.toJSON());
-            options.addHeader(Constants.ACTION, Op.PUT_MANIFEST);
-
-            sendMessage(S3BucketVerticle.class.getName(), message, options, send -> {
-                if (send.succeeded()) {
-                    aPromise.complete();
-                } else {
-                    aPromise.fail(send.cause());
-                }
-            });
-        } catch (final IllegalArgumentException details) {
-            LOGGER.warn(MessageCodes.MFS_074, workID, details.getMessage());
-            aPromise.fail(details);
-        } catch (final IOException details) {
-            aPromise.fail(details);
-        }
-
-        // Return our promise's future result
-        return aPromise.future();
-    }
-
-    /**
-     * Adds pages to a sequence from a work manifest.
-     *
-     * @param aCsvHeaders A CSV headers
-     * @param aPageList A list of pages to add
-     * @param aSequence A sequence to add pages to
-     * @param aImageHost An image host for image links
-     * @param aWorkID A URL encoded work ID
-     * @throws IOException If there is trouble adding a page
-     */
-    private void addPages(final CsvHeaders aCsvHeaders, final List<String[]> aPageList, final Sequence aSequence,
-            final Optional<String> aImageHost, final String aWorkID) throws IOException {
-        final Iterator<String[]> iterator = aPageList.iterator();
-        final String imageHost = aImageHost.orElse(myImageHost);
-
-        while (iterator.hasNext()) {
-            final String[] columns = iterator.next();
-            final String pageID = columns[aCsvHeaders.getItemArkIndex()];
-            final String idPart = IDUtils.getLastPart(pageID); // We're just copying Samvera here
-            final String encodedPageID = URLEncoder.encode(pageID, StandardCharsets.UTF_8);
-            final String pageLabel = columns[aCsvHeaders.getTitleIndex()];
-            final String canvasID = StringUtils.format(CANVAS_URI, Constants.URL_PLACEHOLDER, aWorkID, idPart);
-            final String pageURI = StringUtils.format(SIMPLE_URI, imageHost, encodedPageID);
-            final String annotationURI = StringUtils.format(ANNOTATION_URI, Constants.URL_PLACEHOLDER, aWorkID, idPart);
-
-            String resourceURI = pageURI + StringUtils.format(DEFAULT_THUMBNAIL_URI, DEFAULT_THUMBNAIL_SIZE);
-            ImageResource imageResource = new ImageResource(resourceURI, new ImageInfoService(pageURI));
-            ImageContent imageContent;
-            Canvas canvas;
-
-            try {
-                final ImageInfoLookup infoLookup = new ImageInfoLookup(pageURI);
-                final int width = infoLookup.getWidth();
-                final int height = infoLookup.getHeight();
-
-                // Create a canvas using the width and height of the related image
-                canvas = new Canvas(canvasID, pageLabel, width, height);
-                imageContent = new ImageContent(annotationURI, canvas);
-                imageContent.addResource(imageResource);
-                canvas.addImageContent(imageContent);
-            } catch (final ImageNotFoundException details) {
-                LOGGER.info(MessageCodes.MFS_078, pageID);
-
-                if (myPlaceholderImage != null) {
-                    try {
-                        final ImageInfoLookup placeholderLookup = new ImageInfoLookup(myPlaceholderImage);
-                        final int width = placeholderLookup.getWidth();
-                        final int height = placeholderLookup.getHeight();
-                        final int size = width >= DEFAULT_THUMBNAIL_SIZE ? DEFAULT_THUMBNAIL_SIZE : width;
-
-                        // If placeholder image found, use its URL for image resource and service
-                        resourceURI = myPlaceholderImage + StringUtils.format(DEFAULT_THUMBNAIL_URI, size);
-                        imageResource = new ImageResource(resourceURI, new ImageInfoService(myPlaceholderImage));
-
-                        // Create a canvas using the width and height of the placeholder image
-                        canvas = new Canvas(canvasID, pageLabel, width, height);
-                        imageContent = new ImageContent(annotationURI, canvas);
-                        imageContent.addResource(imageResource);
-                        canvas.addImageContent(imageContent);
-                    } catch (final ImageNotFoundException additionalDetails) {
-                        // We couldn't find the placeholder image so we create an empty canvas
-                        canvas = new Canvas(canvasID, pageLabel, 0, 0);
-                        LOGGER.error(additionalDetails, additionalDetails.getMessage());
-
-                        // No image content added to canvas when we couldn't find any
-                    }
-                } else {
-                    // We couldn't find the placeholder image so we create an empty canvas
-                    canvas = new Canvas(canvasID, pageLabel, 0, 0);
-                    LOGGER.info(MessageCodes.MFS_099, pageID);
-
-                    // No image content added to canvas when we couldn't find any
-                }
-            }
-
-            if (aCsvHeaders.hasViewingHintIndex()) {
-                final String viewingHint = StringUtils.trimToNull(columns[aCsvHeaders.getViewingHintIndex()]);
-
-                if (viewingHint != null) {
-                    canvas.setViewingHint(new ViewingHint(viewingHint));
-                }
-            }
-
-            aSequence.addCanvas(canvas);
+            return V2ManifestVerticle.class.getName();
         }
     }
 }
