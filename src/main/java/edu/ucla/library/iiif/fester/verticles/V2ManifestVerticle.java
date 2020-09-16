@@ -35,6 +35,7 @@ import info.freelibrary.iiif.presentation.v2.properties.Label;
 import info.freelibrary.iiif.presentation.v2.properties.Metadata;
 import info.freelibrary.iiif.presentation.v2.properties.ViewingDirection;
 import info.freelibrary.iiif.presentation.v2.properties.ViewingHint;
+import info.freelibrary.iiif.presentation.v2.services.APIComplianceLevel;
 import info.freelibrary.iiif.presentation.v2.services.ImageInfoService;
 
 import edu.ucla.library.iiif.fester.Constants;
@@ -381,7 +382,8 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
 
             String resourceURI = StringUtils.format(Constants.THUMBNAIL_URI_TEMPLATE, pageURI,
                     Constants.DEFAULT_THUMBNAIL_SIZE);
-            ImageResource imageResource = new ImageResource(resourceURI, new ImageInfoService(pageURI));
+            ImageResource imageResource = new ImageResource(resourceURI,
+                    new ImageInfoService(APIComplianceLevel.TWO, pageURI));
             ImageContent imageContent;
             Canvas canvas;
 
@@ -413,7 +415,8 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
 
                         // If placeholder image found, use its URL for image resource and service
                         resourceURI = StringUtils.format(Constants.THUMBNAIL_URI_TEMPLATE, aPlaceholderImage, size);
-                        imageResource = new ImageResource(resourceURI, new ImageInfoService(aPlaceholderImage));
+                        imageResource = new ImageResource(resourceURI,
+                                new ImageInfoService(APIComplianceLevel.TWO, aPlaceholderImage));
 
                         // Create a canvas using the width and height of the placeholder image
                         canvas = new Canvas(canvasID, pageLabel, width, height);
