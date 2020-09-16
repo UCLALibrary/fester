@@ -27,7 +27,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fth93j13n",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -52,7 +52,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2F2w083x19",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -77,7 +77,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2F8v57gn80",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -102,7 +102,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fm1724790",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -127,7 +127,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2F5s473583",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -152,7 +152,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2F7344mx78",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -177,7 +177,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fk579c569",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -202,7 +202,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fwb884r4m",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -227,7 +227,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fbz13925g",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -252,7 +252,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fcn78k884",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -277,7 +277,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fs733br2s",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -302,7 +302,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2F7844pn9v",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -327,7 +327,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2F9060tm9r",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -352,7 +352,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fcb36vx4w",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -377,7 +377,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2F2787wb2r",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -402,7 +402,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fjz860k89",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -427,7 +427,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fwp616z3m",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -452,7 +452,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fnw85650n",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -477,7 +477,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2F9h665w63",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -502,7 +502,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fx441th9f",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -527,7 +527,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Frh36s81s",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -552,7 +552,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2F3z55nx59",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -577,7 +577,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fqd72740w",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -602,7 +602,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2F0f96pt5b",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -627,7 +627,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2F8k913d05",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -652,7 +652,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fch012x2q",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -677,7 +677,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2F7z97jh0s",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -702,7 +702,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fz105x99f",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -727,7 +727,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fc226bk23",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -752,7 +752,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fwv19dn8z",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -777,7 +777,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fv479d96g",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -802,7 +802,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fzd46rk64",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -827,7 +827,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fb059db70",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -852,7 +852,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2F4r876n12",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -877,7 +877,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2F1f29zr8w",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
@@ -902,7 +902,7 @@
                                 "service": {
                                     "@context": "http://iiif.io/api/image/2/context.json",
                                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fz12f8rtw%2Fhc563t02",
-                                    "profile": "http://iiif.io/api/image/2/level0.json"
+                                    "profile": "http://iiif.io/api/image/2/level2.json"
                                 }
                             }
                         }
