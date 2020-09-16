@@ -14,7 +14,7 @@ jobs:
       jdk:
         - openjdk11
       install:
-        - mvn install -q -Dmaven.test.skip -Dmaven.javadoc.skip -B -V
+        - mvn -Pfluency install -q -Dmaven.test.skip -Dmaven.javadoc.skip -B -V
       script:
         - mvn -Pfluency deploy -B -Dfester.s3.bucket="${AWS_BUCKET}" -Dfester.s3.access_key="${AWS_ACCESS_KEY_ID}" -Dfester.s3.secret_key="${AWS_SECRET_ACCESS_KEY}" -Ddocker.registry.username="${DOCKER_USERNAME}" -Ddocker.registry.password="${DOCKER_PASSWORD}" -Ddocker.registry.account="${DOCKER_REGISTRY_ACCOUNT}" -Dorg.slf4j.simpleLogger.log.net.sourceforge.pmd=error -DlogLevel="${PROD_LOG_LEVEL}"
       cache:
