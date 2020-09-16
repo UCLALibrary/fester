@@ -31,9 +31,8 @@ import edu.ucla.library.iiif.fester.verticles.FakeS3BucketVerticle;
 import edu.ucla.library.iiif.fester.verticles.MainVerticle;
 import edu.ucla.library.iiif.fester.verticles.S3BucketVerticle;
 import io.vertx.config.ConfigRetriever;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.DeploymentOptions;
-import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
@@ -46,10 +45,11 @@ abstract class AbstractFesterHandlerTest {
 
     protected static final String IIIF_URL = "http://0.0.0.0";
 
-    protected static final File MANIFEST_FILE = new File("src/test/resources/json/ark%3A%2F21198%2Fzz0009gv8j.json");
+    protected static final File V2_MANIFEST_FILE = new File(
+            "src/test/resources/json/v2/ark%3A%2F21198%2Fzz0009gv8j.json");
 
-    protected static final File COLLECTION_FILE = new File(
-            "src/test/resources/json/ark%3A%2F21198%2Fzz0009gsq9.json");
+    protected static final File V2_COLLECTION_FILE = new File(
+            "src/test/resources/json/v2/ark%3A%2F21198%2Fzz0009gsq9.json");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFesterHandlerTest.class, Constants.MESSAGES);
 
@@ -73,12 +73,11 @@ abstract class AbstractFesterHandlerTest {
      * @param aContext A testing context
      */
     @Before
-    @SuppressWarnings({ "deprecation" })
     public void setUp(final TestContext aContext) throws IOException {
         final DeploymentOptions options = new DeploymentOptions();
         final ServerSocket socket = new ServerSocket(0);
         final int port = socket.getLocalPort();
-        final Future<AsyncResult> future = Future.future();
+        final Promise<Void> promise = Promise.promise();
         final Async asyncResult = aContext.async();
 
         LOGGER.debug(MessageCodes.MFS_002, port);
@@ -92,13 +91,13 @@ abstract class AbstractFesterHandlerTest {
 
         // We only need to initialize our testing tools once; if done, skip
         if (myVertx == null) {
-            initialize(future);
+            initialize(promise);
         } else {
-            future.complete();
+            promise.complete();
         }
 
         // If our testing tools have been initialized, start up our Fester
-        future.setHandler(initialization -> {
+        promise.future().onComplete(initialization -> {
             if (initialization.succeeded()) {
                 deployFester(aContext, asyncResult, options);
             } else if (initialization.cause() != null) {
@@ -134,7 +133,7 @@ abstract class AbstractFesterHandlerTest {
      * @param aLogLevel A new log level
      * @return The logger's previous log level
      */
-    protected Level setLogLevel(final Class aLogClass, final Level aLogLevel) {
+    protected Level setLogLevel(final Class<?> aLogClass, final Level aLogLevel) {
         final ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(
                 aLogClass, Constants.MESSAGES).getLoggerImpl();
         final Level level = logger.getEffectiveLevel();
@@ -160,16 +159,19 @@ abstract class AbstractFesterHandlerTest {
                 // Our older handlers talk to S3 directly so we need to put some test files there
                 try {
                     LOGGER.debug(MessageCodes.MFS_006, myManifestS3Key, myS3Bucket);
-                    myS3Client.putObject(myS3Bucket, myManifestS3Key, MANIFEST_FILE);
+                    myS3Client.putObject(myS3Bucket, myManifestS3Key, V2_MANIFEST_FILE);
 
                     // We don't need to use the real S3BucketVerticle for our non-S3BucketVerticle tests though
                     myVertx.undeploy(s3BucketDeploymentId, undeployment -> {
                         if (undeployment.succeeded()) {
-                            myVertx.deployVerticle(FakeS3BucketVerticle.class.getName(), fakeS3VerticleDeployment -> {
-                                if (fakeS3VerticleDeployment.succeeded()) {
+                            final DeploymentOptions options = new DeploymentOptions()
+                                    .setConfig(new JsonObject().put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V2));
+
+                            myVertx.deployVerticle(FakeS3BucketVerticle.class.getName(), options, fakeDeployment -> {
+                                if (fakeDeployment.succeeded()) {
                                     aAsyncTask.complete();
                                 } else {
-                                    aContext.fail(fakeS3VerticleDeployment.cause());
+                                    aContext.fail(fakeDeployment.cause());
                                 }
                             });
                         } else {
@@ -188,11 +190,10 @@ abstract class AbstractFesterHandlerTest {
     /**
      * Initialize our testing tools.
      *
-     * @param aFuture A future to capture when the initialization is completed
+     * @param aPromise A promise to capture when the initialization is completed
      * @throws IOException If there is trouble reading from the configuration file
      */
-    @SuppressWarnings({ "deprecation" })
-    private void initialize(final Future aFuture) throws IOException {
+    private void initialize(final Promise<Void> aPromise) throws IOException {
         final ConfigRetriever configRetriever;
 
         myVertx = Vertx.vertx();
@@ -201,7 +202,7 @@ abstract class AbstractFesterHandlerTest {
         // We pull our application's configuration in for the S3 client configuration
         configRetriever.getConfig(configuration -> {
             if (configuration.failed()) {
-                aFuture.fail(configuration.cause());
+                aPromise.fail(configuration.cause());
             } else {
                 final JsonObject config = configuration.result();
 
@@ -225,7 +226,7 @@ abstract class AbstractFesterHandlerTest {
 
                 LOGGER.debug(MessageCodes.MFS_005, s3Region);
 
-                aFuture.complete();
+                aPromise.complete();
             }
         });
     }

@@ -7,18 +7,16 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-import info.freelibrary.iiif.presentation.Collection;
-
 /**
  * Processed metadata from a supplied CSV file.
  */
 public class CsvMetadata {
 
-    private final Map<String, List<Collection.Manifest>> myWorksMap;
-
-    private final List<String[]> myWorksList;
+    private final Map<String, List<String[]>> myWorksMap;
 
     private final Map<String, List<String[]>> myPagesMap;
+
+    private final List<String[]> myWorksList;
 
     /**
      * Creates a CSV metadata object.
@@ -27,7 +25,7 @@ public class CsvMetadata {
      * @param aWorksList A list of works metadata
      * @param aPagesMap A map of pages metadata
      */
-    public CsvMetadata(final Map<String, List<Collection.Manifest>> aWorksMap, final List<String[]> aWorksList,
+    public CsvMetadata(final Map<String, List<String[]>> aWorksMap, final List<String[]> aWorksList,
             final Map<String, List<String[]>> aPagesMap) {
         myWorksMap = aWorksMap;
         myWorksList = aWorksList;
@@ -39,7 +37,7 @@ public class CsvMetadata {
      *
      * @return The metadata for the works stored in a collection document
      */
-    public Map<String, List<Collection.Manifest>> getWorksMap() {
+    public Map<String, List<String[]>> getWorksMap() {
         return myWorksMap;
     }
 
@@ -62,12 +60,12 @@ public class CsvMetadata {
     }
 
     /**
-     * Gets the collection ID, if there is one.
+     * Gets the collection ID of the first work (if any) in the original CSV.
      *
      * @param aIndex The position of the parent ARK in the row
      * @return An optional collection ID
      */
-    public Optional<String> getCollectionID(final int aIndex) {
+    public Optional<String> getFirstCollectionID(final int aIndex) {
         if (hasWorks()) {
             return Optional.ofNullable(myWorksList.get(0)[aIndex]);
         } else {

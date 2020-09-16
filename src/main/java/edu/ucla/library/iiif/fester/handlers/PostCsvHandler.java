@@ -25,6 +25,7 @@ import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.utils.LinkUtils;
 import edu.ucla.library.iiif.fester.verticles.ManifestVerticle;
+
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.DeliveryOptions;
@@ -42,6 +43,8 @@ import io.vertx.ext.web.RoutingContext;
 public class PostCsvHandler extends AbstractFesterHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostCsvHandler.class, Constants.MESSAGES);
+
+    private static final String ATTACHMENT = "attachment; filename=\"{}\"";
 
     private static final String BR_TAG = "<br>";
 
@@ -88,9 +91,8 @@ public class PostCsvHandler extends AbstractFesterHandler {
             response.setStatusMessage(errorMessage);
             response.putHeader(Constants.CONTENT_TYPE, Constants.HTML_MEDIA_TYPE);
             response.end(StringUtils.format(myExceptionPage, errorMessage));
-        } else if (festerizeUserAgentMatcher.matches()
-                && !festerizeUserAgentMatcher.group("version").equals(myFesterizeVersion)) {
-            // Festerize version mismatch
+        } else if (festerizeUserAgentMatcher.matches() &&
+                !festerizeUserAgentMatcher.group("version").equals(myFesterizeVersion)) { // Festerize version mismatch
             errorMessage = LOGGER.getMessage(MessageCodes.MFS_147, myFesterizeVersion);
 
             response.setStatusCode(HTTP.BAD_REQUEST);
@@ -104,10 +106,13 @@ public class PostCsvHandler extends AbstractFesterHandler {
             final JsonObject message = new JsonObject();
             final DeliveryOptions options = new DeliveryOptions();
             final String iiifHost = StringUtils.trimToNull(request.getFormAttribute(Constants.IIIF_HOST));
+            final String iiifVersion = StringUtils.trimToNull(request.getFormAttribute(Constants.IIIF_API_VERSION));
 
             // Store the information that the manifest generator will need
             message.put(Constants.CSV_FILE_NAME, fileName);
             message.put(Constants.CSV_FILE_PATH, filePath);
+            // For now, our default IIIF API version is v2... TODO: make this a configuration option?
+            message.put(Constants.IIIF_API_VERSION, iiifVersion == null ? Constants.IIIF_API_V2 : iiifVersion);
             options.addHeader(Constants.ACTION, Op.POST_CSV);
 
             if (iiifHost != null) {
@@ -123,6 +128,7 @@ public class PostCsvHandler extends AbstractFesterHandler {
                     returnError(response, error.failureCode(), error);
                 }
             });
+
         }
     }
 
@@ -144,6 +150,7 @@ public class PostCsvHandler extends AbstractFesterHandler {
                     aResponse.setStatusCode(HTTP.CREATED);
                     aResponse.setStatusMessage(responseMessage);
                     aResponse.putHeader(Constants.CONTENT_TYPE, Constants.CSV_MEDIA_TYPE);
+                    aResponse.putHeader(Constants.CONTENT_DISPOSITION, StringUtils.format(ATTACHMENT, aFileName));
                     aResponse.end(Buffer.buffer(writer.toString()));
                 } catch (final IOException details) {
                     returnError(aResponse, HTTP.INTERNAL_SERVER_ERROR, details);
@@ -172,7 +179,7 @@ public class PostCsvHandler extends AbstractFesterHandler {
         LOGGER.error(aThrowable, LOGGER.getMessage(MessageCodes.MFS_103, error));
 
         aResponse.setStatusCode(aStatusCode);
-        aResponse.setStatusMessage(error.replaceAll(Constants.EOL_REGEX, ""));
+        aResponse.setStatusMessage(error.replaceAll(Constants.EOL_REGEX, Constants.EMPTY));
         aResponse.putHeader(Constants.CONTENT_TYPE, Constants.HTML_MEDIA_TYPE);
         aResponse.end(StringUtils.format(myExceptionPage, body));
     }

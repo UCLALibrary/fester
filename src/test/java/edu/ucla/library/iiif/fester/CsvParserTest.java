@@ -69,7 +69,7 @@ public class CsvParserTest {
      */
     @Test
     public final void testGetCollection() throws CsvParsingException, CsvException, IOException {
-        assertNotNull(myCsvParser.parse(getTestPath(GOOD_CSV)).getCollection().get());
+        assertNotNull(myCsvParser.parse(getTestPath(GOOD_CSV)).getCsvCollection().get());
     }
 
     /**
@@ -192,7 +192,8 @@ public class CsvParserTest {
      * @throws IOException If there is trouble reading the CSV data
      */
     @Test(expected = CsvParsingException.class)
-    public final void testCollectionWorkPageCsvNoItemSequence() throws CsvParsingException, CsvException, IOException {
+    public final void testCollectionWorkPageCsvNoItemSequence() throws CsvParsingException, CsvException,
+            IOException {
         myCsvParser.parse(getTestPath("hathaway_combined_no_item_seq.csv"));
     }
 
