@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>fester</artifactId>
-  <version>0.13.1-SNAPSHOT</version>
+  <version>0.13.0</version>
   <name>Fester</name>
   <description>A read/write interface for storing and retrieving IIIF manifests</description>
   <url>https://github.com/uclalibrary/fester</url>
