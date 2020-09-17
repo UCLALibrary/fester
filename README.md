@@ -188,13 +188,15 @@ Releases follow semantic versioning, with the exception that we don't consider a
 
 To create a new release, update the `version` element in the POM file (if needed). The updated version should still end with `-SNAPSHOT`, just change the numeric designation.
 
-After the version in the POM file is ready, the following script can be run:
+After the version in the POM file is ready, the following script should be run on a new branch dedicated to the release (e.g., `0.13.0-release`):
 
     src/main/tools/travis/prepare_release
 
-This will prepare the code for release by making two commits to Git. The first will be one for the version to be released (minus the snapshot designation), and the second will be one for a new snapshot version.
+This will prepare the code for release by making two commits to Git and tagging one of them. The first will be one for the version to be released (minus the snapshot designation) and will be tagged with the version number, and the second will be one for a new snapshot version. When the tag pointing to a non-snapshot commit is pushed, a Docker image with that tag will be uploaded to the Docker registry if the Travis build succeeds.
 
-The actual release will be done by the Travis build. When a non-snapshot version is built by Travis, a Docker image will be uploaded to the Docker registry.
+Note that Git won't allow creating a tag with the same name as an existing branch (so, for example, the name `0.13.0` couldn't be used as the branch name).
+
+A new pull request should then be created on the main branch to update the version in the POM. The PR should be merged using the `Merge pull request` option that creates a merge commit so that the tagged commit ends up in the main branch.
 
 ## Festerize
 
