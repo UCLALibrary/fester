@@ -196,7 +196,7 @@ This will prepare the code for release by making two commits to Git and tagging 
 
 Note that Git won't allow creating a tag with the same name as an existing branch (so, for example, the name `0.13.0` couldn't be used as the branch name).
 
-A new pull request should then be created on the main branch to update the version in the POM. The PR should be merged using the `Merge pull request` option that creates a merge commit so that the tagged commit ends up in the main branch.
+A new pull request should then be created on the main branch to update the version in the POM. The PR should be merged using the `Create a merge commit` option so that the tagged commit ends up in the main branch.
 
 ## Festerize
 
