@@ -380,8 +380,8 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
             final String pageURI = StringUtils.format(SIMPLE_URI, aImageHost, encodedPageID);
             final String contentURI = StringUtils.format(ANNOTATION_URI, Constants.URL_PLACEHOLDER, aWorkID, idPart);
 
-            String resourceURI = StringUtils.format(Constants.THUMBNAIL_URI_TEMPLATE, pageURI,
-                    Constants.DEFAULT_THUMBNAIL_SIZE);
+            String resourceURI = StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, pageURI,
+                    Constants.DEFAULT_SAMPLE_SIZE);
             ImageResource imageResource = new ImageResource(resourceURI,
                     new ImageInfoService(APIComplianceLevel.TWO, pageURI));
             ImageContent imageContent;
@@ -407,14 +407,14 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
                         final int height = placeholderLookup.getHeight();
                         final int size;
 
-                        if (width >= Constants.DEFAULT_THUMBNAIL_SIZE) {
-                            size = Constants.DEFAULT_THUMBNAIL_SIZE;
+                        if (width >= Constants.DEFAULT_SAMPLE_SIZE) {
+                            size = Constants.DEFAULT_SAMPLE_SIZE;
                         } else {
                             size = width;
                         }
 
                         // If placeholder image found, use its URL for image resource and service
-                        resourceURI = StringUtils.format(Constants.THUMBNAIL_URI_TEMPLATE, aPlaceholderImage, size);
+                        resourceURI = StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, aPlaceholderImage, size);
                         imageResource = new ImageResource(resourceURI,
                                 new ImageInfoService(APIComplianceLevel.TWO, aPlaceholderImage));
 

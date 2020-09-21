@@ -239,14 +239,14 @@ public final class Constants {
     public static final String IIIF_API_V3 = "v3";
 
     /**
-     * The string template of default thumbnail URIs.
+     * The string template of default sample URIs.
      */
-    public static final String THUMBNAIL_URI_TEMPLATE = "{}/full/{},/0/default.jpg";
+    public static final String SAMPLE_URI_TEMPLATE = "{}/full/{},/0/default.jpg";
 
     /**
-     * The default size of thumbnails.
+     * The default size of sample images.
      */
-    public static final int DEFAULT_THUMBNAIL_SIZE = 600;
+    public static final int DEFAULT_SAMPLE_SIZE = 600;
 
     /**
      * The id property of a v2 IIIF resource.
