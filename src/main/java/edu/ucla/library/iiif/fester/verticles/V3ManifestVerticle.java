@@ -20,22 +20,24 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import info.freelibrary.util.Logger;
+import info.freelibrary.util.LoggerFactory;
+import info.freelibrary.util.StringUtils;
+
+import info.freelibrary.iiif.presentation.v3.Canvas;
 import info.freelibrary.iiif.presentation.v3.Collection;
-import info.freelibrary.iiif.presentation.v3.properties.Label;
-import info.freelibrary.iiif.presentation.v3.properties.Metadata;
-import info.freelibrary.iiif.presentation.v3.properties.RequiredStatement;
+import info.freelibrary.iiif.presentation.v3.ImageContent;
 import info.freelibrary.iiif.presentation.v3.Manifest;
 import info.freelibrary.iiif.presentation.v3.id.Minter;
 import info.freelibrary.iiif.presentation.v3.id.MinterFactory;
+import info.freelibrary.iiif.presentation.v3.properties.Label;
+import info.freelibrary.iiif.presentation.v3.properties.Metadata;
+import info.freelibrary.iiif.presentation.v3.properties.RequiredStatement;
 import info.freelibrary.iiif.presentation.v3.properties.ViewingDirection;
 import info.freelibrary.iiif.presentation.v3.properties.behaviors.CanvasBehavior;
 import info.freelibrary.iiif.presentation.v3.properties.behaviors.ManifestBehavior;
 import info.freelibrary.iiif.presentation.v3.services.ImageService2;
-import info.freelibrary.iiif.presentation.v3.ImageContent;
-import info.freelibrary.iiif.presentation.v3.Canvas;
-import info.freelibrary.util.Logger;
-import info.freelibrary.util.LoggerFactory;
-import info.freelibrary.util.StringUtils;
+
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.CsvHeaders;
 import edu.ucla.library.iiif.fester.CsvParser;
@@ -50,9 +52,11 @@ import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
 import edu.ucla.library.iiif.fester.utils.ItemSequenceComparator;
 import edu.ucla.library.iiif.fester.utils.V3CollectionItemLabelComparator;
+
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -86,6 +90,9 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                     case ManifestVerticle.CREATE_COLLECTION:
                         createCollection(message);
                         break;
+                    case ManifestVerticle.UPDATE_WORK:
+                        updateWork(message);
+                        break;
                     case ManifestVerticle.CREATE_WORK:
                         createWork(message);
                         break;
@@ -93,7 +100,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                         message.fail(HTTP.INTERNAL_SERVER_ERROR, LOGGER.getMessage(MessageCodes.MFS_153, action));
                         break;
                 }
-            } catch (final JsonProcessingException details) {
+            } catch (final JsonProcessingException | DecodeException details) {
                 LOGGER.error(details, details.getMessage());
                 message.fail(HTTP.INTERNAL_SERVER_ERROR, details.getMessage());
             }
@@ -291,6 +298,66 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
     }
 
     /**
+     * Update the work's metadata with values from the CSV file.
+     *
+     * @param aMessage A message with information to be updated
+     * @throws JsonProcessingException If there is trouble parsing the update metadata
+     */
+    private void updateWork(final Message<JsonObject> aMessage) throws JsonProcessingException {
+        final JsonObject body = aMessage.body();
+        final ObjectMapper mapper = new ObjectMapper();
+        final CsvHeaders csvHeaders = CsvHeaders.fromJSON(body.getJsonObject(Constants.CSV_HEADERS));
+        final Manifest manifest = Manifest.fromJSON(body.getJsonObject(Constants.MANIFEST_CONTENT));
+        final JsonArray workArray = body.getJsonArray(Constants.UPDATED_CONTENT);
+        final String[] workRow = mapper.readValue(workArray.encode(), new TypeReference<String[]>() {});
+        final String id = body.getString(Constants.MANIFEST_ID);
+        final DeliveryOptions options = new DeliveryOptions();
+        final JsonObject message = new JsonObject();
+
+        getMetadata(workRow, csvHeaders.getViewingDirectionIndex()).ifPresentOrElse(viewingDirection -> {
+            manifest.setViewingDirection(ViewingDirection.fromString(viewingDirection));
+        }, () -> {
+            manifest.clearViewingDirection();
+        });
+
+        getMetadata(workRow, csvHeaders.getViewingHintIndex()).ifPresentOrElse(behavior -> {
+            manifest.setBehaviors(ManifestBehavior.fromString(behavior));
+        }, () -> {
+            manifest.clearBehaviors();
+        });
+
+        getMetadata(workRow, csvHeaders.getRepositoryNameIndex()).ifPresentOrElse(repoName -> {
+            manifest.setMetadata(updateMetadata(manifest.getMetadata(), MetadataLabels.REPOSITORY_NAME, repoName));
+        }, () -> {
+            manifest.setMetadata(updateMetadata(manifest.getMetadata(), MetadataLabels.REPOSITORY_NAME));
+        });
+
+        getMetadata(workRow, csvHeaders.getLocalRightsStatementIndex()).ifPresentOrElse(localRightsStatement -> {
+            manifest.setRequiredStatement(new RequiredStatement(MetadataLabels.ATTRIBUTION, localRightsStatement));
+        }, () -> {
+            manifest.clearRequiredStatement();
+        });
+
+        getMetadata(workRow, csvHeaders.getRightsContactIndex()).ifPresentOrElse(rightsContact -> {
+            manifest.setMetadata(updateMetadata(manifest.getMetadata(), MetadataLabels.RIGHTS_CONTACT, rightsContact));
+        }, () -> {
+            manifest.setMetadata(updateMetadata(manifest.getMetadata(), MetadataLabels.RIGHTS_CONTACT));
+        });
+
+        message.put(Constants.DATA, manifest.toJSON());
+        message.put(Constants.MANIFEST_ID, id);
+        options.addHeader(Constants.ACTION, Op.PUT_MANIFEST);
+
+        sendMessage(S3BucketVerticle.class.getName(), message, options, send -> {
+            if (send.succeeded()) {
+                aMessage.reply(manifest.toJSON());
+            } else {
+                error(aMessage, send.cause(), MessageCodes.MFS_160, send.cause().getMessage());
+            }
+        });
+    }
+
+    /**
      * Updates pages in a work.
      *
      * @param aMessage A message with information about the page updates
@@ -350,8 +417,8 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
             final String encodedPageID = URLEncoder.encode(pageID, StandardCharsets.UTF_8);
             final String pageURI = StringUtils.format(SIMPLE_URI, aImageHost, encodedPageID);
 
-            String resourceURI = StringUtils.format(Constants.THUMBNAIL_URI_TEMPLATE, pageURI,
-                    Constants.DEFAULT_THUMBNAIL_SIZE);
+            String resourceURI =
+                    StringUtils.format(Constants.THUMBNAIL_URI_TEMPLATE, pageURI, Constants.DEFAULT_THUMBNAIL_SIZE);
             Canvas canvas;
             ImageContent image;
 
@@ -423,6 +490,29 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         }
 
         return canvases.toArray(new Canvas[] {});
+    }
+
+    /**
+     * Updates existing metadata.
+     *
+     * @param aMetadata A metadata property
+     * @param aStringArray A metadata label and, optionally, its value
+     * @return Metadata about the work
+     */
+    private List<Metadata> updateMetadata(final List<Metadata> aMetadataList, final String... aStringArray) {
+        final List<Metadata> metadataList = new ArrayList<>();
+
+        // Add all the metadata entries except the one we're updating
+        aMetadataList.stream().filter(entry -> !aStringArray[0].equals(entry.getLabel().getString())).forEach(entry -> {
+            metadataList.add(entry);
+        });
+
+        // Add the metadata entry we're updating if it has a value
+        if (aStringArray.length == 2) {
+            metadataList.add(new Metadata(aStringArray[0], aStringArray[1]));
+        }
+
+        return metadataList;
     }
 
 }

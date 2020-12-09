@@ -13,16 +13,18 @@ import org.junit.runner.RunWith;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.opencsv.exceptions.CsvException;
 
+import info.freelibrary.util.Logger;
+import info.freelibrary.util.LoggerFactory;
+
 import info.freelibrary.iiif.presentation.v2.Canvas;
 import info.freelibrary.iiif.presentation.v2.ImageResource;
 import info.freelibrary.iiif.presentation.v2.Manifest;
 import info.freelibrary.iiif.presentation.v2.Sequence;
-import info.freelibrary.util.Logger;
-import info.freelibrary.util.LoggerFactory;
 
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
+
 import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.unit.Async;
@@ -31,6 +33,9 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.multipart.MultipartForm;
 
+/**
+ * Tests for handling missing images.
+ */
 @RunWith(VertxUnitRunner.class)
 public class MissingImageFT extends BaseFesterFT {
 

@@ -7,11 +7,15 @@ import info.freelibrary.util.LoggerFactory;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.Status;
+
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 
+/**
+ * A handler that gets the status of the application.
+ */
 public class GetStatusHandler implements Handler<RoutingContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GetStatusHandler.class, Constants.MESSAGES);
@@ -32,7 +36,7 @@ public class GetStatusHandler implements Handler<RoutingContext> {
             final long totalMem = runtime.totalMemory() / MB;
             final long freeMem = runtime.freeMemory() / MB;
             final long usedMem = totalMem - freeMem;
-            final double percentMem = ((double)usedMem / (double)totalMem) * 100D;
+            final double percentMem = (double) usedMem / (double) totalMem * 100D;
             final JsonObject memory = new JsonObject();
 
             if (percentMem >= WARN_PERCENT && percentMem < ERROR_PERCENT) {
@@ -44,7 +48,7 @@ public class GetStatusHandler implements Handler<RoutingContext> {
             }
             status.put(Status.MEMORY, memory);
             memory.put(Status.TOTAL_MEMORY, totalMem).put(Status.FREE_MEMORY, freeMem).put(Status.USED_MEMORY, usedMem)
-                  .put(Status.PERCENT_MEMORY, percentMem);
+                    .put(Status.PERCENT_MEMORY, percentMem);
 
             response.setStatusCode(200);
             response.putHeader(Constants.CONTENT_TYPE, Constants.JSON_MEDIA_TYPE).end(status.encodePrettily());

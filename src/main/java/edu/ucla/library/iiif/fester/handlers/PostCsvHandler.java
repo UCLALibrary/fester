@@ -101,19 +101,25 @@ public class PostCsvHandler extends AbstractFesterHandler {
             response.end(StringUtils.format(myExceptionPage, errorMessage));
         } else {
             final FileUpload csvFile = csvUploads.iterator().next();
+            final DeliveryOptions options = new DeliveryOptions();
             final String filePath = csvFile.uploadedFileName();
             final String fileName = csvFile.fileName();
             final JsonObject message = new JsonObject();
-            final DeliveryOptions options = new DeliveryOptions();
             final String iiifHost = StringUtils.trimToNull(request.getFormAttribute(Constants.IIIF_HOST));
             final String iiifVersion = StringUtils.trimToNull(request.getFormAttribute(Constants.IIIF_API_VERSION));
+            final boolean update = StringUtils.trimToBool(request.getFormAttribute(Constants.METADATA_UPDATE), false);
 
             // Store the information that the manifest generator will need
             message.put(Constants.CSV_FILE_NAME, fileName);
             message.put(Constants.CSV_FILE_PATH, filePath);
             // For now, our default IIIF API version is v2... TODO: make this a configuration option?
             message.put(Constants.IIIF_API_VERSION, iiifVersion == null ? Constants.IIIF_API_V2 : iiifVersion);
-            options.addHeader(Constants.ACTION, Op.POST_CSV);
+
+            if (update) {
+                options.addHeader(Constants.ACTION, Op.POST_UPDATE_CSV);
+            } else {
+                options.addHeader(Constants.ACTION, Op.POST_CSV);
+            }
 
             if (iiifHost != null) {
                 message.put(Constants.IIIF_HOST, iiifHost);
@@ -140,11 +146,10 @@ public class PostCsvHandler extends AbstractFesterHandler {
         fileSystem.readFile(aFilePath, read -> {
             if (read.succeeded()) {
                 final String csvString = read.result().toString(StandardCharsets.UTF_8);
-                final CSVReader csvReader = new CSVReader(new StringReader(csvString));
                 final StringWriter writer = new StringWriter();
-                final CSVWriter csvWriter = new CSVWriter(writer);
 
-                try {
+                try (CSVReader csvReader = new CSVReader(new StringReader(csvString));
+                        CSVWriter csvWriter = new CSVWriter(writer)) {
                     csvWriter.writeAll(LinkUtils.addManifests(myUrl, csvReader.readAll()));
 
                     aResponse.setStatusCode(HTTP.CREATED);
@@ -156,9 +161,6 @@ public class PostCsvHandler extends AbstractFesterHandler {
                     returnError(aResponse, HTTP.INTERNAL_SERVER_ERROR, details);
                 } catch (final CsvException details) {
                     returnError(aResponse, HTTP.BAD_REQUEST, details);
-                } finally {
-                    org.apache.commons.io.IOUtils.closeQuietly(csvReader);
-                    org.apache.commons.io.IOUtils.closeQuietly(csvWriter);
                 }
             } else {
                 returnError(aResponse, HTTP.INTERNAL_SERVER_ERROR, read.cause());

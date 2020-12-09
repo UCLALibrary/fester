@@ -2,7 +2,6 @@
 package edu.ucla.library.iiif.fester.handlers;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 import org.junit.Test;
 
@@ -10,16 +9,23 @@ import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 import info.freelibrary.util.StringUtils;
 
-import ch.qos.logback.classic.Level;
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
+
+import ch.qos.logback.classic.Level;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.web.client.HttpResponse;
+import io.vertx.ext.web.client.WebClient;
 
+/**
+ * Tests the handler that gets collections from the S3 bucket.
+ */
 public class GetCollectionHandlerTest extends AbstractFesterHandlerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GetCollectionHandlerTest.class, Constants.MESSAGES);
@@ -33,35 +39,33 @@ public class GetCollectionHandlerTest extends AbstractFesterHandlerTest {
      * @throws IOException If there is trouble reading a manifest
      */
     @Test
-    @SuppressWarnings("deprecation")
     public void testGetCollectionHandler(final TestContext aContext) throws IOException {
-        final String expectedCollection = StringUtils.read(V2_COLLECTION_FILE);
-        final Async asyncTask = aContext.async();
-        final int port = aContext.get(Config.HTTP_PORT);
+        final String testCollectionDoc = StringUtils.read(V2_COLLECTION_FILE).replaceAll(myUrlPattern, myUrl);
         final String requestPath = IDUtils.getResourceURIPath(myCollectionS3Key);
+        final JsonObject expected = new JsonObject(testCollectionDoc);
+        final WebClient httpClient = WebClient.create(myVertx);
+        final int port = aContext.get(Config.HTTP_PORT);
+        final Async asyncTask = aContext.async();
 
         LOGGER.debug(MessageCodes.MFS_137, requestPath);
 
-        myVertx.createHttpClient().getNow(port, Constants.UNSPECIFIED_HOST, requestPath, response -> {
-            final int statusCode = response.statusCode();
+        httpClient.get(port, Constants.UNSPECIFIED_HOST, requestPath).send(handler -> {
+            if (handler.succeeded()) {
+                final HttpResponse<Buffer> response = handler.result();
+                final int statusCode = response.statusCode();
 
-            if (response.statusCode() == HTTP.OK) {
-                response.bodyHandler(body -> {
-                    final String foundCollection = body.toString(StandardCharsets.UTF_8);
-
-                    // Verify that the CORS header is permissive
+                if (statusCode == HTTP.OK) {
                     aContext.assertEquals(Constants.STAR, response.getHeader(Constants.CORS_HEADER));
+                    aContext.assertEquals(expected, response.bodyAsJsonObject());
+                } else {
+                    aContext.fail(LOGGER.getMessage(MessageCodes.MFS_003, HTTP.OK, statusCode));
+                }
 
-                    // Verify that our retrieved JSON is as we expect it
-                    aContext.assertEquals(new JsonObject(expectedCollection.replaceAll(myUrlPlaceholderPattern, myUrl)),
-                            new JsonObject(foundCollection));
-                });
+                if (!asyncTask.isCompleted()) {
+                    asyncTask.complete();
+                }
             } else {
-                aContext.fail(LOGGER.getMessage(MessageCodes.MFS_003, HTTP.OK, statusCode));
-            }
-
-            if (!asyncTask.isCompleted()) {
-                asyncTask.complete();
+                aContext.fail(handler.cause());
             }
         });
     }

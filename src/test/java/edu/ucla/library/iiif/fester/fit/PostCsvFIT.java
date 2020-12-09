@@ -48,6 +48,9 @@ import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.multipart.MultipartForm;
 
+/**
+ * Tests related to uploading data through a CSV file.
+ */
 public class PostCsvFIT {
 
     /* A logger for the tests */
