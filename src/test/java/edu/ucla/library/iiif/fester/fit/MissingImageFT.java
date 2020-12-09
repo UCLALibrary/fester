@@ -53,7 +53,7 @@ public class MissingImageFT extends BaseFesterFT {
 
     private static final String PLACEHOLDER_URL = "https://iiif.library.ucla.edu/iiif/2/blank";
 
-    private static final String PLACEHOLDER_THUMBNAIL_URL = PLACEHOLDER_URL + "/full/293,/0/default.jpg";
+    private static final String PLACEHOLDER_SAMPLE_URL = PLACEHOLDER_URL + "/full/293,/0/default.jpg";
 
     /**
      * Sets up testing environment.
@@ -172,7 +172,7 @@ public class MissingImageFT extends BaseFesterFT {
 
         // Check that we have the right page and that it's image resource URL is set to our placeholder
         aContext.assertEquals("cover page", coverPage.getLabel().getString());
-        aContext.assertEquals(PLACEHOLDER_THUMBNAIL_URL, image.getID().toString());
+        aContext.assertEquals(PLACEHOLDER_SAMPLE_URL, image.getID().toString());
         aContext.assertEquals(PLACEHOLDER_URL, image.getService().get().getID().toString());
 
         if (!aAsyncTask.isCompleted()) {
