@@ -170,7 +170,7 @@
   <entry key="MFS-157">Test CheckEndpointsHandler with request path: {}</entry>
   <entry key="MFS-158">Failed to update work metadata: {}</entry>
   <entry key="MFS-159">Updating a work manifest's metadata: {}</entry>
-  <entry key="MFS-160">Work updated failed: {}</entry>
+  <entry key="MFS-160">Work update failed: {}</entry>
   <entry key="MFS-161">Failed to find expected metadata entry for '{}'</entry>
   <entry key="MFS-162">Checking that {} manifest contains the updated repository name</entry>
   <entry key="MFS-163">Uploading CSV test file: {}</entry>
