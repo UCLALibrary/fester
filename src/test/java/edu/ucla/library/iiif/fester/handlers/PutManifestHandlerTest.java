@@ -18,11 +18,17 @@ import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
+
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.RequestOptions;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.web.client.HttpResponse;
+import io.vertx.ext.web.client.WebClient;
 
+/**
+ * Tests the handler that puts manifests into the manifest store.
+ */
 public class PutManifestHandlerTest extends AbstractFesterHandlerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PutManifestHandlerTest.class, Constants.MESSAGES);
@@ -110,35 +116,34 @@ public class PutManifestHandlerTest extends AbstractFesterHandlerTest {
      * @throws IOException If there is trouble reading the manifest
      */
     @Test
-    @SuppressWarnings("deprecation")
     public void testPutManifestHandlerMissingMediaType(final TestContext aContext) throws IOException {
-        final String manifestPath = V2_MANIFEST_FILE.getAbsolutePath();
-        final Buffer manifest = myVertx.fileSystem().readFileBlocking(manifestPath);
-        final Async asyncTask = aContext.async();
-        final int port = aContext.get(Config.HTTP_PORT);
+        final Buffer manifest = myVertx.fileSystem().readFileBlocking(V2_MANIFEST_FILE.getAbsolutePath());
         final String requestPath = IDUtils.getResourceURIPath(myPutManifestS3Key);
-        final RequestOptions requestOpts = new RequestOptions();
+        final WebClient httpClient = WebClient.create(myVertx);
+        final int port = aContext.get(Config.HTTP_PORT);
+        final Async asyncTask = aContext.async();
 
         LOGGER.debug(MessageCodes.MFS_016, requestPath);
 
-        requestOpts.setPort(port).setHost(Constants.UNSPECIFIED_HOST).setURI(requestPath);
         // Fail to set the content-type header
+        httpClient.put(port, Constants.UNSPECIFIED_HOST, requestPath).sendBuffer(manifest, handler -> {
+            if (handler.succeeded()) {
+                final HttpResponse<Buffer> response = handler.result();
+                final int statusCode = response.statusCode();
 
-        myVertx.createHttpClient().put(requestOpts, response -> {
-            final int statusCode = response.statusCode();
-
-            switch (statusCode) {
-                case HTTP.UNSUPPORTED_MEDIA_TYPE:
-                case HTTP.METHOD_NOT_ALLOWED:
+                if (statusCode == HTTP.BAD_REQUEST) {
                     aContext.assertFalse(myS3Client.doesObjectExist(myS3Bucket, myPutManifestS3Key));
-                    asyncTask.complete();
 
-                    break;
-                default:
+                    if (!asyncTask.isCompleted()) {
+                        asyncTask.complete();
+                    }
+                } else {
                     aContext.fail(LOGGER.getMessage(MessageCodes.MFS_019, statusCode));
+                }
+            } else {
+                aContext.fail(handler.cause());
             }
-
-        }).end(manifest);
+        });
     }
 
     /**

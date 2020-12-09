@@ -65,7 +65,7 @@ abstract class AbstractFesterHandlerTest {
 
     protected final String myUrl = System.getProperty(Config.FESTER_URL);
 
-    protected final String myUrlPlaceholderPattern = Pattern.quote(Constants.URL_PLACEHOLDER);
+    protected final String myUrlPattern = Pattern.quote(Constants.URL_PLACEHOLDER);
 
     /**
      * Test set up.

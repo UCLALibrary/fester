@@ -13,9 +13,13 @@ import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
+
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 
+/**
+ * Tests the handler that processes requests to delete a manifest.
+ */
 public class DeleteManifestHandlerTest extends AbstractFesterHandlerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DeleteManifestHandlerTest.class, Constants.MESSAGES);

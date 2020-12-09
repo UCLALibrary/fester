@@ -57,6 +57,11 @@ public class ManifestVerticle extends AbstractFesterVerticle {
     public static final String ADD_PAGES = "add-pages";
 
     /**
+     * An action value that indicates work metadata should be updated.
+     */
+    public static final String UPDATE_WORK = "update-work";
+
+    /**
      * An action value that indicates a collection should be updated.
      */
     public static final String UPDATE_COLLECTION = "update-collection";
@@ -93,20 +98,19 @@ public class ManifestVerticle extends AbstractFesterVerticle {
         }
 
         getJsonConsumer().handler(message -> {
-            final JsonObject body = message.body();
-            final String action = message.headers().get(Constants.ACTION);
-
-            if (Op.POST_CSV.equals(action)) {
+            try {
+                final JsonObject body = message.body();
+                final String action = message.headers().get(Constants.ACTION);
                 final Path filePath = Paths.get(body.getString(Constants.CSV_FILE_PATH));
-                final Optional<String> optImageHost = Optional.ofNullable(body.getString(Constants.IIIF_HOST));
                 final String iiifVersion = body.getString(Constants.IIIF_API_VERSION);
-                final String imageHost = optImageHost.orElse(myImageHost);
+                final CsvParser csvParser = new CsvParser().parse(filePath);
+                final CsvMetadata csvMetadata = csvParser.getCsvMetadata();
 
-                try {
-                    final CsvParser csvParser = new CsvParser().parse(filePath);
+                if (Op.POST_CSV.equals(action)) {
+                    final Optional<String> optImageHost = Optional.ofNullable(body.getString(Constants.IIIF_HOST));
                     final Optional<String[]> csvCollection = csvParser.getCsvCollection();
+                    final String imageHost = optImageHost.orElse(myImageHost);
                     final CsvHeaders csvHeaders = csvParser.getCsvHeaders();
-                    final CsvMetadata csvMetadata = csvParser.getCsvMetadata();
 
                     // If we have a collection record in the CSV we're processing, create a collection manifest
                     if (csvCollection.isPresent()) {
@@ -155,23 +159,91 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                         LOGGER.error(details, details.getMessage());
                         message.fail(HTTP.BAD_REQUEST, details.getMessage());
                     }
-                } catch (final IOException details) {
-                    LOGGER.error(details, details.getMessage());
-                    message.fail(HTTP.INTERNAL_SERVER_ERROR, details.getMessage());
-                } catch (final CsvParsingException | CsvException details) {
-                    LOGGER.error(details, details.getMessage());
-                    message.fail(HTTP.BAD_REQUEST, details.getMessage());
-                }
-            } else {
-                final String jsonMsg = message.toString();
-                final String verticleName = getClass().getSimpleName();
-                final String errorMessage = StringUtils.format(MessageCodes.MFS_139, verticleName, jsonMsg, action);
+                } else if (Op.POST_UPDATE_CSV.equals(action)) {
+                    @SuppressWarnings("rawtypes")
+                    final List<Future> futures = new ArrayList<>();
 
-                message.fail(HTTP.INTERNAL_SERVER_ERROR, errorMessage);
+                    csvMetadata.getWorksList().forEach(work -> {
+                        final Promise<Void> promise = Promise.promise();
+
+                        futures.add(promise.future());
+                        updateWork(promise, csvParser.getCsvHeaders(), work, iiifVersion);
+                    });
+
+                    CompositeFuture.all(futures).onComplete(handler -> {
+                        if (handler.succeeded()) {
+                            message.reply(Op.SUCCESS);
+                        } else {
+                            error(message, handler.cause(), MessageCodes.MFS_158, handler.cause().getMessage());
+                        }
+                    });
+                } else {
+                    final String jsonMsg = message.toString();
+                    final String verticleName = getClass().getSimpleName();
+                    final String errorMessage = StringUtils.format(MessageCodes.MFS_139, verticleName, jsonMsg, action);
+
+                    message.fail(HTTP.INTERNAL_SERVER_ERROR, errorMessage);
+                }
+            } catch (final IOException details) {
+                LOGGER.error(details, details.getMessage());
+                message.fail(HTTP.INTERNAL_SERVER_ERROR, details.getMessage());
+            } catch (final CsvParsingException | CsvException details) {
+                LOGGER.error(details, details.getMessage());
+                message.fail(HTTP.BAD_REQUEST, details.getMessage());
             }
         });
 
         aPromise.complete();
+    }
+
+    /**
+     * Updates the work metadata on an already existing work manifest.
+     *
+     * @param aPromise A promise that the work will be updated
+     * @param aCsvHeaders The CSV headers for the work metadata
+     * @param aWork The work's metadata
+     * @param aApiVersion An IIIF API version to which the metadata conforms
+     */
+    private void updateWork(final Promise<Void> aPromise, final CsvHeaders aCsvHeaders, final String[] aWork,
+            final String aApiVersion) {
+        final Promise<LockedManifest> promise = Promise.promise();
+        final String id = aWork[aCsvHeaders.getItemArkIndex()];
+
+        LOGGER.debug(MessageCodes.MFS_159, id);
+
+        promise.future().onComplete(handler -> {
+            if (handler.succeeded()) {
+                final LockedManifest lockedManifest = handler.result();
+                final DeliveryOptions options = new DeliveryOptions();
+                final ObjectMapper mapper = new ObjectMapper();
+                final JsonObject message = new JsonObject();
+
+                try {
+                    options.addHeader(Constants.ACTION, ManifestVerticle.UPDATE_WORK);
+                    message.put(Constants.UPDATED_CONTENT, new JsonArray(mapper.writeValueAsString(aWork)));
+                    message.put(Constants.CSV_HEADERS, aCsvHeaders.toJSON());
+                    message.put(Constants.MANIFEST_CONTENT, lockedManifest.toJSON());
+                    message.put(Constants.MANIFEST_ID, id);
+
+                    sendMessage(getManifestVerticleName(aApiVersion), message, options, workUpdate -> {
+                        if (workUpdate.succeeded()) {
+                            aPromise.complete();
+                        } else {
+                            aPromise.fail(workUpdate.cause());
+                        }
+
+                        lockedManifest.release();
+                    });
+                } catch (final JsonProcessingException details) {
+                    lockedManifest.release();
+                    aPromise.fail(details.getCause());
+                }
+            } else {
+                aPromise.fail(handler.cause());
+            }
+        });
+
+        getLockedManifest(id, false, promise);
     }
 
     /**

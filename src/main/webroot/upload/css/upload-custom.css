@@ -27,6 +27,10 @@ info-form {
   font-style: italic;
 }
 
+#metadata-update {
+	margin-left: 5px;
+}
+
 .infotext {
   font-size: smaller;
   color: #003B5C;

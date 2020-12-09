@@ -9,6 +9,7 @@ import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.verticles.S3BucketVerticle;
+
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
@@ -17,6 +18,9 @@ import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 
+/**
+ * A handler that processes requests to get a collection document.
+ */
 public class GetCollectionHandler extends AbstractFesterHandler implements Handler<RoutingContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GetCollectionHandler.class, Constants.MESSAGES);
@@ -54,8 +58,8 @@ public class GetCollectionHandler extends AbstractFesterHandler implements Handl
                 final ReplyException failure = (ReplyException) send.cause();
                 final int statusCode = failure.failureCode();
                 final String statusMessage = failure.getMessage();
-                final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_009, collectionName, statusCode,
-                        statusMessage);
+                final String errorMessage =
+                        LOGGER.getMessage(MessageCodes.MFS_009, collectionName, statusCode, statusMessage);
 
                 LOGGER.error(errorMessage);
 

@@ -123,6 +123,12 @@ public final class Constants {
     public static final String IIIF_HOST = "iiif-host";
 
     /**
+     * The name of the optional property indicating the load is only a metadata update. Its value, if present, is
+     * <code>true</code> or <code>false</code>.
+     */
+    public static final String METADATA_UPDATE = "metadata-update";
+
+    /**
      * The name of the IIIF presentation version parameter.
      */
     public static final String IIIF_API_VERSION = "iiif-version";
@@ -192,6 +198,11 @@ public final class Constants {
      * Collection content, stored as a JSON object.
      */
     public static final String COLLECTION_CONTENT = "collection-content";
+
+    /**
+     * Updates to manifest or collection content, stored as a string array.
+     */
+    public static final String UPDATED_CONTENT = "updated-content";
 
     /**
      * Manifest pages, stored in list form.
