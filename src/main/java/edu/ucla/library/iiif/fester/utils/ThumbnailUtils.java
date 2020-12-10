@@ -42,13 +42,11 @@ public final class ThumbnailUtils {
      * @param aURL The thumbnail URL
      * @return The updated row
    */
-    public static String[] addThumbnailURL(final String[] aRow, final String aURL) {
+    public static void addThumbnailURL(final String[] aRow, final String aURL) {
         final int thumbnailIndex = Arrays.asList(aRow).indexOf(HEADER_THUMB);
         if (aRow[thumbnailIndex] == null || aRow[thumbnailIndex].trim().equals(Constants.EMPTY) ) {
             aRow[thumbnailIndex] = aURL;
         }
-
-        return aRow;
     }
 
    /**

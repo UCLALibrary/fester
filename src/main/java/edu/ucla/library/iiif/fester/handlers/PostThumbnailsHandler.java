@@ -15,10 +15,7 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-//import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.DeliveryOptions;
-//import io.vertx.core.eventbus.ReplyException;
-//import io.vertx.core.file.FileSystem;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpVersion;
@@ -29,8 +26,8 @@ import io.vertx.ext.web.FileUpload;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-//import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -42,7 +39,6 @@ import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.CSV;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
-//import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.utils.ThumbnailUtils;
 
 /**
@@ -51,6 +47,8 @@ import edu.ucla.library.iiif.fester.utils.ThumbnailUtils;
 public class PostThumbnailsHandler extends AbstractFesterHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostThumbnailsHandler.class, Constants.MESSAGES);
+
+    private static final String MANIFESTS = "manifests";
 
     private final String myExceptionPage;
 
@@ -117,18 +115,48 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
             final String iiifVersion = StringUtils.trimToNull(request.getFormAttribute(Constants.IIIF_API_VERSION));
 
             try {
-                List<String[]> csvLines = new CSVReader(Files.newBufferedReader( Paths.get(filePath))).readAll();
-                csvLines = ThumbnailUtils.addThumbnailColumn(csvLines);
-                final int manifestIndex = Arrays.asList(csvLines.get(0)).indexOf(CSV.ITEM_ARK);
-                final String manifestID = csvLines.get(1)[manifestIndex];
-                final HttpClient httpClient = myVertx.createHttpClient();
-                final int thumbIndex;
-                final String thumbID;
-                httpClient.get(myPort, myUrl, "/" + manifestID + "/manifest", httpResponse -> {
-                    if (httpResponse.statusCode() == HTTP.OK) {
+                final List<String[]> originalLines =
+                    new CSVReader(Files.newBufferedReader(Paths.get(filePath))).readAll();
+                final List<String[]> linesWithThumbs = ThumbnailUtils.addThumbnailColumn(originalLines);
+                final int manifestIndex = Arrays.asList(linesWithThumbs.get(0)).indexOf(CSV.MANIFEST_URL);
+                final String collectionURL = linesWithThumbs.get(1)[manifestIndex];
+		final List<String> errors = new ArrayList<>();
+                final Future<JsonObject> collection = getManifest(collectionURL);
+                collection.onComplete(result -> {
+                    if (result.failed()) {
+                        errors.add(result.cause().getMessage());
                     } else {
+                        final JsonArray canvases = result.result().getJsonArray(MANIFESTS);
+                        final int canvasCount = canvases.size();
+                        final int canvasIndex;
+                        if (canvasCount < 3) {
+                            canvasIndex = 1;
+                        } else {
+                            canvasIndex = ThumbnailUtils.pickThumbnailIndex(canvasCount);
+                        }
+                        final String canvasURL = canvases.getJsonObject(canvasIndex).getString("id");
+                        final Future<JsonObject> canvas = getManifest(canvasURL);
+                        canvas.onComplete(canvasResult -> {
+                            if(canvasResult.failed()) {
+                                errors.add(canvasResult.cause().getMessage());
+			    } else {
+                                final String thumbURL = "something";
+			        linesWithThumbs.stream().forEach(row->ThumbnailUtils.addThumbnailURL(row,thumbURL)); 
+			    }
+                        });
                     }
                 });
+                if (errors.size() > 0) {
+                    final StringBuilder details = new StringBuilder();
+		    errors.stream().forEach(error -> details.append(error).append(" "));
+                    final String errorsMessage = details.toString().trim();
+                    response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
+                    response.setStatusMessage(errorsMessage);
+                    response.putHeader(Constants.CONTENT_TYPE, Constants.HTML_MEDIA_TYPE);
+                    response.end(StringUtils.format(myExceptionPage, errorsMessage));
+		} else {
+                    // return populated csv
+		}
             } catch (CsvException | IOException details) {
                 errorMessage = details.getMessage();
                 response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
@@ -137,13 +165,11 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
                 response.end(StringUtils.format(myExceptionPage, errorMessage));
             }
 
-            //get manifest column, retrieve collection manifest, get items list, decide on thumbnail from items length,
-            //add thumbnail to works rows
         }
     }
 
-    private Future<JsonObject> getByURL(final String aUrl) {
-	final Promise<JsonObject> promise = Promise.promise();
+    private Future<JsonObject> getManifest(final String aUrl) {
+        final Promise<JsonObject> promise = Promise.promise();
         final HttpClientOptions options = new HttpClientOptions().setSsl(true).setUseAlpn(true)
             .setProtocolVersion(HttpVersion.HTTP_2).setTrustAll(true);
         final HttpClient httpClient = myVertx.createHttpClient(options);
@@ -154,8 +180,8 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
                 });
             } else {
                 promise.fail(httpResponse.statusMessage());
-	    }
+            }
         });
-	return promise.future();
+        return promise.future();
     }
 }
