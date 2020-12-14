@@ -40,7 +40,6 @@ public final class ThumbnailUtils {
      *
      * @param aRow A row from a CSV
      * @param aURL The thumbnail URL
-     * @return The updated row
    */
     public static void addThumbnailURL(final String[] aRow, final String aURL) {
         final int thumbnailIndex = Arrays.asList(aRow).indexOf(HEADER_THUMB);

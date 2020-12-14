@@ -2,6 +2,7 @@
 package edu.ucla.library.iiif.fester.handlers;
 
 import com.opencsv.CSVReader;
+import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvException;
 
 import info.freelibrary.util.IOUtils;
@@ -12,6 +13,7 @@ import info.freelibrary.util.StringUtils;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -24,6 +26,7 @@ import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.FileUpload;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -49,6 +52,10 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(PostThumbnailsHandler.class, Constants.MESSAGES);
 
     private static final String MANIFESTS = "manifests";
+
+    private static final String ATTACHMENT = "attachment; filename=\"{}\"";
+
+    private static final String BR_TAG = "<br>";
 
     private final String myExceptionPage;
 
@@ -92,19 +99,11 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
         // An uploaded CSV is required
         if (csvUploads.size() == 0) {
             errorMessage = LOGGER.getMessage(MessageCodes.MFS_037);
-
-            response.setStatusCode(HTTP.BAD_REQUEST);
-            response.setStatusMessage(errorMessage);
-            response.putHeader(Constants.CONTENT_TYPE, Constants.HTML_MEDIA_TYPE);
-            response.end(StringUtils.format(myExceptionPage, errorMessage));
+            returnError(response, HTTP.BAD_REQUEST, errorMessage);
         } else if (festerizeUserAgentMatcher.matches() &&
                 !festerizeUserAgentMatcher.group("version").equals(myFesterizeVersion)) { // Festerize version mismatch
             errorMessage = LOGGER.getMessage(MessageCodes.MFS_147, myFesterizeVersion);
-
-            response.setStatusCode(HTTP.BAD_REQUEST);
-            response.setStatusMessage(errorMessage);
-            response.putHeader(Constants.CONTENT_TYPE, Constants.HTML_MEDIA_TYPE);
-            response.end(StringUtils.format(myExceptionPage, errorMessage));
+            returnError(response, HTTP.BAD_REQUEST, errorMessage);
         } else {
             final FileUpload csvFile = csvUploads.iterator().next();
             final String filePath = csvFile.uploadedFileName();
@@ -120,7 +119,7 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
                 final List<String[]> linesWithThumbs = ThumbnailUtils.addThumbnailColumn(originalLines);
                 final int manifestIndex = Arrays.asList(linesWithThumbs.get(0)).indexOf(CSV.MANIFEST_URL);
                 final String collectionURL = linesWithThumbs.get(1)[manifestIndex];
-		final List<String> errors = new ArrayList<>();
+                final List<String> errors = new ArrayList<>();
                 final Future<JsonObject> collection = getManifest(collectionURL);
                 collection.onComplete(result -> {
                     if (result.failed()) {
@@ -137,32 +136,25 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
                         final String canvasURL = canvases.getJsonObject(canvasIndex).getString("id");
                         final Future<JsonObject> canvas = getManifest(canvasURL);
                         canvas.onComplete(canvasResult -> {
-                            if(canvasResult.failed()) {
+                            if (canvasResult.failed()) {
                                 errors.add(canvasResult.cause().getMessage());
-			    } else {
+                            } else {
                                 final String thumbURL = "something";
-			        linesWithThumbs.stream().forEach(row->ThumbnailUtils.addThumbnailURL(row,thumbURL)); 
-			    }
+                                linesWithThumbs.stream().forEach(row->ThumbnailUtils.addThumbnailURL(row,thumbURL));
+                            }
                         });
                     }
                 });
                 if (errors.size() > 0) {
                     final StringBuilder details = new StringBuilder();
-		    errors.stream().forEach(error -> details.append(error).append(" "));
-                    final String errorsMessage = details.toString().trim();
-                    response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
-                    response.setStatusMessage(errorsMessage);
-                    response.putHeader(Constants.CONTENT_TYPE, Constants.HTML_MEDIA_TYPE);
-                    response.end(StringUtils.format(myExceptionPage, errorsMessage));
-		} else {
-                    // return populated csv
-		}
+                    errors.stream().forEach(error -> details.append(error).append(" "));
+                    returnError(response, HTTP.INTERNAL_SERVER_ERROR, details.toString().trim());
+                } else {
+                    returnCSV(fileName, filePath, linesWithThumbs, response);
+                }
             } catch (CsvException | IOException details) {
-                errorMessage = details.getMessage();
-                response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
-                response.setStatusMessage(errorMessage);
-                response.putHeader(Constants.CONTENT_TYPE, Constants.HTML_MEDIA_TYPE);
-                response.end(StringUtils.format(myExceptionPage, errorMessage));
+                logError(details);
+                returnError(response, HTTP.INTERNAL_SERVER_ERROR, details.getMessage());
             }
 
         }
@@ -183,5 +175,36 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
             }
         });
         return promise.future();
+    }
+
+    private void returnCSV(final String aFileName, final String aFilePath, final List<String[]> aCsvList,
+                           final HttpServerResponse aResponse) {
+        final StringWriter writer = new StringWriter();
+        final String responseMessage = LOGGER.getMessage(MessageCodes.MFS_038, aFileName, aFilePath);
+        try (CSVWriter csvWriter = new CSVWriter(writer)) {
+            csvWriter.writeAll(aCsvList);
+
+            aResponse.setStatusCode(HTTP.OK);
+            aResponse.setStatusMessage(responseMessage);
+            aResponse.putHeader(Constants.CONTENT_TYPE, Constants.CSV_MEDIA_TYPE);
+            aResponse.putHeader(Constants.CONTENT_DISPOSITION, StringUtils.format(ATTACHMENT, aFileName));
+            aResponse.end(Buffer.buffer(writer.toString()));
+        } catch (final IOException details) {
+            logError(details);
+            returnError(aResponse, HTTP.INTERNAL_SERVER_ERROR, details.getMessage());
+        }
+    }
+
+    private void logError(final Throwable aThrowable) {
+        LOGGER.error(aThrowable, LOGGER.getMessage(MessageCodes.MFS_103, aThrowable.getMessage()));
+    }
+
+    private void returnError(final HttpServerResponse aResponse, final int aStatusCode, final String aError) {
+        final String body = LOGGER.getMessage(MessageCodes.MFS_103, aError.replaceAll(Constants.EOL_REGEX, BR_TAG));
+
+        aResponse.setStatusCode(aStatusCode);
+        aResponse.setStatusMessage(aError.replaceAll(Constants.EOL_REGEX, Constants.EMPTY));
+        aResponse.putHeader(Constants.CONTENT_TYPE, Constants.HTML_MEDIA_TYPE);
+        aResponse.end(StringUtils.format(myExceptionPage, body));
     }
 }
