@@ -139,7 +139,10 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
                             if (canvasResult.failed()) {
                                 errors.add(canvasResult.cause().getMessage());
                             } else {
-                                final String thumbURL = "something";
+                                final JsonObject thumbCanvas = canvasResult.result();
+                                final String thumbURL = thumbCanvas.getJsonArray("sequences").getJsonObject(0)
+                                      .getJsonArray("canvases").getJsonObject(0).getJsonArray("images")
+                                      .getJsonObject(0).getJsonObject("resource").getString("@id");
                                 linesWithThumbs.stream().forEach(row->ThumbnailUtils.addThumbnailURL(row,thumbURL));
                             }
                         });
