@@ -145,7 +145,7 @@
     <fester.http.port>8888</fester.http.port>
 
     <!-- The version of Festerize that is compatible with this version of Fester -->
-    <festerize.version>0.1.0</festerize.version>
+    <festerize.version>0.2.0</festerize.version>
 
     <!-- The port a debugger may attach to when Fester is running in debug mode -->
     <fester.debug.port>5555</fester.debug.port>
