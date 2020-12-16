@@ -77,6 +77,7 @@ public class EndpointConfigHandler implements Handler<AsyncResult<OpenAPI3Router
             factory.addHandlerByOperationId(Op.GET_COLLECTION, new GetCollectionHandler(myVertx, myConfig));
             factory.addHandlerByOperationId(Op.PUT_COLLECTION, new PutCollectionHandler(myVertx, myConfig));
             factory.addHandlerByOperationId(Op.CHECK_ENDPOINTS, new CheckEndpointsHandler(myVertx, myConfig));
+            factory.addHandlerByOperationId(Op.POST_THUMB, new PostThumbnailsHandler(myVertx, myConfig));
 
             // After the batch ingest feature is configured (or not), we complete the router configuration
             promise.future().onComplete(handler -> {

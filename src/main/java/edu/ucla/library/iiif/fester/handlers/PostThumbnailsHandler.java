@@ -143,7 +143,9 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
                                 final String thumbURL = thumbCanvas.getJsonArray("sequences").getJsonObject(0)
                                       .getJsonArray("canvases").getJsonObject(0).getJsonArray("images")
                                       .getJsonObject(0).getJsonObject("resource").getString("@id");
-                                linesWithThumbs.stream().forEach(row->ThumbnailUtils.addThumbnailURL(row,thumbURL));
+                                for (int index = 1; index < linesWithThumbs.size(); index++) {
+                                    ThumbnailUtils.addThumbnailURL(linesWithThumbs.get(index),thumbURL);
+                                }
                             }
                         });
                     }
