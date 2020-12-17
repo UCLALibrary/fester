@@ -126,9 +126,9 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
                         final int canvasCount = canvases.size();
                         final int canvasIndex;
                         if (canvasCount < 3) {
-                            canvasIndex = 1;
+                            canvasIndex = 0;
                         } else {
-                            canvasIndex = ThumbnailUtils.pickThumbnailIndex(canvasCount);
+                            canvasIndex = ThumbnailUtils.pickThumbnailIndex(canvasCount - 1);
                         }
                         final String canvasURL = canvases.getJsonObject(canvasIndex).getString("id");
                         final Future<JsonObject> canvas = getManifest(canvasURL);

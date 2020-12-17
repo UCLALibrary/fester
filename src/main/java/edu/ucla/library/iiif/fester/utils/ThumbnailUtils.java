@@ -31,6 +31,7 @@ public final class ThumbnailUtils {
             final int newArraySize = aCsvList.get(0).length + 1;
             csvList = new ArrayList<>(aCsvList.size());
             aCsvList.stream().forEach(entry -> csvList.add(Arrays.copyOf(entry, newArraySize)));
+            csvList.get(0)[newArraySize - 1] = HEADER_THUMB;
             return csvList;
         }
     }
@@ -59,7 +60,7 @@ public final class ThumbnailUtils {
      * @return Random number between 3 and aMax
    */
     public static int pickThumbnailIndex(final int aMax) {
-        final int min = 3;
+        final int min = 2;
         return (int) (Math.random() * (aMax - min + 1) + min);
     }
 

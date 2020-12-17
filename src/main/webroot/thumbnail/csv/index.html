@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<title>Fester CSV Upload</title>
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<link rel="stylesheet" href="/fester/css/bootstrap.min.css">
+<link rel="stylesheet" href="/fester/css/fester-custom.css">
+<link rel="stylesheet" href="/fester/upload/css/upload-custom.css">
+
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-md bg-custom-grey navbar-dark bg-dark fixed-top">
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+      data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false"
+      aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <a class="navbar-brand" href="/fester">Fester</a>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <div class="navbar-nav">
+        <a class="nav-item nav-link active" href="/fester/upload/csv">CSV Upload</a> <a class="nav-item nav-link active"
+          href="/fester/docs">API Documentation</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container-fluid">
+    <h1 id="csv-upload-title">CSV Upload</h1>
+    <p>The CSV upload form can be used to upload festerized CSV files for adding thumbnails.</p>
+    <div class="row csv-upload-form">
+      <div class="col-sm-3 offset-sm-1">
+        <div class="info-form">
+          <form class="form-inlin justify-content-center" action="/thumbnails" method="post"
+            enctype="multipart/form-data">
+            <div class="form-group">
+              <label for="csv-file">File to upload:</label> <input type="file" name="csv-file" id="csv-file" required>
+            </div>
+            <!--div class="form-group">
+              <label for="iiif-host">IIIF Host:</label> <input type="text" value="https://iiif.library.ucla.edu/iiif/2"
+                name="iiif-host" id="iiif-host" onfocus="this.value=''" required/>
+              <div class="infotext">Use the default IIIF URL (i.e., https://iiif.library.ucla.edu/iiif/2) or enter the
+                base URL for a different IIIF server.</div>
+            </div-->
+            <div class="form-group">
+              <input type="submit" value="Upload" name="submit">
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="col-sm-4 offset-sm-1">
+        <h4>Instructions</h4>
+        <p>
+          To start a batch job, upload a CSV file (like one of those found in the <a
+            href="https://github.com/UCLALibrary/eureka/">Eureka</a> GitHub repository). 
+        </p>
+        <br />
+        <h4>Problems?</h4>
+        <p>
+          It's possible to submit a job that takes longer than the timeout on your browser allows. For really large CSV
+          submissions, you might need to use the <a
+            href="https://github.com/UCLALibrary/festerize">Festerize</a> script,
+          which does not have a timeout.
+        </p>
+        <p>
+          If you run into issues when using this upload form, please feel free to contact us in the
+          <code>#softwaredev-services</code>
+          Slack channel. We will be glad to troubleshoot any problems that you may encounter. Thanks!
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+</body>
+
+</html>

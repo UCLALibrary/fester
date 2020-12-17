@@ -43,9 +43,7 @@ public class ThumbnailUtilsTest {
     public final void testAddThumbHeader() throws IOException, CsvException {
         final List<String[]> csvData = read(TEST_CSV);
         final String expected = writeToString(read(EXPECTED_HEADER));
-	System.out.println("header expected = " + expected);
         final String found = writeToString(ThumbnailUtils.addThumbnailColumn(csvData));
-	System.out.println("header found = " + found);
 
         assertEquals(expected, found);
     }
@@ -61,9 +59,7 @@ public class ThumbnailUtilsTest {
         final List<String[]> csvData = read(EXPECTED_HEADER);
         ThumbnailUtils.addThumbnailURL(csvData, THUMBNAIL);
         final String expected = writeToString(read(EXPECTED_CSV));
-	System.out.println("thumb expected = " + expected);
         final String found = writeToString(csvData);
-	System.out.println("thumb found = " + found);
 
         assertEquals(expected, found);
     }
