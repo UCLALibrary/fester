@@ -65,8 +65,6 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
 
     private final Pattern myFesterizeUserAgentPattern;
 
-    private final int myPort;
-
     /**
      * @param aVertx
      * @param aConfig
@@ -80,7 +78,6 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
         myUrl = aConfig.getString(Config.FESTER_URL);
         myFesterizeVersion = aConfig.getString(Config.FESTERIZE_VERSION);
         myFesterizeUserAgentPattern = Pattern.compile("Festerize/(?<version>\\d+\\.\\d+\\.\\d+)");
-        myPort = Integer.parseInt(aConfig.getString(Config.HTTP_PORT));
     }
 
     /*
@@ -143,9 +140,7 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
                                 final String thumbURL = thumbCanvas.getJsonArray("sequences").getJsonObject(0)
                                       .getJsonArray("canvases").getJsonObject(0).getJsonArray("images")
                                       .getJsonObject(0).getJsonObject("resource").getString("@id");
-                                for (int index = 1; index < linesWithThumbs.size(); index++) {
-                                    ThumbnailUtils.addThumbnailURL(linesWithThumbs.get(index),thumbURL);
-                                }
+                                ThumbnailUtils.addThumbnailURL(linesWithThumbs, thumbURL);
                             }
                         });
                     }
@@ -170,7 +165,7 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
         final HttpClientOptions options = new HttpClientOptions().setSsl(true).setUseAlpn(true)
             .setProtocolVersion(HttpVersion.HTTP_2).setTrustAll(true);
         final HttpClient httpClient = myVertx.createHttpClient(options);
-        httpClient.get(myPort, aUrl, "", httpResponse -> {
+        httpClient.get(443, aUrl, "", httpResponse -> {
             if (httpResponse.statusCode() == HTTP.OK) {
                 httpResponse.bodyHandler(body -> {
                     promise.complete(new JsonObject(body.toString()));
