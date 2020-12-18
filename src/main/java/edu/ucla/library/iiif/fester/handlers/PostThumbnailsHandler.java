@@ -114,7 +114,7 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
                 final List<String[]> originalLines =
                     new CSVReader(Files.newBufferedReader(Paths.get(filePath))).readAll();
                 final List<String[]> linesWithThumbs = ThumbnailUtils.addThumbnailColumn(originalLines);
-                final int manifestIndex = Arrays.asList(linesWithThumbs.get(0)).indexOf(CSV.MANIFEST_URL);
+                final int manifestIndex = Arrays.asList(linesWithThumbs.get(1)).indexOf(CSV.MANIFEST_URL);
                 final String collectionURL = linesWithThumbs.get(1)[manifestIndex];
                 final List<String> errors = new ArrayList<>();
                 final Future<JsonObject> collection = getManifest(collectionURL);
@@ -125,7 +125,7 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
                         final JsonArray canvases = result.result().getJsonArray(MANIFESTS);
                         final int canvasCount = canvases.size();
                         final int canvasIndex;
-                        if (canvasCount < 3) {
+                        if (canvasCount <= 3) {
                             canvasIndex = 0;
                         } else {
                             canvasIndex = ThumbnailUtils.pickThumbnailIndex(canvasCount - 1);
