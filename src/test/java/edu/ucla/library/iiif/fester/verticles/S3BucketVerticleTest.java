@@ -32,6 +32,7 @@ import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
+
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
@@ -43,6 +44,9 @@ import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 
+/**
+ * Tests the verticle that handles S3 bucket interactions.
+ */
 @RunWith(VertxUnitRunner.class)
 public class S3BucketVerticleTest extends AbstractFesterVerticle {
 
@@ -112,8 +116,8 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
                 myCollectionUri = IDUtils.getResourceURI(myUrl, myCollectionS3Key);
 
                 // We need to determine if we'll be able to run the S3 integration tests so we can skip if needed
-                if (config.containsKey(Config.S3_ACCESS_KEY) && !config.getString(Config.S3_ACCESS_KEY,
-                        DEFAULT_ACCESS_KEY).equalsIgnoreCase(DEFAULT_ACCESS_KEY)) {
+                if (config.containsKey(Config.S3_ACCESS_KEY) && !config
+                        .getString(Config.S3_ACCESS_KEY, DEFAULT_ACCESS_KEY).equalsIgnoreCase(DEFAULT_ACCESS_KEY)) {
                     isExecutable = true;
                 }
 
@@ -198,8 +202,8 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
         }
 
         final File collectionFile = new File(TEST_COLLECTION_FILE);
-        final JsonObject expected = new JsonObject(StringUtils.read(collectionFile).replaceAll(
-                myUrlPlaceholderPattern, myUrl));
+        final JsonObject expected =
+                new JsonObject(StringUtils.read(collectionFile).replaceAll(myUrlPlaceholderPattern, myUrl));
         final JsonObject message = new JsonObject();
         final DeliveryOptions options = new DeliveryOptions();
         final Async asyncTask = aContext.async();
@@ -282,8 +286,8 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
     }
 
     /**
-     * Tests being able to store a collection manifest to S3. This requires an actual S3 configuration. The test will
-     * be skipped if no such configuration exists.
+     * Tests being able to store a collection manifest to S3. This requires an actual S3 configuration. The test will be
+     * skipped if no such configuration exists.
      *
      * @param aContext A test context
      */

@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>fester</artifactId>
-  <version>0.13.1-SNAPSHOT</version>
+  <version>0.14.2-SNAPSHOT</version>
   <name>Fester</name>
   <description>A read/write interface for storing and retrieving IIIF manifests</description>
   <url>https://github.com/uclalibrary/fester</url>
@@ -69,7 +69,7 @@
   </developers>
 
   <properties>
-    <vertx.version>3.9.1</vertx.version>
+    <vertx.version>3.9.4</vertx.version>
     <opencsv.version>5.0</opencsv.version>
     <moirai.version>2.0.0</moirai.version>
     <slf4j.ext.version>1.7.26</slf4j.ext.version>
@@ -78,8 +78,8 @@
     <freelib.utils.version>1.1.0</freelib.utils.version>
     <freelib.maven.version>0.1.0</freelib.maven.version>
     <vertx.super.s3.version>1.3.3</vertx.super.s3.version>
-    <jiiify.presentation.v2.version>0.5.3</jiiify.presentation.v2.version>
-    <jiiify.presentation.v3.version>0.5.4</jiiify.presentation.v3.version>
+    <jiiify.presentation.v2.version>0.5.5</jiiify.presentation.v2.version>
+    <jiiify.presentation.v3.version>0.5.5</jiiify.presentation.v3.version>
     <alphanumeric.comparator.version>1.4.1</alphanumeric.comparator.version>
 
     <!-- Exclusions/Replacements -->
@@ -145,7 +145,7 @@
     <fester.http.port>8888</fester.http.port>
 
     <!-- The version of Festerize that is compatible with this version of Fester -->
-    <festerize.version>0.1.0</festerize.version>
+    <festerize.version>0.2.0</festerize.version>
 
     <!-- The port a debugger may attach to when Fester is running in debug mode -->
     <fester.debug.port>5555</fester.debug.port>
@@ -884,6 +884,9 @@
                   <exclude>io.vertx:vertx-web-api-contract</exclude>
                   <exclude>io.vertx:vertx-web-common</exclude>
                   <exclude>io.vertx:vertx-web</exclude>
+                  <exclude>jakarta.activation:jakarta.activation-api</exclude>
+                  <exclude>jakarta.xml.bind:jakarta.xml.bind-api</exclude>
+                  <exclude>jakarta.validation:jakarta.validation-api</exclude>
                   <exclude>javax.activation:activation</exclude>
                   <exclude>javax.activation:javax.activation-api</exclude>
                   <exclude>javax.annotation:jsr250-api</exclude>
@@ -930,8 +933,11 @@
                   <exclude>org.glassfish:javax.json</exclude>
                   <exclude>org.jboss.forge.roaster:roaster-api</exclude>
                   <exclude>org.jboss.forge.roaster:roaster-jdt</exclude>
+                  <exclude>org.jsoup:jsoup</exclude>
                   <exclude>org.mozilla:rhino</exclude>
                   <exclude>com.opencsv:opencsv</exclude>
+                  <exclude>org.jruby.jcodings:jcodings</exclude>
+                  <exclude>org.jruby.joni:joni</exclude>
                   <exclude>org.slf4j:jcl-over-slf4j</exclude>
                   <exclude>org.slf4j:slf4j-api</exclude>
                   <exclude>org.slf4j:slf4j-ext</exclude>
@@ -1222,6 +1228,6 @@
   <parent>
     <artifactId>freelib-parent</artifactId>
     <groupId>info.freelibrary</groupId>
-    <version>4.0.1</version>
+    <version>5.2.1</version>
   </parent>
 </project>

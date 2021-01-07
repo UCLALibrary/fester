@@ -11,9 +11,11 @@ import com.amazonaws.services.s3.AmazonS3;
 
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
+
 import io.vertx.core.Vertx;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.web.client.WebClient;
+import io.vertx.ext.web.client.WebClientOptions;
 
 /**
  * A base class for functional or integration tests.
@@ -50,7 +52,7 @@ abstract class AbstractFesterFIT {
     @Before
     public void setUpTest() {
         myID = UUID.randomUUID().toString();
-        myWebClient = WebClient.create(VERTX_INSTANCE);
+        myWebClient = WebClient.create(VERTX_INSTANCE, new WebClientOptions().setKeepAlive(false));
     }
 
     /**

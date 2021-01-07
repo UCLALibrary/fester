@@ -32,6 +32,9 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.multipart.MultipartForm;
 
+/**
+ * Tests for processing pages uploaded via CSV.
+ */
 @RunWith(VertxUnitRunner.class)
 public class PagesManifestFT extends BaseFesterFT {
 

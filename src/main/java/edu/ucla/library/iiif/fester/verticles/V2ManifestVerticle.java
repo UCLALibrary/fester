@@ -53,6 +53,7 @@ import edu.ucla.library.iiif.fester.utils.V2ManifestLabelComparator;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -94,6 +95,9 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
                     case ManifestVerticle.CREATE_COLLECTION:
                         createCollection(message);
                         break;
+                    case ManifestVerticle.UPDATE_WORK:
+                        updateWork(message);
+                        break;
                     case ManifestVerticle.CREATE_WORK:
                         createWork(message);
                         break;
@@ -101,7 +105,7 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
                         message.fail(HTTP.INTERNAL_SERVER_ERROR, LOGGER.getMessage(MessageCodes.MFS_153, action));
                         break;
                 }
-            } catch (final JsonProcessingException details) {
+            } catch (final JsonProcessingException | DecodeException details) {
                 LOGGER.error(details, details.getMessage());
                 message.fail(HTTP.INTERNAL_SERVER_ERROR, details.getMessage());
             }
@@ -305,6 +309,66 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
     }
 
     /**
+     * Update the work's metadata with values from the CSV file.
+     *
+     * @param aMessage A message with information to be updated
+     * @throws JsonProcessingException If there is trouble parsing the update metadata
+     */
+    private void updateWork(final Message<JsonObject> aMessage) throws JsonProcessingException {
+        final JsonObject body = aMessage.body();
+        final ObjectMapper mapper = new ObjectMapper();
+        final Manifest manifest = Manifest.fromJSON(body.getJsonObject(Constants.MANIFEST_CONTENT));
+        final CsvHeaders csvHeaders = CsvHeaders.fromJSON(body.getJsonObject(Constants.CSV_HEADERS));
+        final JsonArray workArray = body.getJsonArray(Constants.UPDATED_CONTENT);
+        final String[] workRow = mapper.readValue(workArray.encode(), new TypeReference<String[]>() {});
+        final String id = body.getString(Constants.MANIFEST_ID);
+        final DeliveryOptions options = new DeliveryOptions();
+        final JsonObject message = new JsonObject();
+
+        getMetadata(workRow, csvHeaders.getViewingDirectionIndex()).ifPresentOrElse(viewingDirection -> {
+            manifest.setViewingDirection(ViewingDirection.fromString(viewingDirection));
+        }, () -> {
+            manifest.clearViewingDirection();
+        });
+
+        getMetadata(workRow, csvHeaders.getViewingHintIndex()).ifPresentOrElse(viewingHint -> {
+            manifest.setViewingHint(new ViewingHint(viewingHint));
+        }, () -> {
+            manifest.clearViewingHint();
+        });
+
+        getMetadata(workRow, csvHeaders.getRepositoryNameIndex()).ifPresentOrElse(repoName -> {
+            manifest.setMetadata(updateMetadata(manifest.getMetadata(), MetadataLabels.REPOSITORY_NAME, repoName));
+        }, () -> {
+            manifest.setMetadata(updateMetadata(manifest.getMetadata(), MetadataLabels.REPOSITORY_NAME));
+        });
+
+        getMetadata(workRow, csvHeaders.getLocalRightsStatementIndex()).ifPresentOrElse(localRightsStatement -> {
+            manifest.setAttribution(new Attribution(localRightsStatement));
+        }, () -> {
+            manifest.clearAttribution();
+        });
+
+        getMetadata(workRow, csvHeaders.getRightsContactIndex()).ifPresentOrElse(rightsContact -> {
+            manifest.setMetadata(updateMetadata(manifest.getMetadata(), MetadataLabels.RIGHTS_CONTACT, rightsContact));
+        }, () -> {
+            manifest.setMetadata(updateMetadata(manifest.getMetadata(), MetadataLabels.RIGHTS_CONTACT));
+        });
+
+        message.put(Constants.DATA, manifest.toJSON());
+        message.put(Constants.MANIFEST_ID, id);
+        options.addHeader(Constants.ACTION, Op.PUT_MANIFEST);
+
+        sendMessage(S3BucketVerticle.class.getName(), message, options, send -> {
+            if (send.succeeded()) {
+                aMessage.reply(manifest.toJSON());
+            } else {
+                error(aMessage, send.cause(), MessageCodes.MFS_160, send.cause().getMessage());
+            }
+        });
+    }
+
+    /**
      * Updates pages in a work.
      *
      * @param aMessage A message with information about the page updates
@@ -451,5 +515,35 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
         }
 
         return canvases.toArray(new Canvas[] {});
+    }
+
+    /**
+     * Updates existing metadata.
+     *
+     * @param aMetadata A metadata property
+     * @param aStringArray A metadata label and, optionally, its value
+     * @return Metadata about the work
+     */
+    private Metadata updateMetadata(final Metadata aMetadata, final String... aStringArray) {
+        final Metadata metadata = new Metadata();
+
+        if (aMetadata != null) {
+            final List<Metadata.Entry> entries = aMetadata.getEntries();
+            final Iterator<Metadata.Entry> iterator = entries.iterator();
+
+            while (iterator.hasNext()) {
+                final Metadata.Entry entry = iterator.next();
+                final boolean labelMatches = entry.getLabel().equals(aStringArray[0]);
+
+                // If our labels match and we have a new value, add the updated metadata
+                if (labelMatches && aStringArray.length == 2) {
+                    metadata.add(aStringArray[0], aStringArray[1]);
+                } else if (!labelMatches) { // If label doesn't match, add the metadata
+                    metadata.add(entry);
+                } // If label matches but we have no updated value, ignore the metadata
+            }
+        }
+
+        return metadata;
     }
 }
