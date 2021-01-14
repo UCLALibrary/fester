@@ -6,7 +6,6 @@ import static edu.ucla.library.iiif.fester.utils.ContainerConfig.S3_ALIAS;
 
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 
 import org.testcontainers.Testcontainers;
 import org.testcontainers.containers.GenericContainer;
@@ -56,8 +55,8 @@ public final class ContainerUtils {
         final String featureFlags = featureFlagsURL == null ? Config.FEATURE_FLAGS : toEnv(Config.FEATURE_FLAGS);
         final String containerPort = checkNotNull(Integer.toString(aConfig.getContainerPort()));
         final Map<String, String> envMap = Map.of(toEnv(Config.S3_ACCESS_KEY), accessKey, toEnv(Config.S3_SECRET_KEY),
-                secretKey, toEnv(Config.S3_REGION), region, toEnv(Config.S3_ENDPOINT), endpoint, toEnv(
-                        Config.HTTP_PORT), containerPort, toEnv(Config.S3_BUCKET), bucket, featureFlags,
+                secretKey, toEnv(Config.S3_REGION), region, toEnv(Config.S3_ENDPOINT), endpoint,
+                toEnv(Config.HTTP_PORT), containerPort, toEnv(Config.S3_BUCKET), bucket, featureFlags,
                 featureFlagsURL != null ? featureFlagsURL : Constants.EMPTY, toEnv(Config.PLACEHOLDER_IMAGE),
                 placeholder, toEnv(Config.FESTERIZE_VERSION), festerizeVersion);
         final String jdwpHostPort = System.getProperty(Config.JDWP_HOST_PORT);
@@ -67,7 +66,7 @@ public final class ContainerUtils {
             container.withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger(aConfig.getContainerName())));
         }
 
-        if (!"".equals(jdwpHostPort)) {
+        if (!Constants.EMPTY.equals(jdwpHostPort) && jdwpHostPort != null) {
             // Allow our container to attach to a JDWP server running on the host machine
             Testcontainers.exposeHostPorts(Integer.parseInt(jdwpHostPort));
         }
@@ -97,20 +96,20 @@ public final class ContainerUtils {
      * @return A Docker image tag
      */
     public static String toTag(final String aVersion) {
-        Objects.requireNonNullElse(aVersion, "(null)");
+        final String version = aVersion != null ? aVersion : "fester:0.0.0-SNAPSHOT";
 
-        if (aVersion.contains("-SNAPSHOT")) {
-            final StringBuilder builder = new StringBuilder(aVersion);
+        if (version.contains("-SNAPSHOT")) {
+            final StringBuilder builder = new StringBuilder(version);
             final int index = builder.lastIndexOf(":");
 
             if (index != -1) {
                 builder.replace(index + 1, builder.length(), "latest");
                 return builder.toString();
             } else {
-                return aVersion;
+                return version;
             }
         } else {
-            return aVersion;
+            return version;
         }
     }
 
