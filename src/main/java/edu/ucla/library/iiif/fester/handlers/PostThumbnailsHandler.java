@@ -98,7 +98,7 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
             errorMessage = LOGGER.getMessage(MessageCodes.MFS_037);
             returnError(response, HTTP.BAD_REQUEST, errorMessage);
         } else if (festerizeUserAgentMatcher.matches() &&
-                !festerizeUserAgentMatcher.group("version").equals(myFesterizeVersion)) { // Festerize version mismatch
+                   !festerizeUserAgentMatcher.group("version").equals(myFesterizeVersion)) { // Festerize version mismatch
             errorMessage = LOGGER.getMessage(MessageCodes.MFS_147, myFesterizeVersion);
             returnError(response, HTTP.BAD_REQUEST, errorMessage);
         } else {
@@ -114,13 +114,12 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
                 final List<String[]> originalLines =
                     new CSVReader(Files.newBufferedReader(Paths.get(filePath))).readAll();
                 final List<String[]> linesWithThumbs = ThumbnailUtils.addThumbnailColumn(originalLines);
-                final int manifestIndex = Arrays.asList(linesWithThumbs.get(1)).indexOf(CSV.MANIFEST_URL);
+                final int manifestIndex = Arrays.asList(linesWithThumbs.get(0)).indexOf(CSV.MANIFEST_URL);
                 final String collectionURL = linesWithThumbs.get(1)[manifestIndex];
-                final List<String> errors = new ArrayList<>();
                 final Future<JsonObject> collection = getManifest(collectionURL);
                 collection.onComplete(result -> {
                     if (result.failed()) {
-                        errors.add(result.cause().getMessage());
+                        returnError(response, HTTP.INTERNAL_SERVER_ERROR, result.cause().getMessage());
                     } else {
                         final JsonArray canvases = result.result().getJsonArray(MANIFESTS);
                         final int canvasCount = canvases.size();
@@ -134,24 +133,18 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
                         final Future<JsonObject> canvas = getManifest(canvasURL);
                         canvas.onComplete(canvasResult -> {
                             if (canvasResult.failed()) {
-                                errors.add(canvasResult.cause().getMessage());
+                                returnError(response, HTTP.INTERNAL_SERVER_ERROR, canvasResult.cause().getMessage());
                             } else {
                                 final JsonObject thumbCanvas = canvasResult.result();
                                 final String thumbURL = thumbCanvas.getJsonArray("sequences").getJsonObject(0)
                                       .getJsonArray("canvases").getJsonObject(0).getJsonArray("images")
                                       .getJsonObject(0).getJsonObject("resource").getString("@id");
                                 ThumbnailUtils.addThumbnailURL(linesWithThumbs, thumbURL);
+                                returnCSV(fileName, filePath, linesWithThumbs, response);
                             }
                         });
                     }
                 });
-                if (errors.size() > 0) {
-                    final StringBuilder details = new StringBuilder();
-                    errors.stream().forEach(error -> details.append(error).append(" "));
-                    returnError(response, HTTP.INTERNAL_SERVER_ERROR, details.toString().trim());
-                } else {
-                    returnCSV(fileName, filePath, linesWithThumbs, response);
-                }
             } catch (CsvException | IOException details) {
                 logError(details);
                 returnError(response, HTTP.INTERNAL_SERVER_ERROR, details.getMessage());
@@ -161,6 +154,7 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
     }
 
     private Future<JsonObject> getManifest(final String aUrl) {
+	    System.out.println("in getManifest with URL " + aUrl);
         final Promise<JsonObject> promise = Promise.promise();
         final HttpClientOptions options = new HttpClientOptions().setSsl(true).setUseAlpn(true)
             .setProtocolVersion(HttpVersion.HTTP_2).setTrustAll(true);
@@ -168,9 +162,11 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
         httpClient.get(443, aUrl, "", httpResponse -> {
             if (httpResponse.statusCode() == HTTP.OK) {
                 httpResponse.bodyHandler(body -> {
+	    System.out.println("reply body = " + body.toString());
                     promise.complete(new JsonObject(body.toString()));
                 });
             } else {
+	    System.out.println("error message = " + httpResponse.statusMessage());
                 promise.fail(httpResponse.statusMessage());
             }
         });
