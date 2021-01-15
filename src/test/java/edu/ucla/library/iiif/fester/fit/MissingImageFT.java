@@ -17,6 +17,7 @@ import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
 import info.freelibrary.iiif.presentation.v2.Canvas;
+import info.freelibrary.iiif.presentation.v2.ImageContent;
 import info.freelibrary.iiif.presentation.v2.ImageResource;
 import info.freelibrary.iiif.presentation.v2.Manifest;
 import info.freelibrary.iiif.presentation.v2.Sequence;
@@ -34,7 +35,8 @@ import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.multipart.MultipartForm;
 
 /**
- * Tests for handling missing images.
+ * Tests for handling missing images. The missing image should be detected and a placeholder image put into the manifest
+ * instead.
  */
 @RunWith(VertxUnitRunner.class)
 public class MissingImageFT extends BaseFesterFT {
@@ -89,7 +91,6 @@ public class MissingImageFT extends BaseFesterFT {
      * @throws IOException If there is trouble reading the CSV test fixtures
      */
     @Test
-    @SuppressWarnings("checkstyle:indentation")
     public final void testPagesCsv(final TestContext aContext) throws CsvException, IOException {
         final Async asyncTask = aContext.async();
         final Promise<Void> collectionPromise = Promise.promise();
@@ -139,7 +140,6 @@ public class MissingImageFT extends BaseFesterFT {
      * @param aForm A multipart form submission
      * @param aPromise A promise that the ingest happens
      */
-    @SuppressWarnings("checkstyle:indentation")
     private void ingestCSV(final MultipartForm aForm, final Promise<Void> aPromise) {
         myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE).sendMultipartForm(aForm,
                 post -> {
@@ -168,7 +168,8 @@ public class MissingImageFT extends BaseFesterFT {
         final Manifest manifest = Manifest.fromString(myS3Client.getObjectAsString(BUCKET, MANIFEST_S3_KEY));
         final List<Sequence> sequences = manifest.getSequences();
         final Canvas coverPage = sequences.get(0).getCanvases().get(0);
-        final ImageResource image = coverPage.getImageContent().get(0).getResources().get(0);
+        final ImageContent imageWrapper = coverPage.getImageContent().get(0);
+        final ImageResource image = imageWrapper.getResources().get(0);
 
         // Check that we have the right page and that it's image resource URL is set to our placeholder
         aContext.assertEquals("cover page", coverPage.getLabel().getString());

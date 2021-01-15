@@ -79,6 +79,14 @@ You might also want to adjust the logging level on the tests themselves. By defa
 
 If you want more fine-grained control over the logging, you can copy the `src/test/resources/logback-test.xml` file to the project's root directory and modify it. A `logback-test.xml` file in the project's home directory will be used instead of the standard one in `src/rest/resources` if it's available. That hypothetical file has also been added to the project's `.gitignore` so you don't need to worry about checking it into Git.
 
+## Running a Single Test
+
+It is sometimes useful to run a single test (instead of the whole test suite). The Surefire Maven plugin allows for this, but it's worth noting that when a single test is run in this way the test suite's pre-configured system properties are not picked up from the plugin's configuration. To work around this, a dev who wants to run a single test must supply the necessary properties theirself. For example, if one wanted to run the functional test that checks that missing images get a placeholder image in the manifest, the command to do that would be:
+
+    mvn integration-test -Dtest=MissingImageFT -Dfester.s3.bucket=iiif-fester -Dfester.placeholder.url="https://iiif.library.ucla.edu/iiif/2/blank" -Dfester.logs.output=true
+
+You would want to supply your own values for `fester.s3.bucket` and `fester.placeholder` of course. This command will spin up the Docker container that the functional test is run against, but it will only run the `MissingImageFT` test, skipping all the integration and other functional tests in the suite.
+
 ## Running the Application for Development
 
 You can run a development instance of Fester by typing the following within the project root:
