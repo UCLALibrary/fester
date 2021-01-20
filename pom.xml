@@ -69,7 +69,7 @@
   </developers>
 
   <properties>
-    <vertx.version>3.9.4</vertx.version>
+    <vertx.version>4.0.0</vertx.version>
     <opencsv.version>5.0</opencsv.version>
     <moirai.version>2.0.0</moirai.version>
     <slf4j.ext.version>1.7.26</slf4j.ext.version>
@@ -154,13 +154,13 @@
     <jdwp.host.port>5556</jdwp.host.port>
 
     <!-- The JDWP configuration for debugging a containerized Fester instance; see "debug" profile -->
-    <jdwp.client.config />
+    <jdwp.client.config/>
 
     <!-- The Docker registry user and password used for publishing images -->
-    <docker.registry.username />
-    <docker.registry.password />
+    <docker.registry.username/>
+    <docker.registry.password/>
     <!-- The Docker registry account, if supplied, must end with a slash (e.g. "account/") -->
-    <docker.registry.account />
+    <docker.registry.account/>
   </properties>
 
   <dependencies>
@@ -791,8 +791,7 @@
             </goals>
             <configuration>
               <transformers>
-                <transformer
-                  implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                   <manifestEntries>
                     <Main-Class>io.vertx.core.Launcher</Main-Class>
                     <Main-Verticle>${main.verticle}</Main-Verticle>
