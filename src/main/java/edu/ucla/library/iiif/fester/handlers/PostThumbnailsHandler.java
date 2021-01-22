@@ -18,19 +18,23 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
-import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.http.HttpVersion;
+//import io.vertx.core.http.HttpClient;
+//import io.vertx.core.http.HttpClientOptions;
+//import io.vertx.core.http.HttpVersion;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.FileUpload;
+import io.vertx.ext.web.client.HttpRequest;
+import io.vertx.ext.web.client.WebClient;
+import io.vertx.ext.web.client.predicate.ResponsePredicate;
+import io.vertx.ext.web.codec.BodyCodec;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+//import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -98,7 +102,7 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
             errorMessage = LOGGER.getMessage(MessageCodes.MFS_037);
             returnError(response, HTTP.BAD_REQUEST, errorMessage);
         } else if (festerizeUserAgentMatcher.matches() &&
-                   !festerizeUserAgentMatcher.group("version").equals(myFesterizeVersion)) { // Festerize version mismatch
+                   !festerizeUserAgentMatcher.group("version").equals(myFesterizeVersion)) {
             errorMessage = LOGGER.getMessage(MessageCodes.MFS_147, myFesterizeVersion);
             returnError(response, HTTP.BAD_REQUEST, errorMessage);
         } else {
@@ -129,7 +133,7 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
                         } else {
                             canvasIndex = ThumbnailUtils.pickThumbnailIndex(canvasCount - 1);
                         }
-                        final String canvasURL = canvases.getJsonObject(canvasIndex).getString("id");
+                        final String canvasURL = canvases.getJsonObject(canvasIndex).getString("@id");
                         final Future<JsonObject> canvas = getManifest(canvasURL);
                         canvas.onComplete(canvasResult -> {
                             if (canvasResult.failed()) {
@@ -154,6 +158,27 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
     }
 
     private Future<JsonObject> getManifest(final String aUrl) {
+        final Promise<JsonObject> promise = Promise.promise();
+        final HttpRequest<JsonObject> request;
+        request = WebClient.create(myVertx)
+            .getAbs(aUrl)
+            .ssl(true)
+            .putHeader("Accept", "application/json")
+            .as(BodyCodec.jsonObject())
+            .expect(ResponsePredicate.SC_OK);
+
+        request.send(asyncResult -> {
+            if (asyncResult.succeeded()) {
+                promise.complete(asyncResult.result().body());
+            } else {
+                promise.fail(asyncResult.result().statusMessage());
+            }
+        });
+
+        return promise.future();
+    }
+
+    /*private Future<JsonObject> getManifest(final String aUrl) {
 	    System.out.println("in getManifest with URL " + aUrl);
         final Promise<JsonObject> promise = Promise.promise();
         final HttpClientOptions options = new HttpClientOptions().setSsl(true).setUseAlpn(true)
@@ -171,7 +196,7 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
             }
         });
         return promise.future();
-    }
+    }*/
 
     private void returnCSV(final String aFileName, final String aFilePath, final List<String[]> aCsvList,
                            final HttpServerResponse aResponse) {
