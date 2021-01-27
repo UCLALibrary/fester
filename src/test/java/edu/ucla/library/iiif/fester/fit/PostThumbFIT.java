@@ -1,6 +1,8 @@
 
 package edu.ucla.library.iiif.fester.fit;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
@@ -31,6 +33,15 @@ import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.multipart.MultipartForm;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.Future;
+import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
+import io.vertx.ext.web.client.HttpRequest;
+import io.vertx.ext.web.client.WebClient;
+import io.vertx.ext.web.client.predicate.ResponsePredicate;
+import io.vertx.ext.web.codec.BodyCodec;
 
 /**
  * Tests related to adding thumbnail  data to a CSV file.
@@ -66,6 +77,42 @@ public class PostThumbFIT {
             super.cleanUpTest();
         }
 
+        @Test
+        public final void testClientCall() {
+            final String collectionURL =
+                "https://iiif.library.ucla.edu/collections/ark%3A%2F21198%2Fzz001ng4t6";
+            final Future<JsonObject> collection = getManifest(collectionURL);
+            collection.onComplete(result -> {
+                if (result.failed()) {
+                    System.out.println("Problem: " + result.cause().getMessage());
+                } else {
+                    final JsonArray canvases = result.result().getJsonArray("manifests");
+                    assertEquals(3, canvases.size());
+                }
+            });
+        }
+
+        private Future<JsonObject> getManifest(final String aUrl) {
+            final Promise<JsonObject> promise = Promise.promise();
+            final HttpRequest<JsonObject> request;
+            request = WebClient.create(Vertx.vertx())
+                .getAbs(aUrl)
+                .ssl(true)
+                .putHeader("Accept", "application/json")
+                .as(BodyCodec.jsonObject())
+                .expect(ResponsePredicate.SC_OK);
+
+            request.send(asyncResult -> {
+                if (asyncResult.succeeded()) {
+                    promise.complete(asyncResult.result().body());
+                } else {
+                    promise.fail(asyncResult.result().statusMessage());
+                }
+            });
+
+            return promise.future();
+        }
+
         /**
          * Tests the thumbnail workflow by posting a CSV.
          *
@@ -86,7 +133,6 @@ public class PostThumbFIT {
                         final String contentType = response.getHeader(Constants.CONTENT_TYPE);
                         final List<String[]> expected;
 
-                        // Check that what we get back is the same as what we sent
                         try {
                             expected = ThumbnailUtils.addThumbnailColumn(
                                        LinkUtilsTest.read(TEST_CSV.getAbsolutePath()));
@@ -97,7 +143,6 @@ public class PostThumbFIT {
                             aContext.fail(aDetails);
                         }
 
-                        // Check that what we get back has the correct media type
                         aContext.assertEquals(Constants.CSV_MEDIA_TYPE, contentType);
                         complete(asyncTask);
                     } else {

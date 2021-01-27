@@ -18,9 +18,6 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
-//import io.vertx.core.http.HttpClient;
-//import io.vertx.core.http.HttpClientOptions;
-//import io.vertx.core.http.HttpVersion;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.FileUpload;
@@ -34,7 +31,6 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-//import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -60,6 +56,8 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
     private static final String ATTACHMENT = "attachment; filename=\"{}\"";
 
     private static final String BR_TAG = "<br>";
+
+    private static final String ID_TAG = "@id";
 
     private final String myExceptionPage;
 
@@ -133,7 +131,7 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
                         } else {
                             canvasIndex = ThumbnailUtils.pickThumbnailIndex(canvasCount - 1);
                         }
-                        final String canvasURL = canvases.getJsonObject(canvasIndex).getString("@id");
+                        final String canvasURL = canvases.getJsonObject(canvasIndex).getString(ID_TAG);
                         final Future<JsonObject> canvas = getManifest(canvasURL);
                         canvas.onComplete(canvasResult -> {
                             if (canvasResult.failed()) {
@@ -142,7 +140,7 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
                                 final JsonObject thumbCanvas = canvasResult.result();
                                 final String thumbURL = thumbCanvas.getJsonArray("sequences").getJsonObject(0)
                                       .getJsonArray("canvases").getJsonObject(0).getJsonArray("images")
-                                      .getJsonObject(0).getJsonObject("resource").getString("@id");
+                                      .getJsonObject(0).getJsonObject("resource").getString(ID_TAG);
                                 ThumbnailUtils.addThumbnailURL(linesWithThumbs, thumbURL);
                                 returnCSV(fileName, filePath, linesWithThumbs, response);
                             }
@@ -177,26 +175,6 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
 
         return promise.future();
     }
-
-    /*private Future<JsonObject> getManifest(final String aUrl) {
-	    System.out.println("in getManifest with URL " + aUrl);
-        final Promise<JsonObject> promise = Promise.promise();
-        final HttpClientOptions options = new HttpClientOptions().setSsl(true).setUseAlpn(true)
-            .setProtocolVersion(HttpVersion.HTTP_2).setTrustAll(true);
-        final HttpClient httpClient = myVertx.createHttpClient(options);
-        httpClient.get(443, aUrl, "", httpResponse -> {
-            if (httpResponse.statusCode() == HTTP.OK) {
-                httpResponse.bodyHandler(body -> {
-	    System.out.println("reply body = " + body.toString());
-                    promise.complete(new JsonObject(body.toString()));
-                });
-            } else {
-	    System.out.println("error message = " + httpResponse.statusMessage());
-                promise.fail(httpResponse.statusMessage());
-            }
-        });
-        return promise.future();
-    }*/
 
     private void returnCSV(final String aFileName, final String aFilePath, final List<String[]> aCsvList,
                            final HttpServerResponse aResponse) {
