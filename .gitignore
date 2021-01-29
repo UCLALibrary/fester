@@ -15,6 +15,7 @@ src/main/tools/eclipse
 src/main/tools/travis
 src/main/generated
 logback-test.xml
+.flattened-pom.xml
 
 ## Ignore project files created by IntelliJ IDEA
 *.iml
