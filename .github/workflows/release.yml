@@ -12,7 +12,7 @@ jobs:
     env:
       AUTORELEASE_ARTIFACT: ${{ secrets.AUTORELEASE_ARTIFACT }}
       SKIP_JAR_DEPLOYMENT: ${{ secrets.SKIP_JAR_DEPLOYMENT }}
-      FREELIBRARY_CACHE_KEY: ${{ secrets.FREELIBRARY_CACHE_KEY }}
+      MAVEN_CACHE_KEY: ${{ secrets.MAVEN_CACHE_KEY }}
     steps:
       - name: Check out source code
         uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # v2
@@ -28,9 +28,11 @@ jobs:
           maven-version: 3.6.3
       - name: Set up Maven cache
         uses: actions/cache@0781355a23dac32fd3bac414512f4b903437991a # v2
+        if: ${{ env.MAVEN_CACHE_KEY }}
         with:
           path: ~/.m2
-          key: freelibrary-cache-${{ env.FREELIBRARY_CACHE_KEY }}
+          key: freelibrary-cache-${{ secrets.MAVEN_CACHE_KEY }}-${{ hashFiles('**/pom.xml') }}
+          restore-keys: freelibrary-cache-${{ secrets.MAVEN_CACHE_KEY }}-
       - name: Set autorelease config
         if: env.AUTORELEASE_ARTIFACT == null
         run: echo "AUTORELEASE_ARTIFACT=false" >> $GITHUB_ENV
@@ -52,10 +54,10 @@ jobs:
           gpg_passphrase: ${{ secrets.BUILD_PASSPHRASE }}
           nexus_username: ${{ secrets.SONATYPE_USERNAME }}
           nexus_password: ${{ secrets.SONATYPE_PASSWORD }}
-          maven_profiles: "release"
+          maven_profiles: release,${{ secrets.BUILD_PROFILES }}
           maven_args: >
             -Drevision=${{ github.event.release.tag_name }} -DautoReleaseAfterClose=${{ env.AUTORELEASE_ARTIFACT }}
-            -ntp -Dorg.slf4j.simpleLogger.log.net.sourceforge.pmd=error
+            -ntp -Dorg.slf4j.simpleLogger.log.net.sourceforge.pmd=error ${{ secrets.BUILD_PROPERTIES }}
             -DskipNexusStagingDeployMojo=${{ env.SKIP_JAR_DEPLOYMENT }}
             -Ddocker.registry.username=${{ secrets.DOCKER_USERNAME }}
             -Ddocker.registry.account=${{ secrets.DOCKER_REGISTRY_ACCOUNT}}

@@ -16,6 +16,6 @@ jobs:
       AUTO_PR_APPROVAL: ${{ secrets.AUTO_PR_APPROVAL }}
     steps:
     - uses: hmarr/auto-approve-action@7782c7e2bdf62b4d79bdcded8332808fd2f179cd # v2.0.0
-      if: env.AUTO_PR_APPROVAL != null
+      if: env.AUTO_PR_APPROVAL == 'true'
       with:
         github-token: "${{ secrets.GITHUB_TOKEN }}"
