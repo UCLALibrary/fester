@@ -1181,6 +1181,6 @@
   <parent>
     <artifactId>freelib-parent</artifactId>
     <groupId>info.freelibrary</groupId>
-    <version>6.6.0</version>
+    <version>6.6.1</version>
   </parent>
 </project>
