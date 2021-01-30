@@ -898,8 +898,15 @@
                   <exclude>org.jsoup:jsoup</exclude>
                   <exclude>org.mozilla:rhino</exclude>
                   <exclude>com.opencsv:opencsv</exclude>
+                  <exclude>com.sndyuk:logback-more-appenders</exclude>
+                  <exclude>net.jodah:failsafe</exclude>
                   <exclude>org.jruby.jcodings:jcodings</exclude>
                   <exclude>org.jruby.joni:joni</exclude>
+                  <exclude>org.komamitsu:fluency-core</exclude>
+                  <exclude>org.komamitsu:fluency-fluentd</exclude>
+                  <exclude>org.komamitsu:phi-accural-failure-detector</exclude>
+                  <exclude>org.msgpack:jackson-dataformat-msgpack</exclude>
+                  <exclude>org.msgpack:msgpack-core</exclude>
                   <exclude>org.slf4j:jcl-over-slf4j</exclude>
                   <exclude>org.slf4j:slf4j-api</exclude>
                   <exclude>org.slf4j:slf4j-ext</exclude>
@@ -1181,6 +1188,6 @@
   <parent>
     <artifactId>freelib-parent</artifactId>
     <groupId>info.freelibrary</groupId>
-    <version>6.6.2</version>
+    <version>6.6.3</version>
   </parent>
 </project>
