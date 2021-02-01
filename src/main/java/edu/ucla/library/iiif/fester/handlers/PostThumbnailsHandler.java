@@ -10,17 +10,17 @@ import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 import info.freelibrary.util.StringUtils;
 
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.RoutingContext;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.FileUpload;
+import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.client.predicate.ResponsePredicate;
@@ -45,8 +45,8 @@ import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.utils.ThumbnailUtils;
 
 /**
- * 
- */
+ * Class to select and add thumbnail link to uploaded CSV
+*/
 public class PostThumbnailsHandler extends AbstractFesterHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostThumbnailsHandler.class, Constants.MESSAGES);
@@ -70,7 +70,7 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
     /**
      * @param aVertx
      * @param aConfig
-     */
+    */
     public PostThumbnailsHandler(final Vertx aVertx, final JsonObject aConfig) throws IOException {
         super(aVertx, aConfig);
 
@@ -195,11 +195,11 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
     }
 
     private void logError(final Throwable aThrowable) {
-        LOGGER.error(aThrowable, LOGGER.getMessage(MessageCodes.MFS_103, aThrowable.getMessage()));
+        LOGGER.error(aThrowable, LOGGER.getMessage(MessageCodes.MFS_166, aThrowable.getMessage()));
     }
 
     private void returnError(final HttpServerResponse aResponse, final int aStatusCode, final String aError) {
-        final String body = LOGGER.getMessage(MessageCodes.MFS_103, aError.replaceAll(Constants.EOL_REGEX, BR_TAG));
+        final String body = LOGGER.getMessage(MessageCodes.MFS_166, aError.replaceAll(Constants.EOL_REGEX, BR_TAG));
 
         aResponse.setStatusCode(aStatusCode);
         aResponse.setStatusMessage(aError.replaceAll(Constants.EOL_REGEX, Constants.EMPTY));

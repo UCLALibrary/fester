@@ -9,6 +9,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 
+/**
+ * Utility methods for thumbnail selection
+*/
 public final class ThumbnailUtils {
     private static final String HEADER_THUMB = "thumbnail";
 
