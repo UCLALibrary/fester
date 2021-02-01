@@ -49,12 +49,11 @@
                 base URL for a different IIIF server.</div>
             </div>
             <div class="form-group">
-              <label for="iiif-version">IIIF manifest version:</label> 
-	          <select name="iiif-version" id="iiif-version" required>
-	              <option value=""/>
-                  <option value="v2">v2</option>
-                  <option value="v3">v3</option>
-              </select>
+              <label for="iiif-version">IIIF manifest version:</label><br/>
+              <input type="radio" id="v2" name="iiif-version" value="v2" checked required>
+              <label for="v2">v2</label><br/>
+              <input type="radio" id="v3" name="iiif-version" value="v3">
+              <label for="v3">v3</label><br/>
             </div>
             <div class="form-group">
               <label for="metadata-update">Update work metadata only:</label> <input type="checkbox"

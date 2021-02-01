@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>fester</artifactId>
-  <version>0.14.2-SNAPSHOT</version>
+  <version>${revision}</version>
   <name>Fester</name>
   <description>A read/write interface for storing and retrieving IIIF manifests</description>
   <url>https://github.com/uclalibrary/fester</url>
@@ -94,6 +94,7 @@
     <jcip.annotations.version>1.0-1</jcip.annotations.version>
 
     <!-- Build plug-in versions -->
+    <exec.plugin.version>3.0.0</exec.plugin.version>
     <shade.plugin.version>2.4.3</shade.plugin.version>
     <deploy.plugin.version>2.8.2</deploy.plugin.version>
     <netty.epoll.version>4.1.37.Final</netty.epoll.version>
@@ -430,6 +431,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
+        <version>${exec.plugin.version}</version>
         <executions>
           <execution>
             <id>docker-network-prune</id>
@@ -551,12 +553,6 @@
       <!-- Checkstyle ensures adherence to coding standards -->
       <plugin>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <configuration>
-          <consoleOutput>true</consoleOutput>
-          <logViolationsToConsole>true</logViolationsToConsole>
-          <violationSeverity>warning</violationSeverity>
-          <includeTestSourceDirectory>true</includeTestSourceDirectory>
-        </configuration>
       </plugin>
 
       <!-- Enforcer enforces some basic characteristics of the project -->
@@ -583,40 +579,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
-        <dependencies>
-          <dependency>
-            <groupId>org.apache.maven.shared</groupId>
-            <artifactId>maven-dependency-analyzer</artifactId>
-            <version>${maven.dependency.analyzer.version}</version>
-            <exclusions>
-              <exclusion>
-                <artifactId>maven-project</artifactId>
-                <groupId>org.apache.maven</groupId>
-              </exclusion>
-            </exclusions>
-          </dependency>
-        </dependencies>
-        <executions>
-          <execution>
-            <id>unpack-build-resources</id>
-            <phase>generate-resources</phase>
-            <goals>
-              <goal>unpack</goal>
-            </goals>
-            <configuration>
-              <artifactItems>
-                <artifactItem>
-                  <groupId>info.freelibrary</groupId>
-                  <artifactId>freelib-resources</artifactId>
-                  <version>${freelib.resources.version}</version>
-                  <type>jar</type>
-                  <includes>eclipse/**/*,checkstyle/**/*,pmd/**/*,travis/**/*</includes>
-                  <outputDirectory>${basedir}/target/build-resources</outputDirectory>
-                </artifactItem>
-              </artifactItems>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
 
       <plugin>
@@ -941,8 +903,15 @@
                   <exclude>org.jsoup:jsoup</exclude>
                   <exclude>org.mozilla:rhino</exclude>
                   <exclude>com.opencsv:opencsv</exclude>
+                  <exclude>com.sndyuk:logback-more-appenders</exclude>
+                  <exclude>net.jodah:failsafe</exclude>
                   <exclude>org.jruby.jcodings:jcodings</exclude>
                   <exclude>org.jruby.joni:joni</exclude>
+                  <exclude>org.komamitsu:fluency-core</exclude>
+                  <exclude>org.komamitsu:fluency-fluentd</exclude>
+                  <exclude>org.komamitsu:phi-accural-failure-detector</exclude>
+                  <exclude>org.msgpack:jackson-dataformat-msgpack</exclude>
+                  <exclude>org.msgpack:msgpack-core</exclude>
                   <exclude>org.slf4j:jcl-over-slf4j</exclude>
                   <exclude>org.slf4j:slf4j-api</exclude>
                   <exclude>org.slf4j:slf4j-ext</exclude>
@@ -1221,18 +1190,9 @@
     </profile>
   </profiles>
 
-  <!-- Enables pushing project documentation up to an S3 bucket -->
-  <distributionManagement>
-    <site>
-      <id>s3.site</id>
-      <!-- TODO: Create a UCLA S3 bucket for this -->
-      <url>s3://projects.freelibrary.info/${project.name}</url>
-    </site>
-  </distributionManagement>
-
   <parent>
     <artifactId>freelib-parent</artifactId>
     <groupId>info.freelibrary</groupId>
-    <version>5.2.1</version>
+    <version>6.6.3</version>
   </parent>
 </project>
