@@ -46,7 +46,7 @@ public class PostThumbFIT {
     private static final File TEST_CSV = new File(DIR, "csv/allied.csv");
 
     private static final String THUMB_URL =
-        "https://iiif.library.ucla.edu/iiif/2/ark%3A%2F21198%2Fzz001p6m70/full/600,/0/default.jpg?";
+        "https://iiif.library.ucla.edu/iiif/2/ark%3A%2F21198%2Fzz001p6m70/full/600,/0/default.jpg";
 
     /**
      * Functional tests for the CSV thumbnail feature.

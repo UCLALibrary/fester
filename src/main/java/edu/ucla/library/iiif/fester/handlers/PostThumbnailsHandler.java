@@ -160,10 +160,13 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
         final HttpRequest<JsonObject> request;
         request = WebClient.create(myVertx)
             .getAbs(aUrl)
-            .ssl(true)
             .putHeader("Accept", "application/json")
             .as(BodyCodec.jsonObject())
             .expect(ResponsePredicate.SC_OK);
+
+        if (aUrl.startsWith("https")) {
+            request.ssl(true);
+        }
 
         request.send(asyncResult -> {
             if (asyncResult.succeeded()) {

@@ -3,11 +3,11 @@ package edu.ucla.library.iiif.fester.utils;
 
 import edu.ucla.library.iiif.fester.Constants;
 
-import java.util.List;
-
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Utility methods for thumbnail selection
@@ -64,7 +64,7 @@ public final class ThumbnailUtils {
    */
     public static int pickThumbnailIndex(final int aMax) {
         final int min = 2;
-        return (int) (Math.random() * (aMax - min + 1) + min);
+        return ThreadLocalRandom.current().nextInt(min, aMax + 1);
     }
 
    /**
