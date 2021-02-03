@@ -14,7 +14,6 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonArray;
@@ -61,11 +60,12 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
 
     private final String myExceptionPage;
 
-    private final String myUrl;
-
     private final String myFesterizeVersion;
 
-    private final Pattern myFesterizeUserAgentPattern;
+    /**
+     * FUA = Festerize User Agent
+     */
+    private final Pattern myFUAPattern;
 
     /**
      * @param aVertx
@@ -77,9 +77,8 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
         final byte[] bytes = IOUtils.readBytes(getClass().getResourceAsStream("/webroot/error.html"));
 
         myExceptionPage = new String(bytes, StandardCharsets.UTF_8);
-        myUrl = aConfig.getString(Config.FESTER_URL);
         myFesterizeVersion = aConfig.getString(Config.FESTERIZE_VERSION);
-        myFesterizeUserAgentPattern = Pattern.compile("Festerize/(?<version>\\d+\\.\\d+\\.\\d+)");
+        myFUAPattern = Pattern.compile("Festerize/(?<version>\\d+\\.\\d+\\.\\d+)");
     }
 
     /*
@@ -92,11 +91,11 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
         final HttpServerResponse response = aContext.response();
         final Set<FileUpload> csvUploads = aContext.fileUploads();
         final String festerizeUserAgent = StringUtils.trimTo(request.getHeader("User-Agent"), Constants.EMPTY);
-        final Matcher festerizeUserAgentMatcher = myFesterizeUserAgentPattern.matcher(festerizeUserAgent);
+        final Matcher festerizeUserAgentMatcher = myFUAPattern.matcher(festerizeUserAgent);
         final String errorMessage;
 
         // An uploaded CSV is required
-        if (csvUploads.size() == 0) {
+        if (csvUploads.isEmpty()) {
             errorMessage = LOGGER.getMessage(MessageCodes.MFS_037);
             returnError(response, HTTP.BAD_REQUEST, errorMessage);
         } else if (festerizeUserAgentMatcher.matches() &&
@@ -107,10 +106,6 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
             final FileUpload csvFile = csvUploads.iterator().next();
             final String filePath = csvFile.uploadedFileName();
             final String fileName = csvFile.fileName();
-            final JsonObject message = new JsonObject();
-            final DeliveryOptions options = new DeliveryOptions();
-            final String iiifHost = StringUtils.trimToNull(request.getFormAttribute(Constants.IIIF_HOST));
-            final String iiifVersion = StringUtils.trimToNull(request.getFormAttribute(Constants.IIIF_API_VERSION));
 
             try {
                 final List<String[]> originalLines =
