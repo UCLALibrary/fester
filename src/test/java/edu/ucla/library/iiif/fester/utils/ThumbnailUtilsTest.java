@@ -70,7 +70,7 @@ public class ThumbnailUtilsTest {
      */
     @Test
     public final void testPickThumbnailIndex() {
-        final int min = 3;
+        final int min = 2;
         final int max = 20;
         final int selected = ThumbnailUtils.pickThumbnailIndex(max);
         assertTrue(selected >= min && selected <= max);
