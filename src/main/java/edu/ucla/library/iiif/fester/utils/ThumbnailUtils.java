@@ -10,7 +10,7 @@ import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Utility methods for thumbnail selection
+ * Utility methods for thumbnail selection.
 */
 public final class ThumbnailUtils {
     private static final String HEADER_THUMB = "thumbnail";
@@ -42,25 +42,39 @@ public final class ThumbnailUtils {
    /**
      * Adds a base IIF URL for the thumnail image.
      *
-     * @param aCsvList A CSV in list of arrays format
+     * @param aIndex Index in CSV row where thumbnail URL will be added
      * @param aURL The thumbnail URL
+     * @param aRow A row from a CSV in string array format
    */
-    public static void addThumbnailURL(final List<String[]> aCsvList, final String aURL) {
-        Objects.requireNonNull(aCsvList);
-        final int thumbnailIndex = Arrays.asList(aCsvList.get(0)).indexOf(HEADER_THUMB);
-        for (int index = 1; index < aCsvList.size(); index++ ) {
+    public static void addThumbnailURL(final int aIndex, final String aURL, final String... aRow) {
+        Objects.requireNonNull(aURL);
+        Objects.requireNonNull(aRow);
+        if (aRow[aIndex] == null || aRow[aIndex].trim().equals(Constants.EMPTY)) {
+            aRow[aIndex] = aURL;
+        }
+        /*for (int index = 1; index < aCsvList.size(); index++ ) {
             if (aCsvList.get(index)[thumbnailIndex] == null ||
                 aCsvList.get(index)[thumbnailIndex].trim().equals(Constants.EMPTY) ) {
                 aCsvList.get(index)[thumbnailIndex] = aURL;
             }
-        }
+        }*/
+    }
+
+   /**
+     * Return the index of the thumbnail column in a CSV header row.
+     *
+     * @param aRow Header row from a CSV
+     * @return Index of the thumbnail header
+   */
+    public static int findThumbHeaderIndex(final String... aRow) {
+        return Arrays.asList(aRow).indexOf(HEADER_THUMB);
     }
 
    /**
      * Chooses the index for a randomly-selected thumbnail.
      *
      * @param aMax Maximum value in selection range
-     * @return Random number between 3 and aMax
+     * @return Random number between 2 (index position 3) and aMax
    */
     public static int pickThumbnailIndex(final int aMax) {
         final int min = 2;
