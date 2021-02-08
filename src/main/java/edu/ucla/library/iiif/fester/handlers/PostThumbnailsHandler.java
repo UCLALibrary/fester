@@ -1,6 +1,13 @@
 
 package edu.ucla.library.iiif.fester.handlers;
 
+import static info.freelibrary.iiif.presentation.v3.Constants.CANVASES;
+import static info.freelibrary.iiif.presentation.v3.Constants.CONTEXT;
+import static info.freelibrary.iiif.presentation.v3.Constants.IMAGE_CONTENT;
+import static info.freelibrary.iiif.presentation.v3.Constants.RESOURCE;
+import static info.freelibrary.iiif.presentation.v3.Constants.SERVICE;
+import static info.freelibrary.iiif.presentation.v3.Constants.ITEMS;
+
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvException;
@@ -53,19 +60,13 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostThumbnailsHandler.class, Constants.MESSAGES);
 
-    private static final String MANIFESTS = "manifests";
+    //private static final String MANIFESTS = "manifests";
+
+    private static final String SEQUENCES = "sequences";
 
     private static final String ATTACHMENT = "attachment; filename=\"{}\"";
 
     private static final String BR_TAG = "<br>";
-
-    private static final String V2_ID_TAG = "@id";
-
-    private static final String V3_ID_TAG = "id";
-
-    private static final String API_2 = "presentation/2";
-
-    private static final String API_3 = "presentation/3";
 
     private final String myExceptionPage;
 
@@ -121,31 +122,25 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
                 final List<String[]> originalLines = csvReader.readAll();
                 final List<String[]> linesWithThumbs = ThumbnailUtils.addThumbnailColumn(originalLines);
                 final int manifestIndex = Arrays.asList(linesWithThumbs.get(0)).indexOf(CSV.MANIFEST_URL);
-		/*
-		 * loop through lineswiththumbs
-		 * check row type vua CsvParser.getObjectType(row, parser.getCsvHeaders())
-		 * if row is work or page, get the manifest URL and retrieve manifest
-		 * determine manifest api version
-		 * retrieve array of canvases
-		 * select image, insert base URL into row
-		 */
                 for (int index = 1; index < linesWithThumbs.size(); index++) {
-                    final String[] row = linesWithThumbs.get(index);
-                    final ObjectType rowType = CsvParser.getObjectType(row, parser.getCsvHeaders());
+                    final int indexForLambda = index;
+                    //final String[] row = linesWithThumbs.get(index);
+                    final ObjectType rowType = CsvParser.getObjectType(
+                                               linesWithThumbs.get(index), parser.getCsvHeaders());
                     if (rowType.equals(ObjectType.WORK) || rowType.equals(ObjectType.PAGE)) {
-                        final String manifestURL = row[manifestIndex];
+                        final String manifestURL = linesWithThumbs.get(index)[manifestIndex];
                         final Future<JsonObject> manifest = getManifest(manifestURL);
                         manifest.onComplete(result -> {
                             if (result.failed()) {
                                 returnError(response, HTTP.INTERNAL_SERVER_ERROR, result.cause().getMessage());
                             } else {
                                 final JsonObject manifestBody = result.result();
-                                final String context = manifestBody.getString("@context");
+                                final String context = manifestBody.getString(CONTEXT);
                                 final int thumbIndex = ThumbnailUtils.findThumbHeaderIndex(linesWithThumbs.get(0));
-                                if (context.contains(API_2)) {
-                                    addV2Thumb(thumbIndex, manifestBody, row);
-                                } else if (context.contains(API_3)) {
-                                    addV3Thumb(thumbIndex, manifestBody, row);
+                                if (context.contains(Constants.CONTEXT_V2)) {
+                                    addV2Thumb(thumbIndex, manifestBody, linesWithThumbs.get(indexForLambda));
+                                } else if (context.contains(Constants.CONTEXT_V3)) {
+                                    addV3Thumb(thumbIndex, manifestBody, linesWithThumbs.get(indexForLambda));
                                 } else {
                                     LOGGER.info("message about unknown API version");
                                 }
@@ -153,7 +148,8 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
                         });
                     }
                 }
-                final String collectionURL = linesWithThumbs.get(1)[manifestIndex];
+                returnCSV(fileName, filePath, linesWithThumbs, response);
+                /*final String collectionURL = linesWithThumbs.get(1)[manifestIndex];
                 final Future<JsonObject> collection = getManifest(collectionURL);
                 collection.onComplete(result -> {
                     if (result.failed()) {
@@ -182,7 +178,7 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
                             }
                         });
                     }
-                });
+                });*/
             } catch (CsvException | IOException | CsvParsingException details) {
                 logError(details);
                 returnError(response, HTTP.INTERNAL_SERVER_ERROR, details.getMessage());
@@ -216,15 +212,20 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
     }
 
     private void addV2Thumb(final int aIndex, final JsonObject aManifest, final String... aRow) {
-        final JsonArray canvases = aManifest.getJsonArray("sequences").getJsonObject(0).getJsonArray("canvases");
+        final JsonArray canvases = aManifest.getJsonArray(SEQUENCES).getJsonObject(0).getJsonArray(CANVASES);
         final int canvasIndex = chooseThumbIndex(canvases.size());
-        final String thumbURL = canvases.getJsonObject(canvasIndex).getJsonObject("images")
-                                .getJsonArray(0).getJsonObject("service").getString(V2_ID_TAG);
+        final String thumbURL = canvases.getJsonObject(canvasIndex).getJsonArray(IMAGE_CONTENT)
+                                .getJsonObject(0).getJsonObject(RESOURCE).getJsonObject(SERVICE)
+                                .getString(Constants.ID_V2);
         ThumbnailUtils.addThumbnailURL(aIndex, thumbURL, aRow);
     }
 
     private void addV3Thumb(final int aIndex, final JsonObject aManifest, final String... aRow) {
-        final String thumbURL = null;
+        final JsonArray canvases = aManifest.getJsonArray(ITEMS).getJsonObject(0).getJsonArray(ITEMS);
+        final int canvasIndex = chooseThumbIndex(canvases.size());
+        final String thumbURL = canvases.getJsonObject(canvasIndex).getJsonArray(ITEMS)
+                                .getJsonObject(0).getJsonObject("body")
+                                .getJsonObject(SERVICE).getString(Constants.ID_V3);
         ThumbnailUtils.addThumbnailURL(aIndex, thumbURL, aRow);
     }
 
