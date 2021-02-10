@@ -96,8 +96,7 @@
     <!-- Versions of tools used for testing -->
     <jsoup.version>1.13.1</jsoup.version>
     <aws.sdk.version>1.11.950</aws.sdk.version>
-    <localstack.version>1.14.3</localstack.version>
-    <testcontainers.version>1.14.3</testcontainers.version>
+    <testcontainers.version>1.15.1</testcontainers.version>
     <jcip.annotations.version>1.0-1</jcip.annotations.version>
 
     <!-- Build plug-in versions -->
@@ -171,6 +170,18 @@
     <docker.registry.account />
   </properties>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>testcontainers-bom</artifactId>
+        <version>${testcontainers.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
 
     <!-- Vert.x is a toolkit for building reactive applications on the JVM -->
@@ -226,6 +237,7 @@
         </exclusion>
       </exclusions>
     </dependency>
+
     <!-- Below is a dependency that needs updating due to security issue (may be able to remove in future) -->
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -318,13 +330,11 @@
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>testcontainers</artifactId>
-      <version>${testcontainers.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>localstack</artifactId>
-      <version>${localstack.version}</version>
       <scope>test</scope>
     </dependency>
     <!-- Allows us to suppress warnings from the AWS SDK (see https://github.com/aws/aws-sdk-java/issues/1707) -->
