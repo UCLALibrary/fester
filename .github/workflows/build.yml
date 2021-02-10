@@ -43,3 +43,4 @@ jobs:
           maven_profiles: default,${{ secrets.BUILD_PROFILES }}
           maven_args: >
             -V -ntp -Dorg.slf4j.simpleLogger.log.net.sourceforge.pmd=error ${{ secrets.BUILD_PROPERTIES }}
+            -DlogLevel=DEBUG -DtestLogLevel=DEBUG
