@@ -1,5 +1,5 @@
 
-FROM ubuntu:20.04
+FROM ubuntu:${ubuntu.tag}
 
 # Store some project metadata in the Docker image
 LABEL ContainerName=${project.name} ContainerSourceCode=${project.url}
@@ -7,9 +7,9 @@ LABEL ContainerName=${project.name} ContainerSourceCode=${project.url}
 # Update packages and install tools
 #  Removing /var/lib/apt/lists/* prevents using `apt` unless you do `apt update` first
 RUN apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -qq --no-install-recommends \
-    openjdk-11-jre-headless=11.0.9.1+1-0ubuntu1~20.04 \
-    python3=3.8.2-0ubuntu2 \
-    curl=7.68.0-1ubuntu2.4 \
+    openjdk-11-jre-headless=${jdk.version} \
+    python3=${python3.version} \
+    curl=${curl.version} \
     < /dev/null > /dev/null && \
     rm -rf /var/lib/apt/lists/*
 

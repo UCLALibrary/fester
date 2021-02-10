@@ -3,6 +3,7 @@ package edu.ucla.library.iiif.fester.fit;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -12,8 +13,10 @@ import info.freelibrary.util.LoggerFactory;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
+
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.Timeout;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 
 /**
@@ -24,6 +27,10 @@ public class BatchIngestFfOnT extends BaseFesterFfT {
 
     /* Our feature flag test logger */
     private static final Logger LOGGER = LoggerFactory.getLogger(BatchIngestFfOnT.class, Constants.MESSAGES);
+
+    /* Slower systems may have trouble finishing within the default timeout */
+    @Rule
+    public final Timeout myTimeoutRule = Timeout.seconds(600);
 
     /**
      * Tests that the POST collections endpoint returns a 201 on success.
@@ -38,8 +45,8 @@ public class BatchIngestFfOnT extends BaseFesterFfT {
         // Create our bucket so we have some place to put the manifests
         myS3Client.createBucket(BUCKET);
 
-        myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE).sendMultipartForm(
-                CSV_UPLOAD_FORM, request -> {
+        myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE)
+                .sendMultipartForm(CSV_UPLOAD_FORM, request -> {
                     if (request.succeeded()) {
                         // Check that we get a 201 response code
                         aContext.assertEquals(HTTP.CREATED, request.result().statusCode());

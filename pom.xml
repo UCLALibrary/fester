@@ -69,6 +69,13 @@
   </developers>
 
   <properties>
+    <!-- Docker image dependencies -->
+    <ubuntu.tag>20.04</ubuntu.tag>
+    <jdk.version>11.0.10+9-0ubuntu1~20.04</jdk.version>
+    <python3.version>3.8.2-0ubuntu2</python3.version>
+    <curl.version>7.68.0-1ubuntu2.4</curl.version>
+
+    <!-- Application dependencies -->
     <vertx.version>3.9.4</vertx.version>
     <opencsv.version>5.0</opencsv.version>
     <moirai.version>2.0.0</moirai.version>
@@ -341,6 +348,7 @@
         <directory>src/test/resources</directory>
         <filtering>true</filtering>
       </testResource>
+
       <!-- We can also override the default logging configuration with a file in our root project directory -->
       <testResource>
         <directory>${basedir}</directory>
@@ -361,6 +369,7 @@
           </compilerArgs>
         </configuration>
       </plugin>
+
       <!-- Disable standard deploy; we publish a Docker image, not Jar file -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -370,58 +379,7 @@
           <skip>true</skip>
         </configuration>
       </plugin>
-      <!-- A Maven plugin that can build a Docker image with our application -->
-      <plugin>
-        <groupId>io.fabric8</groupId>
-        <artifactId>docker-maven-plugin</artifactId>
-        <version>${docker.maven.plugin.version}</version>
-        <configuration>
-          <images>
-            <image>
-              <!-- Registry account, if supplied, must end in a slash (e.g. "account/") -->
-              <name>${docker.registry.account}${project.artifactId}:%l</name>
-              <build>
-                <dockerFile>${project.basedir}/src/main/docker/Dockerfile</dockerFile>
-                <assembly>
-                  <inline>
-                    <fileSets>
-                      <fileSet>
-                        <!-- The directory where we can find our Maven-built artifact -->
-                        <directory>${project.basedir}/target/build-artifact</directory>
-                        <!-- We don't want directory structure on output, just the artifact -->
-                        <outputDirectory>.</outputDirectory>
-                        <includes>
-                          <include>${project.artifactId}-${project.version}.jar</include>
-                        </includes>
-                      </fileSet>
-                    </fileSets>
-                  </inline>
-                </assembly>
-              </build>
-            </image>
-          </images>
-          <authConfig>
-            <username>${docker.registry.username}</username>
-            <password>${docker.registry.password}</password>
-          </authConfig>
-        </configuration>
-        <executions>
-          <execution>
-            <id>docker-build</id>
-            <phase>pre-integration-test</phase>
-            <goals>
-              <goal>build</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>docker-deploy</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>push</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
+
       <!-- Makes sure TestContainers doesn't leave unused networks around -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -445,11 +403,13 @@
           </execution>
         </executions>
       </plugin>
+
       <!-- The build-helper plug-in gets us a dynamic port for testing -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
       </plugin>
+
       <!--<![CDATA[
         To run the generate-codes plugin outside of a full build, run:
          mvn info.freelibrary:freelib-utils:generate-codes -DmessageFiles=src/main/resources/fester_messages.xml
@@ -574,146 +534,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <includes>
-            <include>**/*Test.java</include>
-          </includes>
-          <excludes>
-            <exclude>**/*FT.java</exclude>
-            <exclude>**/*IT.java</exclude>
-            <exclude>**/*FfT.java</exclude>
-          </excludes>
-          <systemPropertyVariables>
-            <vertx.logger-delegate-factory-class-name>io.vertx.core.logging.SLF4JLogDelegateFactory</vertx.logger-delegate-factory-class-name>
-            <fester.url>${fester.url}</fester.url>
-            <fester.http.port>${http.port}</fester.http.port>
-            <vertx-config-path>${project.basedir}/target/test-classes/test-config.properties</vertx-config-path>
-          </systemPropertyVariables>
-          <argLine>${jacoco.agent.arg}</argLine>
-          <skipTests>${skipUTs}</skipTests>
-          <forkCount>1</forkCount><!-- Multiple forks result in multiple containers -->
-        </configuration>
-        <executions>
-          <execution>
-            <id>feature-flags-off</id>
-            <phase>integration-test</phase>
-            <goals>
-              <goal>test</goal>
-            </goals>
-            <configuration>
-              <includes>
-                <include>**/*FfOffT.java</include>
-              </includes>
-              <excludes>
-                <exclude>**/*Test.java</exclude>
-                <exclude>**/*IT.java</exclude>
-                <exclude>**/*FT.java</exclude>
-                <exclude>**/*FfOnT.java</exclude>
-              </excludes>
-              <argLine>${jacoco.agent.arg}</argLine>
-              <skipTests>${skipFfTs}</skipTests>
-              <systemPropertyVariables>
-                <fester.logs.output>${seeLogsFfT}</fester.logs.output>
-                <fester.s3.bucket>${fester.s3.bucket}</fester.s3.bucket>
-                <fester.container.tag>${project.artifactId}:${project.version}</fester.container.tag>
-                <feature.flags>https://iiif-manifest-store.s3.amazonaws.com/fester-features-off.conf</feature.flags>
-                <jdwp.host.port>${jdwp.host.port}</jdwp.host.port>
-                <jdwp.client.config>${jdwp.client.config}</jdwp.client.config>
-              </systemPropertyVariables>
-            </configuration>
-          </execution>
-          <execution>
-            <id>feature-flags-on</id>
-            <phase>integration-test</phase>
-            <goals>
-              <goal>test</goal>
-            </goals>
-            <configuration>
-              <includes>
-                <include>**/*FfOnT.java</include>
-              </includes>
-              <excludes>
-                <exclude>**/*Test.java</exclude>
-                <exclude>**/*IT.java</exclude>
-                <exclude>**/*FT.java</exclude>
-                <exclude>**/*FfOffT.java</exclude>
-              </excludes>
-              <argLine>${jacoco.agent.arg}</argLine>
-              <skipTests>${skipFfTs}</skipTests>
-              <systemPropertyVariables>
-                <fester.logs.output>${seeLogsFfT}</fester.logs.output>
-                <fester.s3.bucket>${fester.s3.bucket}</fester.s3.bucket>
-                <fester.container.tag>${project.artifactId}:${project.version}</fester.container.tag>
-                <feature.flags>https://iiif-manifest-store.s3.amazonaws.com/fester-features-on.conf</feature.flags>
-                <jdwp.host.port>${jdwp.host.port}</jdwp.host.port>
-                <jdwp.client.config>${jdwp.client.config}</jdwp.client.config>
-              </systemPropertyVariables>
-            </configuration>
-          </execution>
-          <execution>
-            <id>functional-tests</id>
-            <phase>integration-test</phase>
-            <goals>
-              <goal>test</goal>
-            </goals>
-            <configuration>
-              <includes>
-                <include>**/*FT.java</include>
-              </includes>
-              <excludes>
-                <exclude>**/*Test.java</exclude>
-                <exclude>**/*IT.java</exclude>
-                <exclude>**/*FfT.java</exclude>
-              </excludes>
-              <argLine>${jacoco.agent.arg}</argLine>
-              <skipTests>${skipFTs}</skipTests>
-              <systemPropertyVariables>
-                <fester.logs.output>${seeLogsFT}</fester.logs.output>
-                <fester.s3.bucket>${fester.s3.bucket}</fester.s3.bucket>
-                <fester.placeholder.url>${fester.placeholder.url}</fester.placeholder.url>
-                <fester.container.tag>${docker.registry.account}${project.artifactId}:${project.version}</fester.container.tag>
-                <festerize.version>${festerize.version}</festerize.version>
-                <jdwp.host.port>${jdwp.host.port}</jdwp.host.port>
-                <jdwp.client.config>${jdwp.client.config}</jdwp.client.config>
-              </systemPropertyVariables>
-            </configuration>
-          </execution>
-          <execution>
-            <id>integration-tests</id>
-            <phase>integration-test</phase>
-            <goals>
-              <goal>test</goal>
-            </goals>
-            <configuration>
-              <includes>
-                <include>**/*IT.java</include>
-              </includes>
-              <excludes>
-                <exclude>**/*FT.java</exclude>
-                <exclude>**/*Test.java</exclude>
-                <exclude>**/*FfT.java</exclude>
-              </excludes>
-              <argLine>${jacoco.agent.arg}</argLine>
-              <skipTests>${skipITs}</skipTests>
-              <systemPropertyVariables>
-                <fester.logs.output>${seeLogsIT}</fester.logs.output>
-                <fester.s3.region>${fester.s3.region}</fester.s3.region>
-                <fester.s3.bucket>${fester.s3.bucket}</fester.s3.bucket>
-                <fester.s3.access_key>${fester.s3.access_key}</fester.s3.access_key>
-                <fester.s3.secret_key>${fester.s3.secret_key}</fester.s3.secret_key>
-                <fester.s3.endpoint>${fester.s3.endpoint}</fester.s3.endpoint>
-                <fester.container.tag>${docker.registry.account}${project.artifactId}:${project.version}</fester.container.tag>
-                <jdwp.host.port>${jdwp.host.port}</jdwp.host.port>
-                <jdwp.client.config>${jdwp.client.config}</jdwp.client.config>
-              </systemPropertyVariables>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
 
       <!-- The Vert.x plug-in enables running the application from within Maven for development -->
@@ -973,6 +793,7 @@
         </dependency>
       </dependencies>
     </profile>
+
     <profile>
       <id>debug</id>
       <properties>
@@ -980,6 +801,7 @@
         <jdwp.client.config>-agentlib:jdwp=transport=dt_socket,address=host.testcontainers.internal:${jdwp.host.port},suspend=n</jdwp.client.config>
       </properties>
     </profile>
+
     <profile>
       <id>runDebug</id>
       <properties>
@@ -1038,6 +860,7 @@
               </execution>
             </executions>
           </plugin>
+
           <plugin>
             <groupId>io.reactiverse</groupId>
             <artifactId>vertx-maven-plugin</artifactId>
@@ -1063,6 +886,7 @@
         </plugins>
       </build>
     </profile>
+
     <profile>
       <id>live</id>
       <properties>
@@ -1121,6 +945,7 @@
               </execution>
             </executions>
           </plugin>
+
           <plugin>
             <groupId>io.reactiverse</groupId>
             <artifactId>vertx-maven-plugin</artifactId>
@@ -1146,6 +971,7 @@
         </plugins>
       </build>
     </profile>
+
     <profile>
       <id>fluency</id>
       <properties>
@@ -1182,6 +1008,263 @@
           <version>${logback.more.appenders.version}</version>
         </dependency>
       </dependencies>
+    </profile>
+
+    <profile>
+      <id>default</id>
+      <activation>
+        <property>
+          <name>!versions</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <!-- A Maven plugin that can build a Docker image with our application -->
+          <plugin>
+            <groupId>io.fabric8</groupId>
+            <artifactId>docker-maven-plugin</artifactId>
+            <version>${docker.maven.plugin.version}</version>
+            <configuration>
+              <images>
+                <image>
+                  <!-- Registry account, if supplied, must end in a slash (e.g. "account/") -->
+                  <name>${docker.registry.account}${project.artifactId}:%l</name>
+                  <build>
+                    <dockerFile>${project.basedir}/src/main/docker/Dockerfile</dockerFile>
+                    <assembly>
+                      <inline>
+                        <fileSets>
+                          <fileSet>
+                            <!-- The directory where we can find our Maven-built artifact -->
+                            <directory>${project.basedir}/target/build-artifact</directory>
+                            <!-- We don't want directory structure on output, just the artifact -->
+                            <outputDirectory>.</outputDirectory>
+                            <includes>
+                              <include>${project.artifactId}-${project.version}.jar</include>
+                            </includes>
+                          </fileSet>
+                        </fileSets>
+                      </inline>
+                    </assembly>
+                  </build>
+                </image>
+              </images>
+              <authConfig>
+                <username>${docker.registry.username}</username>
+                <password>${docker.registry.password}</password>
+              </authConfig>
+            </configuration>
+            <executions>
+              <execution>
+                <id>docker-build</id>
+                <phase>pre-integration-test</phase>
+                <goals>
+                  <goal>build</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>docker-deploy</id>
+                <phase>deploy</phase>
+                <goals>
+                  <goal>push</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <includes>
+                <include>**/*Test.java</include>
+              </includes>
+              <excludes>
+                <exclude>**/*FT.java</exclude>
+                <exclude>**/*IT.java</exclude>
+                <exclude>**/*FfT.java</exclude>
+              </excludes>
+              <systemPropertyVariables>
+                <vertx.logger-delegate-factory-class-name>io.vertx.core.logging.SLF4JLogDelegateFactory</vertx.logger-delegate-factory-class-name>
+                <fester.url>${fester.url}</fester.url>
+                <fester.http.port>${http.port}</fester.http.port>
+                <vertx-config-path>${project.basedir}/target/test-classes/test-config.properties</vertx-config-path>
+              </systemPropertyVariables>
+              <argLine>${jacoco.agent.arg}</argLine>
+              <skipTests>${skipUTs}</skipTests>
+              <forkCount>1</forkCount><!-- Multiple forks result in multiple containers -->
+            </configuration>
+            <executions>
+              <execution>
+                <id>feature-flags-off</id>
+                <phase>integration-test</phase>
+                <goals>
+                  <goal>test</goal>
+                </goals>
+                <configuration>
+                  <includes>
+                    <include>**/*FfOffT.java</include>
+                  </includes>
+                  <excludes>
+                    <exclude>**/*Test.java</exclude>
+                    <exclude>**/*IT.java</exclude>
+                    <exclude>**/*FT.java</exclude>
+                    <exclude>**/*FfOnT.java</exclude>
+                  </excludes>
+                  <argLine>${jacoco.agent.arg}</argLine>
+                  <skipTests>${skipFfTs}</skipTests>
+                  <systemPropertyVariables>
+                    <fester.logs.output>${seeLogsFfT}</fester.logs.output>
+                    <fester.s3.bucket>${fester.s3.bucket}</fester.s3.bucket>
+                    <fester.container.tag>${project.artifactId}:${project.version}</fester.container.tag>
+                    <feature.flags>https://iiif-manifest-store.s3.amazonaws.com/fester-features-off.conf</feature.flags>
+                    <jdwp.host.port>${jdwp.host.port}</jdwp.host.port>
+                    <jdwp.client.config>${jdwp.client.config}</jdwp.client.config>
+                  </systemPropertyVariables>
+                </configuration>
+              </execution>
+              <execution>
+                <id>feature-flags-on</id>
+                <phase>integration-test</phase>
+                <goals>
+                  <goal>test</goal>
+                </goals>
+                <configuration>
+                  <includes>
+                    <include>**/*FfOnT.java</include>
+                  </includes>
+                  <excludes>
+                    <exclude>**/*Test.java</exclude>
+                    <exclude>**/*IT.java</exclude>
+                    <exclude>**/*FT.java</exclude>
+                    <exclude>**/*FfOffT.java</exclude>
+                  </excludes>
+                  <argLine>${jacoco.agent.arg}</argLine>
+                  <skipTests>${skipFfTs}</skipTests>
+                  <systemPropertyVariables>
+                    <fester.logs.output>${seeLogsFfT}</fester.logs.output>
+                    <fester.s3.bucket>${fester.s3.bucket}</fester.s3.bucket>
+                    <fester.container.tag>${project.artifactId}:${project.version}</fester.container.tag>
+                    <feature.flags>https://iiif-manifest-store.s3.amazonaws.com/fester-features-on.conf</feature.flags>
+                    <jdwp.host.port>${jdwp.host.port}</jdwp.host.port>
+                    <jdwp.client.config>${jdwp.client.config}</jdwp.client.config>
+                  </systemPropertyVariables>
+                </configuration>
+              </execution>
+              <execution>
+                <id>functional-tests</id>
+                <phase>integration-test</phase>
+                <goals>
+                  <goal>test</goal>
+                </goals>
+                <configuration>
+                  <includes>
+                    <include>**/*FT.java</include>
+                  </includes>
+                  <excludes>
+                    <exclude>**/*Test.java</exclude>
+                    <exclude>**/*IT.java</exclude>
+                    <exclude>**/*FfT.java</exclude>
+                  </excludes>
+                  <argLine>${jacoco.agent.arg}</argLine>
+                  <skipTests>${skipFTs}</skipTests>
+                  <systemPropertyVariables>
+                    <fester.logs.output>${seeLogsFT}</fester.logs.output>
+                    <fester.s3.bucket>${fester.s3.bucket}</fester.s3.bucket>
+                    <fester.placeholder.url>${fester.placeholder.url}</fester.placeholder.url>
+                    <fester.container.tag>${docker.registry.account}${project.artifactId}:${project.version}</fester.container.tag>
+                    <festerize.version>${festerize.version}</festerize.version>
+                    <jdwp.host.port>${jdwp.host.port}</jdwp.host.port>
+                    <jdwp.client.config>${jdwp.client.config}</jdwp.client.config>
+                  </systemPropertyVariables>
+                </configuration>
+              </execution>
+              <execution>
+                <id>integration-tests</id>
+                <phase>integration-test</phase>
+                <goals>
+                  <goal>test</goal>
+                </goals>
+                <configuration>
+                  <includes>
+                    <include>**/*IT.java</include>
+                  </includes>
+                  <excludes>
+                    <exclude>**/*FT.java</exclude>
+                    <exclude>**/*Test.java</exclude>
+                    <exclude>**/*FfT.java</exclude>
+                  </excludes>
+                  <argLine>${jacoco.agent.arg}</argLine>
+                  <skipTests>${skipITs}</skipTests>
+                  <systemPropertyVariables>
+                    <fester.logs.output>${seeLogsIT}</fester.logs.output>
+                    <fester.s3.region>${fester.s3.region}</fester.s3.region>
+                    <fester.s3.bucket>${fester.s3.bucket}</fester.s3.bucket>
+                    <fester.s3.access_key>${fester.s3.access_key}</fester.s3.access_key>
+                    <fester.s3.secret_key>${fester.s3.secret_key}</fester.s3.secret_key>
+                    <fester.s3.endpoint>${fester.s3.endpoint}</fester.s3.endpoint>
+                    <fester.container.tag>${docker.registry.account}${project.artifactId}:${project.version}</fester.container.tag>
+                    <jdwp.host.port>${jdwp.host.port}</jdwp.host.port>
+                    <jdwp.client.config>${jdwp.client.config}</jdwp.client.config>
+                  </systemPropertyVariables>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <!-- A profile that outputs the latest versions of the installed system dependencies -->
+    <profile>
+      <id>versions</id>
+      <activation>
+        <property>
+          <name>versions</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>io.fabric8</groupId>
+            <artifactId>docker-maven-plugin</artifactId>
+            <version>${docker.maven.plugin.version}</version>
+            <configuration>
+              <logStdout>true</logStdout>
+              <verbose>true</verbose>
+              <images>
+                <image>
+                  <name>ubuntu-versions:latest</name>
+                  <build>
+                    <from>ubuntu:${ubuntu.tag}</from>
+                    <assembly>
+                      <descriptorRef>project</descriptorRef>
+                    </assembly>
+                    <runCmds>
+                      <shell>/maven/src/main/docker/scripts/show_versions.sh</shell>
+                    </runCmds>
+                    <entryPoint>tail -f /dev/null</entryPoint>
+                  </build>
+                </image>
+              </images>
+              <authConfig>
+                <username>${docker.registry.username}</username>
+                <password>${docker.registry.password}</password>
+              </authConfig>
+            </configuration>
+            <executions>
+
+              <!-- Builds the Docker image -->
+              <execution>
+                <id>docker-build</id>
+                <phase>validate</phase>
+                <goals>
+                  <goal>build</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 

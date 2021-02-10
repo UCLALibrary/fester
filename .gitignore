@@ -12,7 +12,6 @@ buildNumber.properties
 .editorconfig
 .checkstyle
 src/main/tools/eclipse
-src/main/tools/travis
 src/main/generated
 logback-test.xml
 .flattened-pom.xml
