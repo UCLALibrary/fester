@@ -13,6 +13,7 @@ import org.testcontainers.containers.Network;
 import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.containers.localstack.LocalStackContainer.Service;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.testcontainers.utility.DockerImageName;
 
 import info.freelibrary.util.LoggerFactory;
 import info.freelibrary.util.StringUtils;
@@ -82,7 +83,8 @@ public final class ContainerUtils {
      * @return A local S3-compatible container
      */
     public static LocalStackContainer getS3Container() {
-        final LocalStackContainer s3Container = new LocalStackContainer();
+        final DockerImageName localstackImage = DockerImageName.parse("localstack/localstack");
+        final LocalStackContainer s3Container = new LocalStackContainer(localstackImage);
 
         s3Container.withServices(Service.S3).withNetwork(NETWORK).withNetworkAliases(S3_ALIAS).start();
 

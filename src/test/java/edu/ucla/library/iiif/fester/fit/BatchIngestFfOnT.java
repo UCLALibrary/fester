@@ -3,7 +3,6 @@ package edu.ucla.library.iiif.fester.fit;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -16,7 +15,6 @@ import edu.ucla.library.iiif.fester.MessageCodes;
 
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
-import io.vertx.ext.unit.junit.Timeout;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 
 /**
@@ -28,17 +26,12 @@ public class BatchIngestFfOnT extends BaseFesterFfT {
     /* Our feature flag test logger */
     private static final Logger LOGGER = LoggerFactory.getLogger(BatchIngestFfOnT.class, Constants.MESSAGES);
 
-    /* Slower systems may have trouble finishing within the default timeout */
-    @Rule
-    public final Timeout myTimeoutRule = Timeout.seconds(600);
-
     /**
      * Tests that the POST collections endpoint returns a 201 on success.
      *
      * @param aContext A testing context
      */
     @Test
-    @SuppressWarnings("checkstyle:indentation") // Checkstyle doesn't handle lambda indentations well
     public final void testCsvPostEndpoint(final TestContext aContext) {
         final Async asyncTask = aContext.async();
 
