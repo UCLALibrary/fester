@@ -1,4 +1,5 @@
-# Fester &nbsp;[![Build Status](https://api.travis-ci.com/uclalibrary/fester.svg?branch=main)](https://travis-ci.com/uclalibrary/fester) [![Codacy Badge](https://app.codacy.com/project/badge/Grade/990b5c316e0a45d092c83d58f148e0e8)](https://www.codacy.com/gh/UCLALibrary/fester?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=UCLALibrary/fester&amp;utm_campaign=Badge_Grade) [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/990b5c316e0a45d092c83d58f148e0e8)](https://www.codacy.com/gh/UCLALibrary/fester?utm_source=github.com&utm_medium=referral&utm_content=UCLALibrary/fester&utm_campaign=Badge_Coverage) [![Known Vulnerabilities](https://snyk.io/test/github/uclalibrary/fester/badge.svg)](https://snyk.io/test/github/uclalibrary/fester)
+# Fester
+[![Maven Build](https://github.com/uclalibrary/fester/workflows/Maven%20Build/badge.svg)](https://github.com/UCLALibrary/fester/actions) [![Codacy Badge](https://app.codacy.com/project/badge/Grade/990b5c316e0a45d092c83d58f148e0e8)](https://www.codacy.com/gh/UCLALibrary/fester?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=UCLALibrary/fester&amp;utm_campaign=Badge_Grade) [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/990b5c316e0a45d092c83d58f148e0e8)](https://www.codacy.com/gh/UCLALibrary/fester?utm_source=github.com&utm_medium=referral&utm_content=UCLALibrary/fester&utm_campaign=Badge_Coverage) [![Known Vulnerabilities](https://snyk.io/test/github/uclalibrary/fester/badge.svg)](https://snyk.io/test/github/uclalibrary/fester)
 
 A microservice for facilitating the creation, storage, and retrieval of IIIF manifests and collections.
 
@@ -50,9 +51,9 @@ When running the build using the 'package' phase (as described above), only the 
 
 or
 
-    mvn install
+    mvn verify
 
-This will run the functional, feature flag, and integration tests, in addition to the unit tests. If you want to skip a particular type of test but still run the 'install' phase, you can use one of the following arguments to your Maven command:
+This will run the functional, feature flag, and integration tests, in addition to the unit tests. If you want to skip a particular type of test but still run the 'verify' phase, you can use one of the following arguments to your Maven command:
 
     -DskipUTs
     -DskipITs
@@ -61,9 +62,7 @@ This will run the functional, feature flag, and integration tests, in addition t
 
 The first will skip the unit tests; the second will skip the integration tests; the third will skip the functional tests; and, the fourth will skip the feature flag tests. They can also be combined so that two types of tests are skipped. For instance, only the functional tests will be run if the following is typed:
 
-    mvn install -DskipUTs -DskipITs
-
-For what it's worth, the difference between the 'install' phase and the 'integration-test' phase is just that the install phase installs the built Jar file into your machine's local Maven repository.
+    mvn verify -DskipUTs -DskipITs
 
 When running the integration and functional tests, it may be desirable to turn on logging for the containers that run the tests. This can be useful in debugging test failures that happen within the container. To do this, supply one (or any) of the following arguments to your build:
 
@@ -186,9 +185,17 @@ For example, if you wish to run a Locust test against a dev instance on your own
 
 ## Git Hooks
 
-To prevent accidentally pushing commits that would cause the Travis CI build to fail, you can configure your Git client to use a pre-push hook:
+To prevent accidentally pushing commits that would cause the CI build to fail, you can configure your Git client to use a pre-push hook:
 
     ln -s ../../src/test/scripts/git-hooks/pre-push .git/hooks
+
+## Working with Pinned OS Packages
+
+We pin the versions of packages that we install into our base image. What this means is that periodically a pinned version will become obsolete and the build will break. We have a nightly build that should catch this issues for us, but in the case that you find the breakage before us, there is a handy way to tell which pinned version has broken the build. To see the current versions inside the base image, run:
+
+    mvn validate -Dversions
+
+This will output a list of current versions, which can be compared to the pinned versions defined in the project's POM file (i.e., pom.xml).
 
 ## Festerize
 

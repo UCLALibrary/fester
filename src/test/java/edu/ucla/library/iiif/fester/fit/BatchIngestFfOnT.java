@@ -12,6 +12,7 @@ import info.freelibrary.util.LoggerFactory;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
+
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -31,15 +32,14 @@ public class BatchIngestFfOnT extends BaseFesterFfT {
      * @param aContext A testing context
      */
     @Test
-    @SuppressWarnings("checkstyle:indentation") // Checkstyle doesn't handle lambda indentations well
     public final void testCsvPostEndpoint(final TestContext aContext) {
         final Async asyncTask = aContext.async();
 
         // Create our bucket so we have some place to put the manifests
         myS3Client.createBucket(BUCKET);
 
-        myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE).sendMultipartForm(
-                CSV_UPLOAD_FORM, request -> {
+        myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE)
+                .sendMultipartForm(CSV_UPLOAD_FORM, request -> {
                     if (request.succeeded()) {
                         // Check that we get a 201 response code
                         aContext.assertEquals(HTTP.CREATED, request.result().statusCode());

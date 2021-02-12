@@ -1,12 +1,12 @@
 #!/bin/sh
 
-# Prevent pushes that would cause the Travis CI build to fail.
+# Prevent pushes that would cause the CI build to fail.
 
-mvn clean install
+mvn clean verify
 
 if [ $? -ne 0 ]
 then
-    echo >&2 "\nThe build command 'mvn clean install' failed, not pushing"
+    echo >&2 "\nThe build command 'mvn clean verify' failed, not pushing"
     exit 1
 fi
 
