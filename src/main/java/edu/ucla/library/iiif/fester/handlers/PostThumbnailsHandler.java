@@ -62,8 +62,6 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostThumbnailsHandler.class, Constants.MESSAGES);
 
-    //private static final String MANIFESTS = "manifests";
-
     private static final String SEQUENCES = "sequences";
 
     private static final String ATTACHMENT = "attachment; filename=\"{}\"";
@@ -126,29 +124,10 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
                 final int manifestIndex = Arrays.asList(linesWithThumbs.get(0)).indexOf(CSV.MANIFEST_URL);
                 final List<Future> futures = new ArrayList<>();
                 for (int rowIndex = 1; rowIndex < linesWithThumbs.size(); rowIndex++) {
-                    //final int indexForLambda = index;
                     final ObjectType rowType = CsvParser.getObjectType(
                                                linesWithThumbs.get(rowIndex), parser.getCsvHeaders());
                     if (rowType.equals(ObjectType.WORK) || rowType.equals(ObjectType.PAGE)) {
                         futures.add(processRow(linesWithThumbs, manifestIndex, rowIndex));
-                        /*final String manifestURL = linesWithThumbs.get(index)[manifestIndex];
-                        final Future<JsonObject> manifest = getManifest(manifestURL);
-                        manifest.onComplete(result -> {
-                            if (result.failed()) {
-                                returnError(response, HTTP.INTERNAL_SERVER_ERROR, result.cause().getMessage());
-                            } else {
-                                final JsonObject manifestBody = result.result();
-                                final String context = manifestBody.getString(CONTEXT);
-                                final int thumbIndex = ThumbnailUtils.findThumbHeaderIndex(linesWithThumbs.get(0));
-                                if (context.contains(Constants.CONTEXT_V2)) {
-                                    addV2Thumb(thumbIndex, indexForLambda, manifestBody, linesWithThumbs);
-                                } else if (context.contains(Constants.CONTEXT_V3)) {
-                                    addV3Thumb(thumbIndex, indexForLambda, manifestBody, linesWithThumbs);
-                                } else {
-                                    LOGGER.info("message about unknown API version");
-                                }
-                            }
-                        });*/
                     }
                 }
                 CompositeFuture.all(futures).onComplete(handler -> {
@@ -158,66 +137,45 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
                         returnError(response, HTTP.INTERNAL_SERVER_ERROR, handler.cause().getMessage());
                     }
                 });
-                /*final String collectionURL = linesWithThumbs.get(1)[manifestIndex];
-                final Future<JsonObject> collection = getManifest(collectionURL);
-                collection.onComplete(result -> {
-                    if (result.failed()) {
-                        returnError(response, HTTP.INTERNAL_SERVER_ERROR, result.cause().getMessage());
-                    } else {
-                        final JsonArray canvases = result.result().getJsonArray(MANIFESTS);
-                        final int canvasCount = canvases.size();
-                        final int canvasIndex;
-                        if (canvasCount <= 3) {
-                            canvasIndex = 0;
-                        } else {
-                            canvasIndex = ThumbnailUtils.pickThumbnailIndex(canvasCount - 1);
-                        }
-                        final String canvasURL = canvases.getJsonObject(canvasIndex).getString(V2_ID_TAG);
-                        final Future<JsonObject> canvas = getManifest(canvasURL);
-                        canvas.onComplete(canvasResult -> {
-                            if (canvasResult.failed()) {
-                                returnError(response, HTTP.INTERNAL_SERVER_ERROR, canvasResult.cause().getMessage());
-                            } else {
-                                final JsonObject thumbCanvas = canvasResult.result();
-                                final String thumbURL = thumbCanvas.getJsonArray("sequences").getJsonObject(0)
-                                      .getJsonArray("canvases").getJsonObject(0).getJsonArray("images")
-                                      .getJsonObject(0).getJsonObject("resource").getString(V2_ID_TAG);
-                                //ThumbnailUtils.addThumbnailURL(linesWithThumbs, thumbURL);
-                                returnCSV(fileName, filePath, linesWithThumbs, response);
-                            }
-                        });
-                    }
-                });*/
             } catch (CsvException | IOException | CsvParsingException details) {
                 logError(details);
                 returnError(response, HTTP.INTERNAL_SERVER_ERROR, details.getMessage());
             }
-
         }
     }
 
-    private Future<JsonObject> getManifest(final String aUrl) {
-        final Promise<JsonObject> promise = Promise.promise();
+    private Future<Void> processRow(final List<String[]> aCsvList, final int aManifestIndex, final int aRowIndex) {
+        final String manifestURL = aCsvList.get(aRowIndex)[aManifestIndex];
+        final Promise<Void> promise = Promise.promise();
         final HttpRequest<JsonObject> request;
         request = WebClient.create(myVertx)
-            .getAbs(aUrl)
-            .putHeader("Accept", "application/json")
-            .as(BodyCodec.jsonObject())
-            .expect(ResponsePredicate.SC_OK);
-
-        if (aUrl.startsWith("https")) {
+          .getAbs(manifestURL)
+          .putHeader("Accept", Constants.JSON_MEDIA_TYPE)
+          .as(BodyCodec.jsonObject())
+          .expect(ResponsePredicate.SC_OK);
+        if (manifestURL.startsWith("https")) {
             request.ssl(true);
         }
-
         request.send(asyncResult -> {
             if (asyncResult.succeeded()) {
-                promise.complete(asyncResult.result().body());
+                final JsonObject manifestBody = asyncResult.result().body();
+                final String context = manifestBody.getString(CONTEXT);
+                final int thumbIndex = ThumbnailUtils.findThumbHeaderIndex(aCsvList.get(0));
+                if (context.contains(Constants.CONTEXT_V2)) {
+                    addV2Thumb(thumbIndex, aRowIndex, manifestBody, aCsvList);
+                } else if (context.contains(Constants.CONTEXT_V3)) {
+                    addV3Thumb(thumbIndex, aRowIndex, manifestBody, aCsvList);
+                } else {
+                    LOGGER.info("message about unknown API version");
+                }
+                promise.complete();
             } else {
                 promise.fail(asyncResult.result().statusMessage());
             }
         });
 
         return promise.future();
+
     }
 
     private void addV2Thumb(final int aColumnIndex, final int aRowIndex,
