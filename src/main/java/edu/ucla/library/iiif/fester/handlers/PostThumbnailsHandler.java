@@ -17,6 +17,7 @@ import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 import info.freelibrary.util.StringUtils;
 
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -40,6 +41,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -122,13 +124,14 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
                 final List<String[]> originalLines = csvReader.readAll();
                 final List<String[]> linesWithThumbs = ThumbnailUtils.addThumbnailColumn(originalLines);
                 final int manifestIndex = Arrays.asList(linesWithThumbs.get(0)).indexOf(CSV.MANIFEST_URL);
-                for (int index = 1; index < linesWithThumbs.size(); index++) {
-                    final int indexForLambda = index;
-                    //final String[] row = linesWithThumbs.get(index);
+                final List<Future> futures = new ArrayList<>();
+                for (int rowIndex = 1; rowIndex < linesWithThumbs.size(); rowIndex++) {
+                    //final int indexForLambda = index;
                     final ObjectType rowType = CsvParser.getObjectType(
-                                               linesWithThumbs.get(index), parser.getCsvHeaders());
+                                               linesWithThumbs.get(rowIndex), parser.getCsvHeaders());
                     if (rowType.equals(ObjectType.WORK) || rowType.equals(ObjectType.PAGE)) {
-                        final String manifestURL = linesWithThumbs.get(index)[manifestIndex];
+                        futures.add(processRow(linesWithThumbs, manifestIndex, rowIndex));
+                        /*final String manifestURL = linesWithThumbs.get(index)[manifestIndex];
                         final Future<JsonObject> manifest = getManifest(manifestURL);
                         manifest.onComplete(result -> {
                             if (result.failed()) {
@@ -138,17 +141,23 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
                                 final String context = manifestBody.getString(CONTEXT);
                                 final int thumbIndex = ThumbnailUtils.findThumbHeaderIndex(linesWithThumbs.get(0));
                                 if (context.contains(Constants.CONTEXT_V2)) {
-                                    addV2Thumb(thumbIndex, manifestBody, linesWithThumbs.get(indexForLambda));
+                                    addV2Thumb(thumbIndex, indexForLambda, manifestBody, linesWithThumbs);
                                 } else if (context.contains(Constants.CONTEXT_V3)) {
-                                    addV3Thumb(thumbIndex, manifestBody, linesWithThumbs.get(indexForLambda));
+                                    addV3Thumb(thumbIndex, indexForLambda, manifestBody, linesWithThumbs);
                                 } else {
                                     LOGGER.info("message about unknown API version");
                                 }
                             }
-                        });
+                        });*/
                     }
                 }
-                returnCSV(fileName, filePath, linesWithThumbs, response);
+                CompositeFuture.all(futures).onComplete(handler -> {
+                    if (handler.succeeded()) {
+                        returnCSV(fileName, filePath, linesWithThumbs, response);
+                    } else {
+                        returnError(response, HTTP.INTERNAL_SERVER_ERROR, handler.cause().getMessage());
+                    }
+                });
                 /*final String collectionURL = linesWithThumbs.get(1)[manifestIndex];
                 final Future<JsonObject> collection = getManifest(collectionURL);
                 collection.onComplete(result -> {
@@ -211,22 +220,24 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
         return promise.future();
     }
 
-    private void addV2Thumb(final int aIndex, final JsonObject aManifest, final String... aRow) {
+    private void addV2Thumb(final int aColumnIndex, final int aRowIndex,
+                            final JsonObject aManifest, final List<String[]> aCsvList) {
         final JsonArray canvases = aManifest.getJsonArray(SEQUENCES).getJsonObject(0).getJsonArray(CANVASES);
         final int canvasIndex = chooseThumbIndex(canvases.size());
         final String thumbURL = canvases.getJsonObject(canvasIndex).getJsonArray(IMAGE_CONTENT)
                                 .getJsonObject(0).getJsonObject(RESOURCE).getJsonObject(SERVICE)
                                 .getString(Constants.ID_V2);
-        ThumbnailUtils.addThumbnailURL(aIndex, thumbURL, aRow);
+        ThumbnailUtils.addThumbnailURL(aColumnIndex, aRowIndex, thumbURL, aCsvList);
     }
 
-    private void addV3Thumb(final int aIndex, final JsonObject aManifest, final String... aRow) {
+    private void addV3Thumb(final int aColumnIndex, final int aRowIndex,
+                            final JsonObject aManifest, final List<String[]> aCsvList) {
         final JsonArray canvases = aManifest.getJsonArray(ITEMS).getJsonObject(0).getJsonArray(ITEMS);
         final int canvasIndex = chooseThumbIndex(canvases.size());
         final String thumbURL = canvases.getJsonObject(canvasIndex).getJsonArray(ITEMS)
                                 .getJsonObject(0).getJsonObject("body")
                                 .getJsonObject(SERVICE).getString(Constants.ID_V3);
-        ThumbnailUtils.addThumbnailURL(aIndex, thumbURL, aRow);
+        ThumbnailUtils.addThumbnailURL(aColumnIndex, aRowIndex, thumbURL, aCsvList);
     }
 
     private int chooseThumbIndex(final int aCount) {

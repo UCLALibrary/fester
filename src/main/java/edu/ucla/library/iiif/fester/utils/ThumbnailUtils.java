@@ -42,15 +42,18 @@ public final class ThumbnailUtils {
    /**
      * Adds a base IIF URL for the thumnail image.
      *
-     * @param aIndex Index in CSV row where thumbnail URL will be added
+     * @param aColumnIndex Index in CSV row where thumbnail URL will be added
+     * @param aRowIndex Index in CSV of row being modified
      * @param aURL The thumbnail URL
-     * @param aRow A row from a CSV in string array format
+     * @param aCsvList A CSV parsed into a list of arrays
    */
-    public static void addThumbnailURL(final int aIndex, final String aURL, final String... aRow) {
+    public static void addThumbnailURL(final int aColumnIndex, final int aRowIndex,
+                                       final String aURL, final List<String[]> aCsvList) {
         Objects.requireNonNull(aURL);
-        Objects.requireNonNull(aRow);
-        if (aRow[aIndex] == null || aRow[aIndex].trim().equals(Constants.EMPTY)) {
-            aRow[aIndex] = aURL;
+        Objects.requireNonNull(aCsvList);
+        if (aCsvList.get(aRowIndex)[aColumnIndex] == null ||
+            aCsvList.get(aRowIndex)[aColumnIndex].trim().equals(Constants.EMPTY)) {
+            aCsvList.get(aRowIndex)[aColumnIndex] = aURL;
         }
         /*for (int index = 1; index < aCsvList.size(); index++ ) {
             if (aCsvList.get(index)[thumbnailIndex] == null ||
