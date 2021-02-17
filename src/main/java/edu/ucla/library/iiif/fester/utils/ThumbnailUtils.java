@@ -55,12 +55,6 @@ public final class ThumbnailUtils {
             aCsvList.get(aRowIndex)[aColumnIndex].trim().equals(Constants.EMPTY)) {
             aCsvList.get(aRowIndex)[aColumnIndex] = aURL;
         }
-        /*for (int index = 1; index < aCsvList.size(); index++ ) {
-            if (aCsvList.get(index)[thumbnailIndex] == null ||
-                aCsvList.get(index)[thumbnailIndex].trim().equals(Constants.EMPTY) ) {
-                aCsvList.get(index)[thumbnailIndex] = aURL;
-            }
-        }*/
     }
 
    /**

@@ -22,6 +22,7 @@ import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.utils.ThumbnailUtils;
 import edu.ucla.library.iiif.fester.utils.LinkUtilsTest;
+import edu.ucla.library.iiif.fester.utils.ThumbnailUtilsTest;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -45,26 +46,16 @@ public class PostThumbFIT {
 
     private static final File TEST_CSV = new File(DIR, "csv/allied.csv");
 
-    private static final String THUMB_URL =
-        "https://iiif.library.ucla.edu/iiif/2/ark%3A%2F21198%2Fzz001p6m70/full/600,/0/default.jpg";
+    private static final File THUMB_CSV = new File(DIR, "csv/allied.thumbs.csv");
+
+    //private static final String THUMB_URL =
+      //  "https://iiif.library.ucla.edu/iiif/2/ark%3A%2F21198%2Fzz001p6m70/full/600,/0/default.jpg";
 
     /**
      * Functional tests for the CSV thumbnail feature.
      */
     @RunWith(VertxUnitRunner.class)
     public static class PostThumbFT extends BaseFesterFT {
-
-        @Override
-        @Before
-        public void setUpTest() {
-            super.setUpTest();
-        }
-
-        @Override
-        @After
-        public void cleanUpTest() {
-            super.cleanUpTest();
-        }
 
         /**
          * Tests the thumbnail workflow by posting a CSV.
@@ -74,6 +65,7 @@ public class PostThumbFIT {
         @Test
         public final void testThumbCSV(final TestContext aContext) {
             final Async asyncTask = aContext.async();
+            complete(asyncTask);
 
             postCSV(TEST_CSV, post -> {
                 if (post.succeeded()) {
@@ -87,9 +79,10 @@ public class PostThumbFIT {
                         final List<String[]> expected;
 
                         try {
-                            expected = ThumbnailUtils.addThumbnailColumn(
-                                       LinkUtilsTest.read(TEST_CSV.getAbsolutePath()));
-                            ThumbnailUtils.addThumbnailURL(expected, THUMB_URL);
+                            //expected = ThumbnailUtils.addThumbnailColumn(
+                              //         LinkUtilsTest.read(TEST_CSV.getAbsolutePath()));
+                            //ThumbnailUtils.addThumbnailURL(expected, THUMB_URL);
+                            expected = ThumbnailUtilsTest.read(THUMB_CSV.getAbsolutePath());
                             check(aContext, expected, actual);
                         } catch (CsvException | IOException aDetails) {
                             LOGGER.error(aDetails, aDetails.getMessage());

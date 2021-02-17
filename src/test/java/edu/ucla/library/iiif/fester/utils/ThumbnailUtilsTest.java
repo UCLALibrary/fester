@@ -57,7 +57,10 @@ public class ThumbnailUtilsTest {
     @Test
     public final void testAddThumbnail() throws IOException, CsvException {
         final List<String[]> csvData = read(EXPECTED_HEADER);
-        ThumbnailUtils.addThumbnailURL(csvData, THUMBNAIL);
+        final int thumbColumn = ThumbnailUtils.findThumbHeaderIndex(csvData.get(0));
+        for (int row = 1; row < csvData.size(); row++) {
+            ThumbnailUtils.addThumbnailURL(thumbColumn, row, THUMBNAIL, csvData);
+        }
         final String expected = writeToString(read(EXPECTED_CSV));
         final String found = writeToString(csvData);
 
