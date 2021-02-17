@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -20,8 +18,6 @@ import info.freelibrary.util.LoggerFactory;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
-import edu.ucla.library.iiif.fester.utils.ThumbnailUtils;
-import edu.ucla.library.iiif.fester.utils.LinkUtilsTest;
 import edu.ucla.library.iiif.fester.utils.ThumbnailUtilsTest;
 
 import io.vertx.core.AsyncResult;
@@ -48,8 +44,6 @@ public class PostThumbFIT {
 
     private static final File THUMB_CSV = new File(DIR, "csv/allied.thumbs.csv");
 
-    //private static final String THUMB_URL =
-      //  "https://iiif.library.ucla.edu/iiif/2/ark%3A%2F21198%2Fzz001p6m70/full/600,/0/default.jpg";
 
     /**
      * Functional tests for the CSV thumbnail feature.
@@ -79,9 +73,6 @@ public class PostThumbFIT {
                         final List<String[]> expected;
 
                         try {
-                            //expected = ThumbnailUtils.addThumbnailColumn(
-                              //         LinkUtilsTest.read(TEST_CSV.getAbsolutePath()));
-                            //ThumbnailUtils.addThumbnailURL(expected, THUMB_URL);
                             expected = ThumbnailUtilsTest.read(THUMB_CSV.getAbsolutePath());
                             check(aContext, expected, actual);
                         } catch (CsvException | IOException aDetails) {
