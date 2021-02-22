@@ -1,6 +1,7 @@
 
 package edu.ucla.library.iiif.fester.handlers;
 
+import static info.freelibrary.iiif.presentation.v3.Constants.BODY;
 import static info.freelibrary.iiif.presentation.v3.Constants.CANVASES;
 import static info.freelibrary.iiif.presentation.v3.Constants.CONTEXT;
 import static info.freelibrary.iiif.presentation.v3.Constants.IMAGE_CONTENT;
@@ -190,11 +191,15 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
 
     private void addV3Thumb(final int aColumnIndex, final int aRowIndex,
                             final JsonObject aManifest, final List<String[]> aCsvList) {
+
         final JsonArray canvases = aManifest.getJsonArray(ITEMS).getJsonObject(0).getJsonArray(ITEMS);
         final int canvasIndex = chooseThumbIndex(canvases.size());
-        final String thumbURL = canvases.getJsonObject(canvasIndex).getJsonArray(ITEMS)
-                                .getJsonObject(0).getJsonObject("body")
-                                .getJsonObject(SERVICE).getString(Constants.ID_V3);
+        final int imageIndex = chooseThumbIndex(canvases.getJsonObject(canvasIndex).getJsonArray(ITEMS)
+                              .getJsonObject(0).getJsonObject(BODY).getJsonArray(ITEMS).size());
+        final String thumbURL = canvases.getJsonObject(canvasIndex).getJsonArray(ITEMS).getJsonObject(0)
+                               .getJsonObject(BODY).getJsonArray(ITEMS).getJsonObject(0)
+                               .getJsonArray(SERVICE).getJsonObject(imageIndex).getString(Constants.ID_V3);
+
         ThumbnailUtils.addThumbnailURL(aColumnIndex, aRowIndex, thumbURL, aCsvList);
     }
 
