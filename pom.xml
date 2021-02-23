@@ -488,19 +488,11 @@
           </dependency>
         </dependencies>
         <configuration>
-          <stylesheetfile>javadocs.css</stylesheetfile>
-          <nonavbar>true</nonavbar>
-          <show>public</show>
-          <nosince>true</nosince>
-          <notimestamp>true</notimestamp>
-          <bottom> </bottom>
-          <detectLinks>false</detectLinks>
           <additionalJOptions>
             <additionalJOption>-J-Dhttp.agent=maven-javadoc-plugin-${project.name}</additionalJOption>
           </additionalJOptions>
           <links>
-            <link>https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/</link>
-            <!-- <link>https://vertx.io/docs/apidocs/</link> -->
+            <link>https://vertx.io/docs/${vertx.version}/apidocs/</link>
           </links>
           <sourcepath>src/main/java:src/main/generated</sourcepath>
         </configuration>
