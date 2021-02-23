@@ -194,11 +194,9 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
 
         final JsonArray canvases = aManifest.getJsonArray(ITEMS).getJsonObject(0).getJsonArray(ITEMS);
         final int canvasIndex = chooseThumbIndex(canvases.size());
-        final int imageIndex = chooseThumbIndex(canvases.getJsonObject(canvasIndex).getJsonArray(ITEMS)
-                              .getJsonObject(0).getJsonObject(BODY).getJsonArray(ITEMS).size());
-        final String thumbURL = canvases.getJsonObject(canvasIndex).getJsonArray(ITEMS).getJsonObject(0)
-                               .getJsonObject(BODY).getJsonArray(ITEMS).getJsonObject(0)
-                               .getJsonArray(SERVICE).getJsonObject(imageIndex).getString(Constants.ID_V3);
+        final int imageIndex = chooseThumbIndex(canvases.getJsonObject(canvasIndex).getJsonArray(ITEMS).size());
+        final String thumbURL = canvases.getJsonObject(canvasIndex).getJsonArray(ITEMS).getJsonObject(imageIndex)
+                               .getJsonObject(BODY).getJsonArray(SERVICE).getJsonObject(0).getString(Constants.ID_V3);
 
         ThumbnailUtils.addThumbnailURL(aColumnIndex, aRowIndex, thumbURL, aCsvList);
     }
