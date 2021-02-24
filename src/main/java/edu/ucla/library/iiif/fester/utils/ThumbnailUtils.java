@@ -13,17 +13,24 @@ import java.util.concurrent.ThreadLocalRandom;
  * Utility methods for thumbnail selection.
 */
 public final class ThumbnailUtils {
+
+    /**
+     * Header-row name for thumbnail column.
+     */
     private static final String HEADER_THUMB = "thumbnail";
 
+    /**
+     * Private constructor for ThumbnailUtils class.
+     */
     private ThumbnailUtils() {
     }
 
-   /**
-     * Adds a "thumbnail" column to a CSV if needed..
-     *
-     * @param aCsvList A CSV parsed into a list of arrays
-     * @return The CSV with added "thumbnail" column
-   */
+    /**
+      * Adds a "thumbnail" column to a CSV if needed..
+      *
+      * @param aCsvList A CSV parsed into a list of arrays
+      * @return The CSV with added "thumbnail" column
+      */
     public static List<String[]> addThumbnailColumn(final List<String[]> aCsvList) {
         Objects.requireNonNull(aCsvList);
         final List<String[]> csvList;
@@ -39,14 +46,14 @@ public final class ThumbnailUtils {
         }
     }
 
-   /**
+    /**
      * Adds a base IIF URL for the thumnail image.
      *
      * @param aColumnIndex Index in CSV row where thumbnail URL will be added
      * @param aRowIndex Index in CSV of row being modified
      * @param aURL The thumbnail URL
      * @param aCsvList A CSV parsed into a list of arrays
-   */
+     */
     public static void addThumbnailURL(final int aColumnIndex, final int aRowIndex,
                                        final String aURL, final List<String[]> aCsvList) {
         Objects.requireNonNull(aURL);
@@ -57,33 +64,33 @@ public final class ThumbnailUtils {
         }
     }
 
-   /**
-     * Return the index of the thumbnail column in a CSV header row.
-     *
-     * @param aRow Header row from a CSV
-     * @return Index of the thumbnail header
-   */
+    /**
+      * Return the index of the thumbnail column in a CSV header row.
+      *
+      * @param aRow Header row from a CSV
+      * @return Index of the thumbnail header
+      */
     public static int findThumbHeaderIndex(final String... aRow) {
         return Arrays.asList(aRow).indexOf(HEADER_THUMB);
     }
 
-   /**
-     * Chooses the index for a randomly-selected thumbnail.
-     *
-     * @param aMax Maximum value in selection range
-     * @return Random number between 2 (index position 3) and aMax
-   */
+    /**
+      * Chooses the index for a randomly-selected thumbnail.
+      *
+      * @param aMax Maximum value in selection range
+      * @return Random number between 2 (index position 3) and aMax
+      */
     public static int pickThumbnailIndex(final int aMax) {
         final int min = 2;
         return ThreadLocalRandom.current().nextInt(min, aMax + 1);
     }
 
-   /**
-     * Determines whether a CSV has a "Thumbnail" column.
-     *
-     * @param aHeaderRow The header row from a CSV
-     * @return Yes/no for "thumbnail" column existence
-   */
+    /**
+      * Determines whether a CSV has a "Thumbnail" column.
+      *
+      * @param aHeaderRow The header row from a CSV
+      * @return Yes/no for "thumbnail" column existence
+      */
     private static boolean hasThumbnailColumn(final String... aHeaderRow) {
         return Arrays.stream(aHeaderRow).anyMatch(HEADER_THUMB::equals);
     }

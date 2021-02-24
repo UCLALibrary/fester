@@ -57,10 +57,11 @@ import edu.ucla.library.iiif.fester.ObjectType;
 import edu.ucla.library.iiif.fester.utils.ThumbnailUtils;
 
 /**
- * Class to select and add thumbnail link to uploaded CSV
+ * Class to select and add thumbnail links to uploaded CSV
 */
 public class PostThumbnailsHandler extends AbstractFesterHandler {
 
+    /* A logger for the class */
     private static final Logger LOGGER = LoggerFactory.getLogger(PostThumbnailsHandler.class, Constants.MESSAGES);
 
     private static final String SEQUENCES = "sequences";
@@ -73,15 +74,16 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
 
     private final String myFesterizeVersion;
 
-    /**
-     * FUA = Festerize User Agent
-     */
+    /* FUA = Festerize User Agent; agent to verify festerize version, acronymed for codacy */
     private final Pattern myFUAPattern;
 
     /**
-     * @param aVertx
-     * @param aConfig
-    */
+     * Creates a handler to handle POSTs to add thumbnail URLs.
+     *
+     * @param aVertx A Vert.x instance
+     * @param aConfig A application configuration
+     * @throws IOException If there is trouble reading the HTML template files
+     */
     public PostThumbnailsHandler(final Vertx aVertx, final JsonObject aConfig) throws IOException {
         super(aVertx, aConfig);
 
@@ -145,6 +147,13 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
         }
     }
 
+    /**
+     * Process a row from a CSV to add a thumbnail URL.
+     *
+     * @param aCsvList A CSV parsed into a list of string arrays
+     * @param aManifestIndex The column index in this CSV where manifest URLs are stored
+     * @param aRowIndex The row in the CSV being updated
+     */
     private Future<Void> processRow(final List<String[]> aCsvList, final int aManifestIndex, final int aRowIndex) {
         final String manifestURL = aCsvList.get(aRowIndex)[aManifestIndex];
         final Promise<Void> promise = Promise.promise();
@@ -167,7 +176,7 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
                 } else if (context.contains(Constants.CONTEXT_V3)) {
                     addV3Thumb(thumbIndex, aRowIndex, manifestBody, aCsvList);
                 } else {
-                    LOGGER.info("message about unknown API version");
+                    LOGGER.info(LOGGER.getMessage(MessageCodes.MFS_167, manifestURL));
                 }
                 promise.complete();
             } else {
@@ -179,6 +188,14 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
 
     }
 
+    /**
+     * Retireve the base thumbnail URL from IIIF V2 presentation manifests.
+     *
+     * @param aColumnIndex The column in the CSV where thumbnail will be added
+     * @param aRowIndex The CSV row being updated
+     * @param aManifest A IIIF work manifest
+     * @param aCsvList A CSV file parsed as a list of string arrays
+     */
     private void addV2Thumb(final int aColumnIndex, final int aRowIndex,
                             final JsonObject aManifest, final List<String[]> aCsvList) {
         final JsonArray canvases = aManifest.getJsonArray(SEQUENCES).getJsonObject(0).getJsonArray(CANVASES);
@@ -189,6 +206,14 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
         ThumbnailUtils.addThumbnailURL(aColumnIndex, aRowIndex, thumbURL, aCsvList);
     }
 
+    /**
+     * Retireve the base thumbnail URL from IIIF V3 presentation manifests.
+     *
+     * @param aColumnIndex The column in the CSV where thumbnail will be added
+     * @param aRowIndex The CSV row being updated
+     * @param aManifest A IIIF work manifest
+     * @param aCsvList A CSV file parsed as a list of string arrays
+     */
     private void addV3Thumb(final int aColumnIndex, final int aRowIndex,
                             final JsonObject aManifest, final List<String[]> aCsvList) {
 
@@ -201,6 +226,11 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
         ThumbnailUtils.addThumbnailURL(aColumnIndex, aRowIndex, thumbURL, aCsvList);
     }
 
+    /**
+     * Select the index for the thumbnail from a list of images.
+     *
+     * @param aCount The number of images
+     */
     private int chooseThumbIndex(final int aCount) {
         if (aCount <= 3) {
             return 0;
@@ -209,6 +239,14 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
         }
     }
 
+    /**
+     * Return the processed CSV to user.
+     *
+     * @param aFileName Name of CSV file
+     * @param aFilePath Path to CSV file
+     * @param aCsvList CSV file paresed as list of string arrays
+     * @param aResponse Response returned to caller
+     */
     private void returnCSV(final String aFileName, final String aFilePath, final List<String[]> aCsvList,
                            final HttpServerResponse aResponse) {
         final StringWriter writer = new StringWriter();
@@ -227,10 +265,22 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
         }
     }
 
+    /**
+     * Logs error for developers/administrators.
+     *
+     * @param aThrowable The error that halded processing
+     */
     private void logError(final Throwable aThrowable) {
         LOGGER.error(aThrowable, LOGGER.getMessage(MessageCodes.MFS_166, aThrowable.getMessage()));
     }
 
+    /**
+     * Return an error page (and response code) to the requester.
+     *
+     * @param aResponse A HTTP response
+     * @param aStatusCode A HTTP response code
+     * @param aThrowable A throwable exception
+     */
     private void returnError(final HttpServerResponse aResponse, final int aStatusCode, final String aError) {
         final String body = LOGGER.getMessage(MessageCodes.MFS_166, aError.replaceAll(Constants.EOL_REGEX, BR_TAG));
 

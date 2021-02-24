@@ -1,24 +1,16 @@
 
 package edu.ucla.library.iiif.fester.fit;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.List;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
-
-import info.freelibrary.util.Logger;
-import info.freelibrary.util.LoggerFactory;
 
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.utils.ThumbnailUtilsTest;
+
+import info.freelibrary.util.Logger;
+import info.freelibrary.util.LoggerFactory;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -29,23 +21,35 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.multipart.MultipartForm;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.List;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 /**
  * Tests related to adding thumbnail  data to a CSV file.
  */
-
 public class PostThumbFIT {
 
     /* A logger for the tests */
     private static final Logger LOGGER = LoggerFactory.getLogger(PostThumbFIT.class, Constants.MESSAGES);
 
+    /* base directory for test resources */
     private static final File DIR = new File("src/test/resources");
 
+    /* file with V2 presentation manifests, no thumbnails */
     private static final File V2_TEST_CSV = new File(DIR, "csv/allied.csv");
 
+    /* file with V2 presentation manifests and thumbnails */
     private static final File V2_THUMB_CSV = new File(DIR, "csv/allied.thumbs.csv");
 
+    /* file with V3 presentation manifests and thumbnails */
     private static final File V3_TEST_CSV = new File(DIR, "csv/hollywoodland.csv");
 
+    /* file with V3 presentation manifests and thumbnails */
     private static final File V3_THUMB_CSV = new File(DIR, "csv/hollywoodland.thumbs.csv");
 
     /**
@@ -140,6 +144,12 @@ public class PostThumbFIT {
             });
         }
 
+        /**
+         * Handles posting the test CSV file to the test Fester service.
+         *
+         * @param aTestFile A CSV file being POSTed
+         * @param aHandler A handler to handle the result of the post
+         */
         private void postCSV(final File aTestFile, final Handler<AsyncResult<HttpResponse<Buffer>>> aHandler) {
             final MultipartForm form =
                     MultipartForm.create()
