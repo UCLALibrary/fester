@@ -1117,7 +1117,7 @@
                   <systemPropertyVariables>
                     <fester.logs.output>${seeLogsFfT}</fester.logs.output>
                     <fester.s3.bucket>${fester.s3.bucket}</fester.s3.bucket>
-                    <fester.container.tag>${project.artifactId}:${project.version}</fester.container.tag>
+                    <fester.container.tag>${docker.registry.account}${project.artifactId}:${project.version}</fester.container.tag>
                     <feature.flags>https://iiif-manifest-store.s3.amazonaws.com/fester-features-off.conf</feature.flags>
                     <jdwp.host.port>${jdwp.host.port}</jdwp.host.port>
                     <jdwp.client.config>${jdwp.client.config}</jdwp.client.config>
@@ -1145,7 +1145,7 @@
                   <systemPropertyVariables>
                     <fester.logs.output>${seeLogsFfT}</fester.logs.output>
                     <fester.s3.bucket>${fester.s3.bucket}</fester.s3.bucket>
-                    <fester.container.tag>${project.artifactId}:${project.version}</fester.container.tag>
+                    <fester.container.tag>${docker.registry.account}${project.artifactId}:${project.version}</fester.container.tag>
                     <feature.flags>https://iiif-manifest-store.s3.amazonaws.com/fester-features-on.conf</feature.flags>
                     <jdwp.host.port>${jdwp.host.port}</jdwp.host.port>
                     <jdwp.client.config>${jdwp.client.config}</jdwp.client.config>
