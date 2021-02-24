@@ -40,10 +40,13 @@ public class PostThumbFIT {
 
     private static final File DIR = new File("src/test/resources");
 
-    private static final File TEST_CSV = new File(DIR, "csv/allied.csv");
+    private static final File V2_TEST_CSV = new File(DIR, "csv/allied.csv");
 
-    private static final File THUMB_CSV = new File(DIR, "csv/allied.thumbs.csv");
+    private static final File V2_THUMB_CSV = new File(DIR, "csv/allied.thumbs.csv");
 
+    private static final File V3_TEST_CSV = new File(DIR, "csv/hollywoodland.csv");
+
+    private static final File V3_THUMB_CSV = new File(DIR, "csv/hollywoodland.thumbs.csv");
 
     /**
      * Functional tests for the CSV thumbnail feature.
@@ -52,16 +55,16 @@ public class PostThumbFIT {
     public static class PostThumbFT extends BaseFesterFT {
 
         /**
-         * Tests the thumbnail workflow by posting a CSV.
+         * Tests the V2 thumbnail workflow by posting a CSV.
          *
          * @param aContext A test context
          */
         @Test
-        public final void testThumbCSV(final TestContext aContext) {
+        public final void testV2ThumbCSV(final TestContext aContext) {
             final Async asyncTask = aContext.async();
             complete(asyncTask);
 
-            postCSV(TEST_CSV, post -> {
+            postCSV(V2_TEST_CSV, post -> {
                 if (post.succeeded()) {
                     final HttpResponse<Buffer> response = post.result();
                     final int statusCode = response.statusCode();
@@ -73,7 +76,50 @@ public class PostThumbFIT {
                         final List<String[]> expected;
 
                         try {
-                            expected = ThumbnailUtilsTest.read(THUMB_CSV.getAbsolutePath());
+                            expected = ThumbnailUtilsTest.read(V2_THUMB_CSV.getAbsolutePath());
+                            check(aContext, expected, actual);
+                        } catch (CsvException | IOException aDetails) {
+                            LOGGER.error(aDetails, aDetails.getMessage());
+                            aContext.fail(aDetails);
+                        }
+
+                        aContext.assertEquals(Constants.CSV_MEDIA_TYPE, contentType);
+                        complete(asyncTask);
+                    } else {
+                        aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, statusCode, statusMessage));
+                    }
+                } else {
+                    final Throwable exception = post.cause();
+
+                    LOGGER.error(exception, exception.getMessage());
+                    aContext.fail(exception);
+                }
+            });
+        }
+
+        /**
+         * Tests the V3 thumbnail workflow by posting a CSV.
+         *
+         * @param aContext A test context
+         */
+        @Test
+        public final void testV3ThumbCSV(final TestContext aContext) {
+            final Async asyncTask = aContext.async();
+            complete(asyncTask);
+
+            postCSV(V3_TEST_CSV, post -> {
+                if (post.succeeded()) {
+                    final HttpResponse<Buffer> response = post.result();
+                    final int statusCode = response.statusCode();
+                    final String statusMessage = response.statusMessage();
+
+                    if (statusCode == HTTP.OK) {
+                        final Buffer actual = response.body();
+                        final String contentType = response.getHeader(Constants.CONTENT_TYPE);
+                        final List<String[]> expected;
+
+                        try {
+                            expected = ThumbnailUtilsTest.read(V3_THUMB_CSV.getAbsolutePath());
                             check(aContext, expected, actual);
                         } catch (CsvException | IOException aDetails) {
                             LOGGER.error(aDetails, aDetails.getMessage());
