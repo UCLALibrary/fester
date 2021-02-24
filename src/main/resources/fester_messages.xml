@@ -64,7 +64,7 @@
   <entry key="MFS-051">Sending '{}' to S3 bucket: {}</entry>
   <entry key="MFS-052">{}</entry>
   <entry key="MFS-053">Manifest '{}' successfully uploaded to S3</entry>
-  <entry key="MFS-054">S3 bucket upload failed: {} -&gt; {}</entry>
+  <entry key="MFS-054">S3 bucket upload failed: {} -&amp;gt; {}</entry>
   <entry key="MFS-055">Error triggering S3 upload retry: {}</entry>
   <entry key="MFS-056">S3 connection pool is full; re-queuing the request: {}</entry>
   <entry key="MFS-057">Failed to read file: {}</entry>

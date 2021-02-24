@@ -3,7 +3,6 @@ package edu.ucla.library.iiif.fester.fit;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
 import org.junit.Before;
@@ -56,7 +55,7 @@ public class PagesManifestFT extends BaseFesterFT {
 
     /* Slower systems may have trouble finishing within the default timeout */
     @Rule
-    public Timeout myTimeout = new Timeout(5, TimeUnit.MINUTES);
+    public Timeout myTimeout = Timeout.seconds(600);
 
     /**
      * Sets up testing environment.
