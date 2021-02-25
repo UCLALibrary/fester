@@ -17,7 +17,7 @@ public final class ThumbnailUtils {
     /**
      * Header-row name for thumbnail column.
      */
-    private static final String HEADER_THUMB = "thumbnail";
+    private static final String HEADER_THUMB = "Thumbnail";
 
     /**
      * Private constructor for ThumbnailUtils class.

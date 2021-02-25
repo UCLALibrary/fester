@@ -66,7 +66,6 @@ public class PostThumbFIT {
         @Test
         public final void testV2ThumbCSV(final TestContext aContext) {
             final Async asyncTask = aContext.async();
-            complete(asyncTask);
 
             postCSV(V2_TEST_CSV, post -> {
                 if (post.succeeded()) {
@@ -82,9 +81,9 @@ public class PostThumbFIT {
                         try {
                             expected = ThumbnailUtilsTest.read(V2_THUMB_CSV.getAbsolutePath());
                             check(aContext, expected, actual);
-                        } catch (CsvException | IOException aDetails) {
-                            LOGGER.error(aDetails, aDetails.getMessage());
-                            aContext.fail(aDetails);
+                        } catch (CsvException | IOException details) {
+                            LOGGER.error(details, details.getMessage());
+                            aContext.fail(details);
                         }
 
                         aContext.assertEquals(Constants.CSV_MEDIA_TYPE, contentType);
@@ -109,7 +108,6 @@ public class PostThumbFIT {
         @Test
         public final void testV3ThumbCSV(final TestContext aContext) {
             final Async asyncTask = aContext.async();
-            complete(asyncTask);
 
             postCSV(V3_TEST_CSV, post -> {
                 if (post.succeeded()) {
@@ -125,9 +123,9 @@ public class PostThumbFIT {
                         try {
                             expected = ThumbnailUtilsTest.read(V3_THUMB_CSV.getAbsolutePath());
                             check(aContext, expected, actual);
-                        } catch (CsvException | IOException aDetails) {
-                            LOGGER.error(aDetails, aDetails.getMessage());
-                            aContext.fail(aDetails);
+                        } catch (CsvException | IOException details) {
+                            LOGGER.error(details, details.getMessage());
+                            aContext.fail(details);
                         }
 
                         aContext.assertEquals(Constants.CSV_MEDIA_TYPE, contentType);

@@ -125,11 +125,12 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
                 final List<String[]> originalLines = csvReader.readAll();
                 final List<String[]> linesWithThumbs = ThumbnailUtils.addThumbnailColumn(originalLines);
                 final int manifestIndex = Arrays.asList(linesWithThumbs.get(0)).indexOf(CSV.MANIFEST_URL);
+		@SuppressWarnings("rawtypes")
                 final List<Future> futures = new ArrayList<>();
                 for (int rowIndex = 1; rowIndex < linesWithThumbs.size(); rowIndex++) {
                     final ObjectType rowType = CsvParser.getObjectType(
                                                linesWithThumbs.get(rowIndex), parser.getCsvHeaders());
-                    if (rowType.equals(ObjectType.WORK) || rowType.equals(ObjectType.PAGE)) {
+                    if (rowType.equals(ObjectType.WORK)) {
                         futures.add(processRow(linesWithThumbs, manifestIndex, rowIndex));
                     }
                 }
@@ -189,7 +190,7 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
     }
 
     /**
-     * Retireve the base thumbnail URL from IIIF V2 presentation manifests.
+     * Retrieve the base thumbnail URL from IIIF V2 presentation manifests.
      *
      * @param aColumnIndex The column in the CSV where thumbnail will be added
      * @param aRowIndex The CSV row being updated
@@ -207,7 +208,7 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
     }
 
     /**
-     * Retireve the base thumbnail URL from IIIF V3 presentation manifests.
+     * Retrieve the base thumbnail URL from IIIF V3 presentation manifests.
      *
      * @param aColumnIndex The column in the CSV where thumbnail will be added
      * @param aRowIndex The CSV row being updated
@@ -244,7 +245,7 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
      *
      * @param aFileName Name of CSV file
      * @param aFilePath Path to CSV file
-     * @param aCsvList CSV file paresed as list of string arrays
+     * @param aCsvList CSV file parsed as list of string arrays
      * @param aResponse Response returned to caller
      */
     private void returnCSV(final String aFileName, final String aFilePath, final List<String[]> aCsvList,

@@ -135,7 +135,7 @@ paths:
       tags: [Collection]
       summary: Post a Collection to add thumbnails
       description: "This endpoint accepts CSV data to use in the addition of a 
-        thumbnail to a collection"
+        thumbnail to each work in a collection"
       operationId: postThumb
       requestBody:
         required: true
