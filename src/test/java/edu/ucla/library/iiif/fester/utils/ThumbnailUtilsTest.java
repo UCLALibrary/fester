@@ -75,8 +75,13 @@ public class ThumbnailUtilsTest {
     public final void testPickThumbnailIndex() {
         final int min = 2;
         final int max = 20;
-        final int selected = ThumbnailUtils.pickThumbnailIndex(max);
-        assertTrue(selected >= min && selected <= max);
+        int old = 0;
+        for (int i = 0; i < 10; i++ ) {
+            final int selected = ThumbnailUtils.pickThumbnailIndex(max);
+            assertTrue(selected >= min && selected <= max);
+            assertTrue(selected != old);
+            old = selected;
+        }
     }
 
     /**
