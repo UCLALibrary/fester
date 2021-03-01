@@ -1,17 +1,29 @@
 
 package edu.ucla.library.iiif.fester.handlers;
 
+import static info.freelibrary.iiif.presentation.v2.utils.Constants.CANVASES;
+import static info.freelibrary.iiif.presentation.v2.utils.Constants.IMAGE_CONTENT;
+import static info.freelibrary.iiif.presentation.v2.utils.Constants.RESOURCE;
+import static info.freelibrary.iiif.presentation.v2.utils.Constants.SEQUENCES;
+
 import static info.freelibrary.iiif.presentation.v3.Constants.BODY;
-import static info.freelibrary.iiif.presentation.v3.Constants.CANVASES;
 import static info.freelibrary.iiif.presentation.v3.Constants.CONTEXT;
-import static info.freelibrary.iiif.presentation.v3.Constants.IMAGE_CONTENT;
-import static info.freelibrary.iiif.presentation.v3.Constants.RESOURCE;
-import static info.freelibrary.iiif.presentation.v3.Constants.SERVICE;
 import static info.freelibrary.iiif.presentation.v3.Constants.ITEMS;
+import static info.freelibrary.iiif.presentation.v3.Constants.SERVICE;
 
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvException;
+
+import edu.ucla.library.iiif.fester.Config;
+import edu.ucla.library.iiif.fester.Constants;
+import edu.ucla.library.iiif.fester.CsvParser;
+import edu.ucla.library.iiif.fester.CsvParsingException;
+import edu.ucla.library.iiif.fester.CSV;
+import edu.ucla.library.iiif.fester.HTTP;
+import edu.ucla.library.iiif.fester.MessageCodes;
+import edu.ucla.library.iiif.fester.ObjectType;
+import edu.ucla.library.iiif.fester.utils.ThumbnailUtils;
 
 import info.freelibrary.util.IOUtils;
 import info.freelibrary.util.Logger;
@@ -46,16 +58,6 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import edu.ucla.library.iiif.fester.Config;
-import edu.ucla.library.iiif.fester.Constants;
-import edu.ucla.library.iiif.fester.CsvParser;
-import edu.ucla.library.iiif.fester.CsvParsingException;
-import edu.ucla.library.iiif.fester.CSV;
-import edu.ucla.library.iiif.fester.HTTP;
-import edu.ucla.library.iiif.fester.MessageCodes;
-import edu.ucla.library.iiif.fester.ObjectType;
-import edu.ucla.library.iiif.fester.utils.ThumbnailUtils;
-
 /**
  * Class to select and add thumbnail links to uploaded CSV
 */
@@ -63,8 +65,6 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
 
     /* A logger for the class */
     private static final Logger LOGGER = LoggerFactory.getLogger(PostThumbnailsHandler.class, Constants.MESSAGES);
-
-    private static final String SEQUENCES = "sequences";
 
     private static final String ATTACHMENT = "attachment; filename=\"{}\"";
 
@@ -125,7 +125,7 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
                 final List<String[]> originalLines = csvReader.readAll();
                 final List<String[]> linesWithThumbs = ThumbnailUtils.addThumbnailColumn(originalLines);
                 final int manifestIndex = Arrays.asList(linesWithThumbs.get(0)).indexOf(CSV.MANIFEST_URL);
-		@SuppressWarnings("rawtypes")
+                @SuppressWarnings("rawtypes")
                 final List<Future> futures = new ArrayList<>();
                 for (int rowIndex = 1; rowIndex < linesWithThumbs.size(); rowIndex++) {
                     final ObjectType rowType = CsvParser.getObjectType(
@@ -218,11 +218,12 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
     private void addV3Thumb(final int aColumnIndex, final int aRowIndex,
                             final JsonObject aManifest, final List<String[]> aCsvList) {
 
-        final JsonArray canvases = aManifest.getJsonArray(ITEMS).getJsonObject(0).getJsonArray(ITEMS);
+        final JsonArray canvases = aManifest.getJsonArray(ITEMS);
         final int canvasIndex = chooseThumbIndex(canvases.size());
-        final int imageIndex = chooseThumbIndex(canvases.getJsonObject(canvasIndex).getJsonArray(ITEMS).size());
-        final String thumbURL = canvases.getJsonObject(canvasIndex).getJsonArray(ITEMS).getJsonObject(imageIndex)
-                               .getJsonObject(BODY).getJsonArray(SERVICE).getJsonObject(0).getString(Constants.ID_V3);
+        final JsonObject canvas = canvases.getJsonObject(canvasIndex);
+        final JsonObject image = canvas.getJsonArray(ITEMS).getJsonObject(0).getJsonArray(ITEMS)
+                                 .getJsonObject(0).getJsonObject(BODY);
+        final String thumbURL = image.getJsonArray(SERVICE).getJsonObject(0).getString(Constants.ID_V3);
 
         ThumbnailUtils.addThumbnailURL(aColumnIndex, aRowIndex, thumbURL, aCsvList);
     }

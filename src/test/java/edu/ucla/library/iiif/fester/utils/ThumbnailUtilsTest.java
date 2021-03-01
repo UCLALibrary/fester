@@ -31,7 +31,7 @@ public class ThumbnailUtilsTest {
     private static final String EXPECTED_CSV = "src/test/resources/csv/thumbs.csv";
 
     private static final String THUMBNAIL =
-        "https://iiif.library.ucla.edu/iiif/2/ark%3A%2F21198%2Fzz002czs4c/full/600,/0/default.jpg";
+        "http://iiif.library.ucla.edu/collections/ark%3A%2F21198%2Fzz001ng4t6";
 
     /**
      * Tests adding thumbnail column the CSV data.
