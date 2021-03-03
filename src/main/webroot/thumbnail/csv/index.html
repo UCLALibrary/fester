@@ -27,38 +27,21 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link active" href="/fester/upload/csv">CSV Upload</a>
         <a class="nav-item nav-link active" href="/fester/thumbnail/csv">Add Thumbnails</a>
-        <a class="nav-item nav-link active" href="/fester/docs">API Documentation</a>
+	<a class="nav-item nav-link active" href="/fester/docs">API Documentation</a>
       </div>
     </div>
   </nav>
 
   <div class="container-fluid">
-    <h1 id="csv-upload-title">CSV Upload</h1>
-    <p>The CSV upload form can be used to upload CSV files for processing by the Fester application.</p>
+    <h1 id="csv-upload-title">Add Thumbnails to CSV</h1>
+    <p>The CSV upload form can be used to upload festerized CSV files for adding thumbnails.</p>
     <div class="row csv-upload-form">
       <div class="col-sm-3 offset-sm-1">
         <div class="info-form">
-          <form class="form-inlin justify-content-center" action="/collections" method="post"
+          <form class="form-inlin justify-content-center" action="/thumbnails" method="post"
             enctype="multipart/form-data">
             <div class="form-group">
               <label for="csv-file">File to upload:</label> <input type="file" name="csv-file" id="csv-file" required>
-            </div>
-            <div class="form-group">
-              <label for="iiif-host">IIIF Host:</label> <input type="text" value="https://iiif.library.ucla.edu/iiif/2"
-                name="iiif-host" id="iiif-host" onfocus="this.value=''" required/>
-              <div class="infotext">Use the default IIIF URL (i.e., https://iiif.library.ucla.edu/iiif/2) or enter the
-                base URL for a different IIIF server.</div>
-            </div>
-            <div class="form-group">
-              <label for="iiif-version">IIIF manifest version:</label><br/>
-              <input type="radio" id="v2" name="iiif-version" value="v2" checked required>
-              <label for="v2">v2</label><br/>
-              <input type="radio" id="v3" name="iiif-version" value="v3">
-              <label for="v3">v3</label><br/>
-            </div>
-            <div class="form-group">
-              <label for="metadata-update">Update work metadata only:</label> <input type="checkbox"
-              id="metadata-update" name="metadata-update" value="true">
             </div>
             <div class="form-group">
               <input type="submit" value="Upload" name="submit">
@@ -70,33 +53,8 @@
         <h4>Instructions</h4>
         <p>
           To start a batch job, upload a CSV file (like one of those found in the <a
-            href="https://github.com/UCLALibrary/eureka/">Eureka</a> GitHub repository). If you would like image
-          dimensions looked up in a different IIIF server from the one supplied in the "IIIF Host" box, be sure to put
-          that server's base URL in the text box.
+            href="https://github.com/UCLALibrary/eureka/">Eureka</a> GitHub repository).
         </p>
-        <p>If most cases, with the exception being the Sinai CSVs, you are probably okay with just using the default
-          value.</p>
-        <p>The CSV columns that are required by the Fester service are:</p>
-        <ul>
-          <li><code>Item ARK</code></li>
-          <li><code>Parent ARK</code></li>
-          <li><code>Object Type</code></li>
-          <li><code>Title</code></li>
-          <li><code>File Name</code></li>
-        </ul>
-        <p>If the CSV contains any rows where the <code>Object Type</code> is <code>Page</code>, then these additional columns are required:</p>
-        <ul>
-          <li><code>Item Sequence</code></li>
-        </ul>
-        <p>There are also some optional columns that will be used if they're found:</p>
-        <ul>
-          <li><code>viewingHint</code></li>
-          <li><code>viewingDirection</code></li>
-          <li><code>Name.repository</code></li>
-          <li><code>Rights.statementLocal</code></li>
-          <li><code>Rights.servicesContract</code></li>
-          <li><code>IIIF Access URL</code></li>
-        </ul>
         <br />
         <h4>Problems?</h4>
         <p>

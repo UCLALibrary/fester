@@ -130,6 +130,58 @@ paths:
               schema:
                 type: string
                 format: binary
+  /thumbnails:
+    post:
+      tags: [Collection]
+      summary: Post a Collection to add thumbnails
+      description: "This endpoint accepts CSV data to use in the addition of a 
+        thumbnail to each work in a collection"
+      operationId: postThumb
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                csv-file:
+                  type: string
+                  format: binary
+
+      responses:
+        '200':
+          description: An HTML page with a link to the created manifest
+          headers:
+            Location:
+              schema:
+                type: string
+                example: 'http://iiif.library.ucla.edu/collections/123456'
+          content:
+            text/html:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Bad request (e.g., missing or invalid CSV file)
+          content:
+            text/html:
+              schema:
+                type: string
+                format: binary
+        '415':
+          description: Unsupported media type (i.e. not a CSV file)
+          content:
+            text/html:
+              schema:
+                type: string
+                format: binary
+        '500':
+          description: There was an internal server error
+          content:
+            text/html:
+              schema:
+                type: string
+                format: binary
   /collections/{collectionName}:
     get:
       tags: [Collection]

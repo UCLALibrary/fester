@@ -150,6 +150,11 @@ public final class Constants {
     public static final String POST_CSV_ROUTE = "/collections";
 
     /**
+     * The HTTP POST route for CSV thumbnail uploads.
+     */
+    public static final String POST_THUMB_ROUTE = "/thumbnails";
+
+    /**
      * The host at which we're serving content.
      */
     public static final String FESTER_HOST = "fester-host";

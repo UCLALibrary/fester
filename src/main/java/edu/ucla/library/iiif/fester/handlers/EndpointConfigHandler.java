@@ -153,9 +153,14 @@ public class EndpointConfigHandler implements Handler<AsyncResult<OpenAPI3Router
             final Promise<Boolean> aPromise) {
         try {
             final PostCsvHandler postHandler = new PostCsvHandler(myVertx, aConfig);
-            final BodyHandler bodyHandler = BodyHandler.create().setDeleteUploadedFilesOnEnd(true);
+            final BodyHandler bodyHandlerCSV = BodyHandler.create().setDeleteUploadedFilesOnEnd(true);
 
-            aFactory.addHandlerByOperationId(Op.POST_CSV, postHandler).setBodyHandler(bodyHandler);
+            final PostThumbnailsHandler thumbHandler = new PostThumbnailsHandler(myVertx, aConfig);
+            final BodyHandler bodyHandlerThumb = BodyHandler.create().setDeleteUploadedFilesOnEnd(true);
+
+            aFactory.addHandlerByOperationId(Op.POST_CSV, postHandler).setBodyHandler(bodyHandlerCSV);
+            aFactory.addHandlerByOperationId(Op.POST_THUMB, thumbHandler).setBodyHandler(bodyHandlerThumb);
+
             aPromise.complete(true);
         } catch (final IOException details) {
             aPromise.fail(details);

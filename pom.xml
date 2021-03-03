@@ -195,6 +195,11 @@
       <artifactId>vertx-web</artifactId>
       <version>${vertx.version}</version>
     </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-web-client</artifactId>
+      <version>${vertx.version}</version>
+    </dependency>
 
     <!-- Feature flag library -->
     <dependency>
@@ -318,12 +323,6 @@
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-unit</artifactId>
-      <version>${vertx.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-web-client</artifactId>
       <version>${vertx.version}</version>
       <scope>test</scope>
     </dependency>
@@ -665,6 +664,7 @@
                   <exclude>io.vertx:vertx-config</exclude>
                   <exclude>io.vertx:vertx-core</exclude>
                   <exclude>io.vertx:vertx-web-api-contract</exclude>
+                  <exclude>io.vertx:vertx-web-client</exclude>
                   <exclude>io.vertx:vertx-web-common</exclude>
                   <exclude>io.vertx:vertx-web</exclude>
                   <exclude>jakarta.activation:jakarta.activation-api</exclude>
