@@ -416,31 +416,32 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
             final String pageLabel = columns[aCsvHeaders.getTitleIndex()];
             final String encodedPageID = URLEncoder.encode(pageID, StandardCharsets.UTF_8);
             final String pageURI = StringUtils.format(SIMPLE_URI, aImageHost, encodedPageID);
+            final Canvas canvas = new Canvas(aMinter, pageLabel);
+            final int width;
+            final int height;
 
-            String resourceURI = StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, pageURI,
-                    Constants.DEFAULT_SAMPLE_SIZE);
-            Canvas canvas;
             ImageContent image;
+            String resourceURI;
 
             try {
                 final ImageInfoLookup infoLookup = new ImageInfoLookup(pageURI);
-                final int width = infoLookup.getWidth();
-                final int height = infoLookup.getHeight();
 
-                // Create a canvas using the width and height of the related image
-                canvas = new Canvas(aMinter, pageLabel);
+                resourceURI = StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, pageURI, Constants.DEFAULT_SAMPLE_SIZE);
                 image = new ImageContent(resourceURI)
                         .setServices(new ImageService2(ImageService2.Profile.TWO, pageURI));
-                canvas.setWidthHeight(width, height).paintWith(aMinter, image);
+
+                // Create a canvas using the width and height of the related image
+                canvas.setWidthHeight(infoLookup.getWidth(), infoLookup.getHeight()).paintWith(aMinter, image);
             } catch (final ImageNotFoundException | IOException details) {
                 LOGGER.info(MessageCodes.MFS_078, pageID);
 
                 if (aPlaceholderImage != null) {
                     try {
                         final ImageInfoLookup placeholderLookup = new ImageInfoLookup(aPlaceholderImage);
-                        final int width = placeholderLookup.getWidth();
-                        final int height = placeholderLookup.getHeight();
                         final int size;
+
+                        width = placeholderLookup.getWidth();
+                        height = placeholderLookup.getHeight();
 
                         if (width >= Constants.DEFAULT_SAMPLE_SIZE) {
                             size = Constants.DEFAULT_SAMPLE_SIZE;
@@ -450,22 +451,19 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
 
                         // If placeholder image found, use its URL for image resource and service
                         resourceURI = StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, aPlaceholderImage, size);
-
-                        // Create a canvas using the width and height of the placeholder image
-                        canvas = new Canvas(aMinter, pageLabel);
                         image = new ImageContent(resourceURI)
                                 .setServices(new ImageService2(ImageService2.Profile.TWO, aPlaceholderImage));
+
+                        // Create a canvas using the width and height of the placeholder image
                         canvas.setWidthHeight(width, height).paintWith(aMinter, image);
                     } catch (final ImageNotFoundException | IOException lookupDetails) {
                         // We couldn't find the placeholder image so we create an empty canvas
-                        canvas = new Canvas(aMinter, pageLabel);
                         LOGGER.error(lookupDetails, lookupDetails.getMessage());
 
                         // No image content added to canvas when we couldn't find any
                     }
                 } else {
-                    // We couldn't find the placeholder image so we create an empty canvas
-                    canvas = new Canvas(aMinter, pageLabel);
+                    // We couldn't find the placeholder image so we keep the canvas empty
                     LOGGER.info(MessageCodes.MFS_099, pageID);
 
                     // No image content added to canvas when we couldn't find any
