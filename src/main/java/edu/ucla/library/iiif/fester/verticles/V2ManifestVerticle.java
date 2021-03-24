@@ -345,11 +345,11 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
         });
 
         CsvParser.getMetadata(workRow, csvHeaders.getLocalRightsStatementIndex())
-        .ifPresentOrElse(localRightsStatement -> {
-            manifest.setAttribution(new Attribution(localRightsStatement));
-        }, () -> {
-            manifest.clearAttribution();
-        });
+            .ifPresentOrElse(localRightsStatement -> {
+                manifest.setAttribution(new Attribution(localRightsStatement));
+            }, () -> {
+                manifest.clearAttribution();
+            });
 
         CsvParser.getMetadata(workRow, csvHeaders.getRightsContactIndex()).ifPresentOrElse(rightsContact -> {
             manifest.setMetadata(updateMetadata(manifest.getMetadata(), MetadataLabels.RIGHTS_CONTACT, rightsContact));

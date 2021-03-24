@@ -1,11 +1,8 @@
 
 package edu.ucla.library.iiif.fester.verticles;
 
-import java.util.Optional;
-
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
-import info.freelibrary.util.StringUtils;
 
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
