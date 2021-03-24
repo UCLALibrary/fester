@@ -28,6 +28,7 @@ import info.freelibrary.iiif.presentation.v3.Canvas;
 import info.freelibrary.iiif.presentation.v3.Collection;
 import info.freelibrary.iiif.presentation.v3.ImageContent;
 import info.freelibrary.iiif.presentation.v3.Manifest;
+import info.freelibrary.iiif.presentation.v3.VideoContent;
 import info.freelibrary.iiif.presentation.v3.id.Minter;
 import info.freelibrary.iiif.presentation.v3.id.MinterFactory;
 import info.freelibrary.iiif.presentation.v3.properties.Label;
@@ -132,15 +133,15 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         final Collection collection = new Collection(uri, label);
 
         // Add optional properties below
-        getMetadata(collectionData, csvHeaders.getRepositoryNameIndex()).ifPresent(repoName -> {
+        CsvParser.getMetadata(collectionData, csvHeaders.getRepositoryNameIndex()).ifPresent(repoName -> {
             collection.getMetadata().add(new Metadata(MetadataLabels.REPOSITORY_NAME, repoName));
         });
 
-        getMetadata(collectionData, csvHeaders.getLocalRightsStatementIndex()).ifPresent(rightsStatement -> {
+        CsvParser.getMetadata(collectionData, csvHeaders.getLocalRightsStatementIndex()).ifPresent(rightsStatement -> {
             collection.setRequiredStatement(new RequiredStatement(MetadataLabels.ATTRIBUTION, rightsStatement));
         });
 
-        getMetadata(collectionData, csvHeaders.getRightsContactIndex()).ifPresent(rightsContract -> {
+        CsvParser.getMetadata(collectionData, csvHeaders.getRightsContactIndex()).ifPresent(rightsContract -> {
             collection.getMetadata().add(new Metadata(MetadataLabels.RIGHTS_CONTACT, rightsContract));
         });
 
@@ -197,23 +198,23 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         final JsonObject message = new JsonObject();
         final JsonObject jsonManifest;
 
-        getMetadata(workRow, csvHeaders.getViewingDirectionIndex()).ifPresent(viewingDirection -> {
+        CsvParser.getMetadata(workRow, csvHeaders.getViewingDirectionIndex()).ifPresent(viewingDirection -> {
             manifest.setViewingDirection(ViewingDirection.fromString(viewingDirection));
         });
 
-        getMetadata(workRow, csvHeaders.getViewingHintIndex()).ifPresent(behavior -> {
+        CsvParser.getMetadata(workRow, csvHeaders.getViewingHintIndex()).ifPresent(behavior -> {
             manifest.setBehaviors(ManifestBehavior.fromString(behavior));
         });
 
-        getMetadata(workRow, csvHeaders.getRepositoryNameIndex()).ifPresent(repositoryName -> {
+        CsvParser.getMetadata(workRow, csvHeaders.getRepositoryNameIndex()).ifPresent(repositoryName -> {
             manifest.getMetadata().add(new Metadata(MetadataLabels.REPOSITORY_NAME, repositoryName));
         });
 
-        getMetadata(workRow, csvHeaders.getLocalRightsStatementIndex()).ifPresent(localRightsStatement -> {
+        CsvParser.getMetadata(workRow, csvHeaders.getLocalRightsStatementIndex()).ifPresent(localRightsStatement -> {
             manifest.setRequiredStatement(new RequiredStatement(MetadataLabels.ATTRIBUTION, localRightsStatement));
         });
 
-        getMetadata(workRow, csvHeaders.getRightsContactIndex()).ifPresent(rightsContract -> {
+        CsvParser.getMetadata(workRow, csvHeaders.getRightsContactIndex()).ifPresent(rightsContract -> {
             manifest.getMetadata().add(new Metadata(MetadataLabels.RIGHTS_CONTACT, rightsContract));
         });
 
@@ -226,14 +227,15 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
             canvases = createCanvases(csvHeaders, pageList, imageHost, placeholderImage, minter);
             manifest.addCanvas(canvases);
         } else {
-            getMetadata(workRow, csvHeaders.getImageAccessUrlIndex()).ifPresent(accessURL -> {
+            if (CsvParser.getMetadata(workRow, csvHeaders.getImageAccessUrlIndex()).isPresent() ||
+                    CsvParser.getMetadata(workRow, csvHeaders.getAudioVideoAccessUrlIndex()).isPresent()) {
                 final List<String[]> pageList = new ArrayList<>(1);
                 final Canvas[] canvases;
 
                 pageList.add(workRow);
                 canvases = createCanvases(csvHeaders, pageList, imageHost, placeholderImage, minter);
                 manifest.addCanvas(canvases);
-            });
+            }
         }
 
         jsonManifest = manifest.toJSON();
@@ -314,31 +316,32 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         final DeliveryOptions options = new DeliveryOptions();
         final JsonObject message = new JsonObject();
 
-        getMetadata(workRow, csvHeaders.getViewingDirectionIndex()).ifPresentOrElse(viewingDirection -> {
+        CsvParser.getMetadata(workRow, csvHeaders.getViewingDirectionIndex()).ifPresentOrElse(viewingDirection -> {
             manifest.setViewingDirection(ViewingDirection.fromString(viewingDirection));
         }, () -> {
             manifest.clearViewingDirection();
         });
 
-        getMetadata(workRow, csvHeaders.getViewingHintIndex()).ifPresentOrElse(behavior -> {
+        CsvParser.getMetadata(workRow, csvHeaders.getViewingHintIndex()).ifPresentOrElse(behavior -> {
             manifest.setBehaviors(ManifestBehavior.fromString(behavior));
         }, () -> {
             manifest.clearBehaviors();
         });
 
-        getMetadata(workRow, csvHeaders.getRepositoryNameIndex()).ifPresentOrElse(repoName -> {
+        CsvParser.getMetadata(workRow, csvHeaders.getRepositoryNameIndex()).ifPresentOrElse(repoName -> {
             manifest.setMetadata(updateMetadata(manifest.getMetadata(), MetadataLabels.REPOSITORY_NAME, repoName));
         }, () -> {
             manifest.setMetadata(updateMetadata(manifest.getMetadata(), MetadataLabels.REPOSITORY_NAME));
         });
 
-        getMetadata(workRow, csvHeaders.getLocalRightsStatementIndex()).ifPresentOrElse(localRightsStatement -> {
+        CsvParser.getMetadata(workRow, csvHeaders.getLocalRightsStatementIndex())
+        .ifPresentOrElse(localRightsStatement -> {
             manifest.setRequiredStatement(new RequiredStatement(MetadataLabels.ATTRIBUTION, localRightsStatement));
         }, () -> {
             manifest.clearRequiredStatement();
         });
 
-        getMetadata(workRow, csvHeaders.getRightsContactIndex()).ifPresentOrElse(rightsContact -> {
+        CsvParser.getMetadata(workRow, csvHeaders.getRightsContactIndex()).ifPresentOrElse(rightsContact -> {
             manifest.setMetadata(updateMetadata(manifest.getMetadata(), MetadataLabels.RIGHTS_CONTACT, rightsContact));
         }, () -> {
             manifest.setMetadata(updateMetadata(manifest.getMetadata(), MetadataLabels.RIGHTS_CONTACT));
@@ -414,59 +417,82 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
             final String[] columns = iterator.next();
             final String pageID = columns[aCsvHeaders.getItemArkIndex()];
             final String pageLabel = columns[aCsvHeaders.getTitleIndex()];
+            final Optional<String> format = CsvParser.getMetadata(columns, aCsvHeaders.getMediaFormatIndex());
+
             final String encodedPageID = URLEncoder.encode(pageID, StandardCharsets.UTF_8);
-            final String pageURI = StringUtils.format(SIMPLE_URI, aImageHost, encodedPageID);
+            final String pageURI;
             final Canvas canvas = new Canvas(aMinter, pageLabel);
             final int width;
             final int height;
+            final float duration;
 
-            ImageContent image;
             String resourceURI;
 
-            try {
-                final ImageInfoLookup infoLookup = new ImageInfoLookup(pageURI);
+            // We've already validated the MIME type in CsvParser, so it's fine to just check for a substring here
+            if (format.isPresent() && format.get().contains("video/")) {
+                final VideoContent video;
 
-                resourceURI = StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, pageURI, Constants.DEFAULT_SAMPLE_SIZE);
-                image = new ImageContent(resourceURI)
-                        .setServices(new ImageService2(ImageService2.Profile.TWO, pageURI));
+                resourceURI = CsvParser.getMetadata(columns, aCsvHeaders.getAudioVideoAccessUrlIndex()).get();
+                video = new VideoContent(resourceURI);
+                // TODO: set format on video
 
-                // Create a canvas using the width and height of the related image
-                canvas.setWidthHeight(infoLookup.getWidth(), infoLookup.getHeight()).paintWith(aMinter, image);
-            } catch (final ImageNotFoundException | IOException details) {
-                LOGGER.info(MessageCodes.MFS_078, pageID);
+                // We've already validated these numeric values in CsvParser
+                width = Integer.parseInt(CsvParser.getMetadata(columns, aCsvHeaders.getMediaWidthIndex()).get());
+                height = Integer.parseInt(CsvParser.getMetadata(columns, aCsvHeaders.getMediaHeightIndex()).get());
+                duration = Float.parseFloat(CsvParser.getMetadata(columns, aCsvHeaders.getMediaDurationIndex()).get());
 
-                if (aPlaceholderImage != null) {
-                    try {
-                        final ImageInfoLookup placeholderLookup = new ImageInfoLookup(aPlaceholderImage);
-                        final int size;
+                canvas.setWidthHeight(width, height).setDuration(duration).paintWith(aMinter, video);
+            } else {
+                ImageContent image;
 
-                        width = placeholderLookup.getWidth();
-                        height = placeholderLookup.getHeight();
+                pageURI = StringUtils.format(SIMPLE_URI, aImageHost, encodedPageID);
 
-                        if (width >= Constants.DEFAULT_SAMPLE_SIZE) {
-                            size = Constants.DEFAULT_SAMPLE_SIZE;
-                        } else {
-                            size = width;
+                try {
+                    final ImageInfoLookup infoLookup = new ImageInfoLookup(pageURI);
+
+                    resourceURI =
+                            StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, pageURI, Constants.DEFAULT_SAMPLE_SIZE);
+                    image = new ImageContent(resourceURI)
+                            .setServices(new ImageService2(ImageService2.Profile.TWO, pageURI));
+
+                    // Create a canvas using the width and height of the related image
+                    canvas.setWidthHeight(infoLookup.getWidth(), infoLookup.getHeight()).paintWith(aMinter, image);
+                } catch (final ImageNotFoundException | IOException details) {
+                    LOGGER.info(MessageCodes.MFS_078, pageID);
+
+                    if (aPlaceholderImage != null) {
+                        try {
+                            final ImageInfoLookup placeholderLookup = new ImageInfoLookup(aPlaceholderImage);
+                            final int size;
+
+                            width = placeholderLookup.getWidth();
+                            height = placeholderLookup.getHeight();
+
+                            if (width >= Constants.DEFAULT_SAMPLE_SIZE) {
+                                size = Constants.DEFAULT_SAMPLE_SIZE;
+                            } else {
+                                size = width;
+                            }
+
+                            // If placeholder image found, use its URL for image resource and service
+                            resourceURI = StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, aPlaceholderImage, size);
+                            image = new ImageContent(resourceURI)
+                                    .setServices(new ImageService2(ImageService2.Profile.TWO, aPlaceholderImage));
+
+                            // Create a canvas using the width and height of the placeholder image
+                            canvas.setWidthHeight(width, height).paintWith(aMinter, image);
+                        } catch (final ImageNotFoundException | IOException lookupDetails) {
+                            // We couldn't find the placeholder image so we create an empty canvas
+                            LOGGER.error(lookupDetails, lookupDetails.getMessage());
+
+                            // No image content added to canvas when we couldn't find any
                         }
-
-                        // If placeholder image found, use its URL for image resource and service
-                        resourceURI = StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, aPlaceholderImage, size);
-                        image = new ImageContent(resourceURI)
-                                .setServices(new ImageService2(ImageService2.Profile.TWO, aPlaceholderImage));
-
-                        // Create a canvas using the width and height of the placeholder image
-                        canvas.setWidthHeight(width, height).paintWith(aMinter, image);
-                    } catch (final ImageNotFoundException | IOException lookupDetails) {
-                        // We couldn't find the placeholder image so we create an empty canvas
-                        LOGGER.error(lookupDetails, lookupDetails.getMessage());
+                    } else {
+                        // We couldn't find the placeholder image so we keep the canvas empty
+                        LOGGER.info(MessageCodes.MFS_099, pageID);
 
                         // No image content added to canvas when we couldn't find any
                     }
-                } else {
-                    // We couldn't find the placeholder image so we keep the canvas empty
-                    LOGGER.info(MessageCodes.MFS_099, pageID);
-
-                    // No image content added to canvas when we couldn't find any
                 }
             }
 

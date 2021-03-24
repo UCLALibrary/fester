@@ -17,6 +17,7 @@ import org.junit.runner.RunWith;
 
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 
@@ -33,6 +34,7 @@ import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
 import edu.ucla.library.iiif.fester.utils.LinkUtils;
 import edu.ucla.library.iiif.fester.utils.LinkUtilsTest;
+import edu.ucla.library.iiif.fester.utils.TestUtils;
 import edu.ucla.library.iiif.fester.utils.V2ManifestLabelComparator;
 
 import io.vertx.core.AsyncResult;
@@ -75,6 +77,14 @@ public class PostCsvFIT {
     private static final File WORKS_CSV_PROTESTA_1 = new File(DIR, "csv/lat_newspapers/protesta/protesta_works_1.csv");
 
     private static final File PROTESTA_COLLECTION_MANIFEST = new File(DIR, "json/v2/ark%3A%2F21198%2Fzz0025hqmb.json");
+
+    private static final File VIDEO_CSV = new File(DIR, "csv/video/video.csv");
+
+    private static final File VIDEO_CSV_MISSING_METADATA = new File(DIR, "csv/video/video_missing_metadata.csv");
+
+    private static final File VIDEO_CSV_MALFORMED_METADATA = new File(DIR, "csv/video/video_malformed_metadata.csv");
+
+    private static final File VIDEO_MANIFEST = new File(DIR, "json/v3/video.json");
 
     /* Uploaded CSV files are named with a UUID */
     private static final String FILE_PATH_REGEX =
@@ -458,6 +468,129 @@ public class PostCsvFIT {
 
                     LOGGER.error(postException, postException.getMessage());
                     aContext.fail(postException);
+                }
+            });
+        }
+
+        /**
+         * Tests submitting a CSV with a video object.
+         *
+         * @param aContext A test context
+         */
+        @Test
+        public final void testVideo(final TestContext aContext) {
+            final Async asyncTask = aContext.async();
+
+            postCSV(VIDEO_CSV, Constants.IIIF_API_V3, post -> {
+                if (post.succeeded()) {
+                    final HttpResponse<Buffer> response = post.result();
+                    final int statusCode = response.statusCode();
+                    final String statusMessage = response.statusMessage();
+
+                    if (statusCode == HTTP.CREATED) {
+                        final Optional<JsonObject> optJsonObject = checkS3("ark:/21198/zz00000001", false);
+
+                        if (optJsonObject.isPresent()) {
+                            try {
+                                final JsonObject expected = readJsonFile(VIDEO_MANIFEST);
+                                final JsonObject found = optJsonObject.get();
+
+                                aContext.assertTrue(TestUtils.manifestsAreEffectivelyEqual(expected, found));
+                            } catch (final IOException details) {
+                                LOGGER.error(details, details.getMessage());
+                                aContext.fail(details);
+                            }
+                        } else {
+                            aContext.fail(LOGGER.getMessage(MessageCodes.MFS_154, VIDEO_CSV));
+                        }
+                        complete(asyncTask);
+                    } else {
+                        aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, statusCode, statusMessage));
+                    }
+                } else {
+                    final Throwable exception = post.cause();
+
+                    LOGGER.error(exception, exception.getMessage());
+                    aContext.fail(exception);
+                }
+            });
+        }
+
+        /**
+         * Tests submitting a CSV with a video object that is missing metadata.
+         *
+         * @param aContext A test context
+         */
+        public final void testVideoMissingMetadata(final TestContext aContext) {
+            final Async asyncTask = aContext.async();
+
+            postCSV(VIDEO_CSV_MISSING_METADATA, Constants.IIIF_API_V3, post -> {
+                if (post.succeeded()) {
+                    final HttpResponse<Buffer> response = post.result();
+                    final int statusCode = response.statusCode();
+                    final String statusMessage = response.statusMessage();
+
+                    aContext.assertEquals(statusCode, HTTP.BAD_REQUEST);
+                    aContext.assertTrue(statusMessage.contains("missing either width, height, or duration"));
+
+                    complete(asyncTask);
+                } else {
+                    final Throwable exception = post.cause();
+
+                    LOGGER.error(exception, exception.getMessage());
+                    aContext.fail(exception);
+                }
+            });
+        }
+
+        /**
+         * Tests submitting a CSV with a video object with malformed metadata.
+         *
+         * @param aContext A test context
+         */
+        public final void testVideoMalformedMetadata(final TestContext aContext) {
+            final Async asyncTask = aContext.async();
+
+            postCSV(VIDEO_CSV_MALFORMED_METADATA, Constants.IIIF_API_V3, post -> {
+                if (post.succeeded()) {
+                    final HttpResponse<Buffer> response = post.result();
+                    final int statusCode = response.statusCode();
+                    final String statusMessage = response.statusMessage();
+
+                    aContext.assertEquals(statusCode, HTTP.BAD_REQUEST);
+                    aContext.assertTrue(statusMessage.contains("Cannot parse value '???'"));
+                    complete(asyncTask);
+                } else {
+                    final Throwable exception = post.cause();
+
+                    LOGGER.error(exception, exception.getMessage());
+                    aContext.fail(exception);
+                }
+            });
+        }
+
+        /**
+         * Tests submitting a CSV with a video object with IIIF Presentation API 2 specified.
+         *
+         * @param aContext A test context
+         */
+        public final void testVideoIiifPresApiV2(final TestContext aContext) {
+            final Async asyncTask = aContext.async();
+
+            postCSV(VIDEO_CSV, Constants.IIIF_API_V2, post -> {
+                if (post.succeeded()) {
+                    final HttpResponse<Buffer> response = post.result();
+                    final int statusCode = response.statusCode();
+                    final String statusMessage = response.statusMessage();
+
+                    aContext.assertEquals(statusCode, HTTP.BAD_REQUEST);
+                    aContext.assertTrue(statusMessage.contains("IIIF Presentation API 2 does not support A/V content"));
+                    complete(asyncTask);
+                } else {
+                    final Throwable exception = post.cause();
+
+                    LOGGER.error(exception, exception.getMessage());
+                    aContext.fail(exception);
                 }
             });
         }
