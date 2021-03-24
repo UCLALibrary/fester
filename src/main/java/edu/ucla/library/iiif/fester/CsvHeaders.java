@@ -61,7 +61,8 @@ public class CsvHeaders {
     /**
      * The index position for the audio/video access URL column.
      */
-    private int myAudioVideoAccessUrlIndex = -1; // NOPMD
+    @SuppressWarnings("PMD.LongVariable")
+    private int myAudioVideoAccessUrlIndex = -1;
 
     /**
      * The index position for the repository name column.

@@ -336,7 +336,7 @@ public class CsvParser {
      * @return The row
      * @throws CsvParsingException If the row represents a v2 canvas and contains any A/V metadata
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "PMD.PreserveStackTrace", "PMD.TooFewBranchesForASwitchStatement" })
     private String[] checkApiCompatibility(final String[] aRow, final Path aPath, final String aIiifVersion)
             throws CsvParsingException {
         final String rowId = getMetadata(aRow, myCsvHeaders.getItemArkIndex()).get();
@@ -363,10 +363,10 @@ public class CsvParser {
                 try {
                     primaryType = new MimeType(format).getPrimaryType();
                 } catch (final MimeTypeParseException details) {
-                    throw new CsvParsingException(MessageCodes.MFS_169, format, rowId, aPath); // NOPMD
+                    throw new CsvParsingException(MessageCodes.MFS_169, format, rowId, aPath);
                 }
 
-                switch (primaryType) { // NOPMD
+                switch (primaryType) {
                     case "video": {
                         if (mediaWidth.isEmpty() || mediaHeight.isEmpty() || mediaDuration.isEmpty() ||
                                 audioVideoAccessUrl.isEmpty()) {
@@ -468,6 +468,7 @@ public class CsvParser {
      * @return An optional metadata value
      * @throws CsvParsingException
      */
+    @SuppressWarnings("PMD.PreserveStackTrace")
     public static Optional<?> getMetadata(final String[] aRow, final int aIndex, final Class<?> aType,
             final Path aPath) throws CsvParsingException {
         try {
@@ -487,7 +488,7 @@ public class CsvParser {
                         throw new CsvParsingException(MessageCodes.MFS_173, rawValue, aPath, aType);
                     }
                 } catch (final NumberFormatException details) {
-                    throw new CsvParsingException(MessageCodes.MFS_173, rawValue, aPath, aType); // NOPMD
+                    throw new CsvParsingException(MessageCodes.MFS_173, rawValue, aPath, aType);
                 }
             }
         } catch (final IndexOutOfBoundsException details) {
