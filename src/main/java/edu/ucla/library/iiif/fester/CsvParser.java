@@ -82,7 +82,8 @@ public class CsvParser {
                 final String[] nextRow = csvIterator.next();
 
                 // Skip blank rows
-                if (!(nextRow.length == 1 && EMPTY.equals(nextRow[0].trim()))) {
+                if (!(nextRow.length == 1 && EMPTY.equals(nextRow[0].trim())) &&
+                        !EMPTY.equals(String.join(EMPTY, nextRow).trim())) {
                     rows.add(nextRow);
                 }
             }
