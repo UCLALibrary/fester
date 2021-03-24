@@ -116,7 +116,7 @@ public class CsvParser {
                 checkForEOLs(row);
                 trimValues(row);
                 if (aIiifVersion != null) {
-                    checkIiifPresApiCompatibility(row, aPath, aIiifVersion);
+                    checkApiCompatibility(row, aPath, aIiifVersion);
                 }
 
                 switch (getObjectType(row, myCsvHeaders)) {
@@ -335,10 +335,9 @@ public class CsvParser {
      * @param aPath A path to a CSV file
      * @return The row
      * @throws CsvParsingException If the row represents a v2 canvas and contains any A/V metadata
-     * @throws MimeTypeParseException
      */
     @SuppressWarnings("unchecked")
-    private String[] checkIiifPresApiCompatibility(final String[] aRow, final Path aPath, final String aIiifVersion)
+    private String[] checkApiCompatibility(final String[] aRow, final Path aPath, final String aIiifVersion)
             throws CsvParsingException {
         final String rowId = getMetadata(aRow, myCsvHeaders.getItemArkIndex()).get();
 

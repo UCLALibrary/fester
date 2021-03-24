@@ -434,7 +434,6 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
 
                 resourceURI = CsvParser.getMetadata(columns, aCsvHeaders.getAudioVideoAccessUrlIndex()).get();
                 video = new VideoContent(resourceURI);
-                // TODO: set format on video
 
                 // We've already validated these numeric values in CsvParser
                 width = Integer.parseInt(CsvParser.getMetadata(columns, aCsvHeaders.getMediaWidthIndex()).get());
