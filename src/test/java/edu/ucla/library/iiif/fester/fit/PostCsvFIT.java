@@ -115,7 +115,7 @@ public class PostCsvFIT {
         public final void testFullCSV(final TestContext aContext) {
             final Async asyncTask = aContext.async();
 
-            postCSV(ALL_IN_ONE_CSV, post -> {
+            postCSV(ALL_IN_ONE_CSV, Constants.IIIF_API_V2, post -> {
                 if (post.succeeded()) {
                     final HttpResponse<Buffer> response = post.result();
                     final int statusCode = response.statusCode();
@@ -160,7 +160,7 @@ public class PostCsvFIT {
         public final void testCsvWithEolCharacter(final TestContext aContext) {
             final Async asyncTask = aContext.async();
 
-            postCSV(EOL_CHECK_CSV, post -> {
+            postCSV(EOL_CHECK_CSV, Constants.IIIF_API_V2, post -> {
                 if (post.succeeded()) {
                     final HttpResponse<Buffer> response = post.result();
 
@@ -189,7 +189,7 @@ public class PostCsvFIT {
         public final void testCsvWithBlankLine(final TestContext aContext) {
             final Async asyncTask = aContext.async();
 
-            postCSV(BLANK_LINE_CSV, post -> {
+            postCSV(BLANK_LINE_CSV, Constants.IIIF_API_V2, post -> {
                 if (post.succeeded()) {
                     final HttpResponse<Buffer> response = post.result();
 
@@ -212,7 +212,7 @@ public class PostCsvFIT {
         public final void testWorksCSV(final TestContext aContext) {
             final Async asyncTask = aContext.async();
 
-            postCSV(WORKS_CSV_COLLECTION, post -> {
+            postCSV(WORKS_CSV_COLLECTION, Constants.IIIF_API_V2, post -> {
                 if (post.succeeded()) {
                     final HttpResponse<Buffer> response = post.result();
                     final int statusCode = response.statusCode();
@@ -272,7 +272,7 @@ public class PostCsvFIT {
             myS3Client.putObject(BUCKET, IDUtils.getCollectionS3Key(HATHAWAY_COLLECTION_ARK),
                     HATHAWAY_COLLECTION_MANIFEST);
 
-            postCSV(WORKS_CSV_NO_COLLECTION, post -> {
+            postCSV(WORKS_CSV_NO_COLLECTION, Constants.IIIF_API_V2, post -> {
                 if (post.succeeded()) {
                     final HttpResponse<Buffer> response = post.result();
                     final int statusCode = response.statusCode();
@@ -319,7 +319,7 @@ public class PostCsvFIT {
         public final void testWorksCSVNoCollectionRow500(final TestContext aContext) {
             final Async asyncTask = aContext.async();
 
-            postCSV(WORKS_CSV_NO_COLLECTION, post -> {
+            postCSV(WORKS_CSV_NO_COLLECTION, Constants.IIIF_API_V2, post -> {
                 if (post.succeeded()) {
                     final HttpResponse<Buffer> response = post.result();
                     final String expectedErrorMessage = LOGGER.getMessage(MessageCodes.MFS_103,
@@ -351,7 +351,7 @@ public class PostCsvFIT {
             final Async asyncTask = aContext.async();
             final List<String[]> expected = LinkUtilsTest.read(ALL_IN_ONE_CSV.getAbsolutePath());
 
-            postCSV(ALL_IN_ONE_CSV, post -> {
+            postCSV(ALL_IN_ONE_CSV, Constants.IIIF_API_V2, post -> {
                 if (post.succeeded()) {
                     final HttpResponse<Buffer> response = post.result();
                     final int statusCode = response.statusCode();
@@ -411,7 +411,7 @@ public class PostCsvFIT {
 
             // POST a work CSV with randomly sorted rows; all work manifests generated from these rows should be
             // ordered before all those already existing on the collection manifest
-            postCSV(WORKS_CSV_PROTESTA_1, post -> {
+            postCSV(WORKS_CSV_PROTESTA_1, Constants.IIIF_API_V2, post -> {
                 if (post.succeeded()) {
                     final HttpResponse<Buffer> postResponse = post.result();
                     final int postStatusCode = postResponse.statusCode();
@@ -475,7 +475,7 @@ public class PostCsvFIT {
             myWebClient.close();
             myWebClient = WebClient.create(VERTX_INSTANCE, new WebClientOptions().setUserAgent("Festerize/0.0.0"));
 
-            postCSV(WORKS_CSV_COLLECTION, post -> {
+            postCSV(WORKS_CSV_COLLECTION, Constants.IIIF_API_V2, post -> {
                 if (post.succeeded()) {
                     final HttpResponse<Buffer> response = post.result();
 
@@ -521,14 +521,17 @@ public class PostCsvFIT {
          * Handles posting the test CSV file to the test Fester service.
          *
          * @param aTestFile A CSV file being POSTed
+         * @param aIiifApiVersion A IIIF Presentation API version identifier (either Constants.IIIF_API_V2 or
+         *        Constants.IIIF_API_V3)
          * @param aHandler A handler to handle the result of the post
          */
-        private void postCSV(final File aTestFile, final Handler<AsyncResult<HttpResponse<Buffer>>> aHandler) {
-            final MultipartForm form =
-                    MultipartForm.create()
-                            .textFileUpload(Constants.CSV_FILE, aTestFile.getName(), aTestFile.getAbsolutePath(),
-                                    Constants.CSV_MEDIA_TYPE)
-                            .attribute(Constants.IIIF_HOST, ImageInfoLookup.FAKE_IIIF_SERVER);
+        private void postCSV(final File aTestFile, final String aIiifApiVersion,
+                final Handler<AsyncResult<HttpResponse<Buffer>>> aHandler) {
+            final MultipartForm form = MultipartForm.create()
+                    .textFileUpload(Constants.CSV_FILE, aTestFile.getName(), aTestFile.getAbsolutePath(),
+                            Constants.CSV_MEDIA_TYPE)
+                    .attribute(Constants.IIIF_HOST, ImageInfoLookup.FAKE_IIIF_SERVER)
+                    .attribute(Constants.IIIF_API_VERSION, aIiifApiVersion);
 
             myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE).sendMultipartForm(form,
                     aHandler);
