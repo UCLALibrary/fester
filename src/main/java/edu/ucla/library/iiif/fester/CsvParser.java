@@ -360,13 +360,15 @@ public class CsvParser {
                 final String format = mediaFormat.get();
                 final String primaryType;
 
+
                 try {
                     primaryType = new MimeType(format).getPrimaryType();
                 } catch (final MimeTypeParseException details) {
-                    throw new CsvParsingException(MessageCodes.MFS_169, format, rowId, aPath);
+
+                    throw new CsvParsingException(MessageCodes.MFS_169, format, rowId, aPath); // NOPMD
                 }
 
-                switch (primaryType) {
+                switch (primaryType) { // NOPMD
                     case "video": {
                         if (mediaWidth.isEmpty() || mediaHeight.isEmpty() || mediaDuration.isEmpty() ||
                                 audioVideoAccessUrl.isEmpty()) {
@@ -487,7 +489,7 @@ public class CsvParser {
                         throw new CsvParsingException(MessageCodes.MFS_173, rawValue, aPath, aType);
                     }
                 } catch (final NumberFormatException details) {
-                    throw new CsvParsingException(MessageCodes.MFS_173, rawValue, aPath, aType);
+                    throw new CsvParsingException(MessageCodes.MFS_173, rawValue, aPath, aType); // NOPMD
                 }
             }
         } catch (final IndexOutOfBoundsException details) {
