@@ -57,6 +57,11 @@ public final class CSV {
     public static final String IIIF_ACCESS_URL = "IIIF Access URL";
 
     /**
+     * The rows's audio/video access URL.
+     */
+    public static final String AV_ACCESS_URL = "AV Access URL";
+
+    /**
      * The row's repository name.
      */
     public static final String REPOSITORY_NAME = "Name.repository";
@@ -70,6 +75,26 @@ public final class CSV {
      * The row's rights contact.
      */
     public static final String RIGHTS_CONTACT = "Rights.servicesContact";
+
+    /**
+     * The row's media width.
+     */
+    public static final String MEDIA_WIDTH = "media.width";
+
+    /**
+     * The row's media height.
+     */
+    public static final String MEDIA_HEIGHT = "media.height";
+
+    /**
+     * The row's media duration.
+     */
+    public static final String MEDIA_DURATION = "media.duration";
+
+    /**
+     * The row's media format.
+     */
+    public static final String MEDIA_FORMAT = "media.format";
 
     private CSV() {
     }

@@ -1,0 +1,43 @@
+{
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  "type": "Manifest",
+  "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest",
+  "label": {
+    "none": [
+      "Test Video 1"
+    ]
+  },
+  "items": [
+    {
+      "type": "Canvas",
+      "label": {
+        "none": [
+          "Test Video 1"
+        ]
+      },
+      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/canvas-wx3d",
+      "width": 640,
+      "height": 360,
+      "duration": 1801.055,
+      "items": [
+        {
+          "type": "AnnotationPage",
+          "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/canvas-wx3d/anno-page-p9oh",
+          "items": [
+            {
+              "type": "Annotation",
+              "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/annotations/anno-m38y",
+              "motivation": "painting",
+              "body": {
+                "type": "Video",
+                "id": "https://fixtures.iiif.io/video/indiana/30-minute-clock/medium/30-minute-clock.mp4",
+                "format": "video/mp4"
+              },
+              "target": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/canvas-wx3d"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

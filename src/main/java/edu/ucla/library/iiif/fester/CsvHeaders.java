@@ -59,6 +59,12 @@ public class CsvHeaders {
     private int myImageAccessUrlIndex = -1;
 
     /**
+     * The index position for the audio/video access URL column.
+     */
+    @SuppressWarnings("PMD.LongVariable")
+    private int myAudioVideoAccessUrlIndex = -1;
+
+    /**
      * The index position for the repository name column.
      */
     private int myRepositoryNameIndex = -1;
@@ -72,6 +78,26 @@ public class CsvHeaders {
      * The index position for the rights contact column.
      */
     private int myRightsContactIndex = -1;
+
+    /**
+     * The index position for the media width column.
+     */
+    private int myMediaWidthIndex = -1;
+
+    /**
+     * The index position for the media height column.
+     */
+    private int myMediaHeightIndex = -1;
+
+    /**
+     * The index position for the media duration column.
+     */
+    private int myMediaDurationIndex = -1;
+
+    /**
+     * The index position for the media format column.
+     */
+    private int myMediaFormatIndex = -1;
 
     /**
      * Create a new CSV headers object.
@@ -110,6 +136,9 @@ public class CsvHeaders {
                 case CSV.IIIF_ACCESS_URL:
                     setImageAccessUrlIndex(index);
                     break;
+                case CSV.AV_ACCESS_URL:
+                    setAudioVideoAccessUrlIndex(index);
+                    break;
                 case CSV.REPOSITORY_NAME:
                     setRepositoryNameIndex(index);
                     break;
@@ -118,6 +147,18 @@ public class CsvHeaders {
                     break;
                 case CSV.RIGHTS_CONTACT:
                     setRightsContactIndex(index);
+                    break;
+                case CSV.MEDIA_WIDTH:
+                    setMediaWidthIndex(index);
+                    break;
+                case CSV.MEDIA_HEIGHT:
+                    setMediaHeightIndex(index);
+                    break;
+                case CSV.MEDIA_DURATION:
+                    setMediaDurationIndex(index);
+                    break;
+                case CSV.MEDIA_FORMAT:
+                    setMediaFormatIndex(index);
                     break;
                 default:
                     // Our default is to ignore things we don't care about
@@ -192,6 +233,37 @@ public class CsvHeaders {
      */
     public boolean hasImageAccessUrlIndex() {
         return myImageAccessUrlIndex != -1;
+    }
+
+    /**
+     * Gets the audio/video access URL index position.
+     *
+     * @return The audio/video access URL index position
+     */
+    @JsonGetter
+    public int getAudioVideoAccessUrlIndex() {
+        return myAudioVideoAccessUrlIndex;
+    }
+
+    /**
+     * Sets the audio/video access URL index position.
+     *
+     * @param aAudioVideoAccessUrlIndex The position of the audio/video access URL header
+     * @return This CSV headers
+     */
+    @JsonSetter
+    public CsvHeaders setAudioVideoAccessUrlIndex(final int aAudioVideoAccessUrlIndex) {
+        myAudioVideoAccessUrlIndex = aAudioVideoAccessUrlIndex;
+        return this;
+    }
+
+    /**
+     * Checks whether there is an audio/video access URL index position
+     *
+     * @return True if there is an audio/video access URL index position; else, false
+     */
+    public boolean hasAudioVideoAccessUrlIndex() {
+        return myAudioVideoAccessUrlIndex != -1;
     }
 
     /**
@@ -502,6 +574,126 @@ public class CsvHeaders {
      */
     public boolean hasRightsContactIndex() {
         return myRightsContactIndex != -1;
+    }
+
+    /**
+     * Gets the media width index position.
+     *
+     * @return The media width index position
+     */
+    @JsonGetter
+    public int getMediaWidthIndex() {
+        return myMediaWidthIndex;
+    }
+
+    /**
+     * Sets the media width index position.
+     *
+     * @param aMediaWidthIndex The position of the media width header
+     * @return This CSV headers
+     */
+    public CsvHeaders setMediaWidthIndex(final int aMediaWidthIndex) {
+        myMediaWidthIndex = aMediaWidthIndex;
+        return this;
+    }
+
+    /**
+     * Checks whether there is a media width index position
+     *
+     * @return True if there is a media width index position; else, false
+     */
+    public boolean hasMediaWidthIndex() {
+        return myMediaWidthIndex != -1;
+    }
+
+    /**
+     * Gets the media height index position.
+     *
+     * @return The media height index position
+     */
+    @JsonGetter
+    public int getMediaHeightIndex() {
+        return myMediaHeightIndex;
+    }
+
+    /**
+     * Sets the media height index position.
+     *
+     * @param aMediaHeightIndex The position of the media height header
+     * @return This CSV headers
+     */
+    public CsvHeaders setMediaHeightIndex(final int aMediaHeightIndex) {
+        myMediaHeightIndex = aMediaHeightIndex;
+        return this;
+    }
+
+    /**
+     * Checks whether there is a media height index position
+     *
+     * @return True if there is a media height index position; else, false
+     */
+    public boolean hasMediaHeightIndex() {
+        return myMediaHeightIndex != -1;
+    }
+
+    /**
+     * Gets the media duration index position.
+     *
+     * @return The media duration index position
+     */
+    @JsonGetter
+    public int getMediaDurationIndex() {
+        return myMediaDurationIndex;
+    }
+
+    /**
+     * Sets the media duration index position.
+     *
+     * @param aMediaDurationIndex The position of the media duration header
+     * @return This CSV headers
+     */
+    public CsvHeaders setMediaDurationIndex(final int aMediaDurationIndex) {
+        myMediaDurationIndex = aMediaDurationIndex;
+        return this;
+    }
+
+    /**
+     * Checks whether there is a media duration index position
+     *
+     * @return True if there is a media duration index position; else, false
+     */
+    public boolean hasMediaDurationIndex() {
+        return myMediaDurationIndex != -1;
+    }
+
+    /**
+     * Gets the media format index position.
+     *
+     * @return The media format index position
+     */
+    @JsonGetter
+    public int getMediaFormatIndex() {
+        return myMediaFormatIndex;
+    }
+
+    /**
+     * Sets the media format index position.
+     *
+     * @param aMediaFormatIndex The position of the media format header
+     * @return This CSV headers
+     */
+    public CsvHeaders setMediaFormatIndex(final int aMediaFormatIndex) {
+        myMediaFormatIndex = aMediaFormatIndex;
+        return this;
+    }
+
+    /**
+     * Checks whether there is a media format index position
+     *
+     * @return True if there is a media format index position; else, false
+     */
+    public boolean hasMediaFormatIndex() {
+        return myMediaFormatIndex != -1;
     }
 
     /**

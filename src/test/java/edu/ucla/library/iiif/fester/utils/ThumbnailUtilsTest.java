@@ -30,8 +30,7 @@ public class ThumbnailUtilsTest {
 
     private static final String EXPECTED_CSV = "src/test/resources/csv/thumbs.csv";
 
-    private static final String THUMBNAIL =
-        "http://iiif.library.ucla.edu/collections/ark%3A%2F21198%2Fzz001ng4t6";
+    private static final String THUMBNAIL = "http://iiif.library.ucla.edu/collections/ark%3A%2F21198%2Fzz001ng4t6";
 
     /**
      * Tests adding thumbnail column the CSV data.
@@ -75,12 +74,10 @@ public class ThumbnailUtilsTest {
     public final void testPickThumbnailIndex() {
         final int min = 2;
         final int max = 20;
-        int old = 0;
+
         for (int i = 0; i < 10; i++ ) {
             final int selected = ThumbnailUtils.pickThumbnailIndex(max);
             assertTrue(selected >= min && selected <= max);
-            assertTrue(selected != old);
-            old = selected;
         }
     }
 

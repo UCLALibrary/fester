@@ -40,6 +40,7 @@ import info.freelibrary.iiif.presentation.v2.services.ImageInfoService;
 
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.CsvHeaders;
+import edu.ucla.library.iiif.fester.CsvParser;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.ImageInfoLookup;
 import edu.ucla.library.iiif.fester.ImageNotFoundException;
@@ -138,15 +139,15 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
         final Metadata metadata = new Metadata();
 
         // Add optional properties below
-        getMetadata(collectionData, csvHeaders.getRepositoryNameIndex()).ifPresent(repoName -> {
+        CsvParser.getMetadata(collectionData, csvHeaders.getRepositoryNameIndex()).ifPresent(repoName -> {
             metadata.add(MetadataLabels.REPOSITORY_NAME, repoName);
         });
 
-        getMetadata(collectionData, csvHeaders.getLocalRightsStatementIndex()).ifPresent(rightsStatement -> {
+        CsvParser.getMetadata(collectionData, csvHeaders.getLocalRightsStatementIndex()).ifPresent(rightsStatement -> {
             collection.setAttribution(new Attribution(rightsStatement));
         });
 
-        getMetadata(collectionData, csvHeaders.getRightsContactIndex()).ifPresent(rightsContract -> {
+        CsvParser.getMetadata(collectionData, csvHeaders.getRightsContactIndex()).ifPresent(rightsContract -> {
             metadata.add(MetadataLabels.RIGHTS_CONTACT, rightsContract);
         });
 
@@ -207,23 +208,23 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
         final Metadata metadata = new Metadata();
         final JsonObject jsonManifest;
 
-        getMetadata(workRow, csvHeaders.getViewingDirectionIndex()).ifPresent(viewingDirection -> {
+        CsvParser.getMetadata(workRow, csvHeaders.getViewingDirectionIndex()).ifPresent(viewingDirection -> {
             manifest.setViewingDirection(ViewingDirection.fromString(viewingDirection));
         });
 
-        getMetadata(workRow, csvHeaders.getViewingHintIndex()).ifPresent(viewingHint -> {
+        CsvParser.getMetadata(workRow, csvHeaders.getViewingHintIndex()).ifPresent(viewingHint -> {
             manifest.setViewingHint(new ViewingHint(viewingHint));
         });
 
-        getMetadata(workRow, csvHeaders.getRepositoryNameIndex()).ifPresent(repositoryName -> {
+        CsvParser.getMetadata(workRow, csvHeaders.getRepositoryNameIndex()).ifPresent(repositoryName -> {
             metadata.add(MetadataLabels.REPOSITORY_NAME, repositoryName);
         });
 
-        getMetadata(workRow, csvHeaders.getLocalRightsStatementIndex()).ifPresent(localRightsStatement -> {
+        CsvParser.getMetadata(workRow, csvHeaders.getLocalRightsStatementIndex()).ifPresent(localRightsStatement -> {
             manifest.setAttribution(new Attribution(localRightsStatement));
         });
 
-        getMetadata(workRow, csvHeaders.getRightsContactIndex()).ifPresent(rightsContract -> {
+        CsvParser.getMetadata(workRow, csvHeaders.getRightsContactIndex()).ifPresent(rightsContract -> {
             metadata.add(MetadataLabels.RIGHTS_CONTACT, rightsContract);
         });
 
@@ -239,7 +240,7 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
             pageList.sort(new ItemSequenceComparator(csvHeaders.getItemSequenceIndex()));
             sequence.addCanvas(createCanvases(csvHeaders, pageList, imageHost, placeholderImage, encodedWorkID));
         } else {
-            getMetadata(workRow, csvHeaders.getImageAccessUrlIndex()).ifPresent(accessURL -> {
+            CsvParser.getMetadata(workRow, csvHeaders.getImageAccessUrlIndex()).ifPresent(accessURL -> {
                 final List<String[]> pageList = new ArrayList<>(1);
 
                 pageList.add(workRow);
@@ -325,31 +326,32 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
         final DeliveryOptions options = new DeliveryOptions();
         final JsonObject message = new JsonObject();
 
-        getMetadata(workRow, csvHeaders.getViewingDirectionIndex()).ifPresentOrElse(viewingDirection -> {
+        CsvParser.getMetadata(workRow, csvHeaders.getViewingDirectionIndex()).ifPresentOrElse(viewingDirection -> {
             manifest.setViewingDirection(ViewingDirection.fromString(viewingDirection));
         }, () -> {
             manifest.clearViewingDirection();
         });
 
-        getMetadata(workRow, csvHeaders.getViewingHintIndex()).ifPresentOrElse(viewingHint -> {
+        CsvParser.getMetadata(workRow, csvHeaders.getViewingHintIndex()).ifPresentOrElse(viewingHint -> {
             manifest.setViewingHint(new ViewingHint(viewingHint));
         }, () -> {
             manifest.clearViewingHint();
         });
 
-        getMetadata(workRow, csvHeaders.getRepositoryNameIndex()).ifPresentOrElse(repoName -> {
+        CsvParser.getMetadata(workRow, csvHeaders.getRepositoryNameIndex()).ifPresentOrElse(repoName -> {
             manifest.setMetadata(updateMetadata(manifest.getMetadata(), MetadataLabels.REPOSITORY_NAME, repoName));
         }, () -> {
             manifest.setMetadata(updateMetadata(manifest.getMetadata(), MetadataLabels.REPOSITORY_NAME));
         });
 
-        getMetadata(workRow, csvHeaders.getLocalRightsStatementIndex()).ifPresentOrElse(localRightsStatement -> {
-            manifest.setAttribution(new Attribution(localRightsStatement));
-        }, () -> {
-            manifest.clearAttribution();
-        });
+        CsvParser.getMetadata(workRow, csvHeaders.getLocalRightsStatementIndex())
+            .ifPresentOrElse(localRightsStatement -> {
+                manifest.setAttribution(new Attribution(localRightsStatement));
+            }, () -> {
+                manifest.clearAttribution();
+            });
 
-        getMetadata(workRow, csvHeaders.getRightsContactIndex()).ifPresentOrElse(rightsContact -> {
+        CsvParser.getMetadata(workRow, csvHeaders.getRightsContactIndex()).ifPresentOrElse(rightsContact -> {
             manifest.setMetadata(updateMetadata(manifest.getMetadata(), MetadataLabels.RIGHTS_CONTACT, rightsContact));
         }, () -> {
             manifest.setMetadata(updateMetadata(manifest.getMetadata(), MetadataLabels.RIGHTS_CONTACT));

@@ -60,7 +60,7 @@ import java.util.regex.Pattern;
 
 /**
  * Class to select and add thumbnail links to uploaded CSV
-*/
+ */
 public class PostThumbnailsHandler extends AbstractFesterHandler {
 
     /* A logger for the class */
@@ -112,7 +112,7 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
             errorMessage = LOGGER.getMessage(MessageCodes.MFS_037);
             returnError(response, HTTP.BAD_REQUEST, errorMessage);
         } else if (festerizeUserAgentMatcher.matches() &&
-                   !festerizeUserAgentMatcher.group("version").equals(myFesterizeVersion)) {
+                !festerizeUserAgentMatcher.group("version").equals(myFesterizeVersion)) {
             errorMessage = LOGGER.getMessage(MessageCodes.MFS_147, myFesterizeVersion);
             returnError(response, HTTP.BAD_REQUEST, errorMessage);
         } else {
@@ -129,7 +129,7 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
                 final List<Future> futures = new ArrayList<>();
                 for (int rowIndex = 1; rowIndex < linesWithThumbs.size(); rowIndex++) {
                     final ObjectType rowType = CsvParser.getObjectType(
-                                               linesWithThumbs.get(rowIndex), parser.getCsvHeaders());
+                            linesWithThumbs.get(rowIndex), parser.getCsvHeaders());
                     if (rowType.equals(ObjectType.WORK)) {
                         futures.add(processRow(linesWithThumbs, manifestIndex, rowIndex));
                     }
@@ -160,10 +160,10 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
         final Promise<Void> promise = Promise.promise();
         final HttpRequest<JsonObject> request;
         request = WebClient.create(myVertx)
-          .getAbs(manifestURL)
-          .putHeader("Accept", Constants.JSON_MEDIA_TYPE)
-          .as(BodyCodec.jsonObject())
-          .expect(ResponsePredicate.SC_OK);
+                .getAbs(manifestURL)
+                .putHeader("Accept", Constants.JSON_MEDIA_TYPE)
+                .as(BodyCodec.jsonObject())
+                .expect(ResponsePredicate.SC_OK);
         if (manifestURL.startsWith("https")) {
             request.ssl(true);
         }
@@ -198,12 +198,12 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
      * @param aCsvList A CSV file parsed as a list of string arrays
      */
     private void addV2Thumb(final int aColumnIndex, final int aRowIndex,
-                            final JsonObject aManifest, final List<String[]> aCsvList) {
+            final JsonObject aManifest, final List<String[]> aCsvList) {
         final JsonArray canvases = aManifest.getJsonArray(SEQUENCES).getJsonObject(0).getJsonArray(CANVASES);
         final int canvasIndex = chooseThumbIndex(canvases.size());
         final String thumbURL = canvases.getJsonObject(canvasIndex).getJsonArray(IMAGE_CONTENT)
-                                .getJsonObject(0).getJsonObject(RESOURCE).getJsonObject(SERVICE)
-                                .getString(Constants.ID_V2);
+                .getJsonObject(0).getJsonObject(RESOURCE).getJsonObject(SERVICE)
+                .getString(Constants.ID_V2);
         ThumbnailUtils.addThumbnailURL(aColumnIndex, aRowIndex, thumbURL, aCsvList);
     }
 
@@ -216,13 +216,13 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
      * @param aCsvList A CSV file parsed as a list of string arrays
      */
     private void addV3Thumb(final int aColumnIndex, final int aRowIndex,
-                            final JsonObject aManifest, final List<String[]> aCsvList) {
+            final JsonObject aManifest, final List<String[]> aCsvList) {
 
         final JsonArray canvases = aManifest.getJsonArray(ITEMS);
         final int canvasIndex = chooseThumbIndex(canvases.size());
         final JsonObject canvas = canvases.getJsonObject(canvasIndex);
         final JsonObject image = canvas.getJsonArray(ITEMS).getJsonObject(0).getJsonArray(ITEMS)
-                                 .getJsonObject(0).getJsonObject(BODY);
+                .getJsonObject(0).getJsonObject(BODY);
         final String thumbURL = image.getJsonArray(SERVICE).getJsonObject(0).getString(Constants.ID_V3);
 
         ThumbnailUtils.addThumbnailURL(aColumnIndex, aRowIndex, thumbURL, aCsvList);
@@ -250,7 +250,7 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
      * @param aResponse Response returned to caller
      */
     private void returnCSV(final String aFileName, final String aFilePath, final List<String[]> aCsvList,
-                           final HttpServerResponse aResponse) {
+            final HttpServerResponse aResponse) {
         final StringWriter writer = new StringWriter();
         final String responseMessage = LOGGER.getMessage(MessageCodes.MFS_038, aFileName, aFilePath);
         try (CSVWriter csvWriter = new CSVWriter(writer)) {

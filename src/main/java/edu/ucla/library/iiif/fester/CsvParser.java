@@ -19,6 +19,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import javax.activation.MimeType;
+import javax.activation.MimeTypeParseException;
+
 import com.opencsv.CSVIterator;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
@@ -61,12 +64,14 @@ public class CsvParser {
      * Rights.statementLocal, Rights.servicesContact,
      *
      * @param aPath A path to a CSV file
+     * @param aIiifVersion The target IIIF Presentation API version
      * @return This CSV parser
      * @throws IOException If there is trouble reading or writing data
      * @throws CsvException If there is trouble reading the CSV data
      * @throws CsvParsingException If there is trouble parsing the CSV data
      */
-    public CsvParser parse(final Path aPath) throws IOException, CsvException, CsvParsingException {
+    public CsvParser parse(final Path aPath, final String aIiifVersion)
+            throws IOException, CsvException, CsvParsingException {
         reset();
 
         try (CSVReader csvReader = new CSVReader(Files.newBufferedReader(aPath))) {
@@ -82,7 +87,8 @@ public class CsvParser {
                 final String[] nextRow = csvIterator.next();
 
                 // Skip blank rows
-                if (!(nextRow.length == 1 && EMPTY.equals(nextRow[0].trim()))) {
+                if (!(nextRow.length == 1 && EMPTY.equals(nextRow[0].trim())) &&
+                        !EMPTY.equals(String.join(EMPTY, nextRow).trim())) {
                     rows.add(nextRow);
                 }
             }
@@ -109,6 +115,9 @@ public class CsvParser {
             for (final String[] row : rows) {
                 checkForEOLs(row);
                 trimValues(row);
+                if (aIiifVersion != null) {
+                    checkApiCompatibility(row, aPath, aIiifVersion);
+                }
 
                 switch (getObjectType(row, myCsvHeaders)) {
                     case COLLECTION: {
@@ -140,6 +149,21 @@ public class CsvParser {
         }
 
         return this;
+    }
+
+    /**
+     * Parses the CSV file at the supplied path. This is not thread-safe. Optional CSV columns: IIIF Access URL, Item
+     * Sequence (if the CSV contains no page rows), viewingHint, viewingDirection, Name.repository,
+     * Rights.statementLocal, Rights.servicesContact,
+     *
+     * @param aPath A path to a CSV file
+     * @return This CSV parser
+     * @throws IOException If there is trouble reading or writing data
+     * @throws CsvException If there is trouble reading the CSV data
+     * @throws CsvParsingException If there is trouble parsing the CSV data
+     */
+    public CsvParser parse(final Path aPath) throws IOException, CsvException, CsvParsingException {
+        return parse(aPath, null);
     }
 
     /**
@@ -190,8 +214,8 @@ public class CsvParser {
      * @throws CsvParsingException If there is trouble parsing the data
      */
     private void extractCollectionMetadata(final String... aRow) throws CsvParsingException {
-        if (getMetadata(aRow[myCsvHeaders.getItemArkIndex()]).isPresent()) {
-            if (getMetadata(aRow[myCsvHeaders.getTitleIndex()]).isEmpty()) {
+        if (getMetadata(aRow, myCsvHeaders.getItemArkIndex()).isPresent()) {
+            if (getMetadata(aRow, myCsvHeaders.getTitleIndex()).isEmpty()) {
                 throw new CsvParsingException(MessageCodes.MFS_104);
             }
 
@@ -210,9 +234,9 @@ public class CsvParser {
      * @throws CsvParsingException If there is trouble getting the necessary info from the CSV
      */
     private void extractWorkMetadata(final String... aRow) throws CsvParsingException {
-        final Optional<String> parentIdOpt = getMetadata(aRow[myCsvHeaders.getParentArkIndex()]);
-        final Optional<String> workIdOpt = getMetadata(aRow[myCsvHeaders.getItemArkIndex()]);
-        final Optional<String> labelOpt = getMetadata(aRow[myCsvHeaders.getTitleIndex()]);
+        final Optional<String> parentIdOpt = getMetadata(aRow, myCsvHeaders.getParentArkIndex());
+        final Optional<String> workIdOpt = getMetadata(aRow, myCsvHeaders.getItemArkIndex());
+        final Optional<String> labelOpt = getMetadata(aRow, myCsvHeaders.getTitleIndex());
 
         // Store the work data for full manifest creation
         myWorksList.add(aRow);
@@ -255,7 +279,7 @@ public class CsvParser {
      * @throws CsvParsingException
      */
     private void extractPageMetadata(final String... aRow) throws CsvParsingException {
-        final Optional<String> workIdOpt = getMetadata(aRow[myCsvHeaders.getParentArkIndex()]);
+        final Optional<String> workIdOpt = getMetadata(aRow, myCsvHeaders.getParentArkIndex());
 
         if (workIdOpt.isPresent()) {
             final String workID = workIdOpt.get();
@@ -299,6 +323,64 @@ public class CsvParser {
         for (int index = 0; index < aRow.length; index++) {
             if (aRow[index] != null) {
                 aRow[index] = aRow[index].trim();
+            }
+        }
+        return aRow;
+    }
+
+    /**
+     * Checks for A/V metadata in rows that represent v2 canvases, and returns the row if none is found.
+     *
+     * @param aRow A row from the metadata CSV
+     * @param aPath A path to a CSV file
+     * @return The row
+     * @throws CsvParsingException If the row represents a v2 canvas and contains any A/V metadata
+     */
+    @SuppressWarnings({ "unchecked", "PMD.PreserveStackTrace", "PMD.TooFewBranchesForASwitchStatement" })
+    private String[] checkApiCompatibility(final String[] aRow, final Path aPath, final String aIiifVersion)
+            throws CsvParsingException {
+        final String rowId = getMetadata(aRow, myCsvHeaders.getItemArkIndex()).get();
+
+        final Optional<Integer> mediaWidth =
+                (Optional<Integer>) getMetadata(aRow, myCsvHeaders.getMediaWidthIndex(), Integer.class, aPath);
+        final Optional<Integer> mediaHeight =
+                (Optional<Integer>) getMetadata(aRow, myCsvHeaders.getMediaHeightIndex(), Integer.class, aPath);
+        final Optional<Float> mediaDuration =
+                (Optional<Float>) getMetadata(aRow, myCsvHeaders.getMediaDurationIndex(), Float.class, aPath);
+        final Optional<String> mediaFormat = getMetadata(aRow, myCsvHeaders.getMediaFormatIndex());
+        final Optional<String> audioVideoAccessUrl = getMetadata(aRow, myCsvHeaders.getAudioVideoAccessUrlIndex());
+
+        if (Constants.IIIF_API_V2.equals(aIiifVersion)) {
+            if (mediaWidth.isPresent() || mediaHeight.isPresent() || mediaDuration.isPresent() ||
+                    mediaFormat.isPresent() || audioVideoAccessUrl.isPresent()) {
+                throw new CsvParsingException(MessageCodes.MFS_168, rowId, aPath);
+            }
+        } else { // Constants.IIIF_API_V3
+            if (mediaFormat.isPresent()) {
+                final String format = mediaFormat.get();
+                final String primaryType;
+
+                try {
+                    primaryType = new MimeType(format).getPrimaryType();
+                } catch (final MimeTypeParseException details) {
+                    throw new CsvParsingException(MessageCodes.MFS_169, format, rowId, aPath);
+                }
+
+                switch (primaryType) {
+                    case "video": {
+                        if (mediaWidth.isEmpty() || mediaHeight.isEmpty() || mediaDuration.isEmpty() ||
+                                audioVideoAccessUrl.isEmpty()) {
+                            throw new CsvParsingException(MessageCodes.MFS_170, rowId, format, aPath);
+                        }
+                        break;
+                    }
+                    default: {
+                        throw new CsvParsingException(MessageCodes.MFS_171, primaryType, rowId, aPath);
+                    }
+                }
+            } else if (mediaWidth.isPresent() || mediaHeight.isPresent() || mediaDuration.isPresent() ||
+                    audioVideoAccessUrl.isPresent()) {
+                throw new CsvParsingException(MessageCodes.MFS_172, rowId, aPath);
             }
         }
         return aRow;
@@ -361,7 +443,56 @@ public class CsvParser {
         return objectTypes;
     }
 
-    private Optional<String> getMetadata(final String aRowColumnValue) {
-        return Optional.ofNullable(StringUtils.trimToNull(aRowColumnValue));
+    /**
+     * Gets the metadata from the supplied row and index position.
+     *
+     * @param aRow A row of metadata
+     * @param aIndex An index position of the metadata to retrieve
+     * @return An optional metadata value
+     */
+    public static Optional<String> getMetadata(final String[] aRow, final int aIndex) {
+        try {
+            return Optional.ofNullable(StringUtils.trimToNull(aRow[aIndex]));
+        } catch (final IndexOutOfBoundsException details) {
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Gets the metadata from the supplied row and index position.
+     *
+     * @param aRow A row of metadata
+     * @param aIndex An index position of the metadata to retrieve
+     * @param aType The type of data that is expected in the field
+     * @param aPath The path of the current CSV
+     * @return An optional metadata value
+     * @throws CsvParsingException
+     */
+    @SuppressWarnings("PMD.PreserveStackTrace")
+    public static Optional<?> getMetadata(final String[] aRow, final int aIndex, final Class<?> aType,
+            final Path aPath) throws CsvParsingException {
+        try {
+            final String rawValue = aRow[aIndex];
+
+            if (rawValue.equals(EMPTY)) {
+                return Optional.empty();
+            } else {
+                try {
+                    if (aType == Integer.class) {
+                        return Optional.of(Integer.parseInt(StringUtils.trimTo(rawValue, EMPTY)));
+                    } else if (aType == Float.class) {
+                        return Optional.of(Float.parseFloat(StringUtils.trimTo(rawValue, EMPTY)));
+                    } else if (aType == String.class) {
+                        return getMetadata(aRow, aIndex);
+                    } else {
+                        throw new CsvParsingException(MessageCodes.MFS_173, rawValue, aPath, aType);
+                    }
+                } catch (final NumberFormatException details) {
+                    throw new CsvParsingException(MessageCodes.MFS_173, rawValue, aPath, aType);
+                }
+            }
+        } catch (final IndexOutOfBoundsException details) {
+            return Optional.empty();
+        }
     }
 }

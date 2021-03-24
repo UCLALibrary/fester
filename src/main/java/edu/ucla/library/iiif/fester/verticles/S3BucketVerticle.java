@@ -84,14 +84,13 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
         getJsonConsumer().handler(message -> {
             final JsonObject messageBody = message.body();
             final String action = message.headers().get(Constants.ACTION);
-            final String apiVersion = message.headers().get(Constants.IIIF_API_VERSION);
             final JsonObject manifest;
             final String manifestID;
 
             switch (action) {
                 case Op.GET_MANIFEST:
                     manifestID = messageBody.getString(Constants.MANIFEST_ID);
-                    LOGGER.debug(MessageCodes.MFS_133, manifestID, apiVersion, myS3Bucket);
+                    LOGGER.debug(MessageCodes.MFS_133, manifestID, myS3Bucket);
                     get(IDUtils.getWorkS3Key(manifestID), message);
                     break;
                 case Op.PUT_MANIFEST:
@@ -101,7 +100,7 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
                     break;
                 case Op.GET_COLLECTION:
                     manifestID = messageBody.getString(Constants.COLLECTION_NAME);
-                    LOGGER.debug(MessageCodes.MFS_133, manifestID, apiVersion, myS3Bucket);
+                    LOGGER.debug(MessageCodes.MFS_133, manifestID, myS3Bucket);
                     get(IDUtils.getCollectionS3Key(manifestID), message);
                     break;
                 case Op.PUT_COLLECTION:
