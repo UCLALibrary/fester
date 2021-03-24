@@ -360,11 +360,9 @@ public class CsvParser {
                 final String format = mediaFormat.get();
                 final String primaryType;
 
-
                 try {
                     primaryType = new MimeType(format).getPrimaryType();
                 } catch (final MimeTypeParseException details) {
-
                     throw new CsvParsingException(MessageCodes.MFS_169, format, rowId, aPath); // NOPMD
                 }
 
