@@ -357,23 +357,23 @@ public class ManifestVerticle extends AbstractFesterVerticle {
         final Promise<LockedManifest> promise = Promise.promise();
         final String collectionID = aCsvMetadata.getFirstCollectionID(aCsvHeaders.getParentArkIndex()).get();
 
-        // If we were able to get a lock on the manifest, update it with our new works
+        // If we were able to get a lock on the collection, update it with our new works
         promise.future().onComplete(handler -> {
             if (handler.succeeded()) {
                 final Map<String, List<String[]>> worksMap = aCsvMetadata.getWorksMap();
-                final LockedManifest lockedManifest = handler.result();
+                final LockedManifest lockedCollection = handler.result();
                 final DeliveryOptions options = new DeliveryOptions();
                 final ObjectMapper mapper = new ObjectMapper();
                 final JsonObject message = new JsonObject();
 
                 try {
                     options.addHeader(Constants.ACTION, ManifestVerticle.UPDATE_COLLECTION);
-                    message.put(Constants.COLLECTION_CONTENT, lockedManifest.toJSON());
+                    message.put(Constants.COLLECTION_CONTENT, lockedCollection.toJSON());
                     message.put(Constants.COLLECTION_NAME, collectionID);
                     message.put(Constants.MANIFEST_CONTENT, new JsonObject(mapper.writeValueAsString(worksMap)));
 
                     sendMessage(getManifestVerticleName(aApiVersion), message, options, update -> {
-                        lockedManifest.release();
+                        lockedCollection.release();
 
                         if (update.succeeded()) {
                             createWorks(aCsvHeaders, aCsvMetadata, aImageHost, aApiVersion, aMessage);
@@ -449,10 +449,10 @@ public class ManifestVerticle extends AbstractFesterVerticle {
     }
 
     /**
-     * Tries to lock an S3 manifest so we can update it.
+     * Tries to lock an S3 manifest or collection so we can update it.
      *
-     * @param aID A manifest ID
-     * @param aCollDoc Whether the manifest is a collection (or a work)
+     * @param aID A manifest or collection ID
+     * @param aCollDoc Whether the resource is a collection or a manifest ("work")
      * @param aPromise A promise that we'll get a lock
      */
     private void getLockedManifest(final String aID, final boolean aCollDoc, final Promise<LockedManifest> aPromise) {
