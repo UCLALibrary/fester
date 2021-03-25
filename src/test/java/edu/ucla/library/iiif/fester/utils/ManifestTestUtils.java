@@ -24,4 +24,11 @@ public interface ManifestTestUtils {
      */
     Optional<String> getMetadata(String aJsonManifest, String aMetadataLabel);
 
+    /**
+     * Gets the manifest label.
+     *
+     * @param aJsonManifest A JSON manifest
+     * @return The value of the label
+     */
+    Optional<String> getLabel(String aJsonManifest);
 }

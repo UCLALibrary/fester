@@ -56,6 +56,8 @@ public class WorkUpdateFT extends BaseFesterFT {
     private static final String REPO_NAME =
             "University of California, Los Angeles. Library. Performing Arts Special Collections";
 
+    private static final String NEW_TITLE = "Hathaway Manuscript 17";
+
     /**
      * Sets up testing environment.
      */
@@ -159,15 +161,27 @@ public class WorkUpdateFT extends BaseFesterFT {
                     final String updatedManifestAsString = myS3Client.getObjectAsString(BUCKET, MANIFEST_S3_KEY);
                     final Optional<String> updatedRepoName =
                             aManifestUtils.getMetadata(updatedManifestAsString, MetadataLabels.REPOSITORY_NAME);
+                    final Optional<String> updatedTitle = aManifestUtils.getLabel(updatedManifestAsString);
+                    String errorMsg;
 
                     if (updatedRepoName.isPresent()) {
-                        LOGGER.debug(MessageCodes.MFS_162, aManifestUtils.getApiVersion());
+                        LOGGER.debug(MessageCodes.MFS_162, aManifestUtils.getApiVersion(), "repository name");
                         assertEquals(NEW_REPO_NAME, updatedRepoName.get());
-                        checkPromise.complete();
                     } else {
-                        LOGGER.error(MessageCodes.MFS_161, MetadataLabels.REPOSITORY_NAME);
-                        checkPromise.fail(LOGGER.getMessage(MessageCodes.MFS_161, MetadataLabels.REPOSITORY_NAME));
+                        errorMsg = LOGGER.getMessage(MessageCodes.MFS_161, "metadata entry",
+                                MetadataLabels.REPOSITORY_NAME);
+                        LOGGER.error(errorMsg);
+                        checkPromise.fail(errorMsg);
                     }
+                    if (updatedTitle.isPresent()) {
+                        LOGGER.debug(MessageCodes.MFS_162, aManifestUtils.getApiVersion(), "title");
+                        assertEquals(NEW_TITLE, updatedTitle.get());
+                    } else {
+                        errorMsg = LOGGER.getMessage(MessageCodes.MFS_161, "label", MANIFEST_S3_KEY);
+                        LOGGER.error(errorMsg);
+                        checkPromise.fail(errorMsg);
+                    }
+                    checkPromise.complete();
                 } else {
                     LOGGER.error(updateHandler.cause().getMessage(), updateHandler.cause());
                     checkPromise.fail(updateHandler.cause());
