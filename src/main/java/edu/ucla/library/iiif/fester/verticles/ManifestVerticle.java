@@ -26,7 +26,7 @@ import edu.ucla.library.iiif.fester.CsvMetadata;
 import edu.ucla.library.iiif.fester.CsvParser;
 import edu.ucla.library.iiif.fester.CsvParsingException;
 import edu.ucla.library.iiif.fester.HTTP;
-import edu.ucla.library.iiif.fester.LockedManifest;
+import edu.ucla.library.iiif.fester.LockedIiifResource;
 import edu.ucla.library.iiif.fester.ManifestNotFoundException;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.Op;
@@ -206,14 +206,14 @@ public class ManifestVerticle extends AbstractFesterVerticle {
      */
     private void updateWork(final Promise<Void> aPromise, final CsvHeaders aCsvHeaders, final String[] aWork,
             final String aApiVersion) {
-        final Promise<LockedManifest> promise = Promise.promise();
+        final Promise<LockedIiifResource> promise = Promise.promise();
         final String id = aWork[aCsvHeaders.getItemArkIndex()];
 
         LOGGER.debug(MessageCodes.MFS_159, id);
 
         promise.future().onComplete(handler -> {
             if (handler.succeeded()) {
-                final LockedManifest lockedManifest = handler.result();
+                final LockedIiifResource lockedManifest = handler.result();
                 final DeliveryOptions options = new DeliveryOptions();
                 final ObjectMapper mapper = new ObjectMapper();
                 final JsonObject message = new JsonObject();
@@ -243,7 +243,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
             }
         });
 
-        getLockedManifest(id, false, promise);
+        getLockedIiifResource(id, false, promise);
     }
 
     /**
@@ -302,11 +302,11 @@ public class ManifestVerticle extends AbstractFesterVerticle {
      */
     private void updatePages(final Promise<Void> aPromise, final String aWorkID, final CsvHeaders aCsvHeaders,
             final List<String[]> aPagesList, final String aImageHost, final String aApiVersion) {
-        final Promise<LockedManifest> promise = Promise.promise();
+        final Promise<LockedIiifResource> promise = Promise.promise();
 
         promise.future().onComplete(handler -> {
             if (handler.succeeded()) {
-                final LockedManifest lockedManifest = handler.result();
+                final LockedIiifResource lockedManifest = handler.result();
                 final DeliveryOptions options = new DeliveryOptions();
                 final ObjectMapper mapper = new ObjectMapper();
                 final JsonObject message = new JsonObject();
@@ -340,7 +340,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
             }
         });
 
-        getLockedManifest(aWorkID, false, promise);
+        getLockedIiifResource(aWorkID, false, promise);
     }
 
     /**
@@ -354,14 +354,14 @@ public class ManifestVerticle extends AbstractFesterVerticle {
      */
     private void updateWorks(final CsvHeaders aCsvHeaders, final CsvMetadata aCsvMetadata, final String aImageHost,
             final String aApiVersion, final Message<JsonObject> aMessage) {
-        final Promise<LockedManifest> promise = Promise.promise();
+        final Promise<LockedIiifResource> promise = Promise.promise();
         final String collectionID = aCsvMetadata.getFirstCollectionID(aCsvHeaders.getParentArkIndex()).get();
 
         // If we were able to get a lock on the collection, update it with our new works
         promise.future().onComplete(handler -> {
             if (handler.succeeded()) {
                 final Map<String, List<String[]>> worksMap = aCsvMetadata.getWorksMap();
-                final LockedManifest lockedCollection = handler.result();
+                final LockedIiifResource lockedCollection = handler.result();
                 final DeliveryOptions options = new DeliveryOptions();
                 final ObjectMapper mapper = new ObjectMapper();
                 final JsonObject message = new JsonObject();
@@ -389,7 +389,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
             }
         });
 
-        getLockedManifest(collectionID, true, promise);
+        getLockedIiifResource(collectionID, true, promise);
     }
 
     /**
@@ -455,7 +455,8 @@ public class ManifestVerticle extends AbstractFesterVerticle {
      * @param aCollDoc Whether the resource is a collection or a manifest ("work")
      * @param aPromise A promise that we'll get a lock
      */
-    private void getLockedManifest(final String aID, final boolean aCollDoc, final Promise<LockedManifest> aPromise) {
+    private void getLockedIiifResource(final String aID, final boolean aCollDoc,
+            final Promise<LockedIiifResource> aPromise) {
         final SharedData sharedData = vertx.sharedData();
 
         // Try to get the lock for a second
@@ -479,7 +480,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                             final JsonObject manifest = handler.result().body();
                             final Lock lock = lockRequest.result();
 
-                            aPromise.complete(new LockedManifest(manifest, aCollDoc, lock));
+                            aPromise.complete(new LockedIiifResource(manifest, aCollDoc, lock));
                         } else {
                             final String type = aCollDoc ? Constants.COLLECTION : Constants.MANIFEST;
                             final Throwable cause = handler.cause();
@@ -496,7 +497,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
             } else {
                 // If we can't get a lock, keep trying (forever, really?)
                 vertx.setTimer(1000, timer -> {
-                    getLockedManifest(aID, aCollDoc, aPromise);
+                    getLockedIiifResource(aID, aCollDoc, aPromise);
                 });
             }
         });
