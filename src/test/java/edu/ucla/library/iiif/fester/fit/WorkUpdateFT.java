@@ -41,7 +41,7 @@ public class WorkUpdateFT extends BaseFesterFT {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WorkUpdateFT.class, Constants.MESSAGES);
 
-    private static final String MANIFEST_S3_KEY = "works/ark:/21198/zz000bjg0d.json";
+    private static final String HATHAWAY_1_S3_KEY = "works/ark:/21198/zz0009gv8j.json";
 
     private static final File SRC_FILE = new File("src/test/resources/csv/hathaway.csv");
 
@@ -56,7 +56,7 @@ public class WorkUpdateFT extends BaseFesterFT {
     private static final String REPO_NAME =
             "University of California, Los Angeles. Library. Performing Arts Special Collections";
 
-    private static final String NEW_TITLE = "Hathaway Manuscript 17";
+    private static final String NEW_TITLE = "Hathaway Manuscript 1";
 
     /**
      * Sets up testing environment.
@@ -145,7 +145,7 @@ public class WorkUpdateFT extends BaseFesterFT {
     private Future<Void> checkManifest(final ManifestTestUtils aManifestUtils) {
         final Promise<Void> uploadPromise = Promise.promise();
         final Promise<Void> checkPromise = Promise.promise();
-        final String manifestAsString = myS3Client.getObjectAsString(BUCKET, MANIFEST_S3_KEY);
+        final String manifestAsString = myS3Client.getObjectAsString(BUCKET, HATHAWAY_1_S3_KEY);
         final Optional<String> repoName = aManifestUtils.getMetadata(manifestAsString, MetadataLabels.REPOSITORY_NAME);
 
         if (repoName.isPresent()) {
@@ -158,7 +158,7 @@ public class WorkUpdateFT extends BaseFesterFT {
 
             uploadPromise.future().onComplete(updateHandler -> {
                 if (updateHandler.succeeded()) {
-                    final String updatedManifestAsString = myS3Client.getObjectAsString(BUCKET, MANIFEST_S3_KEY);
+                    final String updatedManifestAsString = myS3Client.getObjectAsString(BUCKET, HATHAWAY_1_S3_KEY);
                     final Optional<String> updatedRepoName =
                             aManifestUtils.getMetadata(updatedManifestAsString, MetadataLabels.REPOSITORY_NAME);
                     final Optional<String> updatedTitle = aManifestUtils.getLabel(updatedManifestAsString);
@@ -177,7 +177,7 @@ public class WorkUpdateFT extends BaseFesterFT {
                         LOGGER.debug(MessageCodes.MFS_162, aManifestUtils.getApiVersion(), "title");
                         assertEquals(NEW_TITLE, updatedTitle.get());
                     } else {
-                        errorMsg = LOGGER.getMessage(MessageCodes.MFS_161, "label", MANIFEST_S3_KEY);
+                        errorMsg = LOGGER.getMessage(MessageCodes.MFS_161, "label", HATHAWAY_1_S3_KEY);
                         LOGGER.error(errorMsg);
                         checkPromise.fail(errorMsg);
                     }
