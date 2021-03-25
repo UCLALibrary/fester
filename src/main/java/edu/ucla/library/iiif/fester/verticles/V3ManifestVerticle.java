@@ -450,11 +450,9 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                 audio = new SoundContent(resourceURI);
 
                 // We've already validated these numeric values in CsvParser
-                width = Integer.parseInt(CsvParser.getMetadata(columns, aCsvHeaders.getMediaWidthIndex()).get());
-                height = Integer.parseInt(CsvParser.getMetadata(columns, aCsvHeaders.getMediaHeightIndex()).get());
                 duration = Float.parseFloat(CsvParser.getMetadata(columns, aCsvHeaders.getMediaDurationIndex()).get());
 
-                canvas.setWidthHeight(width, height).setDuration(duration).paintWith(aMinter, audio);
+                canvas.setDuration(duration).paintWith(aMinter, audio);
             } else {
                 ImageContent image;
 
