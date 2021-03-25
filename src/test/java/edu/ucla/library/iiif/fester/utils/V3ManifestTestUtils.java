@@ -42,4 +42,12 @@ public class V3ManifestTestUtils implements ManifestTestUtils {
         return Optional.empty();
     }
 
+    @Override
+    public Optional<String> getLabel(final String aJsonManifest) {
+        final Manifest manifest = Manifest.fromString(aJsonManifest);
+
+        // All our manifests currently have only one label
+        return Optional.of(manifest.getLabel().getString());
+    }
+
 }
