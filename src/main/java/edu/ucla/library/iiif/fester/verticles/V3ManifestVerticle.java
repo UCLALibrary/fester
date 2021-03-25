@@ -28,6 +28,7 @@ import info.freelibrary.iiif.presentation.v3.Canvas;
 import info.freelibrary.iiif.presentation.v3.Collection;
 import info.freelibrary.iiif.presentation.v3.ImageContent;
 import info.freelibrary.iiif.presentation.v3.Manifest;
+import info.freelibrary.iiif.presentation.v3.SoundContent;
 import info.freelibrary.iiif.presentation.v3.VideoContent;
 import info.freelibrary.iiif.presentation.v3.id.Minter;
 import info.freelibrary.iiif.presentation.v3.id.MinterFactory;
@@ -434,6 +435,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
 
                 resourceURI = CsvParser.getMetadata(columns, aCsvHeaders.getAudioVideoAccessUrlIndex()).get();
                 video = new VideoContent(resourceURI);
+                // TODO: set format on video
 
                 // We've already validated these numeric values in CsvParser
                 width = Integer.parseInt(CsvParser.getMetadata(columns, aCsvHeaders.getMediaWidthIndex()).get());
@@ -441,6 +443,18 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                 duration = Float.parseFloat(CsvParser.getMetadata(columns, aCsvHeaders.getMediaDurationIndex()).get());
 
                 canvas.setWidthHeight(width, height).setDuration(duration).paintWith(aMinter, video);
+            } else if (format.isPresent() && format.get().contains("audio/")) {
+                final SoundContent audio;
+
+                resourceURI = CsvParser.getMetadata(columns, aCsvHeaders.getAudioVideoAccessUrlIndex()).get();
+                audio = new SoundContent(resourceURI);
+
+                // We've already validated these numeric values in CsvParser
+                width = Integer.parseInt(CsvParser.getMetadata(columns, aCsvHeaders.getMediaWidthIndex()).get());
+                height = Integer.parseInt(CsvParser.getMetadata(columns, aCsvHeaders.getMediaHeightIndex()).get());
+                duration = Float.parseFloat(CsvParser.getMetadata(columns, aCsvHeaders.getMediaDurationIndex()).get());
+
+                canvas.setWidthHeight(width, height).setDuration(duration).paintWith(aMinter, audio);
             } else {
                 ImageContent image;
 

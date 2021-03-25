@@ -86,6 +86,22 @@ public class PostCsvFIT {
 
     private static final File VIDEO_MANIFEST = new File(DIR, "json/v3/video.json");
 
+    private static final File AUDIO_CSV = new File(DIR, "csv/audio/audio.csv");
+
+    private static final File AUDIO_CSV_MISSING_METADATA = new File(DIR, "csv/audio/audio_missing_metadata.csv");
+
+    private static final File AUDIO_CSV_MALFORMED_METADATA = new File(DIR, "csv/audio/audio_malformed_metadata.csv");
+
+    private static final File AUDIO_MANIFEST = new File(DIR, "json/v3/audio.json");
+
+    private static final String AV_ARK = "ark:/21198/zz00000001";
+
+    private static final String AV_MISSING_ERROR = "missing either width, height, or duration";
+
+    private static final String AV_MALFORMED_ERROR = "Cannot parse value '???'";
+
+    private static final String AV_VERSION_ERROR = "IIIF Presentation API 2 does not support A/V content";
+
     /* Uploaded CSV files are named with a UUID */
     private static final String FILE_PATH_REGEX =
             "(" + BodyHandler.DEFAULT_UPLOADS_DIRECTORY + "\\/" + "[0-9a-f\\-]+" + ")";
@@ -488,7 +504,7 @@ public class PostCsvFIT {
                     final String statusMessage = response.statusMessage();
 
                     if (statusCode == HTTP.CREATED) {
-                        final Optional<JsonObject> optJsonObject = checkS3("ark:/21198/zz00000001", false);
+                        final Optional<JsonObject> optJsonObject = checkS3(AV_ARK, false);
 
                         if (optJsonObject.isPresent()) {
                             try {
@@ -531,7 +547,7 @@ public class PostCsvFIT {
                     final String statusMessage = response.statusMessage();
 
                     aContext.assertEquals(statusCode, HTTP.BAD_REQUEST);
-                    aContext.assertTrue(statusMessage.contains("missing either width, height, or duration"));
+                    aContext.assertTrue(statusMessage.contains(AV_MISSING_ERROR));
 
                     complete(asyncTask);
                 } else {
@@ -558,7 +574,7 @@ public class PostCsvFIT {
                     final String statusMessage = response.statusMessage();
 
                     aContext.assertEquals(statusCode, HTTP.BAD_REQUEST);
-                    aContext.assertTrue(statusMessage.contains("Cannot parse value '???'"));
+                    aContext.assertTrue(statusMessage.contains(AV_MALFORMED_ERROR));
                     complete(asyncTask);
                 } else {
                     final Throwable exception = post.cause();
@@ -584,7 +600,130 @@ public class PostCsvFIT {
                     final String statusMessage = response.statusMessage();
 
                     aContext.assertEquals(statusCode, HTTP.BAD_REQUEST);
-                    aContext.assertTrue(statusMessage.contains("IIIF Presentation API 2 does not support A/V content"));
+                    aContext.assertTrue(statusMessage.contains(AV_VERSION_ERROR));
+                    complete(asyncTask);
+                } else {
+                    final Throwable exception = post.cause();
+
+                    LOGGER.error(exception, exception.getMessage());
+                    aContext.fail(exception);
+                }
+            });
+        }
+
+       /**
+         * Tests submitting a CSV with an audio object.
+         *
+         * @param aContext A test context
+         */
+        @Test
+        public final void testAudio(final TestContext aContext) {
+            final Async asyncTask = aContext.async();
+
+            postCSV(AUDIO_CSV, Constants.IIIF_API_V3, post -> {
+                if (post.succeeded()) {
+                    final HttpResponse<Buffer> response = post.result();
+                    final int statusCode = response.statusCode();
+                    final String statusMessage = response.statusMessage();
+
+                    if (statusCode == HTTP.CREATED) {
+                        final Optional<JsonObject> optJsonObject = checkS3(AV_ARK, false);
+
+                        if (optJsonObject.isPresent()) {
+                            try {
+                                final JsonObject expected = readJsonFile(AUDIO_MANIFEST);
+                                final JsonObject found = optJsonObject.get();
+
+                                aContext.assertTrue(TestUtils.manifestsAreEffectivelyEqual(expected, found));
+                            } catch (final IOException details) {
+                                LOGGER.error(details, details.getMessage());
+                                aContext.fail(details);
+                            }
+                        } else {
+                            aContext.fail(LOGGER.getMessage(MessageCodes.MFS_154, AUDIO_CSV));
+                        }
+                        complete(asyncTask);
+                    } else {
+                        aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, statusCode, statusMessage));
+                    }
+                } else {
+                    final Throwable exception = post.cause();
+
+                    LOGGER.error(exception, exception.getMessage());
+                    aContext.fail(exception);
+                }
+            });
+        }
+
+        /**
+         * Tests submitting a CSV with an audio object that is missing metadata.
+         *
+         * @param aContext A test context
+         */
+        public final void testAudioMissingMetadata(final TestContext aContext) {
+            final Async asyncTask = aContext.async();
+
+            postCSV(AUDIO_CSV_MISSING_METADATA, Constants.IIIF_API_V3, post -> {
+                if (post.succeeded()) {
+                    final HttpResponse<Buffer> response = post.result();
+                    final int statusCode = response.statusCode();
+                    final String statusMessage = response.statusMessage();
+
+                    aContext.assertEquals(statusCode, HTTP.BAD_REQUEST);
+                    aContext.assertTrue(statusMessage.contains(AV_MISSING_ERROR));
+
+                    complete(asyncTask);
+                } else {
+                    final Throwable exception = post.cause();
+
+                    LOGGER.error(exception, exception.getMessage());
+                    aContext.fail(exception);
+                }
+            });
+        }
+
+        /**
+         * Tests submitting a CSV with an audio object with malformed metadata.
+         *
+         * @param aContext A test context
+         */
+        public final void testAudioMalformedMetadata(final TestContext aContext) {
+            final Async asyncTask = aContext.async();
+
+            postCSV(AUDIO_CSV_MALFORMED_METADATA, Constants.IIIF_API_V3, post -> {
+                if (post.succeeded()) {
+                    final HttpResponse<Buffer> response = post.result();
+                    final int statusCode = response.statusCode();
+                    final String statusMessage = response.statusMessage();
+
+                    aContext.assertEquals(statusCode, HTTP.BAD_REQUEST);
+                    aContext.assertTrue(statusMessage.contains(AV_MALFORMED_ERROR));
+                    complete(asyncTask);
+                } else {
+                    final Throwable exception = post.cause();
+
+                    LOGGER.error(exception, exception.getMessage());
+                    aContext.fail(exception);
+                }
+            });
+        }
+
+        /**
+         * Tests submitting a CSV with an audio object with IIIF Presentation API 2 specified.
+         *
+         * @param aContext A test context
+         */
+        public final void testAudioIiifPresApiV2(final TestContext aContext) {
+            final Async asyncTask = aContext.async();
+
+            postCSV(AUDIO_CSV, Constants.IIIF_API_V2, post -> {
+                if (post.succeeded()) {
+                    final HttpResponse<Buffer> response = post.result();
+                    final int statusCode = response.statusCode();
+                    final String statusMessage = response.statusMessage();
+
+                    aContext.assertEquals(statusCode, HTTP.BAD_REQUEST);
+                    aContext.assertTrue(statusMessage.contains(AV_VERSION_ERROR));
                     complete(asyncTask);
                 } else {
                     final Throwable exception = post.cause();

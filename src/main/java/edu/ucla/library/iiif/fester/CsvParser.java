@@ -116,7 +116,7 @@ public class CsvParser {
                 checkForEOLs(row);
                 trimValues(row);
                 if (aIiifVersion != null) {
-                    checkApiCompatibility(row, aPath, aIiifVersion);
+                    checkIiifPresApiCompatibility(row, aPath, aIiifVersion);
                 }
 
                 switch (getObjectType(row, myCsvHeaders)) {
@@ -335,9 +335,10 @@ public class CsvParser {
      * @param aPath A path to a CSV file
      * @return The row
      * @throws CsvParsingException If the row represents a v2 canvas and contains any A/V metadata
+     * @throws MimeTypeParseException
      */
-    @SuppressWarnings({ "unchecked", "PMD.PreserveStackTrace", "PMD.TooFewBranchesForASwitchStatement" })
-    private String[] checkApiCompatibility(final String[] aRow, final Path aPath, final String aIiifVersion)
+    @SuppressWarnings("unchecked")
+    private String[] checkIiifPresApiCompatibility(final String[] aRow, final Path aPath, final String aIiifVersion)
             throws CsvParsingException {
         final String rowId = getMetadata(aRow, myCsvHeaders.getItemArkIndex()).get();
 
@@ -370,6 +371,12 @@ public class CsvParser {
                     case "video": {
                         if (mediaWidth.isEmpty() || mediaHeight.isEmpty() || mediaDuration.isEmpty() ||
                                 audioVideoAccessUrl.isEmpty()) {
+                            throw new CsvParsingException(MessageCodes.MFS_170, rowId, format, aPath);
+                        }
+                        break;
+                    }
+                    case "audio": {
+                        if (mediaDuration.isEmpty()) {
                             throw new CsvParsingException(MessageCodes.MFS_170, rowId, format, aPath);
                         }
                         break;
@@ -468,7 +475,6 @@ public class CsvParser {
      * @return An optional metadata value
      * @throws CsvParsingException
      */
-    @SuppressWarnings("PMD.PreserveStackTrace")
     public static Optional<?> getMetadata(final String[] aRow, final int aIndex, final Class<?> aType,
             final Path aPath) throws CsvParsingException {
         try {
