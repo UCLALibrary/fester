@@ -389,30 +389,6 @@
         </configuration>
       </plugin>
 
-      <!-- Makes sure TestContainers doesn't leave unused networks around -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>${exec.plugin.version}</version>
-        <executions>
-          <execution>
-            <id>docker-network-prune</id>
-            <phase>post-integration-test</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>docker</executable>
-              <arguments>
-                <argument>network</argument>
-                <argument>prune</argument>
-                <argument>-f</argument>
-              </arguments>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
       <!-- The build-helper plug-in gets us a dynamic port for testing -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
