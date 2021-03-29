@@ -92,13 +92,17 @@ public class PostCsvFIT {
 
     private static final File AUDIO_CSV_MALFORMED_METADATA = new File(DIR, "csv/audio/audio_malformed_metadata.csv");
 
+    private static final File AUDIO_CSV_UNNEEDED_METADATA = new File(DIR, "csv/audio/audio_unneedded_metadata.csv");
+
     private static final File AUDIO_MANIFEST = new File(DIR, "json/v3/audio.json");
 
     private static final String AV_ARK = "ark:/21198/zz00000001";
 
     private static final String VIDEO_MISSING_ERROR = "missing either width, height, duration";
 
-    private static final String AUDIO_MISSING_ERROR = " missing either duration or A/V access URL";
+    private static final String AUDIO_MISSING_ERROR = "missing either duration or A/V access URL";
+
+    private static final String AUDIO_UNNEEDED_ERROR = "unnecessary for audio content";
 
     private static final String AV_MALFORMED_ERROR = "Cannot parse value '???'";
 
@@ -662,6 +666,7 @@ public class PostCsvFIT {
          *
          * @param aContext A test context
          */
+        @Test
         public final void testAudioMissingMetadata(final TestContext aContext) {
             final Async asyncTask = aContext.async();
 
@@ -689,6 +694,7 @@ public class PostCsvFIT {
          *
          * @param aContext A test context
          */
+        @Test
         public final void testAudioMalformedMetadata(final TestContext aContext) {
             final Async asyncTask = aContext.async();
 
@@ -711,10 +717,38 @@ public class PostCsvFIT {
         }
 
         /**
+         * Tests submitting a CSV with an audio object with malformed metadata.
+         *
+         * @param aContext A test context
+         */
+        @Test
+        public final void testAudioUnneededMetadata(final TestContext aContext) {
+            final Async asyncTask = aContext.async();
+
+            postCSV(AUDIO_CSV_UNNEEDED_METADATA, Constants.IIIF_API_V3, post -> {
+                if (post.succeeded()) {
+                    final HttpResponse<Buffer> response = post.result();
+                    final int statusCode = response.statusCode();
+                    final String statusMessage = response.statusMessage();
+
+                    aContext.assertEquals(statusCode, HTTP.BAD_REQUEST);
+                    aContext.assertTrue(statusMessage.contains(AUDIO_UNNEEDED_ERROR));
+                    complete(asyncTask);
+                } else {
+                    final Throwable exception = post.cause();
+
+                    LOGGER.error(exception, exception.getMessage());
+                    aContext.fail(exception);
+                }
+            });
+        }
+
+        /**
          * Tests submitting a CSV with an audio object with IIIF Presentation API 2 specified.
          *
          * @param aContext A test context
          */
+        @Test
         public final void testAudioIiifPresApiV2(final TestContext aContext) {
             final Async asyncTask = aContext.async();
 

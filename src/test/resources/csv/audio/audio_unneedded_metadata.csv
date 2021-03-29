@@ -1,0 +1,3 @@
+Project Name,Item ARK,Parent ARK,Object Type,File Name,Item Sequence,Title,media.width,media.height,media.duration,media.format,Bucketeer State,IIIF Access URL,AV Access URL
+Test Audio,ark:/21198/zz00000000,,Collection,,,Test Audio,,,,,succeeded,,
+Test Audio,ark:/21198/zz00000001,ark:/21198/zz00000000,Work,,1,Test Audio 1,,600,1985.024,audio/mp4,,,https://fixtures.iiif.io/audio/indiana/mahler-symphony-3/CD1/medium/128Kbps.mp4

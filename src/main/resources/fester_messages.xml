@@ -185,4 +185,5 @@
   <entry key="MFS-172">Found item '{}' with either width, height, duration, or A/V access URL in CSV '{}', but is missing format</entry>
   <entry key="MFS-173">Cannot parse value '{}' from CSV '{}' as '{}'</entry>
   <entry key="MFS-174">Found item '{}' with format '{}' in CSV '{}', but is missing either duration or A/V access URL</entry>
+  <entry key="MFS-175">Found item '{}' with format '{}' in CSV '{}', but it has either height or width, unnecessary for audio content</entry>
 </properties>
