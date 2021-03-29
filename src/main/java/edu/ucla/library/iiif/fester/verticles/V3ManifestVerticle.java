@@ -317,6 +317,12 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         final DeliveryOptions options = new DeliveryOptions();
         final JsonObject message = new JsonObject();
 
+        CsvParser.getMetadata(workRow, csvHeaders.getTitleIndex()).ifPresentOrElse(title -> {
+            manifest.setLabel(new Label(title));
+        }, () -> {
+            manifest.setLabel("");
+        });
+
         CsvParser.getMetadata(workRow, csvHeaders.getViewingDirectionIndex()).ifPresentOrElse(viewingDirection -> {
             manifest.setViewingDirection(ViewingDirection.fromString(viewingDirection));
         }, () -> {

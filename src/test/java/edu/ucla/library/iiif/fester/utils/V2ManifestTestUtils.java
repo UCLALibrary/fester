@@ -27,4 +27,12 @@ public class V2ManifestTestUtils implements ManifestTestUtils {
         return manifest.getMetadata().getValue(aMetadataLabel);
     }
 
+    @Override
+    public Optional<String> getLabel(final String aJsonManifest) {
+        final Manifest manifest = Manifest.fromString(aJsonManifest);
+
+        // All our manifests currently have only one label
+        return Optional.of(manifest.getLabel().getString());
+    }
+
 }
