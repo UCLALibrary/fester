@@ -184,4 +184,5 @@
   <entry key="MFS-171">Unsupported primary MIME type '{}' for item '{}' in CSV '{}'</entry>
   <entry key="MFS-172">Found item '{}' with either width, height, duration, or A/V access URL in CSV '{}', but is missing format</entry>
   <entry key="MFS-173">Cannot parse value '{}' from CSV '{}' as '{}'</entry>
+  <entry key="MFS-174">Found item '{}' with format '{}' in CSV '{}', but is missing either duration or A/V access URL</entry>
 </properties>

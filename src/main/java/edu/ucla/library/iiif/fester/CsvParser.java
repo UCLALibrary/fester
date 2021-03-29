@@ -376,8 +376,8 @@ public class CsvParser {
                         break;
                     }
                     case "audio": {
-                        if (mediaDuration.isEmpty()) {
-                            throw new CsvParsingException(MessageCodes.MFS_170, rowId, format, aPath);
+                        if (mediaDuration.isEmpty() || audioVideoAccessUrl.isEmpty()) {
+                            throw new CsvParsingException(MessageCodes.MFS_174, rowId, format, aPath);
                         }
                         break;
                     }

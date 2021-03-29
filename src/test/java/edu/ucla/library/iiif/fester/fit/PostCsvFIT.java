@@ -96,7 +96,9 @@ public class PostCsvFIT {
 
     private static final String AV_ARK = "ark:/21198/zz00000001";
 
-    private static final String AV_MISSING_ERROR = "missing either width, height, or duration";
+    private static final String VIDEO_MISSING_ERROR = "missing either width, height, duration";
+
+    private static final String AUDIO_MISSING_ERROR = " missing either duration or A/V access URL";
 
     private static final String AV_MALFORMED_ERROR = "Cannot parse value '???'";
 
@@ -547,7 +549,7 @@ public class PostCsvFIT {
                     final String statusMessage = response.statusMessage();
 
                     aContext.assertEquals(statusCode, HTTP.BAD_REQUEST);
-                    aContext.assertTrue(statusMessage.contains(AV_MISSING_ERROR));
+                    aContext.assertTrue(statusMessage.contains(VIDEO_MISSING_ERROR));
 
                     complete(asyncTask);
                 } else {
@@ -670,7 +672,7 @@ public class PostCsvFIT {
                     final String statusMessage = response.statusMessage();
 
                     aContext.assertEquals(statusCode, HTTP.BAD_REQUEST);
-                    aContext.assertTrue(statusMessage.contains(AV_MISSING_ERROR));
+                    aContext.assertTrue(statusMessage.contains(AUDIO_MISSING_ERROR));
 
                     complete(asyncTask);
                 } else {
