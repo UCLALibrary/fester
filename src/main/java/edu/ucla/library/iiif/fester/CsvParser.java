@@ -336,7 +336,7 @@ public class CsvParser {
      * @return The row
      * @throws CsvParsingException If the row represents a v2 canvas and contains any A/V metadata
      */
-    @SuppressWarnings({ "unchecked", "PMD.PreserveStackTrace", "PMD.TooFewBranchesForASwitchStatement" })
+    @SuppressWarnings("unchecked")
     private String[] checkApiCompatibility(final String[] aRow, final Path aPath, final String aIiifVersion)
             throws CsvParsingException {
         final String rowId = getMetadata(aRow, myCsvHeaders.getItemArkIndex()).get();
@@ -371,6 +371,15 @@ public class CsvParser {
                         if (mediaWidth.isEmpty() || mediaHeight.isEmpty() || mediaDuration.isEmpty() ||
                                 audioVideoAccessUrl.isEmpty()) {
                             throw new CsvParsingException(MessageCodes.MFS_170, rowId, format, aPath);
+                        }
+                        break;
+                    }
+                    case "audio": {
+                        if (mediaDuration.isEmpty() || audioVideoAccessUrl.isEmpty()) {
+                            throw new CsvParsingException(MessageCodes.MFS_174, rowId, format, aPath);
+                        }
+                        if (!mediaWidth.isEmpty() || !mediaHeight.isEmpty()) {
+                            throw new CsvParsingException(MessageCodes.MFS_175, rowId, format, aPath);
                         }
                         break;
                     }
@@ -468,7 +477,6 @@ public class CsvParser {
      * @return An optional metadata value
      * @throws CsvParsingException
      */
-    @SuppressWarnings("PMD.PreserveStackTrace")
     public static Optional<?> getMetadata(final String[] aRow, final int aIndex, final Class<?> aType,
             final Path aPath) throws CsvParsingException {
         try {
