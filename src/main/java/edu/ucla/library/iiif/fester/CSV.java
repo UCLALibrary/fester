@@ -57,11 +57,6 @@ public final class CSV {
     public static final String IIIF_ACCESS_URL = "IIIF Access URL";
 
     /**
-     * The rows's audio/video access URL.
-     */
-    //public static final String AV_ACCESS_URL = "AV Access URL";
-
-    /**
      * The row's repository name.
      */
     public static final String REPOSITORY_NAME = "Name.repository";

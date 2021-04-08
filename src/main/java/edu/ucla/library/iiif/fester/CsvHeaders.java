@@ -54,15 +54,9 @@ public class CsvHeaders {
     private int myViewingDirectionIndex = -1;
 
     /**
-     * The index position for the image access URL column.
+     * The index position for the content access URL column.
      */
     private int myContentAccessUrlIndex = -1;
-
-    /**
-     * The index position for the audio/video access URL column.
-     */
-    //@SuppressWarnings("PMD.LongVariable")
-    //private int myAudioVideoAccessUrlIndex = -1;
 
     /**
      * The index position for the repository name column.

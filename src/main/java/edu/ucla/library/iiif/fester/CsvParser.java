@@ -338,8 +338,7 @@ public class CsvParser {
      * @return The row
      * @throws CsvParsingException If the row represents a v2 canvas and contains any A/V metadata
      */
-    @SuppressWarnings("unchecked")
-    @SuppressWarnings("BooleanExpressionComplexity")
+    @SuppressWarnings({"unchecked", "BooleanExpressionComplexity"})
     private String[] checkApiCompatibility(final String[] aRow, final Path aPath, final String aIiifVersion)
             throws CsvParsingException {
         final String rowId = getMetadata(aRow, myCsvHeaders.getItemArkIndex()).get();
