@@ -59,7 +59,7 @@ public final class CSV {
     /**
      * The rows's audio/video access URL.
      */
-    public static final String AV_ACCESS_URL = "AV Access URL";
+    //public static final String AV_ACCESS_URL = "AV Access URL";
 
     /**
      * The row's repository name.

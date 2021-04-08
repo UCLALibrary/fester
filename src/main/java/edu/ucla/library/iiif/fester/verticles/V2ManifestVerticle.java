@@ -240,7 +240,7 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
             pageList.sort(new ItemSequenceComparator(csvHeaders.getItemSequenceIndex()));
             sequence.addCanvas(createCanvases(csvHeaders, pageList, imageHost, placeholderImage, encodedWorkID));
         } else {
-            CsvParser.getMetadata(workRow, csvHeaders.getImageAccessUrlIndex()).ifPresent(accessURL -> {
+            CsvParser.getMetadata(workRow, csvHeaders.getContentAccessUrlIndex()).ifPresent(accessURL -> {
                 final List<String[]> pageList = new ArrayList<>(1);
 
                 pageList.add(workRow);

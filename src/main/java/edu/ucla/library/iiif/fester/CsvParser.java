@@ -41,6 +41,8 @@ public class CsvParser {
 
     private static final Pattern EOL_PATTERN = Pattern.compile(".*\\R");
 
+    private static final String AV_URL_STRING = "pairtree";
+
     private final Map<String, List<String[]>> myWorksMap = new HashMap<>();
 
     private final Map<String, List<String[]>> myPagesMap = new LinkedHashMap<>();
@@ -337,6 +339,7 @@ public class CsvParser {
      * @throws CsvParsingException If the row represents a v2 canvas and contains any A/V metadata
      */
     @SuppressWarnings("unchecked")
+    @SuppressWarnings("BooleanExpressionComplexity")
     private String[] checkApiCompatibility(final String[] aRow, final Path aPath, final String aIiifVersion)
             throws CsvParsingException {
         final String rowId = getMetadata(aRow, myCsvHeaders.getItemArkIndex()).get();
@@ -348,11 +351,13 @@ public class CsvParser {
         final Optional<Float> mediaDuration =
                 (Optional<Float>) getMetadata(aRow, myCsvHeaders.getMediaDurationIndex(), Float.class, aPath);
         final Optional<String> mediaFormat = getMetadata(aRow, myCsvHeaders.getMediaFormatIndex());
-        final Optional<String> audioVideoAccessUrl = getMetadata(aRow, myCsvHeaders.getAudioVideoAccessUrlIndex());
+        final Optional<String> audioVideoAccessUrl = getMetadata(aRow, myCsvHeaders.getContentAccessUrlIndex());
 
         if (Constants.IIIF_API_V2.equals(aIiifVersion)) {
+            //if (hasAVContent(mediaWidth, mediaHeight, mediaDuration, mediaFormat, audioVideoAccessUrl)) {
             if (mediaWidth.isPresent() || mediaHeight.isPresent() || mediaDuration.isPresent() ||
-                    mediaFormat.isPresent() || audioVideoAccessUrl.isPresent()) {
+                    mediaFormat.isPresent() || (audioVideoAccessUrl.isPresent() &&
+                    audioVideoAccessUrl.toString().contains(AV_URL_STRING))) {
                 throw new CsvParsingException(MessageCodes.MFS_168, rowId, aPath);
             }
         } else { // Constants.IIIF_API_V3
@@ -388,7 +393,7 @@ public class CsvParser {
                     }
                 }
             } else if (mediaWidth.isPresent() || mediaHeight.isPresent() || mediaDuration.isPresent() ||
-                    audioVideoAccessUrl.isPresent()) {
+                    (audioVideoAccessUrl.isPresent() && audioVideoAccessUrl.toString().contains(AV_URL_STRING))) {
                 throw new CsvParsingException(MessageCodes.MFS_172, rowId, aPath);
             }
         }
