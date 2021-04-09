@@ -533,7 +533,6 @@
           <runArgs>
             <runArg>-Dvertx-config-path=${project.basedir}/target/test-classes/test-config.properties</runArg>
             <runArg>-Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.SLF4JLogDelegateFactory</runArg>
-            <runArg>-Dcontent.types.user.table=${project.basedir}/src/main/docker/configs/content-types.properties</runArg>
           </runArgs>
         </configuration>
       </plugin>
