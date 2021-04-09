@@ -86,6 +86,10 @@ public class PostCsvFIT {
 
     private static final File VIDEO_MANIFEST = new File(DIR, "json/v3/video.json");
 
+    private static final File VIDEO_MPD_CSV = new File(DIR, "csv/video/video_mpd.csv");
+
+    private static final File VIDEO_MPD_MANIFEST = new File(DIR, "json/v3/video_mpd.json");
+
     private static final File AUDIO_CSV = new File(DIR, "csv/audio/audio.csv");
 
     private static final File AUDIO_CSV_MISSING_METADATA = new File(DIR, "csv/audio/audio_missing_metadata.csv");
@@ -539,6 +543,51 @@ public class PostCsvFIT {
         }
 
         /**
+         * Tests submitting a CSV with a video object with a URL with a .mpd extension. This ensures that Fester is
+         * aware of our custom MIME type database that maps the .mpd extension to the application/dash+xml MIME type.
+         *
+         * @param aContext A test context
+         */
+        @Test
+        public final void testVideoMpd(final TestContext aContext) {
+            final Async asyncTask = aContext.async();
+
+            postCSV(VIDEO_MPD_CSV, Constants.IIIF_API_V3, post -> {
+                if (post.succeeded()) {
+                    final HttpResponse<Buffer> response = post.result();
+                    final int statusCode = response.statusCode();
+                    final String statusMessage = response.statusMessage();
+
+                    if (statusCode == HTTP.CREATED) {
+                        final Optional<JsonObject> optJsonObject = checkS3(AV_ARK, false);
+
+                        if (optJsonObject.isPresent()) {
+                            try {
+                                final JsonObject expected = readJsonFile(VIDEO_MPD_MANIFEST);
+                                final JsonObject found = optJsonObject.get();
+
+                                aContext.assertTrue(TestUtils.manifestsAreEffectivelyEqual(expected, found));
+                            } catch (final IOException details) {
+                                LOGGER.error(details, details.getMessage());
+                                aContext.fail(details);
+                            }
+                        } else {
+                            aContext.fail(LOGGER.getMessage(MessageCodes.MFS_154, VIDEO_MPD_CSV));
+                        }
+                        complete(asyncTask);
+                    } else {
+                        aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, statusCode, statusMessage));
+                    }
+                } else {
+                    final Throwable exception = post.cause();
+
+                    LOGGER.error(exception, exception.getMessage());
+                    aContext.fail(exception);
+                }
+            });
+        }
+
+        /**
          * Tests submitting a CSV with a video object that is missing metadata.
          *
          * @param aContext A test context
@@ -617,7 +666,7 @@ public class PostCsvFIT {
             });
         }
 
-       /**
+        /**
          * Tests submitting a CSV with an audio object.
          *
          * @param aContext A test context
