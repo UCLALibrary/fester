@@ -41,7 +41,7 @@ public class CsvParser {
 
     private static final Pattern EOL_PATTERN = Pattern.compile(".*\\R");
 
-    private static final String AV_URL_STRING = "pairtree";
+    //private static final String AV_URL_STRING = "pairtree";
 
     private final Map<String, List<String[]>> myWorksMap = new HashMap<>();
 
@@ -50,6 +50,8 @@ public class CsvParser {
     private final List<String[]> myWorksList = new ArrayList<>();
 
     private String[] myCollectionData;
+
+    private String myAVUrlString;
 
     private CsvHeaders myCsvHeaders;
 
@@ -353,10 +355,9 @@ public class CsvParser {
         final Optional<String> audioVideoAccessUrl = getMetadata(aRow, myCsvHeaders.getContentAccessUrlIndex());
 
         if (Constants.IIIF_API_V2.equals(aIiifVersion)) {
-            //if (hasAVContent(mediaWidth, mediaHeight, mediaDuration, mediaFormat, audioVideoAccessUrl)) {
             if (mediaWidth.isPresent() || mediaHeight.isPresent() || mediaDuration.isPresent() ||
                     mediaFormat.isPresent() || (audioVideoAccessUrl.isPresent() &&
-                    audioVideoAccessUrl.toString().contains(AV_URL_STRING))) {
+                    audioVideoAccessUrl.toString().contains(myAVUrlString))) {
                 throw new CsvParsingException(MessageCodes.MFS_168, rowId, aPath);
             }
         } else { // Constants.IIIF_API_V3
@@ -376,6 +377,10 @@ public class CsvParser {
                                 audioVideoAccessUrl.isEmpty()) {
                             throw new CsvParsingException(MessageCodes.MFS_170, rowId, format, aPath);
                         }
+                        if (audioVideoAccessUrl.isPresent() &&
+                            !audioVideoAccessUrl.toString().contains(myAVUrlString)) {
+                            throw new CsvParsingException(MessageCodes.MFS_176, rowId, format, aPath);
+                        }
                         break;
                     }
                     case "audio": {
@@ -385,6 +390,10 @@ public class CsvParser {
                         if (!mediaWidth.isEmpty() || !mediaHeight.isEmpty()) {
                             throw new CsvParsingException(MessageCodes.MFS_175, rowId, format, aPath);
                         }
+                        if (audioVideoAccessUrl.isPresent() &&
+                            !audioVideoAccessUrl.toString().contains(myAVUrlString)) {
+                            throw new CsvParsingException(MessageCodes.MFS_176, rowId, format, aPath);
+                        }
                         break;
                     }
                     default: {
@@ -392,7 +401,7 @@ public class CsvParser {
                     }
                 }
             } else if (mediaWidth.isPresent() || mediaHeight.isPresent() || mediaDuration.isPresent() ||
-                    (audioVideoAccessUrl.isPresent() && audioVideoAccessUrl.toString().contains(AV_URL_STRING))) {
+                    (audioVideoAccessUrl.isPresent() && audioVideoAccessUrl.toString().contains(myAVUrlString))) {
                 throw new CsvParsingException(MessageCodes.MFS_172, rowId, aPath);
             }
         }
@@ -506,5 +515,16 @@ public class CsvParser {
         } catch (final IndexOutOfBoundsException details) {
             return Optional.empty();
         }
+    }
+
+    /**
+     * Sets the A/V URL identifier string.
+     *
+     * @param aAVUrlString The A/V URL identifier string
+     * @return This CSV parser
+     */
+    public CsvParser setAVUrlString(final String aAVUrlString) {
+        myAVUrlString = aAVUrlString;
+        return this;
     }
 }

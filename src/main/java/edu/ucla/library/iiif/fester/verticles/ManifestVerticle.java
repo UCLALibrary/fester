@@ -103,7 +103,8 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                 final String action = message.headers().get(Constants.ACTION);
                 final Path filePath = Paths.get(body.getString(Constants.CSV_FILE_PATH));
                 final String iiifVersion = body.getString(Constants.IIIF_API_VERSION);
-                final CsvParser csvParser = new CsvParser().parse(filePath, iiifVersion);
+                final CsvParser csvParser = new CsvParser().setAVUrlString(config().getString(Config.AV_URL_STRING))
+                      .parse(filePath, iiifVersion);
                 final CsvMetadata csvMetadata = csvParser.getCsvMetadata();
 
                 if (Op.POST_CSV.equals(action)) {
