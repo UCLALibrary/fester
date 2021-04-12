@@ -76,6 +76,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
      */
     public static final String CREATE_WORK = "create-work";
 
+    //private static final String DEFAULT_AV_STRING = "pairtree";
     private static final Logger LOGGER = LoggerFactory.getLogger(ManifestVerticle.class, Constants.MESSAGES);
 
     private static final long TIMEOUT = Long.MAX_VALUE; // A temporary over the top setting for image lookups
@@ -103,7 +104,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
                 final String action = message.headers().get(Constants.ACTION);
                 final Path filePath = Paths.get(body.getString(Constants.CSV_FILE_PATH));
                 final String iiifVersion = body.getString(Constants.IIIF_API_VERSION);
-                final CsvParser csvParser = new CsvParser().setAVUrlString(config().getString(Config.AV_URL_STRING))
+                final CsvParser csvParser = new CsvParser().setAVUrlString(config().getString(Config.AV_URL_STRING)) //, DEFAULT_AV_STRING))
                       .parse(filePath, iiifVersion);
                 final CsvMetadata csvMetadata = csvParser.getCsvMetadata();
 
