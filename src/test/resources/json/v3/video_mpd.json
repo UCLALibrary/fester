@@ -1,0 +1,43 @@
+{
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  "type": "Manifest",
+  "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest",
+  "label": {
+    "none": [
+      "Texas Chainsaw Massacre"
+    ]
+  },
+  "items": [
+    {
+      "type": "Canvas",
+      "label": {
+        "none": [
+          "Texas Chainsaw Massacre"
+        ]
+      },
+      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/canvas-s39o",
+      "width": 720,
+      "height": 540,
+      "duration": 5021.0,
+      "items": [
+        {
+          "type": "AnnotationPage",
+          "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/canvas-s39o/anno-page-u590",
+          "items": [
+            {
+              "type": "Annotation",
+              "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/annotations/anno-g334",
+              "motivation": "painting",
+              "body": {
+                "type": "Video",
+                "id": "https://test-wowza.library.ucla.edu/iiif_av_public/mp4:woolseytexaschainsawmassacre.mp4/manifest.mpd",
+                "format": "application/dash+xml"
+              },
+              "target": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/canvas-s39o"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
