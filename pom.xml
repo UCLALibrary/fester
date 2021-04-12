@@ -533,6 +533,7 @@
           <runArgs>
             <runArg>-Dvertx-config-path=${project.basedir}/target/test-classes/test-config.properties</runArg>
             <runArg>-Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.SLF4JLogDelegateFactory</runArg>
+            <runArg>-Dcontent.types.user.table=src/main/docker/configs/content-types.properties</runArg>
           </runArgs>
         </configuration>
       </plugin>
@@ -856,7 +857,6 @@
               <jvmArgs>
                 <jvmArg>-Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.SLF4JLogDelegateFactory</jvmArg>
                 <jvmArg>-Dvertx-config-path=target/test-classes/test-config.properties</jvmArg>
-                <jvmArg>-Dcontent.types.user.table=src/main/docker/configs/content-types.properties</jvmArg>
               </jvmArgs>
               <debugPort>${fester.debug.port}</debugPort>
             </configuration>
