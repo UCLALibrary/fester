@@ -41,8 +41,6 @@ public class CsvParser {
 
     private static final Pattern EOL_PATTERN = Pattern.compile(".*\\R");
 
-    //private static final String AV_URL_STRING = "pairtree";
-
     private final Map<String, List<String[]>> myWorksMap = new HashMap<>();
 
     private final Map<String, List<String[]>> myPagesMap = new LinkedHashMap<>();
@@ -57,9 +55,11 @@ public class CsvParser {
 
     /**
      * Creates a new CsvParser.
+     *
+     * @param aAVUrlString The A/V URL identifier string
      */
-    public CsvParser() {
-
+    public CsvParser(final String aAVUrlString) {
+        myAVUrlString = aAVUrlString;
     }
 
     /**

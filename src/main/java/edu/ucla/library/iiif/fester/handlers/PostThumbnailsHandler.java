@@ -74,6 +74,8 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
 
     private final String myFesterizeVersion;
 
+    private final String myAVUrlString;
+
     /* FUA = Festerize User Agent; agent to verify festerize version, acronymed for codacy */
     private final Pattern myFUAPattern;
 
@@ -92,6 +94,7 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
         myExceptionPage = new String(bytes, StandardCharsets.UTF_8);
         myFesterizeVersion = aConfig.getString(Config.FESTERIZE_VERSION);
         myFUAPattern = Pattern.compile("Festerize/(?<version>\\d+\\.\\d+\\.\\d+)");
+	myAVUrlString = aConfig.getString(Config.AV_URL_STRING, Constants.DEFAULT_AV_STRING);
     }
 
     /*
@@ -121,7 +124,7 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
             final String fileName = csvFile.fileName();
 
             try (CSVReader csvReader = new CSVReader(Files.newBufferedReader(Paths.get(filePath)))) {
-                final CsvParser parser = new CsvParser().parse(Paths.get(filePath));
+                final CsvParser parser = new CsvParser(myAVUrlString).parse(Paths.get(filePath));
                 final List<String[]> originalLines = csvReader.readAll();
                 final List<String[]> linesWithThumbs = ThumbnailUtils.addThumbnailColumn(originalLines);
                 final int manifestIndex = Arrays.asList(linesWithThumbs.get(0)).indexOf(CSV.MANIFEST_URL);
