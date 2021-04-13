@@ -30,7 +30,7 @@
               "motivation": "painting",
               "body": {
                 "type": "Video",
-                "id": "https://fixtures.iiif.io/video/indiana/30-minute-clock/medium/30-minute-clock.mp4",
+                "id": "https://wowza.library.ucla.edu/iiif_av_public/video/indiana/30-minute-clock/medium/30-minute-clock.mp4",
                 "format": "video/mp4"
               },
               "target": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/canvas-wx3d"

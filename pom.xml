@@ -152,7 +152,7 @@
     <fester.http.port>8888</fester.http.port>
 
     <!-- String that should be present in A/V access URLs -->
-    <fester.av.string>pairtree</fester.av.string>
+    <fester.av.string>https://wowza.library.ucla.edu/iiif_av_public/</fester.av.string>
 
     <!-- The version of Festerize that is compatible with this version of Fester -->
     <festerize.version>0.2.0</festerize.version>
