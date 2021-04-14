@@ -288,7 +288,7 @@ public final class Constants {
      * The default pattern for A/V URLs.
      * .
      */
-    public static final String DEFAULT_AV_STRING = "https://wowza.library.ucla.edu/iiif_av_public/";
+    public static final String DEFAULT_AV_STRING = "mpd";
 
     /**
      * Private constructor for Constants class.

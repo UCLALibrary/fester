@@ -49,25 +49,14 @@ public class CsvParser {
 
     private String[] myCollectionData;
 
-    private String myAVUrlString;
-
     private CsvHeaders myCsvHeaders;
-
-    /**
-     * Creates a new CsvParser.
-     *
-     * @param aAVUrlString The A/V URL identifier string
-     */
-    public CsvParser(final String aAVUrlString) {
-        myAVUrlString = aAVUrlString;
-    }
 
     /**
      * Creates a new CsvParser.
      *
      */
     public CsvParser() {
-        myAVUrlString = Constants.DEFAULT_AV_STRING;
+
     }
 
     /**
@@ -77,12 +66,13 @@ public class CsvParser {
      *
      * @param aPath A path to a CSV file
      * @param aIiifVersion The target IIIF Presentation API version
+     * @param aAVUrlString A string expected to be found in A/V access URLs
      * @return This CSV parser
      * @throws IOException If there is trouble reading or writing data
      * @throws CsvException If there is trouble reading the CSV data
      * @throws CsvParsingException If there is trouble parsing the CSV data
      */
-    public CsvParser parse(final Path aPath, final String aIiifVersion)
+    public CsvParser parse(final Path aPath, final String aIiifVersion, final String aAVUrlString)
             throws IOException, CsvException, CsvParsingException {
         reset();
 
@@ -128,7 +118,7 @@ public class CsvParser {
                 checkForEOLs(row);
                 trimValues(row);
                 if (aIiifVersion != null) {
-                    checkApiCompatibility(row, aPath, aIiifVersion);
+                    checkApiCompatibility(row, aPath, aIiifVersion, aAVUrlString);
                 }
 
                 switch (getObjectType(row, myCsvHeaders)) {
@@ -175,7 +165,7 @@ public class CsvParser {
      * @throws CsvParsingException If there is trouble parsing the CSV data
      */
     public CsvParser parse(final Path aPath) throws IOException, CsvException, CsvParsingException {
-        return parse(aPath, null);
+        return parse(aPath, null, null);
     }
 
     /**
@@ -349,7 +339,8 @@ public class CsvParser {
      * @throws CsvParsingException If the row represents a v2 canvas and contains any A/V metadata
      */
     @SuppressWarnings({"unchecked", "BooleanExpressionComplexity"})
-    private String[] checkApiCompatibility(final String[] aRow, final Path aPath, final String aIiifVersion)
+    private String[] checkApiCompatibility(final String[] aRow, final Path aPath,
+        final String aIiifVersion, final String aAVUrlString)
             throws CsvParsingException {
         final String rowId = getMetadata(aRow, myCsvHeaders.getItemArkIndex()).get();
 
@@ -365,7 +356,7 @@ public class CsvParser {
         if (Constants.IIIF_API_V2.equals(aIiifVersion)) {
             if (mediaWidth.isPresent() || mediaHeight.isPresent() || mediaDuration.isPresent() ||
                     mediaFormat.isPresent() || (audioVideoAccessUrl.isPresent() &&
-                    audioVideoAccessUrl.toString().contains(myAVUrlString))) {
+                    audioVideoAccessUrl.toString().contains(aAVUrlString))) {
                 throw new CsvParsingException(MessageCodes.MFS_168, rowId, aPath);
             }
         } else { // Constants.IIIF_API_V3
@@ -386,7 +377,7 @@ public class CsvParser {
                             throw new CsvParsingException(MessageCodes.MFS_170, rowId, format, aPath);
                         }
                         if (audioVideoAccessUrl.isPresent() &&
-                            !audioVideoAccessUrl.toString().contains(myAVUrlString)) {
+                            !audioVideoAccessUrl.toString().contains(aAVUrlString)) {
                             throw new CsvParsingException(MessageCodes.MFS_176, rowId, format, aPath);
                         }
                         break;
@@ -399,7 +390,7 @@ public class CsvParser {
                             throw new CsvParsingException(MessageCodes.MFS_175, rowId, format, aPath);
                         }
                         if (audioVideoAccessUrl.isPresent() &&
-                            !audioVideoAccessUrl.toString().contains(myAVUrlString)) {
+                            !audioVideoAccessUrl.toString().contains(aAVUrlString)) {
                             throw new CsvParsingException(MessageCodes.MFS_176, rowId, format, aPath);
                         }
                         break;
@@ -409,7 +400,7 @@ public class CsvParser {
                     }
                 }
             } else if (mediaWidth.isPresent() || mediaHeight.isPresent() || mediaDuration.isPresent() ||
-                    (audioVideoAccessUrl.isPresent() && audioVideoAccessUrl.toString().contains(myAVUrlString))) {
+                    (audioVideoAccessUrl.isPresent() && audioVideoAccessUrl.toString().contains(aAVUrlString))) {
                 throw new CsvParsingException(MessageCodes.MFS_172, rowId, aPath);
             }
         }
@@ -523,16 +514,5 @@ public class CsvParser {
         } catch (final IndexOutOfBoundsException details) {
             return Optional.empty();
         }
-    }
-
-    /**
-     * Sets the A/V URL identifier string.
-     *
-     * @param aAVUrlString The A/V URL identifier string
-     * @return This CSV parser
-     */
-    public CsvParser setAVUrlString(final String aAVUrlString) {
-        myAVUrlString = aAVUrlString;
-        return this;
     }
 }

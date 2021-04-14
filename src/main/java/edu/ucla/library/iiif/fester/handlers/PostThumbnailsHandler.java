@@ -124,7 +124,7 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
             final String fileName = csvFile.fileName();
 
             try (CSVReader csvReader = new CSVReader(Files.newBufferedReader(Paths.get(filePath)))) {
-                final CsvParser parser = new CsvParser(myAVUrlString).parse(Paths.get(filePath));
+                final CsvParser parser = new CsvParser().parse(Paths.get(filePath), null, myAVUrlString);
                 final List<String[]> originalLines = csvReader.readAll();
                 final List<String[]> linesWithThumbs = ThumbnailUtils.addThumbnailColumn(originalLines);
                 final int manifestIndex = Arrays.asList(linesWithThumbs.get(0)).indexOf(CSV.MANIFEST_URL);
