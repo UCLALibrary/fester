@@ -289,7 +289,7 @@ public final class Constants {
      * .
      */
     public static final String DEFAULT_AV_STRING = "https://wowza.library.ucla.edu/iiif_av_public/";
- 
+
     /**
      * Private constructor for Constants class.
      */

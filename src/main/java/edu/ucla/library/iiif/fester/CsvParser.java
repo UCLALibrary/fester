@@ -63,6 +63,14 @@ public class CsvParser {
     }
 
     /**
+     * Creates a new CsvParser.
+     *
+     */
+    public CsvParser() {
+        myAVUrlString = Constants.DEFAULT_AV_STRING;
+    }
+
+    /**
      * Parses the CSV file at the supplied path. This is not thread-safe. Optional CSV columns: IIIF Access URL, Item
      * Sequence (if the CSV contains no page rows), viewingHint, viewingDirection, Name.repository,
      * Rights.statementLocal, Rights.servicesContact,

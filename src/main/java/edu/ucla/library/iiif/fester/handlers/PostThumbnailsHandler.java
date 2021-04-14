@@ -94,7 +94,7 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
         myExceptionPage = new String(bytes, StandardCharsets.UTF_8);
         myFesterizeVersion = aConfig.getString(Config.FESTERIZE_VERSION);
         myFUAPattern = Pattern.compile("Festerize/(?<version>\\d+\\.\\d+\\.\\d+)");
-	myAVUrlString = aConfig.getString(Config.AV_URL_STRING, Constants.DEFAULT_AV_STRING);
+        myAVUrlString = aConfig.getString(Config.AV_URL_STRING, Constants.DEFAULT_AV_STRING);
     }
 
     /*
