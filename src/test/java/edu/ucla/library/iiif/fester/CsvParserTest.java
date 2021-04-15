@@ -84,7 +84,7 @@ public class CsvParserTest {
         final CsvHeaders csvHeaders = myCsvParser.parse(getTestPath(GOOD_CSV)).getCsvHeaders();
 
         assertEquals(6, csvHeaders.getFileNameIndex());
-        assertEquals(38, csvHeaders.getImageAccessUrlIndex());
+        assertEquals(38, csvHeaders.getContentAccessUrlIndex());
         assertEquals(1, csvHeaders.getItemArkIndex());
         assertEquals(7, csvHeaders.getItemSequenceIndex());
         assertEquals(-1, csvHeaders.getLocalRightsStatementIndex());

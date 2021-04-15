@@ -592,6 +592,7 @@ public class PostCsvFIT {
          *
          * @param aContext A test context
          */
+        @Test
         public final void testVideoMissingMetadata(final TestContext aContext) {
             final Async asyncTask = aContext.async();
 
@@ -619,6 +620,7 @@ public class PostCsvFIT {
          *
          * @param aContext A test context
          */
+        @Test
         public final void testVideoMalformedMetadata(final TestContext aContext) {
             final Async asyncTask = aContext.async();
 
@@ -645,6 +647,7 @@ public class PostCsvFIT {
          *
          * @param aContext A test context
          */
+        @Test
         public final void testVideoIiifPresApiV2(final TestContext aContext) {
             final Async asyncTask = aContext.async();
 

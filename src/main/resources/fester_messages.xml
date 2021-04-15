@@ -186,4 +186,5 @@
   <entry key="MFS-173">Cannot parse value '{}' from CSV '{}' as '{}'</entry>
   <entry key="MFS-174">Found item '{}' with format '{}' in CSV '{}', but is missing either duration or A/V access URL</entry>
   <entry key="MFS-175">Found item '{}' with format '{}' in CSV '{}', but it has either height or width, unnecessary for audio content</entry>
+  <entry key="MFS-176">Found item '{}' with format '{}' in CSV '{}', but the access url has not been processed for Wowza</entry>
 </properties>

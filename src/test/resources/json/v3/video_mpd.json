@@ -30,7 +30,7 @@
               "motivation": "painting",
               "body": {
                 "type": "Video",
-                "id": "https://test-wowza.library.ucla.edu/iiif_av_public/mp4:woolseytexaschainsawmassacre.mp4/manifest.mpd",
+                "id": "https://wowza.library.ucla.edu/iiif_av_public/mp4:woolseytexaschainsawmassacre.mp4/manifest.mpd",
                 "format": "application/dash+xml"
               },
               "target": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/canvas-s39o"

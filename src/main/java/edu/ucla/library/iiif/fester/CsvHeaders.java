@@ -54,15 +54,9 @@ public class CsvHeaders {
     private int myViewingDirectionIndex = -1;
 
     /**
-     * The index position for the image access URL column.
+     * The index position for the content access URL column.
      */
-    private int myImageAccessUrlIndex = -1;
-
-    /**
-     * The index position for the audio/video access URL column.
-     */
-    @SuppressWarnings("PMD.LongVariable")
-    private int myAudioVideoAccessUrlIndex = -1;
+    private int myContentAccessUrlIndex = -1;
 
     /**
      * The index position for the repository name column.
@@ -134,10 +128,7 @@ public class CsvHeaders {
                     setViewingHintIndex(index);
                     break;
                 case CSV.IIIF_ACCESS_URL:
-                    setImageAccessUrlIndex(index);
-                    break;
-                case CSV.AV_ACCESS_URL:
-                    setAudioVideoAccessUrlIndex(index);
+                    setContentAccessUrlIndex(index);
                     break;
                 case CSV.REPOSITORY_NAME:
                     setRepositoryNameIndex(index);
@@ -205,65 +196,34 @@ public class CsvHeaders {
     }
 
     /**
-     * Gets the image access URL index position.
+     * Gets the content access URL index position.
      *
-     * @return The image access URL index position
+     * @return The content access URL index position
      */
     @JsonGetter
-    public int getImageAccessUrlIndex() {
-        return myImageAccessUrlIndex;
+    public int getContentAccessUrlIndex() {
+        return myContentAccessUrlIndex;
     }
 
     /**
-     * Sets the image access URL index position.
+     * Sets the content access URL index position.
      *
-     * @param aImageAccessUrlIndex The position of the image access URL header
+     * @param aContentAccessUrlIndex The position of the content access URL header
      * @return This CSV headers
      */
     @JsonSetter
-    public CsvHeaders setImageAccessUrlIndex(final int aImageAccessUrlIndex) {
-        myImageAccessUrlIndex = aImageAccessUrlIndex;
+    public CsvHeaders setContentAccessUrlIndex(final int aContentAccessUrlIndex) {
+        myContentAccessUrlIndex = aContentAccessUrlIndex;
         return this;
     }
 
     /**
-     * Checks whether there is an image access URL index position
+     * Checks whether there is a content access URL index position
      *
-     * @return True if there is an image access URL index position; else, false
+     * @return True if there is a content access URL index position; else, false
      */
-    public boolean hasImageAccessUrlIndex() {
-        return myImageAccessUrlIndex != -1;
-    }
-
-    /**
-     * Gets the audio/video access URL index position.
-     *
-     * @return The audio/video access URL index position
-     */
-    @JsonGetter
-    public int getAudioVideoAccessUrlIndex() {
-        return myAudioVideoAccessUrlIndex;
-    }
-
-    /**
-     * Sets the audio/video access URL index position.
-     *
-     * @param aAudioVideoAccessUrlIndex The position of the audio/video access URL header
-     * @return This CSV headers
-     */
-    @JsonSetter
-    public CsvHeaders setAudioVideoAccessUrlIndex(final int aAudioVideoAccessUrlIndex) {
-        myAudioVideoAccessUrlIndex = aAudioVideoAccessUrlIndex;
-        return this;
-    }
-
-    /**
-     * Checks whether there is an audio/video access URL index position
-     *
-     * @return True if there is an audio/video access URL index position; else, false
-     */
-    public boolean hasAudioVideoAccessUrlIndex() {
-        return myAudioVideoAccessUrlIndex != -1;
+    public boolean hasContentAccessUrlIndex() {
+        return myContentAccessUrlIndex != -1;
     }
 
     /**

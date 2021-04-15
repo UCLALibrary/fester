@@ -48,6 +48,9 @@ public final class Config {
     /* The version of Festerize that is compatible with this version of Fester */
     public static final String FESTERIZE_VERSION = "festerize.version";
 
+    /* A string to distinguish A/V access URLs from generic IIF access URLs */
+    public static final String AV_URL_STRING = "fester.av.string";
+
     /**
      * Private constructor for the Constants class.
      */

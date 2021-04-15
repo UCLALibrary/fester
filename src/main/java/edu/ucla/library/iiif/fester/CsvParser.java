@@ -53,6 +53,7 @@ public class CsvParser {
 
     /**
      * Creates a new CsvParser.
+     *
      */
     public CsvParser() {
 
@@ -65,12 +66,13 @@ public class CsvParser {
      *
      * @param aPath A path to a CSV file
      * @param aIiifVersion The target IIIF Presentation API version
+     * @param aAVUrlString A string expected to be found in A/V access URLs
      * @return This CSV parser
      * @throws IOException If there is trouble reading or writing data
      * @throws CsvException If there is trouble reading the CSV data
      * @throws CsvParsingException If there is trouble parsing the CSV data
      */
-    public CsvParser parse(final Path aPath, final String aIiifVersion)
+    public CsvParser parse(final Path aPath, final String aIiifVersion, final String aAVUrlString)
             throws IOException, CsvException, CsvParsingException {
         reset();
 
@@ -116,7 +118,7 @@ public class CsvParser {
                 checkForEOLs(row);
                 trimValues(row);
                 if (aIiifVersion != null) {
-                    checkApiCompatibility(row, aPath, aIiifVersion);
+                    checkApiCompatibility(row, aPath, aIiifVersion, aAVUrlString);
                 }
 
                 switch (getObjectType(row, myCsvHeaders)) {
@@ -163,7 +165,7 @@ public class CsvParser {
      * @throws CsvParsingException If there is trouble parsing the CSV data
      */
     public CsvParser parse(final Path aPath) throws IOException, CsvException, CsvParsingException {
-        return parse(aPath, null);
+        return parse(aPath, null, null);
     }
 
     /**
@@ -336,8 +338,9 @@ public class CsvParser {
      * @return The row
      * @throws CsvParsingException If the row represents a v2 canvas and contains any A/V metadata
      */
-    @SuppressWarnings("unchecked")
-    private String[] checkApiCompatibility(final String[] aRow, final Path aPath, final String aIiifVersion)
+    @SuppressWarnings({"unchecked", "BooleanExpressionComplexity"})
+    private String[] checkApiCompatibility(final String[] aRow, final Path aPath,
+        final String aIiifVersion, final String aAVUrlString)
             throws CsvParsingException {
         final String rowId = getMetadata(aRow, myCsvHeaders.getItemArkIndex()).get();
 
@@ -348,11 +351,12 @@ public class CsvParser {
         final Optional<Float> mediaDuration =
                 (Optional<Float>) getMetadata(aRow, myCsvHeaders.getMediaDurationIndex(), Float.class, aPath);
         final Optional<String> mediaFormat = getMetadata(aRow, myCsvHeaders.getMediaFormatIndex());
-        final Optional<String> audioVideoAccessUrl = getMetadata(aRow, myCsvHeaders.getAudioVideoAccessUrlIndex());
+        final Optional<String> audioVideoAccessUrl = getMetadata(aRow, myCsvHeaders.getContentAccessUrlIndex());
 
         if (Constants.IIIF_API_V2.equals(aIiifVersion)) {
             if (mediaWidth.isPresent() || mediaHeight.isPresent() || mediaDuration.isPresent() ||
-                    mediaFormat.isPresent() || audioVideoAccessUrl.isPresent()) {
+                    mediaFormat.isPresent() || (audioVideoAccessUrl.isPresent() &&
+                    audioVideoAccessUrl.toString().contains(aAVUrlString))) {
                 throw new CsvParsingException(MessageCodes.MFS_168, rowId, aPath);
             }
         } else { // Constants.IIIF_API_V3
@@ -372,6 +376,10 @@ public class CsvParser {
                                 audioVideoAccessUrl.isEmpty()) {
                             throw new CsvParsingException(MessageCodes.MFS_170, rowId, format, aPath);
                         }
+                        if (audioVideoAccessUrl.isPresent() &&
+                            !audioVideoAccessUrl.toString().contains(aAVUrlString)) {
+                            throw new CsvParsingException(MessageCodes.MFS_176, rowId, format, aPath);
+                        }
                         break;
                     }
                     case "audio": {
@@ -381,6 +389,10 @@ public class CsvParser {
                         if (!mediaWidth.isEmpty() || !mediaHeight.isEmpty()) {
                             throw new CsvParsingException(MessageCodes.MFS_175, rowId, format, aPath);
                         }
+                        if (audioVideoAccessUrl.isPresent() &&
+                            !audioVideoAccessUrl.toString().contains(aAVUrlString)) {
+                            throw new CsvParsingException(MessageCodes.MFS_176, rowId, format, aPath);
+                        }
                         break;
                     }
                     default: {
@@ -388,7 +400,7 @@ public class CsvParser {
                     }
                 }
             } else if (mediaWidth.isPresent() || mediaHeight.isPresent() || mediaDuration.isPresent() ||
-                    audioVideoAccessUrl.isPresent()) {
+                    (audioVideoAccessUrl.isPresent() && audioVideoAccessUrl.toString().contains(aAVUrlString))) {
                 throw new CsvParsingException(MessageCodes.MFS_172, rowId, aPath);
             }
         }

@@ -228,8 +228,8 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
             canvases = createCanvases(csvHeaders, pageList, imageHost, placeholderImage, minter);
             manifest.addCanvas(canvases);
         } else {
-            if (CsvParser.getMetadata(workRow, csvHeaders.getImageAccessUrlIndex()).isPresent() ||
-                    CsvParser.getMetadata(workRow, csvHeaders.getAudioVideoAccessUrlIndex()).isPresent()) {
+            if (CsvParser.getMetadata(workRow, csvHeaders.getContentAccessUrlIndex()).isPresent() ||
+                    CsvParser.getMetadata(workRow, csvHeaders.getContentAccessUrlIndex()).isPresent()) {
                 final List<String[]> pageList = new ArrayList<>(1);
                 final Canvas[] canvases;
 
@@ -439,7 +439,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
             if (format.isPresent() && format.get().contains("video/")) {
                 final VideoContent video;
 
-                resourceURI = CsvParser.getMetadata(columns, aCsvHeaders.getAudioVideoAccessUrlIndex()).get();
+                resourceURI = CsvParser.getMetadata(columns, aCsvHeaders.getContentAccessUrlIndex()).get();
                 video = new VideoContent(resourceURI);
 
                 // We've already validated these numeric values in CsvParser
@@ -451,7 +451,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
             } else if (format.isPresent() && format.get().contains("audio/")) {
                 final SoundContent audio;
 
-                resourceURI = CsvParser.getMetadata(columns, aCsvHeaders.getAudioVideoAccessUrlIndex()).get();
+                resourceURI = CsvParser.getMetadata(columns, aCsvHeaders.getContentAccessUrlIndex()).get();
                 audio = new SoundContent(resourceURI);
 
                 // We've already validated this numeric value in CsvParser

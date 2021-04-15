@@ -285,6 +285,12 @@ public final class Constants {
     public static final String CONTEXT_V3 = "http://iiif.io/api/presentation/3/context.json";
 
     /**
+     * The default pattern for A/V URLs.
+     * .
+     */
+    public static final String DEFAULT_AV_STRING = "mpd";
+
+    /**
      * Private constructor for Constants class.
      */
     private Constants() {

@@ -25,5 +25,8 @@ FESTER_S3_ENDPOINT=https://s3.amazonaws.com
 
 IIIF_BASE_URL=https://iiif.library.ucla.edu/iiif/2
 
+# String that should be present in A/V access URLs
+AV_URL_STRING=https://wowza.library.ucla.edu/iiif_av_public/
+
 # The version of Festerize that is compatible with this version of Fester
 FESTERIZE_VERSION=
