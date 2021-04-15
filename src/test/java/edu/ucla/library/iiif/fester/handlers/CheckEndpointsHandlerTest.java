@@ -9,12 +9,13 @@ import info.freelibrary.util.LoggerFactory;
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
-import edu.ucla.library.iiif.fester.Status;
 import edu.ucla.library.iiif.fester.MessageCodes;
+import edu.ucla.library.iiif.fester.Status;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.client.predicate.ResponsePredicate;
 import io.vertx.ext.web.codec.BodyCodec;
@@ -41,22 +42,19 @@ public class CheckEndpointsHandlerTest extends AbstractFesterHandlerTest {
 
         LOGGER.debug(MessageCodes.MFS_157, requestPath);
 
-        webClient
-            .get(port, Constants.UNSPECIFIED_HOST, requestPath)
-            .expect(ResponsePredicate.SC_SUCCESS)
-            .as(BodyCodec.jsonObject())
-            .send(ar -> {
-                final int statusCode = ar.result().statusCode();
-
+        webClient.get(port, Constants.UNSPECIFIED_HOST, requestPath).expect(ResponsePredicate.SC_SUCCESS)
+            .as(BodyCodec.jsonObject()).send(ar -> {
                 if (ar.succeeded()) {
-                    final JsonObject result = ar.result().body();
-                    aContext.assertEquals(Status.OK, result.getValue(Status.STATUS));
-                } else {
-                    aContext.fail(LOGGER.getMessage(MessageCodes.MFS_003, HTTP.OK, statusCode));
-                }
+                    final HttpResponse<JsonObject> response = ar.result();
 
-                if (!asyncTask.isCompleted()) {
-                    asyncTask.complete();
+                    aContext.assertEquals(HTTP.OK, response.statusCode());
+                    aContext.assertEquals(Status.OK, response.body().getValue(Status.STATUS));
+
+                    if (!asyncTask.isCompleted()) {
+                        asyncTask.complete();
+                    }
+                } else {
+                    aContext.fail(ar.cause());
                 }
             });
 
