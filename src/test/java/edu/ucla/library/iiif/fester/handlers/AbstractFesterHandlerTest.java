@@ -173,16 +173,8 @@ abstract class AbstractFesterHandlerTest {
                                 if (fakeDeployment.succeeded()) {
                                     final int testPort = aOpts.getConfig().getInteger(Config.HTTP_PORT);
 
+                                    // Server checker doesn't close the test task until the server is responding
                                     new ServerChecker(testPort, aAsyncTask).run();
-                                    // Give our server a bit more startup time for GitHub Actions
-                                    // FIXME: this is a workaround for another bug that we haven't fount yet
-                                    // try {
-                                    // Thread.sleep(10000);
-                                    // } catch (final InterruptedException details) {
-                                    // System.err.println(details);
-                                    // }
-                                    //
-                                    // aAsyncTask.complete();
                                 } else {
                                     aContext.fail(fakeDeployment.cause());
                                 }

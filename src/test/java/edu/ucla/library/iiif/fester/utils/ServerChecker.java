@@ -11,10 +11,11 @@ import info.freelibrary.util.StringUtils;
 
 import edu.ucla.library.iiif.fester.MessageCodes;
 
+import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.unit.Async;
 
 /**
- * A checker to confirm that our server has been started.
+ * A test utility that confirms our server has been started before completing the set up process.
  */
 public class ServerChecker implements Runnable {
 
@@ -37,23 +38,25 @@ public class ServerChecker implements Runnable {
         myPort = aPort;
     }
 
+    /**
+     * Checks that the server is up and responsive.
+     */
     @Override
     public void run() {
-        while (!myAsyncTask.isCompleted()) { // Without completing the test will eventually time out
+        while (!myAsyncTask.isCompleted()) { // Without completing, the test will eventually time out
             try {
                 final URL url = new URL(StringUtils.format(URL, myPort));
                 final HttpURLConnection http = (HttpURLConnection) url.openConnection();
-                final int responseCode;
 
-                http.setRequestMethod("GET");
+                http.setRequestMethod(HttpMethod.GET.name());
                 http.connect();
-                responseCode = http.getResponseCode();
 
-                LOGGER.debug("Found the server: {}", responseCode);
-                myAsyncTask.complete();
+                LOGGER.debug(MessageCodes.MFS_177, http.getResponseCode());
+
                 http.disconnect();
+                myAsyncTask.complete();
             } catch (final IOException details) {
-                LOGGER.error(details.getMessage());
+                // I don't think we care how many times we tried(?)
             }
         }
     }
