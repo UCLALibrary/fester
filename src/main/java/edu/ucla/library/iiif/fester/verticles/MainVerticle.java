@@ -13,6 +13,7 @@ import info.freelibrary.util.StringUtils;
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.handlers.EndpointConfigHandler;
+
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
@@ -63,10 +64,13 @@ public class MainVerticle extends AbstractVerticle {
                         LOGGER.info(MessageCodes.MFS_041, port);
 
                         // Start our server
-                        server.requestHandler(router).listen(port);
-
-                        // Start up our Fester verticles
-                        startVerticles(config, aPromise);
+                        server.requestHandler(router).listen(port, listening -> {
+                            if (listening.succeeded()) {
+                                startVerticles(config, aPromise);
+                            } else {
+                                aPromise.fail(listening.cause());
+                            }
+                        });
                     } else {
                         aPromise.fail(handler.cause());
                     }
@@ -139,7 +143,7 @@ public class MainVerticle extends AbstractVerticle {
      * @param aPromise A promise to deploy the requested verticle
      */
     private Future<Void> deployVerticle(final String aVerticleName, final DeploymentOptions aOptions,
-            final Promise<Void> aPromise) {
+        final Promise<Void> aPromise) {
         vertx.deployVerticle(aVerticleName, aOptions, response -> {
             try {
                 final String verticleName = Class.forName(aVerticleName).getSimpleName();

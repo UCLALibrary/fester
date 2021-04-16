@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.runner.RunWith;
 
 import com.amazonaws.SdkClientException;
@@ -22,14 +23,16 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
-import ch.qos.logback.classic.Level;
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
+import edu.ucla.library.iiif.fester.utils.ServerChecker;
 import edu.ucla.library.iiif.fester.verticles.FakeS3BucketVerticle;
 import edu.ucla.library.iiif.fester.verticles.MainVerticle;
 import edu.ucla.library.iiif.fester.verticles.S3BucketVerticle;
+
+import ch.qos.logback.classic.Level;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Promise;
@@ -38,6 +41,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.Timeout;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 
 @RunWith(VertxUnitRunner.class)
@@ -45,13 +49,16 @@ abstract class AbstractFesterHandlerTest {
 
     protected static final String IIIF_URL = "http://0.0.0.0";
 
-    protected static final File V2_MANIFEST_FILE = new File(
-            "src/test/resources/json/v2/ark%3A%2F21198%2Fzz0009gv8j.json");
+    protected static final File V2_MANIFEST_FILE =
+        new File("src/test/resources/json/v2/ark%3A%2F21198%2Fzz0009gv8j.json");
 
-    protected static final File V2_COLLECTION_FILE = new File(
-            "src/test/resources/json/v2/ark%3A%2F21198%2Fzz0009gsq9.json");
+    protected static final File V2_COLLECTION_FILE =
+        new File("src/test/resources/json/v2/ark%3A%2F21198%2Fzz0009gsq9.json");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFesterHandlerTest.class, Constants.MESSAGES);
+
+    @Rule
+    public Timeout myTestTimeout = Timeout.seconds(600);
 
     protected Vertx myVertx;
 
@@ -134,8 +141,8 @@ abstract class AbstractFesterHandlerTest {
      * @return The logger's previous log level
      */
     protected Level setLogLevel(final Class<?> aLogClass, final Level aLogLevel) {
-        final ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(
-                aLogClass, Constants.MESSAGES).getLoggerImpl();
+        final ch.qos.logback.classic.Logger logger =
+            (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(aLogClass, Constants.MESSAGES).getLoggerImpl();
         final Level level = logger.getEffectiveLevel();
 
         logger.setLevel(aLogLevel);
@@ -165,11 +172,14 @@ abstract class AbstractFesterHandlerTest {
                     myVertx.undeploy(s3BucketDeploymentId, undeployment -> {
                         if (undeployment.succeeded()) {
                             final DeploymentOptions options = new DeploymentOptions()
-                                    .setConfig(new JsonObject().put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V2));
+                                .setConfig(new JsonObject().put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V2));
 
                             myVertx.deployVerticle(FakeS3BucketVerticle.class.getName(), options, fakeDeployment -> {
                                 if (fakeDeployment.succeeded()) {
-                                    aAsyncTask.complete();
+                                    final int testPort = aOpts.getConfig().getInteger(Config.HTTP_PORT);
+
+                                    // Server checker doesn't close the test task until the server is responding
+                                    new ServerChecker(testPort, aAsyncTask).run();
                                 } else {
                                     aContext.fail(fakeDeployment.cause());
                                 }

@@ -43,6 +43,6 @@ jobs:
           maven_profiles: default
           maven_args: >
             -V -ntp -Dorg.slf4j.simpleLogger.log.net.sourceforge.pmd=error -DlogLevel=DEBUG -DtestLogLevel=DEBUG
-            -Dfester.s3.access_key="${{ secrets.AWS_ACCESS_KEY }}"
-            -Dfester.s3.secret_key="${{ secrets.AWS_SECRET_KEY }}"
+            -Dfester.s3.access_key="${{ secrets.AWS_ACCESS_KEY }}" -Dsurefire.skipAfterFailureCount=1
+            -Dfester.s3.secret_key="${{ secrets.AWS_SECRET_KEY }}" -Dfailsafe.skipAfterFailureCount=1
             -Dfester.s3.bucket="${{ secrets.S3_BUCKET }}"
