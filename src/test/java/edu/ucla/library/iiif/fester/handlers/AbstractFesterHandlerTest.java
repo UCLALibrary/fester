@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.runner.RunWith;
 
 import com.amazonaws.SdkClientException;
@@ -40,10 +41,14 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.Timeout;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 
 @RunWith(VertxUnitRunner.class)
 abstract class AbstractFesterHandlerTest {
+
+    @Rule
+    public Timeout myTestTimeout = Timeout.seconds(300);
 
     protected static final String IIIF_URL = "http://0.0.0.0";
 
