@@ -48,7 +48,7 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 abstract class AbstractFesterHandlerTest {
 
     @Rule
-    public Timeout myTestTimeout = Timeout.seconds(300);
+    public Timeout myTestTimeout = Timeout.seconds(600);
 
     protected static final String IIIF_URL = "http://0.0.0.0";
 
