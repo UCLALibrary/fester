@@ -47,9 +47,6 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 @RunWith(VertxUnitRunner.class)
 abstract class AbstractFesterHandlerTest {
 
-    @Rule
-    public Timeout myTestTimeout = Timeout.seconds(600);
-
     protected static final String IIIF_URL = "http://0.0.0.0";
 
     protected static final File V2_MANIFEST_FILE =
@@ -59,6 +56,9 @@ abstract class AbstractFesterHandlerTest {
         new File("src/test/resources/json/v2/ark%3A%2F21198%2Fzz0009gsq9.json");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFesterHandlerTest.class, Constants.MESSAGES);
+
+    @Rule
+    public Timeout myTestTimeout = Timeout.seconds(600);
 
     protected Vertx myVertx;
 
