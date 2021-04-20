@@ -44,6 +44,8 @@ public class ServerChecker implements Runnable {
     @Override
     public void run() {
         while (!myAsyncTask.isCompleted()) { // Without completing, the test will eventually time out
+            LOGGER.debug("Looking for test application's server port: {}", myPort);
+
             try {
                 final URL url = new URL(StringUtils.format(URL, myPort));
                 final HttpURLConnection http = (HttpURLConnection) url.openConnection();
