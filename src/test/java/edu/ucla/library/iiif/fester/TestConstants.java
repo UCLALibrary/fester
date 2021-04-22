@@ -22,12 +22,6 @@ public final class TestConstants {
     public static final String CONTAINER_IMAGE = "fester.container.tag";
 
     /**
-     * The IP for an unspecified host.
-     */
-    @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
-    public static final String UNSPECIFIED_HOST = "0.0.0.0";
-
-    /**
      * Creates a new TestConstants object.
      */
     private TestConstants() {
