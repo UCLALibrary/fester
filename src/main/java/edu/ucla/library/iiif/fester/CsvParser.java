@@ -53,7 +53,6 @@ public class CsvParser {
 
     /**
      * Creates a new CsvParser.
-     *
      */
     public CsvParser() {
 
@@ -89,7 +88,7 @@ public class CsvParser {
                 final String[] nextRow = csvIterator.next();
 
                 // Skip blank rows
-                if (!(nextRow.length == 1 && EMPTY.equals(nextRow[0].trim())) &&
+                if ((nextRow.length != 1 || !EMPTY.equals(nextRow[0].trim())) &&
                         !EMPTY.equals(String.join(EMPTY, nextRow).trim())) {
                     rows.add(nextRow);
                 }
@@ -307,9 +306,9 @@ public class CsvParser {
      * @throws CsvParsingException If the metadata contains a hard return
      */
     private String[] checkForEOLs(final String... aRow) throws CsvParsingException {
-        for (int index = 0; index < aRow.length; index++) {
-            if (EOL_PATTERN.matcher(aRow[index]).find()) {
-                throw new CsvParsingException(MessageCodes.MFS_093, aRow[index]);
+        for (final String element : aRow) {
+            if (EOL_PATTERN.matcher(element).find()) {
+                throw new CsvParsingException(MessageCodes.MFS_093, element);
             }
         }
         return aRow;
@@ -338,10 +337,9 @@ public class CsvParser {
      * @return The row
      * @throws CsvParsingException If the row represents a v2 canvas and contains any A/V metadata
      */
-    @SuppressWarnings({"unchecked", "BooleanExpressionComplexity"})
-    private String[] checkApiCompatibility(final String[] aRow, final Path aPath,
-        final String aIiifVersion, final String aAVUrlString)
-            throws CsvParsingException {
+    @SuppressWarnings({ "unchecked", "BooleanExpressionComplexity" })
+    private String[] checkApiCompatibility(final String[] aRow, final Path aPath, final String aIiifVersion,
+            final String aAVUrlString) throws CsvParsingException {
         final String rowId = getMetadata(aRow, myCsvHeaders.getItemArkIndex()).get();
 
         final Optional<Integer> mediaWidth =
@@ -355,8 +353,8 @@ public class CsvParser {
 
         if (Constants.IIIF_API_V2.equals(aIiifVersion)) {
             if (mediaWidth.isPresent() || mediaHeight.isPresent() || mediaDuration.isPresent() ||
-                    mediaFormat.isPresent() || (audioVideoAccessUrl.isPresent() &&
-                    audioVideoAccessUrl.toString().contains(aAVUrlString))) {
+                    mediaFormat.isPresent() ||
+                    audioVideoAccessUrl.isPresent() && audioVideoAccessUrl.toString().contains(aAVUrlString)) {
                 throw new CsvParsingException(MessageCodes.MFS_168, rowId, aPath);
             }
         } else { // Constants.IIIF_API_V3
@@ -376,23 +374,26 @@ public class CsvParser {
                                 audioVideoAccessUrl.isEmpty()) {
                             throw new CsvParsingException(MessageCodes.MFS_170, rowId, format, aPath);
                         }
-                        if (audioVideoAccessUrl.isPresent() &&
-                            !audioVideoAccessUrl.toString().contains(aAVUrlString)) {
+
+                        if (audioVideoAccessUrl.isPresent() && !audioVideoAccessUrl.toString().contains(aAVUrlString)) {
                             throw new CsvParsingException(MessageCodes.MFS_176, rowId, format, aPath);
                         }
+
                         break;
                     }
                     case "audio": {
                         if (mediaDuration.isEmpty() || audioVideoAccessUrl.isEmpty()) {
                             throw new CsvParsingException(MessageCodes.MFS_174, rowId, format, aPath);
                         }
+
                         if (!mediaWidth.isEmpty() || !mediaHeight.isEmpty()) {
                             throw new CsvParsingException(MessageCodes.MFS_175, rowId, format, aPath);
                         }
-                        if (audioVideoAccessUrl.isPresent() &&
-                            !audioVideoAccessUrl.toString().contains(aAVUrlString)) {
+
+                        if (audioVideoAccessUrl.isPresent() && !audioVideoAccessUrl.toString().contains(aAVUrlString)) {
                             throw new CsvParsingException(MessageCodes.MFS_176, rowId, format, aPath);
                         }
+
                         break;
                     }
                     default: {
@@ -400,7 +401,7 @@ public class CsvParser {
                     }
                 }
             } else if (mediaWidth.isPresent() || mediaHeight.isPresent() || mediaDuration.isPresent() ||
-                    (audioVideoAccessUrl.isPresent() && audioVideoAccessUrl.toString().contains(aAVUrlString))) {
+                    audioVideoAccessUrl.isPresent() && audioVideoAccessUrl.toString().contains(aAVUrlString)) {
                 throw new CsvParsingException(MessageCodes.MFS_172, rowId, aPath);
             }
         }
@@ -413,8 +414,8 @@ public class CsvParser {
      * @param aRow A row from the metadata CSV
      * @param aCsvHeaders CSV header information
      * @return The object type
-     * @throws CsvParsingException If object type isn't included in the CSV headers, or the object type index is out
-     *         of bounds of the CSV row, or the metadata contains an unknown object type
+     * @throws CsvParsingException If object type isn't included in the CSV headers, or the object type index is out of
+     *         bounds of the CSV row, or the metadata contains an unknown object type
      */
     public static ObjectType getObjectType(final String[] aRow, final CsvHeaders aCsvHeaders)
             throws CsvParsingException {
@@ -450,8 +451,8 @@ public class CsvParser {
      * @param aCsvRows A list of rows from the metadata CSV
      * @param aCsvHeaders CSV header information
      * @return The set of object types
-     * @throws CsvParsingException If object type isn't included in the CSV headers, or the object type index is out
-     *         of bounds of the CSV row, or the metadata contains an unknown object type
+     * @throws CsvParsingException If object type isn't included in the CSV headers, or the object type index is out of
+     *         bounds of the CSV row, or the metadata contains an unknown object type
      */
     public static Set<ObjectType> getObjectTypes(final List<String[]> aCsvRows, final CsvHeaders aCsvHeaders)
             throws CsvParsingException {
@@ -489,8 +490,8 @@ public class CsvParser {
      * @return An optional metadata value
      * @throws CsvParsingException
      */
-    public static Optional<?> getMetadata(final String[] aRow, final int aIndex, final Class<?> aType,
-            final Path aPath) throws CsvParsingException {
+    public static Optional<?> getMetadata(final String[] aRow, final int aIndex, final Class<?> aType, final Path aPath)
+            throws CsvParsingException {
         try {
             final String rawValue = aRow[aIndex];
 

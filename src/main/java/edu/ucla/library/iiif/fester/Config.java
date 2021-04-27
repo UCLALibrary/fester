@@ -51,6 +51,9 @@ public final class Config {
     /* A string to distinguish A/V access URLs from generic IIF access URLs */
     public static final String AV_URL_STRING = "fester.av.string";
 
+    /* A string for different manifest versions which will be appended onto the generic AV_URL_STRING */
+    public static final String AV_URL_EXTENSIONS = "fester.av.string.exts";
+
     /**
      * Private constructor for the Constants class.
      */

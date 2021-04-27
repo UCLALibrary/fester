@@ -1,12 +1,15 @@
 
 package edu.ucla.library.iiif.fester.verticles;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -20,28 +23,30 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import info.freelibrary.iiif.presentation.v3.Manifest;
-import info.freelibrary.iiif.presentation.v3.properties.ViewingDirection;
-import info.freelibrary.iiif.presentation.v3.properties.behaviors.ManifestBehavior;
-import info.freelibrary.iiif.presentation.v3.utils.Manifestor;
 import info.freelibrary.util.FileUtils;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 import info.freelibrary.util.RegexDirFilter;
 import info.freelibrary.util.StringUtils;
 
-import edu.ucla.library.iiif.fester.Config;
+import info.freelibrary.iiif.presentation.v3.Manifest;
+import info.freelibrary.iiif.presentation.v3.properties.ViewingDirection;
+import info.freelibrary.iiif.presentation.v3.properties.behaviors.ManifestBehavior;
+import info.freelibrary.iiif.presentation.v3.utils.Manifestor;
+
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.ImageInfoLookup;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
+
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.file.FileSystem;
 import io.vertx.core.json.JsonObject;
@@ -65,6 +70,8 @@ public class V3ManifestVerticleTest {
     private static final String WORKS_CSV = "src/test/resources/csv/{}/batch1/{}1.csv";
 
     private static final String SINAI_WORKS_CSV = "src/test/resources/csv/sinai_test_12/works.csv";
+
+    private static final String SYNANON_CSV = "src/test/resources/csv/video/synanon.csv";
 
     private static final String CSV_FILE_PATH = "src/test/resources/csv/{}.csv";
 
@@ -103,8 +110,8 @@ public class V3ManifestVerticleTest {
                 @SuppressWarnings("rawtypes")
                 final List<Future> futures = new ArrayList<>();
 
-                options.setConfig(config.put(Config.IIIF_BASE_URL, getConfig.result().getString(
-                        Config.IIIF_BASE_URL)).put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V3));
+                config.mergeIn(getConfig.result());
+                options.setConfig(config.put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V3));
 
                 for (final String verticleName : Arrays.asList(TEST_VERTICLES)) {
                     final Promise<String> promise = Promise.promise();
@@ -170,7 +177,7 @@ public class V3ManifestVerticleTest {
         final Async asyncTask = aContext.async();
 
         message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, SINAI_WORKS_CSV)
-        .put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V3);
+                .put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V3);
         options.addHeader(Constants.ACTION, Op.POST_CSV);
 
         LOGGER.debug(MessageCodes.MFS_120, SINAI, ManifestVerticle.class.getName());
@@ -206,13 +213,53 @@ public class V3ManifestVerticleTest {
         final Async asyncTask = aContext.async();
 
         message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, filePath)
-        .put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V3);
+                .put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V3);
         options.addHeader(Constants.ACTION, Op.POST_CSV);
         options.setSendTimeout(60000);
 
         LOGGER.debug(MessageCodes.MFS_120, HATHAWAY, ManifestVerticle.class.getName());
 
         myVertx.eventBus().request(ManifestVerticle.class.getName(), message, options, request -> {
+            if (request.succeeded()) {
+                asyncTask.complete();
+            } else {
+                aContext.fail(request.cause());
+            }
+        });
+    }
+
+    /**
+     * Tests manifest generation using a Choice (between HLS and MPD) for streaming.
+     *
+     * @param aContext A test context
+     */
+    @Test
+    public final void testSynanonManifest(final TestContext aContext) {
+        final String outputFile = Path.of(myJsonFiles, "works%2Fark%3A%2F21198%2Fzz002hdsj2.json").toString();
+        final JsonObject message = new JsonObject();
+        final DeliveryOptions options = new DeliveryOptions();
+        final Async asyncTask = aContext.async();
+
+        message.put(Constants.CSV_FILE_NAME, myRunID);
+        message.put(Constants.CSV_FILE_PATH, SYNANON_CSV);
+        message.put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V3);
+        options.addHeader(Constants.ACTION, Op.POST_CSV);
+        options.setSendTimeout(60000);
+
+        LOGGER.debug(MessageCodes.MFS_120, "Synanon", ManifestVerticle.class.getName());
+
+        myVertx.eventBus().request(ManifestVerticle.class.getName(), message, options, request -> {
+            final Buffer fileBuffer = myVertx.fileSystem().readFileBlocking(outputFile);
+            final String json = fileBuffer.toString(StandardCharsets.UTF_8);
+
+            // Make sure we added Pairtree paths for the streaming choice
+            assertTrue(json.contains("21198=zz002hdsj2/ark%2B=21198=zz002hdsj2.mp4/manifest.mpd"));
+            assertTrue(json.contains("21198=zz002hdsj2/ark%2B=21198=zz002hdsj2.mp4/playlist.m3u8"));
+
+            // Make sure we added formats for the streaming choice
+            assertTrue(json.contains("application/vnd.apple.mpegurl"));
+            assertTrue(json.contains("application/dash+xml"));
+
             if (request.succeeded()) {
                 asyncTask.complete();
             } else {
@@ -235,7 +282,7 @@ public class V3ManifestVerticleTest {
         final Async asyncTask = aContext.async();
 
         message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, filePath)
-        .put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V3);
+                .put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V3);
         options.addHeader(Constants.ACTION, Op.POST_CSV);
 
         LOGGER.debug(MessageCodes.MFS_120, POSTCARDS, ManifestVerticle.class.getName());
@@ -270,7 +317,7 @@ public class V3ManifestVerticleTest {
         final Async asyncTask = aContext.async();
 
         message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, filePath)
-        .put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V3);
+                .put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V3);
         options.addHeader(Constants.ACTION, Op.POST_CSV);
 
         LOGGER.debug(MessageCodes.MFS_120, hathawayWorks, ManifestVerticle.class.getName());
@@ -297,7 +344,7 @@ public class V3ManifestVerticleTest {
         final Async asyncTask = aContext.async();
 
         message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, filePath)
-        .put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V3);
+                .put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V3);
         options.addHeader(Constants.ACTION, Op.POST_CSV);
 
         LOGGER.debug(MessageCodes.MFS_120, WORKS, ManifestVerticle.class.getName());
@@ -326,7 +373,7 @@ public class V3ManifestVerticleTest {
         final Async asyncTask = aContext.async();
 
         message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, filePath)
-        .put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V3);
+                .put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V3);
         message.put(Constants.IIIF_HOST, ImageInfoLookup.FAKE_IIIF_SERVER);
         options.addHeader(Constants.ACTION, Op.POST_CSV);
 
@@ -336,12 +383,12 @@ public class V3ManifestVerticleTest {
             if (request.succeeded()) {
                 try {
                     final FileSystem fileSystem = myVertx.fileSystem();
-                    final Function<JsonObject, String> getCanvasLabel = canvas -> canvas.getJsonObject("label")
-                            .getJsonArray("none").getString(0);
+                    final Function<JsonObject, String> getCanvasLabel =
+                            canvas -> canvas.getJsonObject("label").getJsonArray("none").getString(0);
 
                     @SuppressWarnings("unchecked")
-                    final List<String> expected = new JsonObject(fileSystem.readFileBlocking(expectedFile))
-                            .getJsonArray("labels").getList();
+                    final List<String> expected =
+                            new JsonObject(fileSystem.readFileBlocking(expectedFile)).getJsonArray("labels").getList();
                     final List<String> found = new JsonObject(fileSystem.readFileBlocking(foundFile))
                             .getJsonArray("items").stream().map(canvas -> getCanvasLabel.apply((JsonObject) canvas))
                             .collect(Collectors.toList());

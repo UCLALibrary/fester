@@ -42,7 +42,7 @@ import io.vertx.core.shareddata.Lock;
 import io.vertx.core.shareddata.SharedData;
 
 /**
- * A verticle to parse the incoming CSV data and hand the request off to the appropriate manifester.
+ * A verticle to parse the incoming CSV data and hand the request off to the appropriate manifestor.
  */
 public class ManifestVerticle extends AbstractFesterVerticle {
 

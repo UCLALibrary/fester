@@ -189,4 +189,5 @@
   <entry key="MFS-176">Found item '{}' with format '{}' in CSV '{}', but the access url has not been processed for Wowza</entry>
   <entry key="MFS-177">Test server was responsive: {}</entry>
   <entry key="MFS-178">Looking for test application's server port: {}</entry>
+  <entry key="MFS-179">A/V server URL substitution only supports up to one replacement: {}</entry>
 </properties>
