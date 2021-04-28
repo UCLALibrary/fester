@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -40,6 +42,7 @@ import info.freelibrary.iiif.presentation.v3.properties.behaviors.CanvasBehavior
 import info.freelibrary.iiif.presentation.v3.properties.behaviors.ManifestBehavior;
 import info.freelibrary.iiif.presentation.v3.services.ImageService2;
 
+import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.CsvHeaders;
 import edu.ucla.library.iiif.fester.CsvParser;
@@ -68,6 +71,8 @@ import io.vertx.core.json.JsonObject;
 public class V3ManifestVerticle extends AbstractFesterVerticle {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(V3ManifestVerticle.class, MessageCodes.BUNDLE);
+
+    private static final String SUBSTITUTION_PATTERN = "{}";
 
     private static final String MANIFEST_URI = "{}/{}/manifest";
 
@@ -226,7 +231,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
 
             pageList.sort(new ItemSequenceComparator(csvHeaders.getItemSequenceIndex()));
             canvases = createCanvases(csvHeaders, pageList, imageHost, placeholderImage, minter);
-            manifest.addCanvas(canvases);
+            manifest.addCanvases(canvases);
         } else {
             if (CsvParser.getMetadata(workRow, csvHeaders.getContentAccessUrlIndex()).isPresent() ||
                     CsvParser.getMetadata(workRow, csvHeaders.getContentAccessUrlIndex()).isPresent()) {
@@ -235,7 +240,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
 
                 pageList.add(workRow);
                 canvases = createCanvases(csvHeaders, pageList, imageHost, placeholderImage, minter);
-                manifest.addCanvas(canvases);
+                manifest.addCanvases(canvases);
             }
         }
 
@@ -320,7 +325,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         CsvParser.getMetadata(workRow, csvHeaders.getTitleIndex()).ifPresentOrElse(title -> {
             manifest.setLabel(new Label(title));
         }, () -> {
-            manifest.setLabel("");
+            manifest.setLabel(Constants.EMPTY);
         });
 
         CsvParser.getMetadata(workRow, csvHeaders.getViewingDirectionIndex()).ifPresentOrElse(viewingDirection -> {
@@ -342,11 +347,12 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         });
 
         CsvParser.getMetadata(workRow, csvHeaders.getLocalRightsStatementIndex())
-            .ifPresentOrElse(localRightsStatement -> {
-                manifest.setRequiredStatement(new RequiredStatement(MetadataLabels.ATTRIBUTION, localRightsStatement));
-            }, () -> {
-                manifest.clearRequiredStatement();
-            });
+                .ifPresentOrElse(localRightsStatement -> {
+                    manifest.setRequiredStatement(
+                            new RequiredStatement(MetadataLabels.ATTRIBUTION, localRightsStatement));
+                }, () -> {
+                    manifest.clearRequiredStatement();
+                });
 
         CsvParser.getMetadata(workRow, csvHeaders.getRightsContactIndex()).ifPresentOrElse(rightsContact -> {
             manifest.setMetadata(updateMetadata(manifest.getMetadata(), MetadataLabels.RIGHTS_CONTACT, rightsContact));
@@ -390,7 +396,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
 
         manifest.getCanvases().clear(); // Overwrite whatever canvases are on the manifest
         pagesList.sort(new ItemSequenceComparator(csvHeaders.getItemSequenceIndex()));
-        manifest.addCanvas(createCanvases(csvHeaders, pagesList, imageHost, placeholderImage, minter));
+        manifest.addCanvases(createCanvases(csvHeaders, pagesList, imageHost, placeholderImage, minter));
 
         jsonManifest = manifest.toJSON();
         message.put(Constants.DATA, jsonManifest);
@@ -427,49 +433,44 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
             final Optional<String> format = CsvParser.getMetadata(columns, aCsvHeaders.getMediaFormatIndex());
 
             final String encodedPageID = URLEncoder.encode(pageID, StandardCharsets.UTF_8);
-            final String pageURI;
             final Canvas canvas = new Canvas(aMinter, pageLabel);
+            final String pageURI;
             final int width;
             final int height;
             final float duration;
 
-            String resourceURI;
-
             // We've already validated the MIME type in CsvParser, so it's fine to just check for a substring here
             if (format.isPresent() && format.get().contains("video/")) {
-                final VideoContent video;
-
-                resourceURI = CsvParser.getMetadata(columns, aCsvHeaders.getContentAccessUrlIndex()).get();
-                video = new VideoContent(resourceURI);
+                final String resourceURI = CsvParser.getMetadata(columns, aCsvHeaders.getContentAccessUrlIndex()).get();
+                final VideoContent[] videos = getVideoContent(resourceURI);
 
                 // We've already validated these numeric values in CsvParser
                 width = Integer.parseInt(CsvParser.getMetadata(columns, aCsvHeaders.getMediaWidthIndex()).get());
                 height = Integer.parseInt(CsvParser.getMetadata(columns, aCsvHeaders.getMediaHeightIndex()).get());
                 duration = Float.parseFloat(CsvParser.getMetadata(columns, aCsvHeaders.getMediaDurationIndex()).get());
 
-                canvas.setWidthHeight(width, height).setDuration(duration).paintWith(aMinter, video);
+                canvas.setWidthHeight(width, height).setDuration(duration).paintWith(aMinter, videos);
             } else if (format.isPresent() && format.get().contains("audio/")) {
-                final SoundContent audio;
-
-                resourceURI = CsvParser.getMetadata(columns, aCsvHeaders.getContentAccessUrlIndex()).get();
-                audio = new SoundContent(resourceURI);
+                final String resourceURI = CsvParser.getMetadata(columns, aCsvHeaders.getContentAccessUrlIndex()).get();
+                final SoundContent[] audios = getSoundContent(resourceURI);
 
                 // We've already validated this numeric value in CsvParser
                 duration = Float.parseFloat(CsvParser.getMetadata(columns, aCsvHeaders.getMediaDurationIndex()).get());
 
-                canvas.setDuration(duration).paintWith(aMinter, audio);
+                canvas.setDuration(duration).paintWith(aMinter, audios);
             } else {
+                String resourceURI;
                 ImageContent image;
 
                 pageURI = StringUtils.format(SIMPLE_URI, aImageHost, encodedPageID);
+                resourceURI = StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, pageURI, Constants.DEFAULT_SAMPLE_SIZE);
 
+                // Try to look up the w/h but on failure, fall back to a placeholder image
                 try {
                     final ImageInfoLookup infoLookup = new ImageInfoLookup(pageURI);
 
-                    resourceURI =
-                            StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, pageURI, Constants.DEFAULT_SAMPLE_SIZE);
                     image = new ImageContent(resourceURI)
-                            .setServices(new ImageService2(ImageService2.Profile.TWO, pageURI));
+                            .setServices(new ImageService2(ImageService2.Profile.LEVEL_TWO, pageURI));
 
                     // Create a canvas using the width and height of the related image
                     canvas.setWidthHeight(infoLookup.getWidth(), infoLookup.getHeight()).paintWith(aMinter, image);
@@ -493,7 +494,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                             // If placeholder image found, use its URL for image resource and service
                             resourceURI = StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, aPlaceholderImage, size);
                             image = new ImageContent(resourceURI)
-                                    .setServices(new ImageService2(ImageService2.Profile.TWO, aPlaceholderImage));
+                                    .setServices(new ImageService2(ImageService2.Profile.LEVEL_TWO, aPlaceholderImage));
 
                             // Create a canvas using the width and height of the placeholder image
                             canvas.setWidthHeight(width, height).paintWith(aMinter, image);
@@ -513,11 +514,11 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
             }
 
             if (aCsvHeaders.hasViewingHintIndex()) {
-                final ObjectType objectType;
                 final String behavior = StringUtils.trimToNull(columns[aCsvHeaders.getViewingHintIndex()]);
 
                 try {
-                    objectType = CsvParser.getObjectType(columns, aCsvHeaders);
+                    final ObjectType objectType = CsvParser.getObjectType(columns, aCsvHeaders);
+
                     if (objectType == ObjectType.PAGE && behavior != null) {
                         canvas.setBehaviors(CanvasBehavior.fromString(behavior));
                     }
@@ -530,6 +531,71 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         }
 
         return canvases.toArray(new Canvas[] {});
+    }
+
+    private VideoContent[] getVideoContent(final String aResourceURI) {
+        final int substitutionCount = countSubstitutionPatterns(aResourceURI);
+        final VideoContent[] videos;
+
+        if (substitutionCount == 0) {
+            videos = new VideoContent[] { new VideoContent(aResourceURI) };
+        } else if (substitutionCount == 1) {
+            final String extsPattern = config().getString(Config.AV_URL_EXTENSIONS, Constants.EMPTY);
+            final String[] exts = extsPattern.split(Constants.COMMA);
+
+            videos = new VideoContent[exts.length];
+
+            for (int index = 0; index < videos.length; index++) {
+                videos[index] = new VideoContent(StringUtils.format(aResourceURI, exts[index]));
+            }
+        } else {
+            throw new UnsupportedOperationException(LOGGER.getMessage(MessageCodes.MFS_179, aResourceURI));
+        }
+
+        return videos;
+    }
+
+    private SoundContent[] getSoundContent(final String aResourceURI) {
+        final int substitutionCount = countSubstitutionPatterns(aResourceURI);
+        final SoundContent[] audios;
+
+        if (substitutionCount == 0) {
+            audios = new SoundContent[] { new SoundContent(aResourceURI) };
+        } else if (substitutionCount == 1) {
+            final String extsPattern = config().getString(Config.AV_URL_EXTENSIONS, Constants.EMPTY);
+            final String[] exts = extsPattern.split(Constants.COMMA);
+
+            audios = new SoundContent[exts.length];
+
+            for (int index = 0; index < audios.length; index++) {
+                audios[index] = new SoundContent(StringUtils.format(aResourceURI, exts[index]));
+            }
+        } else {
+            throw new UnsupportedOperationException(LOGGER.getMessage(MessageCodes.MFS_179, aResourceURI));
+        }
+
+        return audios;
+    }
+
+    /**
+     * Counts the number of substitution patterns in the supplied string.
+     *
+     * @param aString A string with substitution patterns (e.g. <code>{}</code>)
+     * @return The number of substitution patterns in the supplied string
+     */
+    private int countSubstitutionPatterns(final String aString) {
+        final Pattern pattern = Pattern.compile(SUBSTITUTION_PATTERN, Pattern.LITERAL);
+        final Matcher matcher = pattern.matcher(aString);
+
+        int startIndex = 0;
+        int count = 0;
+
+        while (matcher.find(startIndex)) {
+            startIndex = matcher.start() + 1;
+            count += 1;
+        }
+
+        return count;
     }
 
     /**

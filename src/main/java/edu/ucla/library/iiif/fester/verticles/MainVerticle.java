@@ -116,6 +116,7 @@ public class MainVerticle extends AbstractVerticle {
         final int cores = Runtime.getRuntime().availableProcessors();
 
         uploaderOptions.setConfig(aConfig);
+        manifestorOptions.setConfig(aConfig);
         manifestorOptions.setWorker(true).setWorkerPoolName(ManifestVerticle.class.getSimpleName());
         manifestorOptions.setWorkerPoolSize(cores > 2 ? cores - 2 : 1).setConfig(aConfig);
 
@@ -143,7 +144,7 @@ public class MainVerticle extends AbstractVerticle {
      * @param aPromise A promise to deploy the requested verticle
      */
     private Future<Void> deployVerticle(final String aVerticleName, final DeploymentOptions aOptions,
-        final Promise<Void> aPromise) {
+            final Promise<Void> aPromise) {
         vertx.deployVerticle(aVerticleName, aOptions, response -> {
             try {
                 final String verticleName = Class.forName(aVerticleName).getSimpleName();

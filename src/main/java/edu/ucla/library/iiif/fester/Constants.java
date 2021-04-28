@@ -98,6 +98,11 @@ public final class Constants {
     public static final String EMPTY = "";
 
     /**
+     * A delimiter for use in string parsing.
+     */
+    public static final String COMMA = ",";
+
+    /**
      * A regular expression representing end of line character(s).
      */
     public static final String EOL_REGEX = "\\r|\\n|\\r\\n";
@@ -285,10 +290,9 @@ public final class Constants {
     public static final String CONTEXT_V3 = "http://iiif.io/api/presentation/3/context.json";
 
     /**
-     * The default pattern for A/V URLs.
-     * .
+     * The default pattern for A/V URLs. .
      */
-    public static final String DEFAULT_AV_STRING = "mpd";
+    public static final String DEFAULT_AV_STRING = "mp4";
 
     /**
      * Private constructor for Constants class.
