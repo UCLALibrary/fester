@@ -154,7 +154,7 @@
     <!-- String that should be present in A/V access URLs -->
     <fester.av.string>https://wowza.library.ucla.edu/iiif_av_public/definst/mp4</fester.av.string>
 
-    <!-- Manifest types (e.g., MPD or HLS) that should be appended onto the fester.av.string before use -->
+    <!-- Comma-separated list of strings to fill any A/V access URL template strings with -->
     <fester.av.string.exts>/manifest.mpd,/playlist.m3u8</fester.av.string.exts>
 
     <!-- The version of Festerize that is compatible with this version of Fester -->
