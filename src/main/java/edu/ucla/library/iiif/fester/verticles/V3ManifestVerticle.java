@@ -435,7 +435,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
             final String encodedPageID = URLEncoder.encode(pageID, StandardCharsets.UTF_8);
             final Canvas canvas = new Canvas(aMinter, pageLabel);
             final String pageURI;
-            final String thumbnailURI;
+            final String thumbnail;
             final int width;
             final int height;
             final float duration;
@@ -445,27 +445,27 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                 final String resourceURI = CsvParser.getMetadata(columns, aCsvHeaders.getContentAccessUrlIndex()).get();
                 final VideoContent[] videos = getVideoContent(resourceURI);
 
-                thumbnailURI = StringUtils.trimTo(config().getString(Config.AV_DEFAULT_VIDEO_THUMBNAIL_URL),
-                        Constants.UCLA_VIDEO_THUMBNAIL_URL);
+                thumbnail = StringUtils.trimTo(config().getString(Config.AV_DEFAULT_VIDEO_THUMBNAIL),
+                        Constants.UCLA_VIDEO_THUMBNAIL);
 
                 // We've already validated these numeric values in CsvParser
                 width = Integer.parseInt(CsvParser.getMetadata(columns, aCsvHeaders.getMediaWidthIndex()).get());
                 height = Integer.parseInt(CsvParser.getMetadata(columns, aCsvHeaders.getMediaHeightIndex()).get());
                 duration = Float.parseFloat(CsvParser.getMetadata(columns, aCsvHeaders.getMediaDurationIndex()).get());
 
-                canvas.setWidthHeight(width, height).setDuration(duration).setThumbnails(new ImageContent(thumbnailURI));
+                canvas.setWidthHeight(width, height).setDuration(duration).setThumbnails(new ImageContent(thumbnail));
                 canvas.paintWith(aMinter, videos);
             } else if (format.isPresent() && format.get().contains("audio/")) {
                 final String resourceURI = CsvParser.getMetadata(columns, aCsvHeaders.getContentAccessUrlIndex()).get();
                 final SoundContent[] audios = getSoundContent(resourceURI);
 
-                thumbnailURI = StringUtils.trimTo(config().getString(Config.AV_DEFAULT_AUDIO_THUMBNAIL_URL),
-                        Constants.UCLA_AUDIO_THUMBNAIL_URL);
+                thumbnail = StringUtils.trimTo(config().getString(Config.AV_DEFAULT_AUDIO_THUMBNAIL),
+                        Constants.UCLA_AUDIO_THUMBNAIL);
 
                 // We've already validated this numeric value in CsvParser
                 duration = Float.parseFloat(CsvParser.getMetadata(columns, aCsvHeaders.getMediaDurationIndex()).get());
 
-                canvas.setDuration(duration).setThumbnails(new ImageContent(thumbnailURI));
+                canvas.setDuration(duration).setThumbnails(new ImageContent(thumbnail));
                 canvas.paintWith(aMinter, audios);
             } else {
                 String resourceURI;
