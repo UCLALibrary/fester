@@ -469,8 +469,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                 try {
                     final ImageInfoLookup infoLookup = new ImageInfoLookup(pageURI);
 
-                    image = new ImageContent(resourceURI)
-                            .setServices(new ImageService2(ImageService2.Profile.LEVEL_TWO, pageURI));
+                    image = new ImageContent(resourceURI).setServices(new ImageService2(pageURI));
 
                     // Create a canvas using the width and height of the related image
                     canvas.setWidthHeight(infoLookup.getWidth(), infoLookup.getHeight()).paintWith(aMinter, image);
@@ -493,8 +492,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
 
                             // If placeholder image found, use its URL for image resource and service
                             resourceURI = StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, aPlaceholderImage, size);
-                            image = new ImageContent(resourceURI)
-                                    .setServices(new ImageService2(ImageService2.Profile.LEVEL_TWO, aPlaceholderImage));
+                            image = new ImageContent(resourceURI).setServices(new ImageService2(aPlaceholderImage));
 
                             // Create a canvas using the width and height of the placeholder image
                             canvas.setWidthHeight(width, height).paintWith(aMinter, image);
