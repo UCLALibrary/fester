@@ -28,5 +28,11 @@ IIIF_BASE_URL=https://iiif.library.ucla.edu/iiif/2
 # String that should be present in A/V access URLs
 AV_URL_STRING=https://wowza.library.ucla.edu/iiif_av_public/
 
+# The URL of the default thumbnail image for Canvases with Sound content
+AV_DEFAULT_AUDIO_THUMBNAIL_URL=
+
+# The URL of the default thumbnail image for Canvases with Video content
+AV_DEFAULT_VIDEO_THUMBNAIL_URL=
+
 # The version of Festerize that is compatible with this version of Fester
 FESTERIZE_VERSION=

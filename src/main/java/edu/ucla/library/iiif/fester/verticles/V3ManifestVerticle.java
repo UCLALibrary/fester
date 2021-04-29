@@ -435,35 +435,37 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
             final String encodedPageID = URLEncoder.encode(pageID, StandardCharsets.UTF_8);
             final Canvas canvas = new Canvas(aMinter, pageLabel);
             final String pageURI;
+            final String thumbnailURI;
             final int width;
             final int height;
             final float duration;
-            final ImageContent thumbnail;
 
             // We've already validated the MIME type in CsvParser, so it's fine to just check for a substring here
             if (format.isPresent() && format.get().contains("video/")) {
                 final String resourceURI = CsvParser.getMetadata(columns, aCsvHeaders.getContentAccessUrlIndex()).get();
                 final VideoContent[] videos = getVideoContent(resourceURI);
 
+                thumbnailURI = StringUtils.trimTo(config().getString(Config.AV_DEFAULT_VIDEO_THUMBNAIL_URL),
+                        Constants.UCLA_VIDEO_THUMBNAIL_URL);
+
                 // We've already validated these numeric values in CsvParser
                 width = Integer.parseInt(CsvParser.getMetadata(columns, aCsvHeaders.getMediaWidthIndex()).get());
                 height = Integer.parseInt(CsvParser.getMetadata(columns, aCsvHeaders.getMediaHeightIndex()).get());
                 duration = Float.parseFloat(CsvParser.getMetadata(columns, aCsvHeaders.getMediaDurationIndex()).get());
 
-                thumbnail = new ImageContent(Constants.DEFAULT_VIDEO_THUMBNAIL_URL);
-
-                canvas.setWidthHeight(width, height).setDuration(duration).setThumbnails(thumbnail);
+                canvas.setWidthHeight(width, height).setDuration(duration).setThumbnails(new ImageContent(thumbnailURI));
                 canvas.paintWith(aMinter, videos);
             } else if (format.isPresent() && format.get().contains("audio/")) {
                 final String resourceURI = CsvParser.getMetadata(columns, aCsvHeaders.getContentAccessUrlIndex()).get();
                 final SoundContent[] audios = getSoundContent(resourceURI);
 
+                thumbnailURI = StringUtils.trimTo(config().getString(Config.AV_DEFAULT_AUDIO_THUMBNAIL_URL),
+                        Constants.UCLA_AUDIO_THUMBNAIL_URL);
+
                 // We've already validated this numeric value in CsvParser
                 duration = Float.parseFloat(CsvParser.getMetadata(columns, aCsvHeaders.getMediaDurationIndex()).get());
 
-                thumbnail = new ImageContent(Constants.DEFAULT_AUDIO_THUMBNAIL_URL);
-
-                canvas.setDuration(duration).setThumbnails(thumbnail);
+                canvas.setDuration(duration).setThumbnails(new ImageContent(thumbnailURI));
                 canvas.paintWith(aMinter, audios);
             } else {
                 String resourceURI;

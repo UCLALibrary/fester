@@ -297,13 +297,13 @@ public final class Constants {
     /**
      * The default thumbnail for audio content.
      */
-    public static final String DEFAULT_AUDIO_THUMBNAIL_URL =
+    public static final String UCLA_AUDIO_THUMBNAIL_URL =
             "https://prod-uclalibrary-resources.s3-us-west-2.amazonaws.com/audio_icon.svg";
 
     /**
      * The default thumbnail for video content.
      */
-    public static final String DEFAULT_VIDEO_THUMBNAIL_URL =
+    public static final String UCLA_VIDEO_THUMBNAIL_URL =
             "https://prod-uclalibrary-resources.s3-us-west-2.amazonaws.com/video_icon.svg";
 
     /**
