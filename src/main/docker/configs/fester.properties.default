@@ -28,6 +28,9 @@ IIIF_BASE_URL=https://iiif.library.ucla.edu/iiif/2
 # String that should be present in A/V access URLs
 AV_URL_STRING=https://wowza.library.ucla.edu/iiif_av_public/
 
+# Comma-separated list of strings to fill any A/V access URL template strings with
+AV_EXTS=/manifest.mpd,/playlist.m3u8
+
 # The URL of the default thumbnail image for Canvases with Sound content
 AV_DEFAULT_AUDIO_THUMBNAIL_URL=
 
