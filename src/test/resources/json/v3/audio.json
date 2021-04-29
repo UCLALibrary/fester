@@ -17,6 +17,13 @@
     },
     "id" : "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/canvas-wh66",
     "duration" : 1985.024,
+    "thumbnail" : [
+      {
+        "type" : "Image",
+        "id" : "https://prod-uclalibrary-resources.s3-us-west-2.amazonaws.com/audio_icon.svg",
+        "format" : "image/svg+xml"
+      }
+    ],
     "items" : [ 
 	  {
         "type" : "AnnotationPage",

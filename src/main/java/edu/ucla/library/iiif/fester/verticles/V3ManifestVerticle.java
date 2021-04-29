@@ -438,6 +438,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
             final int width;
             final int height;
             final float duration;
+            final ImageContent thumbnail;
 
             // We've already validated the MIME type in CsvParser, so it's fine to just check for a substring here
             if (format.isPresent() && format.get().contains("video/")) {
@@ -449,7 +450,10 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                 height = Integer.parseInt(CsvParser.getMetadata(columns, aCsvHeaders.getMediaHeightIndex()).get());
                 duration = Float.parseFloat(CsvParser.getMetadata(columns, aCsvHeaders.getMediaDurationIndex()).get());
 
-                canvas.setWidthHeight(width, height).setDuration(duration).paintWith(aMinter, videos);
+                thumbnail = new ImageContent(Constants.DEFAULT_VIDEO_THUMBNAIL_URL);
+
+                canvas.setWidthHeight(width, height).setDuration(duration).setThumbnails(thumbnail);
+                canvas.paintWith(aMinter, videos);
             } else if (format.isPresent() && format.get().contains("audio/")) {
                 final String resourceURI = CsvParser.getMetadata(columns, aCsvHeaders.getContentAccessUrlIndex()).get();
                 final SoundContent[] audios = getSoundContent(resourceURI);
@@ -457,7 +461,10 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                 // We've already validated this numeric value in CsvParser
                 duration = Float.parseFloat(CsvParser.getMetadata(columns, aCsvHeaders.getMediaDurationIndex()).get());
 
-                canvas.setDuration(duration).paintWith(aMinter, audios);
+                thumbnail = new ImageContent(Constants.DEFAULT_AUDIO_THUMBNAIL_URL);
+
+                canvas.setDuration(duration).setThumbnails(thumbnail);
+                canvas.paintWith(aMinter, audios);
             } else {
                 String resourceURI;
                 ImageContent image;
