@@ -51,6 +51,12 @@ public final class Config {
     /* A string to distinguish A/V access URLs from generic IIF access URLs */
     public static final String AV_URL_STRING = "fester.av.string";
 
+    /* The URL of the default thumbnail image for Canvases with Sound content */
+    public static final String DEFAULT_AUDIO_THUMBNAIL = "fester.av.default_audio_thumbnail.url";
+
+    /* The URL of the default thumbnail image for Canvases with Video content */
+    public static final String DEFAULT_VIDEO_THUMBNAIL = "fester.av.default_video_thumbnail.url";
+
     /* A string for different manifest versions which will be appended onto the generic AV_URL_STRING */
     public static final String AV_URL_EXTENSIONS = "fester.av.string.exts";
 

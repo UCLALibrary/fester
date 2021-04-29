@@ -19,6 +19,13 @@
       "width": 640,
       "height": 360,
       "duration": 1801.055,
+      "thumbnail" : [
+        {
+          "type" : "Image",
+          "id" : "https://prod-uclalibrary-resources.s3-us-west-2.amazonaws.com/video_icon.svg",
+          "format" : "image/svg+xml"
+        }
+      ],
       "items": [
         {
           "type": "AnnotationPage",

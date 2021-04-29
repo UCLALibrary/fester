@@ -435,6 +435,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
             final String encodedPageID = URLEncoder.encode(pageID, StandardCharsets.UTF_8);
             final Canvas canvas = new Canvas(aMinter, pageLabel);
             final String pageURI;
+            final String thumbnail;
             final int width;
             final int height;
             final float duration;
@@ -444,20 +445,28 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                 final String resourceURI = CsvParser.getMetadata(columns, aCsvHeaders.getContentAccessUrlIndex()).get();
                 final VideoContent[] videos = getVideoContent(resourceURI);
 
+                thumbnail = StringUtils.trimTo(config().getString(Config.DEFAULT_VIDEO_THUMBNAIL),
+                        Constants.UCLA_VIDEO_THUMBNAIL);
+
                 // We've already validated these numeric values in CsvParser
                 width = Integer.parseInt(CsvParser.getMetadata(columns, aCsvHeaders.getMediaWidthIndex()).get());
                 height = Integer.parseInt(CsvParser.getMetadata(columns, aCsvHeaders.getMediaHeightIndex()).get());
                 duration = Float.parseFloat(CsvParser.getMetadata(columns, aCsvHeaders.getMediaDurationIndex()).get());
 
-                canvas.setWidthHeight(width, height).setDuration(duration).paintWith(aMinter, videos);
+                canvas.setWidthHeight(width, height).setDuration(duration).setThumbnails(new ImageContent(thumbnail));
+                canvas.paintWith(aMinter, videos);
             } else if (format.isPresent() && format.get().contains("audio/")) {
                 final String resourceURI = CsvParser.getMetadata(columns, aCsvHeaders.getContentAccessUrlIndex()).get();
                 final SoundContent[] audios = getSoundContent(resourceURI);
 
+                thumbnail = StringUtils.trimTo(config().getString(Config.DEFAULT_AUDIO_THUMBNAIL),
+                        Constants.UCLA_AUDIO_THUMBNAIL);
+
                 // We've already validated this numeric value in CsvParser
                 duration = Float.parseFloat(CsvParser.getMetadata(columns, aCsvHeaders.getMediaDurationIndex()).get());
 
-                canvas.setDuration(duration).paintWith(aMinter, audios);
+                canvas.setDuration(duration).setThumbnails(new ImageContent(thumbnail));
+                canvas.paintWith(aMinter, audios);
             } else {
                 String resourceURI;
                 ImageContent image;
@@ -469,8 +478,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                 try {
                     final ImageInfoLookup infoLookup = new ImageInfoLookup(pageURI);
 
-                    image = new ImageContent(resourceURI)
-                            .setServices(new ImageService2(ImageService2.Profile.LEVEL_TWO, pageURI));
+                    image = new ImageContent(resourceURI).setServices(new ImageService2(pageURI));
 
                     // Create a canvas using the width and height of the related image
                     canvas.setWidthHeight(infoLookup.getWidth(), infoLookup.getHeight()).paintWith(aMinter, image);
@@ -493,8 +501,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
 
                             // If placeholder image found, use its URL for image resource and service
                             resourceURI = StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, aPlaceholderImage, size);
-                            image = new ImageContent(resourceURI)
-                                    .setServices(new ImageService2(ImageService2.Profile.LEVEL_TWO, aPlaceholderImage));
+                            image = new ImageContent(resourceURI).setServices(new ImageService2(aPlaceholderImage));
 
                             // Create a canvas using the width and height of the placeholder image
                             canvas.setWidthHeight(width, height).paintWith(aMinter, image);
