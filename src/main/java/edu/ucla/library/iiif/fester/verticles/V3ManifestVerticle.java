@@ -445,7 +445,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                 final String resourceURI = CsvParser.getMetadata(columns, aCsvHeaders.getContentAccessUrlIndex()).get();
                 final VideoContent[] videos = getVideoContent(resourceURI);
 
-                thumbnail = StringUtils.trimTo(config().getString(Config.AV_DEFAULT_VIDEO_THUMBNAIL),
+                thumbnail = StringUtils.trimTo(config().getString(Config.DEFAULT_VIDEO_THUMBNAIL),
                         Constants.UCLA_VIDEO_THUMBNAIL);
 
                 // We've already validated these numeric values in CsvParser
@@ -459,7 +459,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                 final String resourceURI = CsvParser.getMetadata(columns, aCsvHeaders.getContentAccessUrlIndex()).get();
                 final SoundContent[] audios = getSoundContent(resourceURI);
 
-                thumbnail = StringUtils.trimTo(config().getString(Config.AV_DEFAULT_AUDIO_THUMBNAIL),
+                thumbnail = StringUtils.trimTo(config().getString(Config.DEFAULT_AUDIO_THUMBNAIL),
                         Constants.UCLA_AUDIO_THUMBNAIL);
 
                 // We've already validated this numeric value in CsvParser
