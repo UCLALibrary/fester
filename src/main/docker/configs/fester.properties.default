@@ -32,10 +32,10 @@ AV_URL_STRING=https://wowza.library.ucla.edu/iiif_av_public/
 AV_EXTS=/manifest.mpd,/playlist.m3u8
 
 # The URL of the default thumbnail image for Canvases with Sound content
-AV_DEFAULT_AUDIO_THUMBNAIL_URL=https://prod-uclalibrary-resources.s3-us-west-2.amazonaws.com/audio_icon.svg
+AV_DEFAULT_AUDIO_THUMBNAIL_URL=
 
 # The URL of the default thumbnail image for Canvases with Video content
-AV_DEFAULT_VIDEO_THUMBNAIL_URL=https://prod-uclalibrary-resources.s3-us-west-2.amazonaws.com/video_icon.svg
+AV_DEFAULT_VIDEO_THUMBNAIL_URL=
 
 # The version of Festerize that is compatible with this version of Fester
 FESTERIZE_VERSION=
