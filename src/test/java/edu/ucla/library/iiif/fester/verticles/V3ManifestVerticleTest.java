@@ -32,7 +32,7 @@ import info.freelibrary.util.StringUtils;
 import info.freelibrary.iiif.presentation.v3.Manifest;
 import info.freelibrary.iiif.presentation.v3.properties.ViewingDirection;
 import info.freelibrary.iiif.presentation.v3.properties.behaviors.ManifestBehavior;
-import info.freelibrary.iiif.presentation.v3.utils.Manifestor;
+import info.freelibrary.iiif.presentation.v3.io.Manifestor;
 
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.ImageInfoLookup;
