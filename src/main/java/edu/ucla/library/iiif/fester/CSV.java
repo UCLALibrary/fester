@@ -91,6 +91,11 @@ public final class CSV {
      */
     public static final String MEDIA_FORMAT = "media.format";
 
+    /**
+     * The row's audio waveform URL.
+     */
+    public static final String WAVEFORM = "Waveform";
+
     private CSV() {
     }
 }

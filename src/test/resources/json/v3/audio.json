@@ -38,7 +38,14 @@
             "id" : "https://wowza.library.ucla.edu/iiif_av_public/audio/indiana/mahler-symphony-3/CD1/medium/128Kbps.mp4",
             "format" : "video/mp4"
           },
-          "target" : "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/canvas-wh66"
+          "target" : "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/canvas-wh66",
+          "seeAlso" : [
+          {
+            "type" : "Dataset",
+            "id" : "https://prod-uclalibrary-resources.s3-us-west-2.amazonaws.com/waveform.dat",
+            "format" : "application/octet-stream",
+            "profile" : "http://waveform.prototyping.bbc.co.uk"
+          } ]
         } ]
       } ]
   } ]
