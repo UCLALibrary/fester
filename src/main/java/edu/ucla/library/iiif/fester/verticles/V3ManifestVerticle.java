@@ -475,7 +475,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                 // Possibly modify the annotation created with the above call to paintWith
                 CsvParser.getMetadata(columns, aCsvHeaders.getWaveformIndex()).ifPresent(waveformURI -> {
                     final SeeAlso waveform = new SeeAlso(waveformURI, ResourceTypes.DATASET)
-                            .setProfile("http://waveform.prototyping.bbc.co.uk").setFormat(MediaType.OCTET_STREAM);
+                            .setProfile(Constants.AUDIOWAVEFORM_DATASET_PROFILE).setFormat(MediaType.OCTET_STREAM);
                     // This assumes that there is only one AnnotationPage (with only one Annotation) on the Canvas
                     final PaintingAnnotation anno = canvas.getPaintingPages().get(0).getAnnotations().get(0);
 
