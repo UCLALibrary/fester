@@ -309,7 +309,7 @@ public final class Constants {
     /**
      * The profile URI for Dataset resources created with the BBC's <code>audiowaveform</code> software.
      */
-    public static final String AUDIOWAVEFORM_DATASET_PROFILE = "http://waveform.prototyping.bbc.co.uk";
+    public static final String AUDIOWAVEFORM_DATASET = "http://waveform.prototyping.bbc.co.uk";
 
     /**
      * Private constructor for Constants class.
