@@ -30,7 +30,7 @@ public class V3CollectionItemLabelComparator implements Comparator<Collection.It
             return myComparator.compare(firstLabel, secondLabel);
         } else {
             // Sort Collections before Manifests
-            if (firstType.equals(Collection.Item.Type.Collection) && secondType.equals(Collection.Item.Type.Manifest)) {
+            if (firstType.equals(Collection.Item.Type.COLLECTION) && secondType.equals(Collection.Item.Type.MANIFEST)) {
                 return -1;
             } else {
                 return 1;

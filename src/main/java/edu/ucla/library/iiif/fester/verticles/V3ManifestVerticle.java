@@ -21,6 +21,7 @@ import java.util.stream.Stream;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.net.MediaType;
 
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
@@ -30,6 +31,8 @@ import info.freelibrary.iiif.presentation.v3.Canvas;
 import info.freelibrary.iiif.presentation.v3.Collection;
 import info.freelibrary.iiif.presentation.v3.ImageContent;
 import info.freelibrary.iiif.presentation.v3.Manifest;
+import info.freelibrary.iiif.presentation.v3.PaintingAnnotation;
+import info.freelibrary.iiif.presentation.v3.ResourceTypes;
 import info.freelibrary.iiif.presentation.v3.SoundContent;
 import info.freelibrary.iiif.presentation.v3.VideoContent;
 import info.freelibrary.iiif.presentation.v3.id.Minter;
@@ -37,10 +40,11 @@ import info.freelibrary.iiif.presentation.v3.id.MinterFactory;
 import info.freelibrary.iiif.presentation.v3.properties.Label;
 import info.freelibrary.iiif.presentation.v3.properties.Metadata;
 import info.freelibrary.iiif.presentation.v3.properties.RequiredStatement;
+import info.freelibrary.iiif.presentation.v3.properties.SeeAlso;
 import info.freelibrary.iiif.presentation.v3.properties.ViewingDirection;
 import info.freelibrary.iiif.presentation.v3.properties.behaviors.CanvasBehavior;
 import info.freelibrary.iiif.presentation.v3.properties.behaviors.ManifestBehavior;
-import info.freelibrary.iiif.presentation.v3.services.ImageService2;
+import info.freelibrary.iiif.presentation.v3.services.image.ImageService2;
 
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
@@ -157,7 +161,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
             final TypeReference<List<String[]>> listTypeRef = new TypeReference<>() {};
 
             for (final String[] workArray : mapper.readValue(manifests.get(), listTypeRef)) {
-                final Collection.Item item = new Collection.Item(Collection.Item.Type.Manifest,
+                final Collection.Item item = new Collection.Item(Collection.Item.Type.MANIFEST,
                         URI.create(workArray[0]), new Label(workArray[1]));
                 sortedSet.add(item);
             }
@@ -283,7 +287,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         worksMap.get(IDUtils.getResourceID(collection.getID())).stream().forEach(workArray -> {
             final URI manifestURI = URI.create(workArray[0]);
             final Label label = new Label(workArray[1]);
-            collectionItemMap.put(manifestURI, new Collection.Item(Collection.Item.Type.Manifest, manifestURI, label));
+            collectionItemMap.put(manifestURI, new Collection.Item(Collection.Item.Type.MANIFEST, manifestURI, label));
         });
 
         // Update the item list with the manifests in the map, ordered by their label
@@ -331,7 +335,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         CsvParser.getMetadata(workRow, csvHeaders.getViewingDirectionIndex()).ifPresentOrElse(viewingDirection -> {
             manifest.setViewingDirection(ViewingDirection.fromString(viewingDirection));
         }, () -> {
-            manifest.clearViewingDirection();
+            manifest.setViewingDirection(null);
         });
 
         CsvParser.getMetadata(workRow, csvHeaders.getViewingHintIndex()).ifPresentOrElse(behavior -> {
@@ -351,7 +355,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                     manifest.setRequiredStatement(
                             new RequiredStatement(MetadataLabels.ATTRIBUTION, localRightsStatement));
                 }, () -> {
-                    manifest.clearRequiredStatement();
+                    manifest.setRequiredStatement(null);
                 });
 
         CsvParser.getMetadata(workRow, csvHeaders.getRightsContactIndex()).ifPresentOrElse(rightsContact -> {
@@ -467,6 +471,16 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
 
                 canvas.setDuration(duration).setThumbnails(new ImageContent(thumbnail));
                 canvas.paintWith(aMinter, audios);
+
+                // Possibly modify the annotation created with the above call to paintWith
+                CsvParser.getMetadata(columns, aCsvHeaders.getWaveformIndex()).ifPresent(waveformURI -> {
+                    final SeeAlso waveform = new SeeAlso(waveformURI, ResourceTypes.DATASET)
+                            .setProfile(Constants.AUDIOWAVEFORM_DATASET).setFormat(MediaType.OCTET_STREAM);
+                    // This assumes that there is only one AnnotationPage (with only one Annotation) on the Canvas
+                    final PaintingAnnotation anno = canvas.getPaintingPages().get(0).getAnnotations().get(0);
+
+                    anno.setSeeAlsoRefs(waveform);
+                });
             } else {
                 String resourceURI;
                 ImageContent image;

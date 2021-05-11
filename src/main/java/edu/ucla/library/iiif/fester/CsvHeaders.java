@@ -94,6 +94,11 @@ public class CsvHeaders {
     private int myMediaFormatIndex = -1;
 
     /**
+     * The index position for the audio waveform URL column.
+     */
+    private int myWaveformIndex = -1;
+
+    /**
      * Create a new CSV headers object.
      *
      * @param aRow CSV header data
@@ -150,6 +155,9 @@ public class CsvHeaders {
                     break;
                 case CSV.MEDIA_FORMAT:
                     setMediaFormatIndex(index);
+                    break;
+                case CSV.WAVEFORM:
+                    setWaveformIndex(index);
                     break;
                 default:
                     // Our default is to ignore things we don't care about
@@ -654,6 +662,35 @@ public class CsvHeaders {
      */
     public boolean hasMediaFormatIndex() {
         return myMediaFormatIndex != -1;
+    }
+
+    /**
+     * Gets the audio waveform URL index position.
+     *
+     * @return The audio waveform URL index position
+     */
+    public int getWaveformIndex() {
+        return myWaveformIndex;
+    }
+
+    /**
+     * Sets the audio waveform URL index position.
+     *
+     * @param aWaveformIndex The position of the audio waveform URL header
+     * @return This CSV headers
+     */
+    public CsvHeaders setWaveformIndex(final int aWaveformIndex) {
+        myWaveformIndex = aWaveformIndex;
+        return this;
+    }
+
+    /**
+     * Checks whether there is a audio waveform URL index position
+     *
+     * @return True if there is a audio waveform URL index position; else, false
+     */
+    public boolean hasWaveformIndex() {
+        return myWaveformIndex != -1;
     }
 
     /**
