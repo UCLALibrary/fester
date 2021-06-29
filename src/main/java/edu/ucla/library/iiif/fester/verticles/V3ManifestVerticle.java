@@ -240,8 +240,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
             canvases = createCanvases(csvHeaders, pageList, imageHost, placeholderImage, minter);
             manifest.addCanvases(canvases);
         } else {
-            if (CsvParser.getMetadata(workRow, csvHeaders.getContentAccessUrlIndex()).isPresent() ||
-                    CsvParser.getMetadata(workRow, csvHeaders.getContentAccessUrlIndex()).isPresent()) {
+            if (CsvParser.getMetadata(workRow, csvHeaders.getContentAccessUrlIndex()).isPresent()) {
                 pageList = new ArrayList<>(1);
                 pageList.add(workRow);
                 canvases = createCanvases(csvHeaders, pageList, imageHost, placeholderImage, minter);
