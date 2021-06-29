@@ -46,5 +46,30 @@
         }
       ]
     }
-  ]
+  ],
+  "accompanyingCanvas": {
+    "type": "Canvas",
+    "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/canvas-xy4e",
+    "width": 129,
+    "height": 129,
+    "items": [
+      {
+        "type": "AnnotationPage",
+        "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/canvas-xy4e/anno-page-q0pi",
+        "items": [
+          {
+            "type": "Annotation",
+            "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/annotations/anno-n49z",
+            "motivation": "painting",
+            "body": {
+              "type": "Image",
+              "id":"https://prod-uclalibrary-resources.s3-us-west-2.amazonaws.com/video_icon.svg",
+              "format":"image/svg+xml"
+            },
+            "target": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/canvas-xy4e"
+          }
+        ]
+      }
+    ]
+  }
 }

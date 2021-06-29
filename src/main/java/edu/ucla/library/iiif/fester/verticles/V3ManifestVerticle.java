@@ -27,6 +27,7 @@ import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 import info.freelibrary.util.StringUtils;
 
+import info.freelibrary.iiif.presentation.v3.AccompanyingCanvas;
 import info.freelibrary.iiif.presentation.v3.Canvas;
 import info.freelibrary.iiif.presentation.v3.Collection;
 import info.freelibrary.iiif.presentation.v3.ImageContent;
@@ -207,6 +208,10 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         final DeliveryOptions options = new DeliveryOptions();
         final JsonObject message = new JsonObject();
         final JsonObject jsonManifest;
+        final List<String[]> pageList;
+        final Canvas[] canvases;
+        final Stream<Optional<String>> pageFormats;
+        final boolean addVideoAccompanyingCanvas;
 
         CsvParser.getMetadata(workRow, csvHeaders.getViewingDirectionIndex()).ifPresent(viewingDirection -> {
             manifest.setViewingDirection(ViewingDirection.fromString(viewingDirection));
@@ -230,22 +235,38 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
 
         // Check first for pages, then if the work itself is an image
         if (pagesMap.containsKey(workID)) {
-            final List<String[]> pageList = pagesMap.get(workID);
-            final Canvas[] canvases;
-
+            pageList = pagesMap.get(workID);
             pageList.sort(new ItemSequenceComparator(csvHeaders.getItemSequenceIndex()));
             canvases = createCanvases(csvHeaders, pageList, imageHost, placeholderImage, minter);
             manifest.addCanvases(canvases);
         } else {
             if (CsvParser.getMetadata(workRow, csvHeaders.getContentAccessUrlIndex()).isPresent() ||
                     CsvParser.getMetadata(workRow, csvHeaders.getContentAccessUrlIndex()).isPresent()) {
-                final List<String[]> pageList = new ArrayList<>(1);
-                final Canvas[] canvases;
-
+                pageList = new ArrayList<>(1);
                 pageList.add(workRow);
                 canvases = createCanvases(csvHeaders, pageList, imageHost, placeholderImage, minter);
                 manifest.addCanvases(canvases);
+            } else {
+                // This manifest will have zero canvases
+                pageList = new ArrayList<>(0);
             }
+        }
+
+        // Only add the video icon as an acccompanyingCanvas if all CSV rows representing the object have a video format
+        pageFormats = pageList.stream().map(pageRow -> {
+            return CsvParser.getMetadata(pageRow, csvHeaders.getMediaFormatIndex());
+        });
+        // Check the element count since Stream.allMatch returns true if the stream is empty
+        addVideoAccompanyingCanvas = pageList.size() > 0 &&
+                pageFormats.allMatch(format -> format.isPresent() && format.get().contains("video"));
+
+        if (addVideoAccompanyingCanvas) {
+            final AccompanyingCanvas accompanyingCanvas = new AccompanyingCanvas(minter);
+            final String videoIconURL = StringUtils.trimTo(config().getString(Config.DEFAULT_VIDEO_THUMBNAIL),
+                    Constants.UCLA_VIDEO_THUMBNAIL);
+
+            accompanyingCanvas.setWidthHeight(129, 129).paintWith(minter, new ImageContent(videoIconURL));
+            manifest.setAccompanyingCanvas(accompanyingCanvas);
         }
 
         jsonManifest = manifest.toJSON();
