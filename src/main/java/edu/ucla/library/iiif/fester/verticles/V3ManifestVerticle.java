@@ -239,16 +239,14 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
             pageList.sort(new ItemSequenceComparator(csvHeaders.getItemSequenceIndex()));
             canvases = createCanvases(csvHeaders, pageList, imageHost, placeholderImage, minter);
             manifest.addCanvases(canvases);
+        } else if (CsvParser.getMetadata(workRow, csvHeaders.getContentAccessUrlIndex()).isPresent()) {
+            pageList = new ArrayList<>(1);
+            pageList.add(workRow);
+            canvases = createCanvases(csvHeaders, pageList, imageHost, placeholderImage, minter);
+            manifest.addCanvases(canvases);
         } else {
-            if (CsvParser.getMetadata(workRow, csvHeaders.getContentAccessUrlIndex()).isPresent()) {
-                pageList = new ArrayList<>(1);
-                pageList.add(workRow);
-                canvases = createCanvases(csvHeaders, pageList, imageHost, placeholderImage, minter);
-                manifest.addCanvases(canvases);
-            } else {
-                // This manifest will have zero canvases
-                pageList = new ArrayList<>(0);
-            }
+            // This manifest will have zero canvases
+            pageList = new ArrayList<>(0);
         }
 
         // Only add the video icon as an acccompanyingCanvas if all CSV rows representing the object have a video format
