@@ -211,7 +211,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         final List<String[]> pageList;
         final Canvas[] canvases;
         final Stream<Optional<String>> pageFormats;
-        final boolean addVideoAccompanyingCanvas;
+        final boolean videoAccompanyingCanvas;
 
         CsvParser.getMetadata(workRow, csvHeaders.getViewingDirectionIndex()).ifPresent(viewingDirection -> {
             manifest.setViewingDirection(ViewingDirection.fromString(viewingDirection));
@@ -254,10 +254,10 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
             return CsvParser.getMetadata(pageRow, csvHeaders.getMediaFormatIndex());
         });
         // Check the element count since Stream.allMatch returns true if the stream is empty
-        addVideoAccompanyingCanvas = pageList.size() > 0 &&
+        videoAccompanyingCanvas = !pageList.isEmpty() &&
                 pageFormats.allMatch(format -> format.isPresent() && format.get().contains("video"));
 
-        if (addVideoAccompanyingCanvas) {
+        if (videoAccompanyingCanvas) {
             final AccompanyingCanvas accompanyingCanvas = new AccompanyingCanvas(minter);
             final String videoIconURL = StringUtils.trimTo(config().getString(Config.DEFAULT_VIDEO_THUMBNAIL),
                     Constants.UCLA_VIDEO_THUMBNAIL);
