@@ -34,11 +34,13 @@ public class GetStatusFT extends BaseFesterFT {
                 final JsonObject response = request.result().bodyAsJsonObject();
                 final String status = response.getString(Status.STATUS);
                 final JsonObject memory = response.getJsonObject(Status.MEMORY);
-                final long freeMemory = memory.getLong(Status.FREE_MEMORY);
-                final long totalMemory = memory.getLong(Status.TOTAL_MEMORY);
+                final String freeMemory = memory.getString(Status.FREE_MEMORY);
+                final String totalMemory = memory.getString(Status.TOTAL_MEMORY);
+                final String usedMemory = memory.getString(Status.USED_MEMORY);
 
                 aContext.assertEquals(Status.OK, status);
-                aContext.assertTrue(totalMemory > freeMemory);
+                aContext.assertTrue(freeMemory.contains(Constants.MB_STR) &&
+                    totalMemory.contains(Constants.MB_STR) && usedMemory.contains(Constants.MB_STR));
 
                 complete(asyncTask);
             } else {
@@ -46,5 +48,4 @@ public class GetStatusFT extends BaseFesterFT {
             }
         });
     }
-
 }

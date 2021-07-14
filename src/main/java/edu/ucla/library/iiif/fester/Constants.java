@@ -7,6 +7,11 @@ package edu.ucla.library.iiif.fester;
 public final class Constants {
 
     /**
+     * The name of a data type
+     */
+    public static final String MB_STR = "MB";
+
+    /**
      * ResourceBundle file name for I18n messages.
      */
     public static final String MESSAGES = "fester_messages";
@@ -96,6 +101,11 @@ public final class Constants {
      * Just a empty string, useful.
      */
     public static final String EMPTY = "";
+
+    /**
+     * Just a space, useful.
+     */
+    public static final String SPACE = " ";
 
     /**
      * A delimiter for use in string parsing.
