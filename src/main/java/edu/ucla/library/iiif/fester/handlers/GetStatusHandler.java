@@ -26,6 +26,8 @@ public class GetStatusHandler implements Handler<RoutingContext> {
 
     private static final double ERROR_PERCENT = 95.0D;
 
+    private static final String MB_STR = " MB";
+
     @Override
     public void handle(final RoutingContext aContext) {
         final HttpServerResponse response = aContext.response();
@@ -38,6 +40,9 @@ public class GetStatusHandler implements Handler<RoutingContext> {
             final long usedMem = totalMem - freeMem;
             final double percentMem = (double) usedMem / (double) totalMem * 100D;
             final JsonObject memory = new JsonObject();
+            final String totalMemStr = String.valueOf(totalMem) + MB_STR;
+            final String freeMemStr = String.valueOf(freeMem) + MB_STR;
+            final String usedMemStr = String.valueOf(usedMem) + MB_STR;
 
             if (percentMem >= WARN_PERCENT && percentMem < ERROR_PERCENT) {
                 status.put(Status.STATUS, Status.WARN);
@@ -47,8 +52,8 @@ public class GetStatusHandler implements Handler<RoutingContext> {
                 status.put(Status.STATUS, Status.OK);
             }
             status.put(Status.MEMORY, memory);
-            memory.put(Status.TOTAL_MEMORY, totalMem).put(Status.FREE_MEMORY, freeMem).put(Status.USED_MEMORY, usedMem)
-                    .put(Status.PERCENT_MEMORY, percentMem);
+            memory.put(Status.TOTAL_MEMORY, totalMemStr).put(Status.FREE_MEMORY, freeMemStr)
+                .put(Status.USED_MEMORY, usedMemStr).put(Status.PERCENT_MEMORY, percentMem);
 
             response.setStatusCode(200);
             response.putHeader(Constants.CONTENT_TYPE, Constants.JSON_MEDIA_TYPE).end(status.encodePrettily());
