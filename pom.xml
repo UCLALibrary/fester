@@ -73,7 +73,7 @@
     <ubuntu.tag>20.04</ubuntu.tag>
     <jdk.version>11.0.11+9-0ubuntu2~20.04</jdk.version>
     <python3.version>3.8.2-0ubuntu2</python3.version>
-    <curl.version>7.68.0-1ubuntu2.5</curl.version>
+    <curl.version>7.68.0-1ubuntu2.6</curl.version>
 
     <!-- Application dependencies -->
     <vertx.version>3.9.4</vertx.version>
