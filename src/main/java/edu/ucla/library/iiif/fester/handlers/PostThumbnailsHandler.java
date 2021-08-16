@@ -6,29 +6,38 @@ import static info.freelibrary.iiif.presentation.v2.utils.Constants.IMAGE_CONTEN
 import static info.freelibrary.iiif.presentation.v2.utils.Constants.RESOURCE;
 import static info.freelibrary.iiif.presentation.v2.utils.Constants.SEQUENCES;
 
-import static info.freelibrary.iiif.presentation.v3.Constants.BODY;
-import static info.freelibrary.iiif.presentation.v3.Constants.CONTEXT;
-import static info.freelibrary.iiif.presentation.v3.Constants.ITEMS;
-import static info.freelibrary.iiif.presentation.v3.Constants.SERVICE;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvException;
 
-import edu.ucla.library.iiif.fester.Config;
-import edu.ucla.library.iiif.fester.Constants;
-import edu.ucla.library.iiif.fester.CsvParser;
-import edu.ucla.library.iiif.fester.CsvParsingException;
-import edu.ucla.library.iiif.fester.CSV;
-import edu.ucla.library.iiif.fester.HTTP;
-import edu.ucla.library.iiif.fester.MessageCodes;
-import edu.ucla.library.iiif.fester.ObjectType;
-import edu.ucla.library.iiif.fester.utils.ThumbnailUtils;
-
 import info.freelibrary.util.IOUtils;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 import info.freelibrary.util.StringUtils;
+
+import info.freelibrary.iiif.presentation.v3.utils.JsonKeys;
+
+import edu.ucla.library.iiif.fester.CSV;
+import edu.ucla.library.iiif.fester.Config;
+import edu.ucla.library.iiif.fester.Constants;
+import edu.ucla.library.iiif.fester.CsvParser;
+import edu.ucla.library.iiif.fester.CsvParsingException;
+import edu.ucla.library.iiif.fester.HTTP;
+import edu.ucla.library.iiif.fester.MessageCodes;
+import edu.ucla.library.iiif.fester.ObjectType;
+import edu.ucla.library.iiif.fester.utils.ThumbnailUtils;
 
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
@@ -45,18 +54,6 @@ import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.client.predicate.ResponsePredicate;
 import io.vertx.ext.web.codec.BodyCodec;
-
-import java.io.IOException;
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Class to select and add thumbnail links to uploaded CSV
@@ -131,8 +128,8 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
                 @SuppressWarnings("rawtypes")
                 final List<Future> futures = new ArrayList<>();
                 for (int rowIndex = 1; rowIndex < linesWithThumbs.size(); rowIndex++) {
-                    final ObjectType rowType = CsvParser.getObjectType(
-                            linesWithThumbs.get(rowIndex), parser.getCsvHeaders());
+                    final ObjectType rowType =
+                            CsvParser.getObjectType(linesWithThumbs.get(rowIndex), parser.getCsvHeaders());
                     if (rowType.equals(ObjectType.WORK)) {
                         futures.add(processRow(linesWithThumbs, manifestIndex, rowIndex));
                     }
@@ -162,18 +159,15 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
         final String manifestURL = aCsvList.get(aRowIndex)[aManifestIndex];
         final Promise<Void> promise = Promise.promise();
         final HttpRequest<JsonObject> request;
-        request = WebClient.create(myVertx)
-                .getAbs(manifestURL)
-                .putHeader("Accept", Constants.JSON_MEDIA_TYPE)
-                .as(BodyCodec.jsonObject())
-                .expect(ResponsePredicate.SC_OK);
+        request = WebClient.create(myVertx).getAbs(manifestURL).putHeader("Accept", Constants.JSON_MEDIA_TYPE)
+                .as(BodyCodec.jsonObject()).expect(ResponsePredicate.SC_OK);
         if (manifestURL.startsWith("https")) {
             request.ssl(true);
         }
         request.send(asyncResult -> {
             if (asyncResult.succeeded()) {
                 final JsonObject manifestBody = asyncResult.result().body();
-                final String context = manifestBody.getString(CONTEXT);
+                final String context = manifestBody.getString(JsonKeys.CONTEXT);
                 final int thumbIndex = ThumbnailUtils.findThumbHeaderIndex(aCsvList.get(0));
                 if (context.contains(Constants.CONTEXT_V2)) {
                     addV2Thumb(thumbIndex, aRowIndex, manifestBody, aCsvList);
@@ -200,13 +194,12 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
      * @param aManifest A IIIF work manifest
      * @param aCsvList A CSV file parsed as a list of string arrays
      */
-    private void addV2Thumb(final int aColumnIndex, final int aRowIndex,
-            final JsonObject aManifest, final List<String[]> aCsvList) {
+    private void addV2Thumb(final int aColumnIndex, final int aRowIndex, final JsonObject aManifest,
+            final List<String[]> aCsvList) {
         final JsonArray canvases = aManifest.getJsonArray(SEQUENCES).getJsonObject(0).getJsonArray(CANVASES);
         final int canvasIndex = chooseThumbIndex(canvases.size());
-        final String thumbURL = canvases.getJsonObject(canvasIndex).getJsonArray(IMAGE_CONTENT)
-                .getJsonObject(0).getJsonObject(RESOURCE).getJsonObject(SERVICE)
-                .getString(Constants.ID_V2);
+        final String thumbURL = canvases.getJsonObject(canvasIndex).getJsonArray(IMAGE_CONTENT).getJsonObject(0)
+                .getJsonObject(RESOURCE).getJsonObject(JsonKeys.SERVICE).getString(Constants.ID_V2);
         ThumbnailUtils.addThumbnailURL(aColumnIndex, aRowIndex, thumbURL, aCsvList);
     }
 
@@ -218,15 +211,15 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
      * @param aManifest A IIIF work manifest
      * @param aCsvList A CSV file parsed as a list of string arrays
      */
-    private void addV3Thumb(final int aColumnIndex, final int aRowIndex,
-            final JsonObject aManifest, final List<String[]> aCsvList) {
+    private void addV3Thumb(final int aColumnIndex, final int aRowIndex, final JsonObject aManifest,
+            final List<String[]> aCsvList) {
 
-        final JsonArray canvases = aManifest.getJsonArray(ITEMS);
+        final JsonArray canvases = aManifest.getJsonArray(JsonKeys.ITEMS);
         final int canvasIndex = chooseThumbIndex(canvases.size());
         final JsonObject canvas = canvases.getJsonObject(canvasIndex);
-        final JsonObject image = canvas.getJsonArray(ITEMS).getJsonObject(0).getJsonArray(ITEMS)
-                .getJsonObject(0).getJsonObject(BODY);
-        final String thumbURL = image.getJsonArray(SERVICE).getJsonObject(0).getString(Constants.ID_V3);
+        final JsonObject image = canvas.getJsonArray(JsonKeys.ITEMS).getJsonObject(0).getJsonArray(JsonKeys.ITEMS)
+                .getJsonObject(0).getJsonObject(JsonKeys.BODY);
+        final String thumbURL = image.getJsonArray(JsonKeys.SERVICE).getJsonObject(0).getString(Constants.ID_V3);
 
         ThumbnailUtils.addThumbnailURL(aColumnIndex, aRowIndex, thumbURL, aCsvList);
     }

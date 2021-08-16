@@ -21,7 +21,6 @@ import java.util.stream.Stream;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.net.MediaType;
 
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
@@ -32,12 +31,13 @@ import info.freelibrary.iiif.presentation.v3.Canvas;
 import info.freelibrary.iiif.presentation.v3.Collection;
 import info.freelibrary.iiif.presentation.v3.ImageContent;
 import info.freelibrary.iiif.presentation.v3.Manifest;
+import info.freelibrary.iiif.presentation.v3.MediaType;
 import info.freelibrary.iiif.presentation.v3.PaintingAnnotation;
 import info.freelibrary.iiif.presentation.v3.ResourceTypes;
 import info.freelibrary.iiif.presentation.v3.SoundContent;
 import info.freelibrary.iiif.presentation.v3.VideoContent;
-import info.freelibrary.iiif.presentation.v3.id.Minter;
-import info.freelibrary.iiif.presentation.v3.id.MinterFactory;
+import info.freelibrary.iiif.presentation.v3.ids.Minter;
+import info.freelibrary.iiif.presentation.v3.ids.MinterFactory;
 import info.freelibrary.iiif.presentation.v3.properties.Label;
 import info.freelibrary.iiif.presentation.v3.properties.Metadata;
 import info.freelibrary.iiif.presentation.v3.properties.RequiredStatement;
@@ -250,9 +250,8 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         }
 
         // Only add the video icon as an acccompanyingCanvas if all CSV rows representing the object have a video format
-        pageFormats = pageList.stream().map(pageRow -> {
-            return CsvParser.getMetadata(pageRow, csvHeaders.getMediaFormatIndex());
-        });
+        pageFormats =
+                pageList.stream().map(pageRow -> CsvParser.getMetadata(pageRow, csvHeaders.getMediaFormatIndex()));
         // Check the element count since Stream.allMatch returns true if the stream is empty
         videoAccompanyingCanvas = !pageList.isEmpty() &&
                 pageFormats.allMatch(format -> format.isPresent() && format.get().contains("video"));
@@ -476,7 +475,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                 duration = Float.parseFloat(CsvParser.getMetadata(columns, aCsvHeaders.getMediaDurationIndex()).get());
 
                 canvas.setWidthHeight(width, height).setDuration(duration).setThumbnails(new ImageContent(thumbnail));
-                canvas.paintWith(aMinter, videos);
+                canvas.paintWith(aMinter, true, videos);
             } else if (format.isPresent() && format.get().contains("audio/")) {
                 final String resourceURI = CsvParser.getMetadata(columns, aCsvHeaders.getContentAccessUrlIndex()).get();
                 final SoundContent[] audios = getSoundContent(resourceURI);
@@ -488,12 +487,12 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                 duration = Float.parseFloat(CsvParser.getMetadata(columns, aCsvHeaders.getMediaDurationIndex()).get());
 
                 canvas.setDuration(duration).setThumbnails(new ImageContent(thumbnail));
-                canvas.paintWith(aMinter, audios);
+                canvas.paintWith(aMinter, true, audios);
 
                 // Possibly modify the annotation created with the above call to paintWith
                 CsvParser.getMetadata(columns, aCsvHeaders.getWaveformIndex()).ifPresent(waveformURI -> {
                     final SeeAlso waveform = new SeeAlso(waveformURI, ResourceTypes.DATASET)
-                            .setProfile(Constants.AUDIOWAVEFORM_DATASET).setFormat(MediaType.OCTET_STREAM);
+                            .setProfile(Constants.AUDIOWAVEFORM_DATASET).setFormat(MediaType.APPLICATION_OCTET_STREAM);
                     // This assumes that there is only one AnnotationPage (with only one Annotation) on the Canvas
                     final PaintingAnnotation anno = canvas.getPaintingPages().get(0).getAnnotations().get(0);
 
