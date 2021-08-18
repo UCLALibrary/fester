@@ -44,9 +44,7 @@ public class DeleteManifestHandlerTest extends AbstractFesterHandlerTest {
 
             if (response.statusCode() == HTTP.SUCCESS_NO_CONTENT) {
                 aContext.assertFalse(myS3Client.doesObjectExist(myS3Bucket, myManifestS3Key));
-                if (!asyncTask.isCompleted()) {
-                    asyncTask.complete();
-                }
+                complete(asyncTask);
             } else {
                 aContext.fail(LOGGER.getMessage(MessageCodes.MFS_004, HTTP.SUCCESS_NO_CONTENT, statusCode));
             }
@@ -72,9 +70,7 @@ public class DeleteManifestHandlerTest extends AbstractFesterHandlerTest {
                 aContext.fail(LOGGER.getMessage(MessageCodes.MFS_004, HTTP.NOT_FOUND, statusCode));
             }
 
-            if (!asyncTask.isCompleted()) {
-                asyncTask.complete();
-            }
+            complete(asyncTask);
         }).end();
     }
 
