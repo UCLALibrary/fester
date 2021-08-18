@@ -23,23 +23,20 @@ COPY docker-entrypoint.sh /usr/local/bin/
 COPY configs/${project.artifactId}.properties.tmpl /etc/${project.artifactId}/${project.artifactId}.properties.tmpl
 COPY configs/${project.artifactId}.properties.default \
     /etc/${project.artifactId}/${project.artifactId}.properties.default
-COPY configs/content-types.properties /etc/${project.artifactId}/content-types.properties
 
 RUN mkdir -p /var/log/${project.artifactId} /var/cache/${project.artifactId} \
     /usr/local/${project.artifactId}/file-uploads /etc/${project.artifactId} \
  && touch /etc/${project.artifactId}/${project.artifactId}.properties \
  && chown -R ${project.artifactId} /var/log/${project.artifactId} /var/cache/${project.artifactId} \
     /usr/local/${project.artifactId}/file-uploads /etc/${project.artifactId} \
-    /etc/${project.artifactId}/${project.artifactId}.properties /etc/${project.artifactId}/content-types.properties \
-    /usr/local/bin/docker-entrypoint.sh
+    /etc/${project.artifactId}/${project.artifactId}.properties /usr/local/bin/docker-entrypoint.sh
 
 USER ${project.artifactId}
 ENTRYPOINT ["docker-entrypoint.sh"]
 ENV CACHE_DIR="-Dvertx.cacheDirBase=/tmp"
 ENV CONFIG_FILE="-Dvertx-config-path=/etc/${project.artifactId}/${project.artifactId}.properties"
-ENV CONTENT_TYPES="-Dcontent.types.user.table=/etc/${project.artifactId}/content-types.properties"
 ENV JAVA_TOOL_OPTIONS="${jdwp.client.config}"
 ENV JAR_PATH="/usr/local/${project.artifactId}/${project.artifactId}-${project.version}.jar"
-CMD ["sh", "-c", "java $CACHE_DIR $CONFIG_FILE $CONTENT_TYPES -Xmx2g -jar $JAR_PATH $LOGBACK_PATH"]
+CMD ["sh", "-c", "java $CACHE_DIR $CONFIG_FILE -Xmx2g -jar $JAR_PATH $LOGBACK_PATH"]
 
 EXPOSE ${fester.http.port}

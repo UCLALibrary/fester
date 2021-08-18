@@ -549,7 +549,6 @@
           <runArgs>
             <runArg>-Dvertx-config-path=${project.basedir}/target/test-classes/test-config.properties</runArg>
             <runArg>-Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.SLF4JLogDelegateFactory</runArg>
-            <runArg>-Dcontent.types.user.table=src/main/docker/configs/content-types.properties</runArg>
           </runArgs>
         </configuration>
       </plugin>
@@ -1070,7 +1069,6 @@
                 <fester.url>${fester.url}</fester.url>
                 <fester.http.port>${http.port}</fester.http.port>
                 <vertx-config-path>${project.basedir}/target/test-classes/test-config.properties</vertx-config-path>
-                <content.types.user.table>${project.basedir}/src/main/docker/configs/content-types.properties</content.types.user.table>
               </systemPropertyVariables>
               <argLine>${jacoco.agent.arg}</argLine>
               <skipTests>${skipUTs}</skipTests>
