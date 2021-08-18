@@ -144,11 +144,11 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
                     myS3Bucket = config.getString(Config.S3_BUCKET);
 
                     LOGGER.debug(MessageCodes.MFS_067, getClass().getName());
-                    asyncTask.complete();
+                    complete(asyncTask);
                 });
             } else {
                 aContext.fail(getConfig.cause());
-                asyncTask.complete();
+                complete(asyncTask);
             }
         });
     }
@@ -180,7 +180,7 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
                     myAmazonS3.deleteObject(myS3Bucket, myCollectionS3Key);
                 }
 
-                async.complete();
+                complete(async);
             }
         });
     }
@@ -222,9 +222,7 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
                 if (send.succeeded()) {
                     aContext.assertEquals(expected, send.result().body());
 
-                    if (!asyncTask.isCompleted()) {
-                        asyncTask.complete();
-                    }
+                    complete(asyncTask);
                 } else {
                     aContext.fail(send.cause());
                 }
@@ -275,10 +273,7 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
                     aContext.fail(details);
                 }
 
-                // If the assertion passed, we need to complete our task
-                if (!asyncTask.isCompleted()) {
-                    asyncTask.complete();
-                }
+                complete(asyncTask);
             } else {
                 aContext.fail(send.cause());
             }
@@ -330,13 +325,21 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
                     aContext.fail(details);
                 }
 
-                // If the assertion passed, we need to complete our task
-                if (!asyncTask.isCompleted()) {
-                    asyncTask.complete();
-                }
+                complete(asyncTask);
             } else {
                 aContext.fail(send.cause());
             }
         });
+    }
+
+    /**
+     * Completes an asynchronous task.
+     *
+     * @param aAsyncTask An asynchronous task
+     */
+    protected void complete(final Async aAsyncTask) {
+        if (!aAsyncTask.isCompleted()) {
+            aAsyncTask.complete();
+        }
     }
 }

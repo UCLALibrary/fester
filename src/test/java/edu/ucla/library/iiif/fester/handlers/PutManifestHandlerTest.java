@@ -100,7 +100,7 @@ public class PutManifestHandlerTest extends AbstractFesterHandlerTest {
             switch (statusCode) {
                 case HTTP.OK:
                     aContext.assertTrue(myS3Client.doesObjectExist(myS3Bucket, myPutManifestS3Key));
-                    asyncTask.complete();
+                    complete(asyncTask);
 
                     break;
                 default:
@@ -134,9 +134,8 @@ public class PutManifestHandlerTest extends AbstractFesterHandlerTest {
                 if (statusCode == HTTP.BAD_REQUEST) {
                     aContext.assertFalse(myS3Client.doesObjectExist(myS3Bucket, myPutManifestS3Key));
 
-                    if (!asyncTask.isCompleted()) {
-                        asyncTask.complete();
-                    }
+                    complete(asyncTask);
+
                 } else {
                     aContext.fail(LOGGER.getMessage(MessageCodes.MFS_019, statusCode));
                 }
@@ -174,7 +173,7 @@ public class PutManifestHandlerTest extends AbstractFesterHandlerTest {
                 case HTTP.UNSUPPORTED_MEDIA_TYPE:
                 case HTTP.METHOD_NOT_ALLOWED:
                     aContext.assertFalse(myS3Client.doesObjectExist(myS3Bucket, myPutManifestS3Key));
-                    asyncTask.complete();
+                    complete(asyncTask);
 
                     break;
                 default:
