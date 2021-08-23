@@ -151,17 +151,6 @@ abstract class AbstractFesterHandlerTest {
     }
 
     /**
-     * Completes an asynchronous task.
-     *
-     * @param aAsyncTask An asynchronous task
-     */
-    protected void complete(final Async aAsyncTask) {
-        if (!aAsyncTask.isCompleted()) {
-            aAsyncTask.complete();
-        }
-    }
-
-    /**
      * Deploy Fester to test against.
      *
      * @param aContext A test context

@@ -63,15 +63,4 @@ abstract class AbstractFesterFIT {
         myWebClient.close();
     }
 
-    /**
-     * Completes an asynchronous task.
-     *
-     * @param aAsyncTask An asynchronous task
-     */
-    protected void complete(final Async aAsyncTask) {
-        if (!aAsyncTask.isCompleted()) {
-            aAsyncTask.complete();
-        }
-    }
-
 }

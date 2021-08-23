@@ -19,6 +19,7 @@ import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
+import edu.ucla.library.iiif.fester.utils.TestUtils;
 
 import ch.qos.logback.classic.Level;
 import io.vertx.core.buffer.Buffer;
@@ -102,9 +103,7 @@ public class PutCollectionHandlerTest extends AbstractFesterHandlerTest {
                             final JsonObject found = new JsonObject(body);
                             aContext.assertEquals(expected, found);
 
-                            if (!asyncTask.isCompleted()) {
-                                asyncTask.complete();
-                            }
+                            TestUtils.complete(asyncTask);
                         });
                     } else {
                         aContext.fail(LOGGER.getMessage(MessageCodes.MFS_140, myPutCollectionID));
@@ -144,9 +143,7 @@ public class PutCollectionHandlerTest extends AbstractFesterHandlerTest {
                     setLogLevel(GetCollectionHandler.class, logLevel); // Turn logger back on after expected error
                     aContext.assertFalse(myS3Client.doesObjectExist(myS3Bucket, myPutCollectionS3Key));
 
-                    if (!asyncTask.isCompleted()) {
-                        asyncTask.complete();
-                    }
+                    TestUtils.complete(asyncTask);
                 } else {
                     aContext.fail(LOGGER.getMessage(MessageCodes.MFS_019, manifestPath, statusCode));
                 }
@@ -191,9 +188,7 @@ public class PutCollectionHandlerTest extends AbstractFesterHandlerTest {
                         setLogLevel(GetCollectionHandler.class, logLevel); // Turn logger back on after expected error
 
                         if (getStatusCode == HTTP.NOT_FOUND) {
-                            if (!asyncTask.isCompleted()) {
-                                asyncTask.complete();
-                            }
+                            TestUtils.complete(asyncTask);
                         } else if (getStatusCode == HTTP.OK) {
                             aContext.fail(LOGGER.getMessage(MessageCodes.MFS_141, myPutCollectionID));
                         } else {

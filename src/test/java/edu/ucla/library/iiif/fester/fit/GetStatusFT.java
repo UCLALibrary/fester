@@ -6,6 +6,8 @@ import org.junit.runner.RunWith;
 
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.Status;
+import edu.ucla.library.iiif.fester.utils.TestUtils;
+
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -42,7 +44,7 @@ public class GetStatusFT extends BaseFesterFT {
                 aContext.assertTrue(freeMemory.contains(Constants.MB_STR) &&
                     totalMemory.contains(Constants.MB_STR) && usedMemory.contains(Constants.MB_STR));
 
-                complete(asyncTask);
+                TestUtils.complete(asyncTask);
             } else {
                 aContext.fail(request.cause());
             }

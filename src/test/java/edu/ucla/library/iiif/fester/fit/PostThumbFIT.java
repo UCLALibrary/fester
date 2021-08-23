@@ -8,6 +8,7 @@ import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.utils.ThumbnailUtilsTest;
+import edu.ucla.library.iiif.fester.utils.TestUtils;
 
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
@@ -87,7 +88,7 @@ public class PostThumbFIT {
                         }
 
                         aContext.assertEquals(Constants.CSV_MEDIA_TYPE, contentType);
-                        complete(asyncTask);
+                        TestUtils.complete(asyncTask);
                     } else {
                         aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, statusCode, statusMessage));
                     }
@@ -105,7 +106,8 @@ public class PostThumbFIT {
          *
          * @param aContext A test context
          */
-        @Test
+        // @Test
+        @Test(timeout = 1000l)
         public final void testV3ThumbCSV(final TestContext aContext) {
             final Async asyncTask = aContext.async();
 
@@ -129,7 +131,7 @@ public class PostThumbFIT {
                         }
 
                         aContext.assertEquals(Constants.CSV_MEDIA_TYPE, contentType);
-                        complete(asyncTask);
+                        TestUtils.complete(asyncTask);
                     } else {
                         aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, statusCode, statusMessage));
                     }

@@ -173,7 +173,7 @@ public class PostCsvFIT {
 
                         // Check that what we get back has the correct media type
                         aContext.assertEquals(Constants.CSV_MEDIA_TYPE, contentType);
-                        complete(asyncTask);
+                        TestUtils.complete(asyncTask);
                     } else {
                         aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, statusCode, statusMessage));
                     }
@@ -209,7 +209,7 @@ public class PostCsvFIT {
                     aContext.assertTrue(response.statusMessage().startsWith(
                             "CSV data contains a forbidden hard return: Minasian (Caro) Collection of Persian"));
 
-                    complete(asyncTask);
+                    TestUtils.complete(asyncTask);
                 } else {
                     aContext.fail(post.cause());
                 }
@@ -230,7 +230,7 @@ public class PostCsvFIT {
                     final HttpResponse<Buffer> response = post.result();
 
                     aContext.assertEquals(HTTP.CREATED, response.statusCode(), response.statusMessage());
-                    complete(asyncTask);
+                    TestUtils.complete(asyncTask);
                 } else {
                     aContext.fail(post.cause());
                 }
@@ -279,7 +279,7 @@ public class PostCsvFIT {
 
                         // Check that what we get back has the correct media type
                         aContext.assertEquals(Constants.CSV_MEDIA_TYPE, contentType);
-                        complete(asyncTask);
+                        TestUtils.complete(asyncTask);
                     } else {
                         aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, statusCode, statusMessage));
                     }
@@ -330,7 +330,7 @@ public class PostCsvFIT {
 
                         // Check that what we get back has the correct media type
                         aContext.assertEquals(Constants.CSV_MEDIA_TYPE, contentType);
-                        complete(asyncTask);
+                        TestUtils.complete(asyncTask);
                     } else {
                         aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, statusCode, statusMessage));
                     }
@@ -365,7 +365,7 @@ public class PostCsvFIT {
                     aContext.assertEquals(response.getHeader(Constants.CONTENT_TYPE), Constants.HTML_MEDIA_TYPE);
                     aContext.assertTrue(response.bodyAsString().contains(expectedErrorMessage));
 
-                    complete(asyncTask);
+                    TestUtils.complete(asyncTask);
                 } else {
                     final Throwable exception = post.cause();
 
@@ -415,7 +415,7 @@ public class PostCsvFIT {
                                     aContext.fail(LOGGER.getMessage(MessageCodes.MFS_134, filePath, timerDelay));
                                 }
 
-                                complete(asyncTask);
+                                TestUtils.complete(asyncTask);
                             });
                         } else {
                             aContext.fail(LOGGER.getMessage(MessageCodes.MFS_135, FILE_PATH_REGEX, statusMessage));
@@ -475,7 +475,7 @@ public class PostCsvFIT {
                                         aContext.assertTrue(comparator.compare(work1, work2) < 0);
                                     }
 
-                                    complete(asyncTask);
+                                    TestUtils.complete(asyncTask);
                                 } else {
                                     aContext.fail(LOGGER.getMessage(MessageCodes.MFS_097, s3Key, getStatusMessage));
                                 }
@@ -529,7 +529,7 @@ public class PostCsvFIT {
                         } else {
                             aContext.fail(LOGGER.getMessage(MessageCodes.MFS_154, VIDEO_CSV));
                         }
-                        complete(asyncTask);
+                        TestUtils.complete(asyncTask);
                     } else {
                         aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, statusCode, statusMessage));
                     }
@@ -574,7 +574,7 @@ public class PostCsvFIT {
                         } else {
                             aContext.fail(LOGGER.getMessage(MessageCodes.MFS_154, VIDEO_MPD_CSV));
                         }
-                        complete(asyncTask);
+                        TestUtils.complete(asyncTask);
                     } else {
                         aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, statusCode, statusMessage));
                     }
@@ -605,7 +605,7 @@ public class PostCsvFIT {
                     aContext.assertEquals(statusCode, HTTP.BAD_REQUEST);
                     aContext.assertTrue(statusMessage.contains(VIDEO_MISSING_ERROR));
 
-                    complete(asyncTask);
+                    TestUtils.complete(asyncTask);
                 } else {
                     final Throwable exception = post.cause();
 
@@ -632,7 +632,7 @@ public class PostCsvFIT {
 
                     aContext.assertEquals(statusCode, HTTP.BAD_REQUEST);
                     aContext.assertTrue(statusMessage.contains(AV_MALFORMED_ERROR));
-                    complete(asyncTask);
+                    TestUtils.complete(asyncTask);
                 } else {
                     final Throwable exception = post.cause();
 
@@ -659,7 +659,7 @@ public class PostCsvFIT {
 
                     aContext.assertEquals(statusCode, HTTP.BAD_REQUEST);
                     aContext.assertTrue(statusMessage.contains(AV_VERSION_ERROR));
-                    complete(asyncTask);
+                    TestUtils.complete(asyncTask);
                 } else {
                     final Throwable exception = post.cause();
 
@@ -700,7 +700,7 @@ public class PostCsvFIT {
                         } else {
                             aContext.fail(LOGGER.getMessage(MessageCodes.MFS_154, AUDIO_CSV));
                         }
-                        complete(asyncTask);
+                        TestUtils.complete(asyncTask);
                     } else {
                         aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, statusCode, statusMessage));
                     }
@@ -731,7 +731,7 @@ public class PostCsvFIT {
                     aContext.assertEquals(statusCode, HTTP.BAD_REQUEST);
                     aContext.assertTrue(statusMessage.contains(AUDIO_MISSING_ERROR));
 
-                    complete(asyncTask);
+                    TestUtils.complete(asyncTask);
                 } else {
                     final Throwable exception = post.cause();
 
@@ -758,7 +758,7 @@ public class PostCsvFIT {
 
                     aContext.assertEquals(statusCode, HTTP.BAD_REQUEST);
                     aContext.assertTrue(statusMessage.contains(AV_MALFORMED_ERROR));
-                    complete(asyncTask);
+                    TestUtils.complete(asyncTask);
                 } else {
                     final Throwable exception = post.cause();
 
@@ -785,7 +785,7 @@ public class PostCsvFIT {
 
                     aContext.assertEquals(statusCode, HTTP.BAD_REQUEST);
                     aContext.assertTrue(statusMessage.contains(AUDIO_UNNEEDED_ERROR));
-                    complete(asyncTask);
+                    TestUtils.complete(asyncTask);
                 } else {
                     final Throwable exception = post.cause();
 
@@ -812,7 +812,7 @@ public class PostCsvFIT {
 
                     aContext.assertEquals(statusCode, HTTP.BAD_REQUEST);
                     aContext.assertTrue(statusMessage.contains(AV_VERSION_ERROR));
-                    complete(asyncTask);
+                    TestUtils.complete(asyncTask);
                 } else {
                     final Throwable exception = post.cause();
 
@@ -842,7 +842,7 @@ public class PostCsvFIT {
                     aContext.assertEquals(HTTP.BAD_REQUEST, response.statusCode());
                     aContext.assertTrue(response.body().toString().contains("Festerize is outdated, please upgrade"));
 
-                    complete(asyncTask);
+                    TestUtils.complete(asyncTask);
                 } else {
                     aContext.fail(post.cause());
                 }

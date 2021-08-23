@@ -73,7 +73,7 @@ public class GetManifestFIT {
                         aContext.fail(LOGGER.getMessage(MessageCodes.MFS_004, HTTP.OK, statusCode));
                     }
 
-                    complete(asyncTask);
+                    TestUtils.complete(asyncTask);
                 } else {
                     aContext.fail(request.cause());
                 }
@@ -101,7 +101,7 @@ public class GetManifestFIT {
                         aContext.fail(LOGGER.getMessage(MessageCodes.MFS_004, HTTP.NOT_FOUND, statusCode));
                     }
 
-                    complete(asyncTask);
+                    TestUtils.complete(asyncTask);
                 } else {
                     aContext.fail(request.cause());
                 }
@@ -151,7 +151,7 @@ public class GetManifestFIT {
                         aContext.fail(LOGGER.getMessage(MessageCodes.MFS_004, HTTP.OK, statusCode));
                     }
 
-                    complete(asyncTask);
+                    TestUtils.complete(asyncTask);
                 } else {
                     aContext.fail(request.cause());
                 }
@@ -179,7 +179,7 @@ public class GetManifestFIT {
                         aContext.fail(LOGGER.getMessage(MessageCodes.MFS_004, HTTP.NOT_FOUND, statusCode));
                     }
 
-                    complete(asyncTask);
+                    TestUtils.complete(asyncTask);
                 } else {
                     aContext.fail(request.cause());
                 }

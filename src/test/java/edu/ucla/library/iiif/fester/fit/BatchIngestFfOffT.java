@@ -12,6 +12,8 @@ import info.freelibrary.util.LoggerFactory;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
+import edu.ucla.library.iiif.fester.utils.TestUtils;
+
 import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -47,7 +49,7 @@ public class BatchIngestFfOffT extends BaseFesterFfT {
                         aContext.assertEquals(HTTP.SERVICE_UNAVAILABLE, response.statusCode());
                         aContext.assertEquals(expectedStatusMessage, response.statusMessage());
 
-                        complete(asyncTask);
+                        TestUtils.complete(asyncTask);
                     } else {
                         aContext.fail(request.cause());
                     }
@@ -75,7 +77,7 @@ public class BatchIngestFfOffT extends BaseFesterFfT {
                     aContext.fail(LOGGER.getMessage(MessageCodes.MFS_087));
                 }
 
-                complete(asyncTask);
+                TestUtils.complete(asyncTask);
             } else {
                 aContext.fail(request.cause());
             }

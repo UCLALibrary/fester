@@ -73,7 +73,7 @@ public class PutManifestFIT {
                         aContext.fail(LOGGER.getMessage(MessageCodes.MFS_018, myID, response.statusMessage()));
                     }
 
-                    complete(asyncTask);
+                    TestUtils.complete(asyncTask);
                 } else {
                     aContext.fail(put.cause());
                 }
@@ -117,7 +117,7 @@ public class PutManifestFIT {
                         aContext.fail(LOGGER.getMessage(MessageCodes.MFS_018, myID, response.statusMessage()));
                     }
 
-                    complete(asyncTask);
+                    TestUtils.complete(asyncTask);
                 } else {
                     aContext.fail(put.cause());
                 }

@@ -18,6 +18,7 @@ import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
+import edu.ucla.library.iiif.fester.utils.TestUtils;
 
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.RequestOptions;
@@ -100,7 +101,7 @@ public class PutManifestHandlerTest extends AbstractFesterHandlerTest {
             switch (statusCode) {
                 case HTTP.OK:
                     aContext.assertTrue(myS3Client.doesObjectExist(myS3Bucket, myPutManifestS3Key));
-                    complete(asyncTask);
+                    TestUtils.complete(asyncTask);
 
                     break;
                 default:
@@ -134,7 +135,7 @@ public class PutManifestHandlerTest extends AbstractFesterHandlerTest {
                 if (statusCode == HTTP.BAD_REQUEST) {
                     aContext.assertFalse(myS3Client.doesObjectExist(myS3Bucket, myPutManifestS3Key));
 
-                    complete(asyncTask);
+                    TestUtils.complete(asyncTask);
 
                 } else {
                     aContext.fail(LOGGER.getMessage(MessageCodes.MFS_019, statusCode));
@@ -173,7 +174,7 @@ public class PutManifestHandlerTest extends AbstractFesterHandlerTest {
                 case HTTP.UNSUPPORTED_MEDIA_TYPE:
                 case HTTP.METHOD_NOT_ALLOWED:
                     aContext.assertFalse(myS3Client.doesObjectExist(myS3Bucket, myPutManifestS3Key));
-                    complete(asyncTask);
+                    TestUtils.complete(asyncTask);
 
                     break;
                 default:

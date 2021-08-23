@@ -21,6 +21,7 @@ import info.freelibrary.iiif.presentation.v2.Manifest;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
+import edu.ucla.library.iiif.fester.utils.TestUtils;
 
 import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
@@ -175,8 +176,6 @@ public class PagesManifestFT extends BaseFesterFT {
             aContext.assertEquals(CANVAS_COUNTS[index], manifest.getSequences().get(0).getCanvases().size());
         }
 
-        if (!aAsyncTask.isCompleted()) {
-            aAsyncTask.complete();
-        }
+        TestUtils.complete(aAsyncTask);
     }
 }
