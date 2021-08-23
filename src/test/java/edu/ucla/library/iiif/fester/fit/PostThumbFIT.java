@@ -1,8 +1,21 @@
 
 package edu.ucla.library.iiif.fester.fit;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.List;
+
+import org.junit.Ignore;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
+
+import info.freelibrary.util.Logger;
+import info.freelibrary.util.LoggerFactory;
 
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
@@ -10,28 +23,18 @@ import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.utils.ThumbnailUtilsTest;
 import edu.ucla.library.iiif.fester.utils.TestUtils;
 
-import info.freelibrary.util.Logger;
-import info.freelibrary.util.LoggerFactory;
-
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.Timeout;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.multipart.MultipartForm;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.List;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
 /**
- * Tests related to adding thumbnail  data to a CSV file.
+ * Tests related to adding thumbnail data to a CSV file.
  */
 public class PostThumbFIT {
 
@@ -59,12 +62,16 @@ public class PostThumbFIT {
     @RunWith(VertxUnitRunner.class)
     public static class PostThumbFT extends BaseFesterFT {
 
+        @Rule
+        public Timeout myTimeout = Timeout.seconds(600);
+
         /**
          * Tests the V2 thumbnail workflow by posting a CSV.
          *
          * @param aContext A test context
          */
         @Test
+        @Ignore
         public final void testV2ThumbCSV(final TestContext aContext) {
             final Async asyncTask = aContext.async();
 
@@ -106,8 +113,8 @@ public class PostThumbFIT {
          *
          * @param aContext A test context
          */
-        // @Test
-        @Test(timeout = 1000l)
+        @Test
+        @Ignore
         public final void testV3ThumbCSV(final TestContext aContext) {
             final Async asyncTask = aContext.async();
 
@@ -151,13 +158,11 @@ public class PostThumbFIT {
          * @param aHandler A handler to handle the result of the post
          */
         private void postCSV(final File aTestFile, final Handler<AsyncResult<HttpResponse<Buffer>>> aHandler) {
-            final MultipartForm form =
-                    MultipartForm.create()
-                            .textFileUpload(Constants.CSV_FILE, aTestFile.getName(), aTestFile.getAbsolutePath(),
-                                    Constants.CSV_MEDIA_TYPE);
+            final MultipartForm form = MultipartForm.create().textFileUpload(Constants.CSV_FILE, aTestFile.getName(),
+                    aTestFile.getAbsolutePath(), Constants.CSV_MEDIA_TYPE);
 
-            myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST,
-                             Constants.POST_THUMB_ROUTE).sendMultipartForm(form, aHandler);
+            myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_THUMB_ROUTE)
+                    .sendMultipartForm(form, aHandler);
         }
 
         /**

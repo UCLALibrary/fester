@@ -30,9 +30,10 @@ import info.freelibrary.util.RegexDirFilter;
 import info.freelibrary.util.StringUtils;
 
 import info.freelibrary.iiif.presentation.v3.Manifest;
+import info.freelibrary.iiif.presentation.v3.PaintingAnnotation;
 import info.freelibrary.iiif.presentation.v3.properties.ViewingDirection;
 import info.freelibrary.iiif.presentation.v3.properties.behaviors.ManifestBehavior;
-import info.freelibrary.iiif.presentation.v3.io.Manifestor;
+import info.freelibrary.iiif.presentation.v3.utils.Manifestor;
 
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.ImageInfoLookup;
@@ -250,6 +251,11 @@ public class V3ManifestVerticleTest {
         myVertx.eventBus().request(ManifestVerticle.class.getName(), message, options, request -> {
             final Buffer fileBuffer = myVertx.fileSystem().readFileBlocking(outputFile);
             final String json = fileBuffer.toString(StandardCharsets.UTF_8);
+            final PaintingAnnotation annotation =
+                    Manifest.fromString(json).getCanvases().get(0).getPaintingPages().get(0).getAnnotations().get(0);
+
+            // Make sure the painting annotation has a choice
+            assertTrue(annotation.bodyHasChoice());
 
             // Make sure we added Pairtree paths for the streaming choice
             assertTrue(json.contains("21198=zz002hdsj2/ark%2B=21198=zz002hdsj2.mp4/manifest.mpd"));

@@ -17,7 +17,6 @@ import org.junit.runner.RunWith;
 
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
-
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 
