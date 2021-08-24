@@ -11,6 +11,7 @@ import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.Status;
+import edu.ucla.library.iiif.fester.utils.TestUtils;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
@@ -50,9 +51,7 @@ public class CheckEndpointsHandlerTest extends AbstractFesterHandlerTest {
                     aContext.assertEquals(HTTP.OK, response.statusCode());
                     aContext.assertEquals(Status.OK, response.body().getValue(Status.STATUS));
 
-                    if (!asyncTask.isCompleted()) {
-                        asyncTask.complete();
-                    }
+                    TestUtils.complete(asyncTask);
                 } else {
                     aContext.fail(ar.cause());
                 }

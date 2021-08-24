@@ -32,6 +32,7 @@ import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
+import edu.ucla.library.iiif.fester.utils.TestUtils;
 
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.DeploymentOptions;
@@ -144,11 +145,11 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
                     myS3Bucket = config.getString(Config.S3_BUCKET);
 
                     LOGGER.debug(MessageCodes.MFS_067, getClass().getName());
-                    asyncTask.complete();
+                    TestUtils.complete(asyncTask);
                 });
             } else {
                 aContext.fail(getConfig.cause());
-                asyncTask.complete();
+                TestUtils.complete(asyncTask);
             }
         });
     }
@@ -180,7 +181,7 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
                     myAmazonS3.deleteObject(myS3Bucket, myCollectionS3Key);
                 }
 
-                async.complete();
+                TestUtils.complete(async);
             }
         });
     }
@@ -222,9 +223,7 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
                 if (send.succeeded()) {
                     aContext.assertEquals(expected, send.result().body());
 
-                    if (!asyncTask.isCompleted()) {
-                        asyncTask.complete();
-                    }
+                    TestUtils.complete(asyncTask);
                 } else {
                     aContext.fail(send.cause());
                 }
@@ -275,10 +274,7 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
                     aContext.fail(details);
                 }
 
-                // If the assertion passed, we need to complete our task
-                if (!asyncTask.isCompleted()) {
-                    asyncTask.complete();
-                }
+                TestUtils.complete(asyncTask);
             } else {
                 aContext.fail(send.cause());
             }
@@ -330,13 +326,11 @@ public class S3BucketVerticleTest extends AbstractFesterVerticle {
                     aContext.fail(details);
                 }
 
-                // If the assertion passed, we need to complete our task
-                if (!asyncTask.isCompleted()) {
-                    asyncTask.complete();
-                }
+                TestUtils.complete(asyncTask);
             } else {
                 aContext.fail(send.cause());
             }
         });
     }
+
 }

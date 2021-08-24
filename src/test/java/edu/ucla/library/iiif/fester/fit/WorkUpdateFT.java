@@ -23,6 +23,7 @@ import edu.ucla.library.iiif.fester.MetadataLabels;
 import edu.ucla.library.iiif.fester.utils.ManifestTestUtils;
 import edu.ucla.library.iiif.fester.utils.V2ManifestTestUtils;
 import edu.ucla.library.iiif.fester.utils.V3ManifestTestUtils;
+import edu.ucla.library.iiif.fester.utils.TestUtils;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -97,7 +98,7 @@ public class WorkUpdateFT extends BaseFesterFT {
         setupManifest(v2ManifestTestUtils.getApiVersion()).compose(outcome -> checkManifest(v2ManifestTestUtils))
                 .compose(outcome -> {
                     LOGGER.debug(MessageCodes.MFS_165, v2ManifestTestUtils.getApiVersion());
-                    return Future.future(handle -> complete(asyncTask));
+                    return Future.future(handle -> TestUtils.complete(asyncTask));
                 });
     }
 
@@ -114,7 +115,7 @@ public class WorkUpdateFT extends BaseFesterFT {
         setupManifest(v3ManifestTestUtils.getApiVersion()).compose(outcome -> checkManifest(v3ManifestTestUtils))
                 .compose(outcome -> {
                     LOGGER.debug(MessageCodes.MFS_165, v3ManifestTestUtils.getApiVersion());
-                    return Future.future(handle -> complete(asyncTask));
+                    return Future.future(handle -> TestUtils.complete(asyncTask));
                 });
 
     }

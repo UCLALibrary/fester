@@ -13,6 +13,7 @@ import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
+import edu.ucla.library.iiif.fester.utils.TestUtils;
 
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -44,7 +45,7 @@ public class DeleteManifestHandlerTest extends AbstractFesterHandlerTest {
 
             if (response.statusCode() == HTTP.SUCCESS_NO_CONTENT) {
                 aContext.assertFalse(myS3Client.doesObjectExist(myS3Bucket, myManifestS3Key));
-                asyncTask.complete();
+                TestUtils.complete(asyncTask);
             } else {
                 aContext.fail(LOGGER.getMessage(MessageCodes.MFS_004, HTTP.SUCCESS_NO_CONTENT, statusCode));
             }
@@ -70,9 +71,7 @@ public class DeleteManifestHandlerTest extends AbstractFesterHandlerTest {
                 aContext.fail(LOGGER.getMessage(MessageCodes.MFS_004, HTTP.NOT_FOUND, statusCode));
             }
 
-            if (!asyncTask.isCompleted()) {
-                asyncTask.complete();
-            }
+            TestUtils.complete(asyncTask);
         }).end();
     }
 

@@ -40,6 +40,7 @@ import edu.ucla.library.iiif.fester.ImageInfoLookup;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
+import edu.ucla.library.iiif.fester.utils.TestUtils;
 
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.CompositeFuture;
@@ -136,7 +137,7 @@ public class V3ManifestVerticleTest {
                         if (map.containsKey(deploymentKey)) {
                             try {
                                 myJsonFiles = getS3TempDir(map.get(deploymentKey));
-                                asyncTask.complete();
+                                TestUtils.complete(asyncTask);
                             } catch (final FileNotFoundException details) {
                                 aContext.fail(details);
                             }
@@ -192,9 +193,7 @@ public class V3ManifestVerticleTest {
                 aContext.assertEquals(paged, manifest.getJsonArray("behavior").getString(0));
                 aContext.assertEquals(rightToLeft, manifest.getString("viewingDirection"));
 
-                if (!asyncTask.isCompleted()) {
-                    asyncTask.complete();
-                }
+                TestUtils.complete(asyncTask);
             } else {
                 aContext.fail(request.cause());
             }
@@ -222,7 +221,7 @@ public class V3ManifestVerticleTest {
 
         myVertx.eventBus().request(ManifestVerticle.class.getName(), message, options, request -> {
             if (request.succeeded()) {
-                asyncTask.complete();
+                TestUtils.complete(asyncTask);
             } else {
                 aContext.fail(request.cause());
             }
@@ -267,7 +266,7 @@ public class V3ManifestVerticleTest {
             assertTrue(json.contains("application/dash+xml"));
 
             if (request.succeeded()) {
-                asyncTask.complete();
+                TestUtils.complete(asyncTask);
             } else {
                 aContext.fail(request.cause());
             }
@@ -300,9 +299,7 @@ public class V3ManifestVerticleTest {
                 // Check that the canvas was added to this sequence
                 aContext.assertEquals(1, foundManifest.getCanvases().size());
 
-                if (!asyncTask.isCompleted()) {
-                    asyncTask.complete();
-                }
+                TestUtils.complete(asyncTask);
             } else {
                 aContext.fail(request.cause());
             }
@@ -330,7 +327,7 @@ public class V3ManifestVerticleTest {
 
         myVertx.eventBus().request(ManifestVerticle.class.getName(), message, options, request -> {
             if (request.succeeded()) {
-                asyncTask.complete();
+                TestUtils.complete(asyncTask);
             } else {
                 aContext.fail(request.cause());
             }
@@ -357,7 +354,7 @@ public class V3ManifestVerticleTest {
 
         myVertx.eventBus().request(ManifestVerticle.class.getName(), message, options, request -> {
             if (request.succeeded()) {
-                asyncTask.complete();
+                TestUtils.complete(asyncTask);
             } else {
                 aContext.fail(request.cause());
             }
@@ -405,9 +402,7 @@ public class V3ManifestVerticleTest {
                     aContext.fail(details.getCause());
                 }
 
-                if (!asyncTask.isCompleted()) {
-                    asyncTask.complete();
-                }
+                TestUtils.complete(asyncTask);
             } else {
                 aContext.fail(request.cause());
             }

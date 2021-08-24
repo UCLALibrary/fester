@@ -25,6 +25,7 @@ import info.freelibrary.iiif.presentation.v2.Sequence;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
+import edu.ucla.library.iiif.fester.utils.TestUtils;
 
 import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
@@ -176,8 +177,6 @@ public class MissingImageFT extends BaseFesterFT {
         aContext.assertEquals(PLACEHOLDER_SAMPLE_URL, image.getID().toString());
         aContext.assertEquals(PLACEHOLDER_URL, image.getService().get().getID().toString());
 
-        if (!aAsyncTask.isCompleted()) {
-            aAsyncTask.complete();
-        }
+        TestUtils.complete(aAsyncTask);
     }
 }

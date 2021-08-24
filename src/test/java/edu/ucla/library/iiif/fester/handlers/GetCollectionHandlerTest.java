@@ -14,6 +14,7 @@ import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
+import edu.ucla.library.iiif.fester.utils.TestUtils;
 
 import ch.qos.logback.classic.Level;
 import io.vertx.core.buffer.Buffer;
@@ -61,9 +62,7 @@ public class GetCollectionHandlerTest extends AbstractFesterHandlerTest {
                     aContext.fail(LOGGER.getMessage(MessageCodes.MFS_003, HTTP.OK, statusCode));
                 }
 
-                if (!asyncTask.isCompleted()) {
-                    asyncTask.complete();
-                }
+                TestUtils.complete(asyncTask);
             } else {
                 aContext.fail(handler.cause());
             }
@@ -92,9 +91,7 @@ public class GetCollectionHandlerTest extends AbstractFesterHandlerTest {
                 aContext.fail(LOGGER.getMessage(MessageCodes.MFS_004, HTTP.NOT_FOUND, statusCode));
             }
 
-            if (!asyncTask.isCompleted()) {
-                asyncTask.complete();
-            }
+            TestUtils.complete(asyncTask);
         });
     }
 }

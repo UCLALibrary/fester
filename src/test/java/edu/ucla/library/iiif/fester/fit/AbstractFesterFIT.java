@@ -13,7 +13,6 @@ import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 
 import io.vertx.core.Vertx;
-import io.vertx.ext.unit.Async;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.client.WebClientOptions;
 
@@ -61,17 +60,6 @@ abstract class AbstractFesterFIT {
     @After
     public void cleanUpTest() {
         myWebClient.close();
-    }
-
-    /**
-     * Completes an asynchronous task.
-     *
-     * @param aAsyncTask An asynchronous task
-     */
-    protected void complete(final Async aAsyncTask) {
-        if (!aAsyncTask.isCompleted()) {
-            aAsyncTask.complete();
-        }
     }
 
 }

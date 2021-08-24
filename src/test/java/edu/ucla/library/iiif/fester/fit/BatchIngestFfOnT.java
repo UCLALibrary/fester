@@ -12,6 +12,7 @@ import info.freelibrary.util.LoggerFactory;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
+import edu.ucla.library.iiif.fester.utils.TestUtils;
 
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -43,7 +44,7 @@ public class BatchIngestFfOnT extends BaseFesterFfT {
                     if (request.succeeded()) {
                         // Check that we get a 201 response code
                         aContext.assertEquals(HTTP.CREATED, request.result().statusCode());
-                        complete(asyncTask);
+                        TestUtils.complete(asyncTask);
                     } else {
                         aContext.fail(request.cause());
                     }
@@ -71,7 +72,7 @@ public class BatchIngestFfOnT extends BaseFesterFfT {
                     aContext.fail(LOGGER.getMessage(MessageCodes.MFS_087));
                 }
 
-                complete(asyncTask);
+                TestUtils.complete(asyncTask);
             } else {
                 aContext.fail(request.cause());
             }
