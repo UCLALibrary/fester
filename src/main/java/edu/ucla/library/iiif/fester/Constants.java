@@ -282,11 +282,13 @@ public final class Constants {
     /**
      * The string template of default thumbnail URIs.
      */
-    public static final String THUMBNAIL_URI_TEMPLATE = "{}/full/{}/0/default.jpg";
+    @SuppressWarnings({ "PMD.LongVariable" })
+    public static final String IIIF_THUMBNAIL_URI_TEMPLATE = "{}/full/{}/0/default.jpg";
 
     /**
      * The default size of thumbnail images.
      */
+    @SuppressWarnings({ "PMD.LongVariable" })
     public static final String DEFAULT_IMAGE_THUMBNAIL_SIZE = "!200,200";
 
     /**

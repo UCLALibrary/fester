@@ -507,7 +507,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
 
                 pageURI = StringUtils.format(SIMPLE_URI, aImageHost, encodedPageID);
                 resourceURI = StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, pageURI, Constants.DEFAULT_SAMPLE_SIZE);
-                thumbnail = StringUtils.format(Constants.THUMBNAIL_URI_TEMPLATE, pageURI, imageThumbnailSize);
+                thumbnail = StringUtils.format(Constants.IIIF_THUMBNAIL_URI_TEMPLATE, pageURI, imageThumbnailSize);
 
                 // Try to look up the w/h but on failure, fall back to a placeholder image
                 try {
