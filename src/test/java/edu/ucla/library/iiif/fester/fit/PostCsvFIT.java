@@ -67,7 +67,11 @@ public class PostCsvFIT {
 
     private static final String HATHAWAY_COLLECTION_ARK = "ark:/21198/zz0009gsq9";
 
+    private static final String HATHAWAY_SECOND_WORK_ARK = "ark:/21198/zz000bjdtv";
+
     private static final File HATHAWAY_COLLECTION_MANIFEST = new File(DIR, "json/v2/ark%3A%2F21198%2Fzz0009gsq9.json");
+
+    private static final File HATHAWAY_SECOND_MANIFEST = new File(DIR, "json/v3/ark%3A%2F21198%2Fzz000bjdtv.json");
 
     private static final File BLANK_LINE_CSV = new File(DIR, "csv/blankline.csv");
 
@@ -812,6 +816,52 @@ public class PostCsvFIT {
                     aContext.assertEquals(statusCode, HTTP.BAD_REQUEST);
                     aContext.assertTrue(statusMessage.contains(AV_VERSION_ERROR));
                     TestUtils.complete(asyncTask);
+                } else {
+                    final Throwable exception = post.cause();
+
+                    LOGGER.error(exception, exception.getMessage());
+                    aContext.fail(exception);
+                }
+            });
+        }
+
+        /**
+         * Tests submitting a CSV with image objects with IIIF Presentation API 3 specified. The resulting Manifests
+         * should have thumbnails on the Canvases.
+         *
+         * @param aContext A test context
+         */
+        @Test
+        public final void testImageCanvasThumbnailsV3(final TestContext aContext) {
+            final Async asyncTask = aContext.async();
+
+            postCSV(ALL_IN_ONE_CSV, Constants.IIIF_API_V3, post -> {
+                if (post.succeeded()) {
+                    final HttpResponse<Buffer> response = post.result();
+                    final int statusCode = response.statusCode();
+                    final String statusMessage = response.statusMessage();
+
+                    if (statusCode == HTTP.CREATED) {
+                        // Just check the second manifest, since another test already uses the first manifest
+                        final Optional<JsonObject> optJsonObject = checkS3(HATHAWAY_SECOND_WORK_ARK, false);
+
+                        if (optJsonObject.isPresent()) {
+                            try {
+                                final JsonObject expected = readJsonFile(HATHAWAY_SECOND_MANIFEST);
+                                final JsonObject found = optJsonObject.get();
+
+                                aContext.assertTrue(TestUtils.manifestsAreEffectivelyEqual(expected, found));
+                            } catch (final IOException details) {
+                                LOGGER.error(details, details.getMessage());
+                                aContext.fail(details);
+                            }
+                        } else {
+                            aContext.fail(LOGGER.getMessage(MessageCodes.MFS_154, ALL_IN_ONE_CSV));
+                        }
+                        TestUtils.complete(asyncTask);
+                    } else {
+                        aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, statusCode, statusMessage));
+                    }
                 } else {
                     final Throwable exception = post.cause();
 

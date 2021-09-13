@@ -453,13 +453,16 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
             final String pageLabel = columns[aCsvHeaders.getTitleIndex()];
             final Optional<String> format = CsvParser.getMetadata(columns, aCsvHeaders.getMediaFormatIndex());
 
+            final String imageThumbnailSize = StringUtils.trimTo(
+                    config().getString(Config.DEFAULT_IMAGE_THUMBNAIL_SIZE), Constants.DEFAULT_IMAGE_THUMBNAIL_SIZE);
             final String encodedPageID = URLEncoder.encode(pageID, StandardCharsets.UTF_8);
             final Canvas canvas = new Canvas(aMinter, pageLabel);
             final String pageURI;
             final String thumbnail;
-            final int width;
-            final int height;
             final float duration;
+
+            int width;
+            int height;
 
             // We've already validated the MIME type in CsvParser, so it's fine to just check for a substring here
             if (format.isPresent() && format.get().contains("video/")) {
@@ -504,15 +507,19 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
 
                 pageURI = StringUtils.format(SIMPLE_URI, aImageHost, encodedPageID);
                 resourceURI = StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, pageURI, Constants.DEFAULT_SAMPLE_SIZE);
+                thumbnail = StringUtils.format(Constants.THUMBNAIL_URI_TEMPLATE, pageURI, imageThumbnailSize);
 
                 // Try to look up the w/h but on failure, fall back to a placeholder image
                 try {
                     final ImageInfoLookup infoLookup = new ImageInfoLookup(pageURI);
 
+                    width = infoLookup.getWidth();
+                    height = infoLookup.getHeight();
                     image = new ImageContent(resourceURI).setServices(new ImageService2(pageURI));
 
                     // Create a canvas using the width and height of the related image
-                    canvas.setWidthHeight(infoLookup.getWidth(), infoLookup.getHeight()).paintWith(aMinter, image);
+                    canvas.setWidthHeight(width, height).setThumbnails(new ImageContent(thumbnail));
+                    canvas.paintWith(aMinter, image);
                 } catch (final ImageNotFoundException | IOException details) {
                     LOGGER.info(MessageCodes.MFS_078, pageID);
 
@@ -535,7 +542,8 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                             image = new ImageContent(resourceURI).setServices(new ImageService2(aPlaceholderImage));
 
                             // Create a canvas using the width and height of the placeholder image
-                            canvas.setWidthHeight(width, height).paintWith(aMinter, image);
+                            canvas.setWidthHeight(width, height).setThumbnails(new ImageContent(thumbnail));
+                            canvas.paintWith(aMinter, image);
                         } catch (final ImageNotFoundException | IOException lookupDetails) {
                             // We couldn't find the placeholder image so we create an empty canvas
                             LOGGER.error(lookupDetails, lookupDetails.getMessage());
