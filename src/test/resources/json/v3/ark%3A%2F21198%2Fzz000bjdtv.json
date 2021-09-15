@@ -1,0 +1,126 @@
+{
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz000bjdtv/manifest",
+  "type": "Manifest",
+  "label": {
+    "none": [
+      "Hathaway 2"
+    ]
+  },
+  "metadata": [
+    {
+      "label": {
+        "none": [
+          "Repository"
+        ]
+      },
+      "value": {
+        "none": [
+          "University of California, Los Angeles. Library. Performing Arts Special Collections"
+        ]
+      }
+    },
+    {
+      "label": {
+        "none": [
+          "Rights contact"
+        ]
+      },
+      "value": {
+        "none": [
+          "UCLA Charles E. Young Research Library Department of Special Collections, A1713 Young Research Library, Box 951575, Los Angeles, CA 90095-1575. E-mail: spec-coll@library.ucla.edu. Phone: (310)825-4990"
+        ]
+      }
+    }
+  ],
+  "items": [
+    {
+      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz000bjdtv/manifest/canvas-shy7",
+      "type": "Canvas",
+      "label": {
+        "none": [
+          "Hathaway 2 recto"
+        ]
+      },
+      "height": 1000,
+      "width": 1000,
+      "thumbnail": [
+        {
+          "id": "https://test.example.com/iiif/ark%3A%2F21198%2Fzz000bjffn/full/!200,200/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "items": [
+        {
+          "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz000bjdtv/manifest/canvas-shy7/anno-page-2v4v",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz000bjdtv/manifest/annotations/anno-xb1i",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://test.example.com/iiif/ark%3A%2F21198%2Fzz000bjffn/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/jpeg",
+                "service": [
+                  {
+                    "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fzz000bjffn",
+                    "@type": "ImageService2",
+                    "profile": "http://iiif.io/api/image/2/level2.json"
+                  }
+                ]
+              },
+              "target": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz000bjdtv/manifest/canvas-shy7"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz000bjdtv/manifest/canvas-dqg0",
+      "type": "Canvas",
+      "label": {
+        "none": [
+          "Hathaway 2 verso"
+        ]
+      },
+      "height": 1000,
+      "width": 1000,
+      "thumbnail": [
+        {
+          "id": "https://test.example.com/iiif/ark%3A%2F21198%2Fzz000bjfg5/full/!200,200/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "items": [
+        {
+          "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz000bjdtv/manifest/canvas-dqg0/anno-page-tbno",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz000bjdtv/manifest/annotations/anno-h8q6",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://test.example.com/iiif/ark%3A%2F21198%2Fzz000bjfg5/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/jpeg",
+                "service": [
+                  {
+                    "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fzz000bjfg5",
+                    "@type": "ImageService2",
+                    "profile": "http://iiif.io/api/image/2/level2.json"
+                  }
+                ]
+              },
+              "target": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz000bjdtv/manifest/canvas-dqg0"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

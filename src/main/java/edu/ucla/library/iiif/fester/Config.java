@@ -60,6 +60,10 @@ public final class Config {
     /* A string for different manifest versions which will be appended onto the generic AV_URL_STRING */
     public static final String AV_URL_EXTENSIONS = "fester.av.string.exts";
 
+    /* A string specifying the default IIIF Image API 2 size parameter to use for thumbnail IDs */
+    @SuppressWarnings({ "PMD.LongVariable" })
+    public static final String DEFAULT_IMAGE_THUMBNAIL_SIZE = "fester.default_image_thumbnail.size";
+
     /**
      * Private constructor for the Constants class.
      */

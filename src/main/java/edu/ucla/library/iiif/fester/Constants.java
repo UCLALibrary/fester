@@ -280,6 +280,18 @@ public final class Constants {
     public static final int DEFAULT_SAMPLE_SIZE = 600;
 
     /**
+     * The string template of default thumbnail URIs.
+     */
+    @SuppressWarnings({ "PMD.LongVariable" })
+    public static final String IIIF_THUMBNAIL_URI_TEMPLATE = "{}/full/{}/0/default.jpg";
+
+    /**
+     * The default size of thumbnail images.
+     */
+    @SuppressWarnings({ "PMD.LongVariable" })
+    public static final String DEFAULT_IMAGE_THUMBNAIL_SIZE = "!200,200";
+
+    /**
      * The id property of a v2 IIIF resource.
      */
     public static final String ID_V2 = "@id";

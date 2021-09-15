@@ -37,5 +37,8 @@ AV_DEFAULT_AUDIO_THUMBNAIL_URL=
 # The URL of the default thumbnail image for Canvases with Video content
 AV_DEFAULT_VIDEO_THUMBNAIL_URL=
 
+# A string specifying the default IIIF Image API 2 size parameter to use for thumbnail IDs
+DEFAULT_IMAGE_THUMBNAIL_SIZE=
+
 # The version of Festerize that is compatible with this version of Fester
 FESTERIZE_VERSION=
