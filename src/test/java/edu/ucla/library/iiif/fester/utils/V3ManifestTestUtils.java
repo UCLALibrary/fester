@@ -26,7 +26,7 @@ public class V3ManifestTestUtils implements ManifestTestUtils {
 
     @Override
     public Optional<String> getMetadata(final String aJsonManifest, final String aMetadataLabel) {
-        final Manifest manifest = Manifest.fromString(aJsonManifest);
+        final Manifest manifest = Manifest.from(aJsonManifest);
         final List<Metadata> metadataList = manifest.getMetadata();
         final Iterator<Metadata> iterator = metadataList.iterator();
 
@@ -44,7 +44,7 @@ public class V3ManifestTestUtils implements ManifestTestUtils {
 
     @Override
     public Optional<String> getLabel(final String aJsonManifest) {
-        final Manifest manifest = Manifest.fromString(aJsonManifest);
+        final Manifest manifest = Manifest.from(aJsonManifest);
 
         // All our manifests currently have only one label
         return Optional.of(manifest.getLabel().getString());

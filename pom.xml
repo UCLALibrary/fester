@@ -71,22 +71,22 @@
   <properties>
     <!-- Docker image dependencies -->
     <ubuntu.tag>20.04</ubuntu.tag>
-    <jdk.version>11.0.11+9-0ubuntu2~20.04</jdk.version>
+    <jdk.version>11.0.13+8-0ubuntu1~20.04</jdk.version>
     <python3.version>3.8.2-0ubuntu2</python3.version>
     <curl.version>7.68.0-1ubuntu2.7</curl.version>
 
     <!-- Application dependencies -->
-    <vertx.version>3.9.4</vertx.version>
+    <vertx.version>3.9.12</vertx.version>
     <opencsv.version>5.0</opencsv.version>
     <moirai.version>2.0.0</moirai.version>
-    <slf4j.ext.version>1.7.26</slf4j.ext.version>
-    <jcl.over.slf4j.version>1.7.30</jcl.over.slf4j.version>
+    <slf4j.ext.version>1.7.32</slf4j.ext.version>
+    <jcl.over.slf4j.version>1.7.32</jcl.over.slf4j.version>
     <commons.lang.version>3.9</commons.lang.version>
-    <freelib.utils.version>2.4.0</freelib.utils.version>
+    <freelib.utils.version>3.0.1</freelib.utils.version>
     <freelib.maven.version>0.3.0</freelib.maven.version>
     <vertx.super.s3.version>1.3.3</vertx.super.s3.version>
-    <jiiify.presentation.v2.version>0.5.5</jiiify.presentation.v2.version>
-    <jiiify.presentation.v3.version>0.9.1</jiiify.presentation.v3.version>
+    <jiiify.presentation.v2.version>0.5.6</jiiify.presentation.v2.version>
+    <jiiify.presentation.v3.version>0.10.1</jiiify.presentation.v3.version>
     <alphanumeric.comparator.version>1.4.1</alphanumeric.comparator.version>
 
     <!-- Exclusions/Replacements -->
@@ -95,7 +95,7 @@
 
     <!-- Versions of tools used for testing -->
     <jsoup.version>1.14.2</jsoup.version>
-    <aws.sdk.version>1.12.91</aws.sdk.version>
+    <aws.sdk.version>1.12.133</aws.sdk.version>
     <testcontainers.version>1.15.1</testcontainers.version>
     <jcip.annotations.version>1.0-1</jcip.annotations.version>
 
@@ -417,12 +417,6 @@
             <goals>
               <goal>generate-codes</goal>
             </goals>
-            <configuration>
-              <generatedSourcesDirectory>${project.basedir}/src/main/generated</generatedSourcesDirectory>
-              <messageFiles>
-                <messageFile>${project.basedir}/src/main/resources/fester_messages.xml</messageFile>
-              </messageFiles>
-            </configuration>
           </execution>
           <execution>
             <id>generate-media-types</id>
@@ -636,6 +630,7 @@
                   <exclude>io.netty:netty-handler</exclude>
                   <exclude>io.netty:netty-resolver-dns</exclude>
                   <exclude>io.netty:netty-resolver</exclude>
+                  <exclude>io.netty:netty-tcnative-classes</exclude>
                   <exclude>io.netty:netty-transport</exclude>
                   <exclude>io.netty:netty-transport-native-epoll</exclude>
                   <exclude>io.netty:netty-transport-native-unix-common</exclude>
