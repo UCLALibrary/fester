@@ -973,17 +973,17 @@ public class PostCsvFIT {
                 key = IDUtils.getWorkS3Key(aKey);
             }
 
-            if (myS3Client.doesObjectExist(BUCKET, key)) {
-                try {
-                    final S3Object s3Object = myS3Client.getObject(BUCKET, key);
-                    final byte[] bytes = s3Object.getObjectContent().readAllBytes();
+            if (!myS3Client.doesObjectExist(BUCKET, key)) {
+                return Optional.empty();
+            }
 
-                    return Optional.of(new JsonObject(new String(bytes, StandardCharsets.UTF_8)));
-                } catch (final IOException details) {
-                    LOGGER.error(details, details.getMessage());
-                    return Optional.empty();
-                }
-            } else {
+            try {
+                final S3Object s3Object = myS3Client.getObject(BUCKET, key);
+                final byte[] bytes = s3Object.getObjectContent().readAllBytes();
+
+                return Optional.of(new JsonObject(new String(bytes, StandardCharsets.UTF_8)));
+            } catch (final IOException details) {
+                LOGGER.error(details, details.getMessage());
                 return Optional.empty();
             }
         }

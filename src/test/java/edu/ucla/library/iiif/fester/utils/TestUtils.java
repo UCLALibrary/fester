@@ -1,12 +1,7 @@
 
 package edu.ucla.library.iiif.fester.utils;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import info.freelibrary.util.StringUtils;
 
@@ -14,12 +9,29 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 
-
 /**
  * Utilities related to working with test IDs.
  */
 public final class TestUtils {
 
+    /**
+     * A regular expression pattern for IDs.
+     */
+    private static final String ID_PATTERN = "\\\"{}\\\":\\\"[a-zA-Z0-9\\-\\.\\:\\%\\/\\,]*\\\"";
+
+    /**
+     * A pattern for a sanitized JSON ID key and value.
+     */
+    private static final String EMPTY_ID = "\"{}\":\"\"";
+
+    /**
+     * An array of ID keys that might be found in a JSON manifest.
+     */
+    private static final String[] ID_KEYS = new String[] { "id", "target" };
+
+    /**
+     * Creates a new test utilities class.
+     */
     private TestUtils() {
     }
 
@@ -44,79 +56,32 @@ public final class TestUtils {
     }
 
     /**
-     * Determines if the given manifests are effectively equal.
+     * Determines whether the supplied manifests are equal in all respects other than their IDs.
      *
-     * Note that this method does not consider integers and their corresponding floating point representations to be
-     * equal (e.g., 60 != 60.0), so any JSON test fixtures with integral duration values should be modified so that they
-     * all have a ".0" appended to the end of the value. For example, <code>"duration": 60</code> should be changed to
-     * <code>"duration": 60.0</code>.
-     *
-     * @param aManifestArray An array of IIIF manifests
-     * @return true if they are all equal after "de-randomizing" IIIF resource IDs, false otherwise
+     * @param aExpectedManifest The expected manifest
+     * @param aFoundManifest The test's resulting manifest
+     * @return Whether the manifests are effectively equal
      */
-    public static boolean manifestsAreEffectivelyEqual(final JsonObject... aManifestArray) {
-        final String annoPageIdPattern = "anno-page-[0-9a-z]{4}";
-        final String annoIdPattern = "anno-[0-9a-z]{4}";
-        final String canvasIdPattern = "canvas-[0-9a-z]{4}";
+    public static boolean manifestsAreEffectivelyEqual(final JsonObject aExpectedManifest,
+            final JsonObject aFoundManifest) {
+        return sanitize(aExpectedManifest, ID_KEYS).equals(sanitize(aFoundManifest, ID_KEYS));
+    }
 
-        // anno-page must come before anno since "page" also matches [0-9a-z]{4}
-        final Pattern idPattern = Pattern.compile(StringUtils.format("(?<annopage>{})|(?<anno>{})|(?<canvas>{})",
-                annoPageIdPattern, annoIdPattern, canvasIdPattern));
+    /**
+     * Cleans the IDs in the supplied manifest.
+     *
+     * @param aManifest A manifest whose IDs should be sanitized
+     * @param aKeyArray An array of ID keys from the JSON document
+     * @return A manifest with its IDs sanitized to a fixed value
+     */
+    private static JsonObject sanitize(final JsonObject aManifest, final String[] aKeyArray) {
+        String json = aManifest.encode();
 
-        final long distinctManifestCount = Arrays.stream(aManifestArray).map(manifest -> {
+        for (final String name : aKeyArray) {
+            json = json.replaceAll(StringUtils.format(ID_PATTERN, name), StringUtils.format(EMPTY_ID, name));
+        }
 
-            final Matcher idMatcher = idPattern.matcher(manifest.toString());
-            final StringBuilder sb = new StringBuilder();
-
-            final Map<String, String> annoPageIdReplacementMap = new HashMap<>();
-            final Map<String, String> annoIdReplacementMap = new HashMap<>();
-            final Map<String, String> canvasIdReplacementMap = new HashMap<>();
-
-            int annoPageIdMatchCount = 0;
-            int annoIdMatchCount = 0;
-            int canvasIdMatchCount = 0;
-
-            // De-randomize all the IIIF resource IDs so the manifests can be compared
-            while (idMatcher.find()) {
-                final String annoPageIdMatch = idMatcher.group("annopage");
-                final String annoIdMatch = idMatcher.group("anno");
-                final String canvasIdMatch = idMatcher.group("canvas");
-
-                final String replacementId;
-
-                if (annoPageIdMatch != null) {
-                    if (annoPageIdReplacementMap.containsKey(annoPageIdMatch)) {
-                        // Use the same de-randomized ID for instances of the same ID
-                        replacementId = annoPageIdReplacementMap.get(annoPageIdMatch);
-                    } else {
-                        // Create a new de-randomized ID
-                        replacementId = StringUtils.format("anno-page-{}", ++annoPageIdMatchCount);
-                        annoPageIdReplacementMap.put(annoPageIdMatch, replacementId);
-                    }
-                } else if (annoIdMatch != null) {
-                    if (annoIdReplacementMap.containsKey(annoIdMatch)) {
-                        replacementId = annoIdReplacementMap.get(annoIdMatch);
-                    } else {
-                        replacementId = StringUtils.format("anno-{}", ++annoIdMatchCount);
-                        annoIdReplacementMap.put(annoIdMatch, replacementId);
-                    }
-                } else { // canvas
-                    if (canvasIdReplacementMap.containsKey(canvasIdMatch)) {
-                        replacementId = canvasIdReplacementMap.get(canvasIdMatch);
-                    } else {
-                        replacementId = StringUtils.format("canvas-{}", ++canvasIdMatchCount);
-                        canvasIdReplacementMap.put(canvasIdMatch, replacementId);
-                    }
-                }
-                idMatcher.appendReplacement(sb, replacementId);
-            }
-            idMatcher.appendTail(sb);
-
-            return new JsonObject(sb.toString());
-
-        }).distinct().count();
-
-        return distinctManifestCount == 1;
+        return new JsonObject(json);
     }
 
     /**
