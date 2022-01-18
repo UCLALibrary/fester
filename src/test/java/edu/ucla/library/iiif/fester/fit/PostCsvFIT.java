@@ -569,6 +569,7 @@ public class PostCsvFIT {
                                 final JsonObject expected = readJsonFile(VIDEO_MPD_MANIFEST);
                                 final JsonObject found = optJsonObject.get();
 
+
                                 aContext.assertTrue(TestUtils.manifestsAreEffectivelyEqual(expected, found));
                             } catch (final IOException details) {
                                 LOGGER.error(details, details.getMessage());
