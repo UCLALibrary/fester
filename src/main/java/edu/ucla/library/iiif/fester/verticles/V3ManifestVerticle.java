@@ -172,7 +172,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
 
         options.addHeader(Constants.ACTION, Op.PUT_COLLECTION);
         message.put(Constants.COLLECTION_NAME, collectionName);
-        message.put(Constants.DATA, collection.toJSON());
+        message.put(Constants.DATA, new JsonObject(collection.toString()));
 
         sendMessage(S3BucketVerticle.class.getName(), message, options, send -> {
             if (send.succeeded()) {
@@ -218,7 +218,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         });
 
         CsvParser.getMetadata(workRow, csvHeaders.getViewingHintIndex()).ifPresent(behavior -> {
-            manifest.setBehaviors(ManifestBehavior.fromString(behavior));
+            manifest.setBehaviors(ManifestBehavior.from(behavior));
         });
 
         CsvParser.getMetadata(workRow, csvHeaders.getRepositoryNameIndex()).ifPresent(repositoryName -> {
@@ -265,7 +265,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
             manifest.setAccompanyingCanvas(accompanyingCanvas);
         }
 
-        jsonManifest = manifest.toJSON();
+        jsonManifest = new JsonObject(manifest.toString());
         message.put(Constants.DATA, jsonManifest);
         message.put(Constants.MANIFEST_ID, workID);
         options.addHeader(Constants.ACTION, Op.PUT_MANIFEST);
@@ -288,7 +288,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         final JsonObject body = aMessage.body();
         final String collectionName = body.getString(Constants.COLLECTION_NAME);
         final JsonObject worksJSON = body.getJsonObject(Constants.MANIFEST_CONTENT);
-        final Collection collection = Collection.fromJSON(body.getJsonObject(Constants.COLLECTION_CONTENT));
+        final Collection collection = Collection.from(body.getJsonObject(Constants.COLLECTION_CONTENT).toString());
         final TypeReference<Map<String, List<String[]>>> type = new TypeReference<>() {};
         final Map<String, List<String[]>> worksMap = new ObjectMapper().readValue(worksJSON.encode(), type);
         final SortedSet<Collection.Item> sortedCollectionItemSet = new TreeSet<>(new V3CollectionItemLabelComparator());
@@ -313,13 +313,13 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         collection.getItems().clear();
         collection.getItems().addAll(sortedCollectionItemSet);
 
-        message.put(Constants.DATA, collection.toJSON());
+        message.put(Constants.DATA, new JsonObject(collection.toString()));
         message.put(Constants.COLLECTION_NAME, collectionName);
         options.addHeader(Constants.ACTION, Op.PUT_COLLECTION);
 
         sendMessage(S3BucketVerticle.class.getName(), message, options, update -> {
             if (update.succeeded()) {
-                aMessage.reply(collection.toJSON());
+                aMessage.reply(new JsonObject(collection.toString()));
             } else {
                 error(aMessage, update.cause(), MessageCodes.MFS_152, update.cause().getMessage());
             }
@@ -336,7 +336,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         final JsonObject body = aMessage.body();
         final ObjectMapper mapper = new ObjectMapper();
         final CsvHeaders csvHeaders = CsvHeaders.fromJSON(body.getJsonObject(Constants.CSV_HEADERS));
-        final Manifest manifest = Manifest.fromJSON(body.getJsonObject(Constants.MANIFEST_CONTENT));
+        final Manifest manifest = Manifest.from(body.getJsonObject(Constants.MANIFEST_CONTENT).toString());
         final JsonArray workArray = body.getJsonArray(Constants.UPDATED_CONTENT);
         final String[] workRow = mapper.readValue(workArray.encode(), new TypeReference<String[]>() {});
         final String id = body.getString(Constants.MANIFEST_ID);
@@ -356,7 +356,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         });
 
         CsvParser.getMetadata(workRow, csvHeaders.getViewingHintIndex()).ifPresentOrElse(behavior -> {
-            manifest.setBehaviors(ManifestBehavior.fromString(behavior));
+            manifest.setBehaviors(ManifestBehavior.from(behavior));
         }, () -> {
             manifest.clearBehaviors();
         });
@@ -381,13 +381,13 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
             manifest.setMetadata(updateMetadata(manifest.getMetadata(), MetadataLabels.RIGHTS_CONTACT));
         });
 
-        message.put(Constants.DATA, manifest.toJSON());
+        message.put(Constants.DATA, new JsonObject(manifest.toString()));
         message.put(Constants.MANIFEST_ID, id);
         options.addHeader(Constants.ACTION, Op.PUT_MANIFEST);
 
         sendMessage(S3BucketVerticle.class.getName(), message, options, send -> {
             if (send.succeeded()) {
-                aMessage.reply(manifest.toJSON());
+                aMessage.reply(new JsonObject(manifest.toString()));
             } else {
                 error(aMessage, send.cause(), MessageCodes.MFS_160, send.cause().getMessage());
             }
@@ -405,7 +405,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         final String workID = body.getString(Constants.MANIFEST_ID);
         final String imageHost = body.getString(Constants.IIIF_HOST);
         final String placeholderImage = body.getString(Constants.PLACEHOLDER_IMAGE);
-        final Manifest manifest = Manifest.fromJSON(body.getJsonObject(Constants.MANIFEST_CONTENT));
+        final Manifest manifest = Manifest.from(body.getJsonObject(Constants.MANIFEST_CONTENT).toString());
         final Minter minter = MinterFactory.getMinter(manifest);
         final CsvHeaders csvHeaders = CsvHeaders.fromJSON(body.getJsonObject(Constants.CSV_HEADERS));
         final TypeReference<List<String[]>> typeRef = new TypeReference<>() {};
@@ -419,7 +419,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         pagesList.sort(new ItemSequenceComparator(csvHeaders.getItemSequenceIndex()));
         manifest.addCanvases(createCanvases(csvHeaders, pagesList, imageHost, placeholderImage, minter));
 
-        jsonManifest = manifest.toJSON();
+        jsonManifest = new JsonObject(manifest.toString());
         message.put(Constants.DATA, jsonManifest);
         message.put(Constants.MANIFEST_ID, workID);
         options.addHeader(Constants.ACTION, Op.PUT_MANIFEST);

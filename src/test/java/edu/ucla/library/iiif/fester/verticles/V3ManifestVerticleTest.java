@@ -252,7 +252,7 @@ public class V3ManifestVerticleTest {
             final Buffer fileBuffer = myVertx.fileSystem().readFileBlocking(outputFile);
             final String json = fileBuffer.toString(StandardCharsets.UTF_8);
             final PaintingAnnotation annotation =
-                    Manifest.fromString(json).getCanvases().get(0).getPaintingPages().get(0).getAnnotations().get(0);
+                    Manifest.from(json).getCanvases().get(0).getPaintingPages().get(0).getAnnotations().get(0);
 
             // Make sure the painting annotation has a choice
             assertTrue(annotation.bodyHasChoice());
@@ -294,12 +294,16 @@ public class V3ManifestVerticleTest {
 
         myVertx.eventBus().request(ManifestVerticle.class.getName(), message, options, request -> {
             if (request.succeeded()) {
-                final Manifest foundManifest = new Manifestor().readManifest(new File(foundFile));
+                try {
+                    final Manifest foundManifest = new Manifestor().readManifest(new File(foundFile));
 
-                // Check that the canvas was added to this sequence
-                aContext.assertEquals(1, foundManifest.getCanvases().size());
+                    // Check that the canvas was added to this sequence
+                    aContext.assertEquals(1, foundManifest.getCanvases().size());
 
-                TestUtils.complete(asyncTask);
+                    TestUtils.complete(asyncTask);
+                } catch (final IOException details) {
+                    aContext.fail(details);
+                }
             } else {
                 aContext.fail(request.cause());
             }
