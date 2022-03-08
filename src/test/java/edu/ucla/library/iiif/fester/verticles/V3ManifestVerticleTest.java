@@ -380,8 +380,8 @@ public class V3ManifestVerticleTest {
         final Async asyncTask = aContext.async();
 
         message.put(Constants.CSV_FILE_NAME, myRunID).put(Constants.CSV_FILE_PATH, filePath)
-                .put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V3);
-        message.put(Constants.IIIF_HOST, ImageInfoLookup.FAKE_IIIF_SERVER);
+                .put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V3)
+                .put(Constants.IIIF_HOST, ImageInfoLookup.FAKE_IIIF_SERVER);
         options.addHeader(Constants.ACTION, Op.POST_CSV);
 
         LOGGER.debug(MessageCodes.MFS_120, WORKS, ManifestVerticle.class.getName());
@@ -390,15 +390,15 @@ public class V3ManifestVerticleTest {
             if (request.succeeded()) {
                 try {
                     final FileSystem fileSystem = myVertx.fileSystem();
+                    final Buffer foundJSON = fileSystem.readFileBlocking(foundFile);
+                    final Buffer expectedJSON = fileSystem.readFileBlocking(expectedFile);
                     final Function<JsonObject, String> getCanvasLabel =
                             canvas -> canvas.getJsonObject("label").getJsonArray("none").getString(0);
 
                     @SuppressWarnings("unchecked")
-                    final List<String> expected =
-                            new JsonObject(fileSystem.readFileBlocking(expectedFile)).getJsonArray("labels").getList();
-                    final List<String> found = new JsonObject(fileSystem.readFileBlocking(foundFile))
-                            .getJsonArray("items").stream().map(canvas -> getCanvasLabel.apply((JsonObject) canvas))
-                            .collect(Collectors.toList());
+                    final List<String> expected = new JsonObject(expectedJSON).getJsonArray("labels").getList();
+                    final List<String> found = new JsonObject(foundJSON).getJsonArray("items").stream()
+                            .map(canvas -> getCanvasLabel.apply((JsonObject) canvas)).collect(Collectors.toList());
 
                     // Confirm that the order of our pages is what we expect it to be
                     aContext.assertEquals(expected, found);
