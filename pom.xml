@@ -71,7 +71,7 @@
   <properties>
     <!-- Docker image dependencies -->
     <ubuntu.tag>20.04</ubuntu.tag>
-    <jdk.version>11.0.13+8-0ubuntu1~20.04</jdk.version>
+    <jdk.version>11.0.14+9-0ubuntu2~20.04</jdk.version>
     <python3.version>3.8.2-0ubuntu2</python3.version>
     <curl.version>7.68.0-1ubuntu2.7</curl.version>
 
@@ -95,7 +95,7 @@
 
     <!-- Versions of tools used for testing -->
     <jsoup.version>1.14.2</jsoup.version>
-    <aws.sdk.version>1.12.133</aws.sdk.version>
+    <aws.sdk.version>1.12.172</aws.sdk.version>
     <testcontainers.version>1.15.1</testcontainers.version>
     <jcip.annotations.version>1.0-1</jcip.annotations.version>
 

@@ -180,7 +180,13 @@ public class PostCsvHandler extends AbstractFesterHandler {
 
         LOGGER.error(aThrowable, LOGGER.getMessage(MessageCodes.MFS_103, error));
 
-        aResponse.setStatusCode(aStatusCode);
+        // Handle errors that don't have a status code set
+        if (aStatusCode >= 0) {
+            aResponse.setStatusCode(aStatusCode);
+        } else {
+            aResponse.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
+        }
+
         aResponse.setStatusMessage(error.replaceAll(Constants.EOL_REGEX, Constants.EMPTY));
         aResponse.putHeader(Constants.CONTENT_TYPE, Constants.HTML_MEDIA_TYPE);
         aResponse.end(StringUtils.format(myExceptionPage, body));
