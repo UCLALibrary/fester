@@ -45,7 +45,7 @@ import info.freelibrary.iiif.presentation.v3.properties.SeeAlso;
 import info.freelibrary.iiif.presentation.v3.properties.ViewingDirection;
 import info.freelibrary.iiif.presentation.v3.properties.behaviors.CanvasBehavior;
 import info.freelibrary.iiif.presentation.v3.properties.behaviors.ManifestBehavior;
-import info.freelibrary.iiif.presentation.v3.services.image.ImageService2;
+import info.freelibrary.iiif.presentation.v3.services.ImageService2;
 
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
