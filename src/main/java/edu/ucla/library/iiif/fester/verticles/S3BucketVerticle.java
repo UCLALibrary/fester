@@ -10,7 +10,12 @@ import com.amazonaws.regions.RegionUtils;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 import info.freelibrary.util.StringUtils;
+
+import info.freelibrary.vertx.s3.LocalStackEndpoint;
 import info.freelibrary.vertx.s3.S3Client;
+import info.freelibrary.vertx.s3.S3ClientOptions;
+import info.freelibrary.vertx.s3.S3Endpoint;
+import info.freelibrary.vertx.s3.UnexpectedStatusException;
 
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
@@ -19,6 +24,7 @@ import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.utils.CodeUtils;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
@@ -59,20 +65,24 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
             final String s3AccessKey = config.getString(Config.S3_ACCESS_KEY);
             final String s3SecretKey = config.getString(Config.S3_SECRET_KEY);
             final String s3RegionName = config.getString(Config.S3_REGION, "us-east-1");
-            final String endpoint = config.getString(Config.S3_ENDPOINT);
+            final S3ClientOptions opts = new S3ClientOptions().setCredentials(s3AccessKey, s3SecretKey);
 
-            // Check to see that we're not overriding the default S3 endpoint
-            if (endpoint == null || Constants.S3_ENDPOINT.equals(endpoint)) {
-                final String regionEndpoint = RegionUtils.getRegion(s3RegionName).getServiceEndpoint("s3");
+            if (RegionUtils.getRegion(s3RegionName) != null) {
+                final String endpoint = config.getString(Config.S3_ENDPOINT);
 
-                LOGGER.debug(MessageCodes.MFS_034, regionEndpoint, "default");
-                myS3Client = new S3Client(getVertx(), s3AccessKey, s3SecretKey, "https://" + regionEndpoint);
-            } else {
-                LOGGER.debug(MessageCodes.MFS_034, endpoint, "supplied");
-                myS3Client = new S3Client(getVertx(), s3AccessKey, s3SecretKey, endpoint);
+                if (endpoint == null) {
+                    opts.setEndpoint(S3Endpoint.fromRegion(s3RegionName));
+                    LOGGER.debug(MessageCodes.MFS_034, opts.getEndpoint().getRegion(), "region");
+                } else if (Constants.S3_ENDPOINT.equals(endpoint)) {
+                    opts.setEndpoint(S3Endpoint.US_EAST_1);
+                    LOGGER.debug(MessageCodes.MFS_034, S3Endpoint.US_EAST_1.getRegion(), "default");
+                } else {
+                    opts.setEndpoint(new LocalStackEndpoint(endpoint));
+                    LOGGER.debug(MessageCodes.MFS_034, endpoint, "supplied");
+                }
             }
 
-            myS3Client.useV2Signature(true);
+            myS3Client = new S3Client(getVertx(), opts);
             myS3Bucket = config.getString(Config.S3_BUCKET);
 
             // Trace is only for developer use; don't turn on when running on a server
@@ -126,15 +136,31 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
     @SuppressWarnings("checkstyle:indentation")
     private void get(final String aS3Key, final Message<JsonObject> aMessage) {
         myS3Client.get(myS3Bucket, aS3Key, get -> {
-            final int statusCode = get.statusCode();
-            final String statusMessage = get.statusMessage();
+            if (get.failed()) {
+                final UnexpectedStatusException error = (UnexpectedStatusException) get.cause();
+                final int statusCode = error.getStatusCode();
+                final String statusMessage = error.getMessage();
 
-            // This lets us know at what time we received a response, in addition to the code
-            LOGGER.debug(MessageCodes.MFS_096, aS3Key, statusCode);
+                LOGGER.debug(MessageCodes.MFS_096, aS3Key, statusCode);
 
-            if (statusCode == HTTP.OK) {
-                get.bodyHandler(body -> {
-                    final String serializedJson = body.toString(StandardCharsets.UTF_8);
+                if (statusCode == HTTP.NOT_FOUND) {
+                    aMessage.fail(statusCode, statusMessage);
+                } else {
+                    get.result().body(body -> {
+                        final Buffer buffer = body.result();
+
+                        if (buffer != null) {
+                            LOGGER.error(error, MessageCodes.MFS_097, aS3Key, buffer.toString(StandardCharsets.UTF_8));
+                        }
+                    });
+
+                    aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, statusMessage);
+                }
+            } else {
+                LOGGER.debug(MessageCodes.MFS_096, aS3Key, HTTP.OK);
+
+                get.result().body(body -> {
+                    final String serializedJson = body.result().toString(StandardCharsets.UTF_8);
                     final String manifest;
 
                     if (aMessage.headers().get(Constants.NO_REWRITE_URLS) != null) {
@@ -145,18 +171,7 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
 
                     aMessage.reply(new JsonObject(manifest));
                 });
-            } else if (statusCode == HTTP.NOT_FOUND) {
-                aMessage.fail(HTTP.NOT_FOUND, statusMessage);
-            } else {
-                get.bodyHandler(body -> {
-                    LOGGER.error(body.toString(StandardCharsets.UTF_8));
-                });
-
-                aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, statusMessage);
             }
-        }, exception -> {
-            LOGGER.error(exception, MessageCodes.MFS_097, aS3Key, exception.getMessage());
-            aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, exception.getMessage());
         });
     }
 
@@ -172,14 +187,15 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
         final Buffer manifestContent = aManifest.toBuffer();
         final String manifestID = IDUtils.getResourceID(aS3Key);
         final String context = aManifest.getString("@context");
-        final String idKey;
         final String derivedManifestS3Key;
+        final String idKey;
 
         if (context.equals(Constants.CONTEXT_V2)) {
             idKey = Constants.ID_V2;
         } else { // Constants.CONTEXT_V3
             idKey = Constants.ID_V3;
         }
+
         derivedManifestS3Key = IDUtils.getResourceS3Key(URI.create(aManifest.getString(idKey)));
 
         LOGGER.debug(MessageCodes.MFS_051, aManifest, myS3Bucket);
@@ -190,39 +206,23 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
         }
 
         try {
-            myS3Client.put(myS3Bucket, aS3Key, manifestContent, response -> {
-                final int statusCode = response.statusCode();
-
-                response.exceptionHandler(exception -> {
-                    LOGGER.error(exception, exception.getMessage());
-                    sendReply(aMessage, CodeUtils.getInt(MessageCodes.MFS_052), exception.getMessage());
-                });
-
-                // If we get a successful upload response code, send a reply to indicate so
-                if (statusCode == HTTP.OK) {
-                    LOGGER.info(MessageCodes.MFS_053, manifestID);
-
-                    // Send the success result and decrement the S3 request counter
-                    sendReply(aMessage, 0, Op.SUCCESS);
-                } else {
-                    LOGGER.error(MessageCodes.MFS_054, statusCode, response.statusMessage());
-
-                    // Log the detailed reason we failed so we can track down the issue
-                    response.bodyHandler(body -> {
-                        LOGGER.error(MessageCodes.MFS_052, body.getString(0, body.length()));
-                    });
+            myS3Client.put(myS3Bucket, aS3Key, manifestContent, put -> {
+                if (put.failed()) {
+                    final UnexpectedStatusException error = (UnexpectedStatusException) put.cause();
+                    final int statusCode = error.getStatusCode();
+                    final String message = error.getMessage();
 
                     // If there is some internal S3 server error, let's try again
                     if (statusCode == HTTP.INTERNAL_SERVER_ERROR) {
                         sendReply(aMessage, 0, Op.RETRY);
                     } else {
-                        LOGGER.warn(MessageCodes.MFS_055, statusCode + " - " + response.statusMessage());
+                        LOGGER.warn(MessageCodes.MFS_055, statusCode + " -> " + message);
                         retryUpload(manifestID, aMessage);
                     }
+                } else {
+                    LOGGER.info(MessageCodes.MFS_053, manifestID);
+                    sendReply(aMessage, 0, Op.SUCCESS); // Decrements the request counter
                 }
-            }, exception -> {
-                LOGGER.warn(MessageCodes.MFS_055, exception.getMessage());
-                retryUpload(manifestID, aMessage);
             });
         } catch (final ConnectionPoolTooBusyException details) {
             LOGGER.debug(MessageCodes.MFS_056, manifestID);

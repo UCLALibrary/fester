@@ -76,7 +76,7 @@
     <curl.version>7.68.0-1ubuntu2.7</curl.version>
 
     <!-- Application dependencies -->
-    <vertx.version>3.9.12</vertx.version>
+    <vertx.version>4.2.6</vertx.version>
     <opencsv.version>5.0</opencsv.version>
     <moirai.version>2.0.0</moirai.version>
     <slf4j.ext.version>1.7.32</slf4j.ext.version>
@@ -84,10 +84,14 @@
     <commons.lang.version>3.9</commons.lang.version>
     <freelib.utils.version>3.0.1</freelib.utils.version>
     <freelib.maven.version>0.3.0</freelib.maven.version>
-    <vertx.super.s3.version>1.3.3</vertx.super.s3.version>
+    <vertx.s3.service.version>0.0.0-SNAPSHOT</vertx.s3.service.version>
+    <netty.epoll.version>4.1.59.Final</netty.epoll.version>
     <jiiify.presentation.v2.version>0.5.6</jiiify.presentation.v2.version>
     <jiiify.presentation.v3.version>0.12.0</jiiify.presentation.v3.version>
     <alphanumeric.comparator.version>1.4.1</alphanumeric.comparator.version>
+
+    <!-- Dependencies pulled out for security reasons -->
+    <jackson.version></jackson.version>
 
     <!-- Exclusions/Replacements -->
     <snakeyaml.version>1.26</snakeyaml.version>
@@ -95,19 +99,18 @@
 
     <!-- Versions of tools used for testing -->
     <jsoup.version>1.14.2</jsoup.version>
-    <aws.sdk.version>1.12.172</aws.sdk.version>
-    <testcontainers.version>1.15.1</testcontainers.version>
+    <aws.sdk.version>1.12.192</aws.sdk.version>
+    <testcontainers.version>1.16.3</testcontainers.version>
     <jcip.annotations.version>1.0-1</jcip.annotations.version>
 
     <!-- Build plug-in versions -->
     <exec.plugin.version>3.0.0</exec.plugin.version>
     <shade.plugin.version>2.4.3</shade.plugin.version>
     <deploy.plugin.version>2.8.2</deploy.plugin.version>
-    <netty.epoll.version>4.1.37.Final</netty.epoll.version>
-    <vertx.plugin.version>1.0.18</vertx.plugin.version>
+    <vertx.plugin.version>1.0.27</vertx.plugin.version>
     <codacy.plugin.version>1.2.0</codacy.plugin.version>
     <xml.maven.plugin.version>1.0.2</xml.maven.plugin.version>
-    <docker.maven.plugin.version>0.33.0</docker.maven.plugin.version>
+    <docker.maven.plugin.version>0.39.1</docker.maven.plugin.version>
 
     <!-- Name of the main Vert.x verticle -->
     <main.verticle>edu.ucla.library.iiif.fester.verticles.MainVerticle</main.verticle>
@@ -274,8 +277,8 @@
     </dependency>
     <dependency>
       <groupId>info.freelibrary</groupId>
-      <artifactId>vertx-super-s3</artifactId>
-      <version>${vertx.super.s3.version}</version>
+      <artifactId>vertx-s3-service</artifactId>
+      <version>${vertx.s3.service.version}</version>
     </dependency>
     <dependency>
       <groupId>com.opencsv</groupId>
@@ -618,7 +621,7 @@
                   <exclude>info.freelibrary:jiiify-presentation-v2</exclude>
                   <exclude>info.freelibrary:jiiify-presentation-v3</exclude>
                   <exclude>info.freelibrary:vertx-pairtree</exclude>
-                  <exclude>info.freelibrary:vertx-super-s3</exclude>
+                  <exclude>info.freelibrary:vertx-s3-service</exclude>
                   <exclude>io.netty:netty-buffer</exclude>
                   <exclude>io.netty:netty-codec-dns</exclude>
                   <exclude>io.netty:netty-codec-http2</exclude>
@@ -648,8 +651,10 @@
                   <exclude>io.swagger:swagger-parser</exclude>
                   <exclude>io.vertx:vertx-auth-common</exclude>
                   <exclude>io.vertx:vertx-bridge-common</exclude>
+                  <exclude>io.vertx:vertx-codegen</exclude>
                   <exclude>io.vertx:vertx-config</exclude>
                   <exclude>io.vertx:vertx-core</exclude>
+                  <exclude>io.vertx:vertx-service-proxy</exclude>
                   <exclude>io.vertx:vertx-web-api-contract</exclude>
                   <exclude>io.vertx:vertx-web-client</exclude>
                   <exclude>io.vertx:vertx-web-common</exclude>
