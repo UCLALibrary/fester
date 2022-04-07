@@ -26,10 +26,13 @@ import io.vertx.ext.web.RoutingContext;
  */
 public class CheckEndpointsHandler extends AbstractFesterHandler {
 
+    /** The logger for this handler. */
     private static final Logger LOGGER = LoggerFactory.getLogger(CheckEndpointsHandler.class, Constants.MESSAGES);
 
+    /** A key for a test of the S3 endpoints. */
     private static final String UPLOAD_KEY = "test_load.json";
 
+    /** A delimiter used in appending. */
     private static final String APPEND = " : ";
 
     /**
@@ -110,6 +113,7 @@ public class CheckEndpointsHandler extends AbstractFesterHandler {
     /**
      * Determines the endpoint's status.
      *
+     * @param aEndpoint A service endpoint
      * @param aCode A status code
      * @param aStatus A status message
      * @param aMessage Additional details in the form of a JsonObject

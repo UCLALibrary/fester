@@ -7,6 +7,7 @@ import info.freelibrary.util.LoggerFactory;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
+
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerRequest;
@@ -22,6 +23,7 @@ import io.vertx.ext.web.RoutingContext;
  */
 public class MatchingOpNotFoundHandler implements Handler<RoutingContext> {
 
+    /** The logger for this handler. */
     private static final Logger LOGGER = LoggerFactory.getLogger(MatchingOpNotFoundHandler.class, Constants.MESSAGES);
 
     @Override

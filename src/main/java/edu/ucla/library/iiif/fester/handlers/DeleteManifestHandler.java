@@ -22,6 +22,9 @@ import io.vertx.ext.web.RoutingContext;
  */
 public class DeleteManifestHandler extends AbstractFesterHandler {
 
+    /**
+     * The logger for this handler.
+     */
     private static final Logger LOGGER = LoggerFactory.getLogger(DeleteManifestHandler.class, Constants.MESSAGES);
 
     /**
@@ -71,6 +74,8 @@ public class DeleteManifestHandler extends AbstractFesterHandler {
                         response.setStatusCode(statusCode);
                         response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
                         response.end(errorMessage);
+
+                        break;
                 }
             } else {
                 response.setStatusCode(HTTP.SUCCESS_NO_CONTENT);

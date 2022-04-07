@@ -13,6 +13,7 @@ import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.Features;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
+
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
@@ -23,6 +24,7 @@ import io.vertx.ext.web.RoutingContext;
  */
 public class FeatureOffHandler extends AbstractFesterHandler {
 
+    /** The logger for this handler. */
     private static final Logger LOGGER = LoggerFactory.getLogger(FeatureOffHandler.class, Constants.MESSAGES);
 
     /** A template HTML page for the feature off notification */

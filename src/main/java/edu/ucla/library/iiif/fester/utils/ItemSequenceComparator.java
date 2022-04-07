@@ -11,6 +11,7 @@ import java.util.Comparator;
  */
 public class ItemSequenceComparator implements Comparator<String[]> {
 
+    /** The comparator's index. */
     private final int myIndex;
 
     /**

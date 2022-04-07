@@ -1,5 +1,5 @@
 
-package edu.ucla.library.iiif.fester.handlers;
+package edu.ucla.library.iiif.fester.handlers; // NOPMD - ExcessiveImports
 
 import static info.freelibrary.iiif.presentation.v2.utils.Constants.CANVASES;
 import static info.freelibrary.iiif.presentation.v2.utils.Constants.IMAGE_CONTENT;
@@ -60,20 +60,28 @@ import io.vertx.ext.web.codec.BodyCodec;
  */
 public class PostThumbnailsHandler extends AbstractFesterHandler {
 
-    /* A logger for the class */
+    /** A logger for this handler. */
     private static final Logger LOGGER = LoggerFactory.getLogger(PostThumbnailsHandler.class, Constants.MESSAGES);
 
+    /** An attachment template. */
     private static final String ATTACHMENT = "attachment; filename=\"{}\"";
 
+    /** A constant for the break tag. */
     private static final String BR_TAG = "<br>";
 
+    /** A threshold for the number of images to randomize thumbnail selection. */
+    private static final int THUMBNAIL_COUNT_THRESHOLD = 3;
+
+    /** An exception page for this handler to use. */
     private final String myExceptionPage;
 
+    /** A festerize version that this handler checks. */
     private final String myFesterizeVersion;
 
+    /** An A/V URL. */
     private final String myAVUrlString;
 
-    /* FUA = Festerize User Agent; agent to verify festerize version, acronymed for codacy */
+    /** FUA = Festerize User Agent; agent to verify festerize version, acronym'ed for Codacy. */
     private final Pattern myFUAPattern;
 
     /**
@@ -95,10 +103,10 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
     }
 
     /*
-     * (non-Javadoc)
      * @see io.vertx.core.Handler#handle(java.lang.Object)
      */
     @Override
+    @SuppressWarnings("PMD.CognitiveComplexity")
     public void handle(final RoutingContext aContext) {
         final HttpServerRequest request = aContext.request();
         final HttpServerResponse response = aContext.response();
@@ -125,15 +133,19 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
                 final List<String[]> originalLines = csvReader.readAll();
                 final List<String[]> linesWithThumbs = ThumbnailUtils.addThumbnailColumn(originalLines);
                 final int manifestIndex = Arrays.asList(linesWithThumbs.get(0)).indexOf(CSV.MANIFEST_URL);
+
                 @SuppressWarnings("rawtypes")
                 final List<Future> futures = new ArrayList<>();
+
                 for (int rowIndex = 1; rowIndex < linesWithThumbs.size(); rowIndex++) {
                     final ObjectType rowType =
                             CsvParser.getObjectType(linesWithThumbs.get(rowIndex), parser.getCsvHeaders());
+
                     if (rowType.equals(ObjectType.WORK)) {
                         futures.add(processRow(linesWithThumbs, manifestIndex, rowIndex));
                     }
                 }
+
                 CompositeFuture.all(futures).onComplete(handler -> {
                     if (handler.succeeded()) {
                         returnCSV(fileName, filePath, linesWithThumbs, response);
@@ -154,21 +166,26 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
      * @param aCsvList A CSV parsed into a list of string arrays
      * @param aManifestIndex The column index in this CSV where manifest URLs are stored
      * @param aRowIndex The row in the CSV being updated
+     * @return A future completion
      */
     private Future<Void> processRow(final List<String[]> aCsvList, final int aManifestIndex, final int aRowIndex) {
         final String manifestURL = aCsvList.get(aRowIndex)[aManifestIndex];
         final Promise<Void> promise = Promise.promise();
         final HttpRequest<JsonObject> request;
+
         request = WebClient.create(myVertx).getAbs(manifestURL).putHeader("Accept", Constants.JSON_MEDIA_TYPE)
                 .as(BodyCodec.jsonObject()).expect(ResponsePredicate.SC_OK);
+
         if (manifestURL.startsWith("https")) {
             request.ssl(true);
         }
+
         request.send(asyncResult -> {
             if (asyncResult.succeeded()) {
                 final JsonObject manifestBody = asyncResult.result().body();
                 final String context = manifestBody.getString(JsonKeys.CONTEXT);
                 final int thumbIndex = ThumbnailUtils.findThumbHeaderIndex(aCsvList.get(0));
+
                 if (context.contains(Constants.CONTEXT_V2)) {
                     addV2Thumb(thumbIndex, aRowIndex, manifestBody, aCsvList);
                 } else if (context.contains(Constants.CONTEXT_V3)) {
@@ -176,6 +193,7 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
                 } else {
                     LOGGER.info(LOGGER.getMessage(MessageCodes.MFS_167, manifestURL));
                 }
+
                 promise.complete();
             } else {
                 promise.fail(asyncResult.result().statusMessage());
@@ -200,6 +218,7 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
         final int canvasIndex = chooseThumbIndex(canvases.size());
         final String thumbURL = canvases.getJsonObject(canvasIndex).getJsonArray(IMAGE_CONTENT).getJsonObject(0)
                 .getJsonObject(RESOURCE).getJsonObject(JsonKeys.SERVICE).getString(Constants.ID_V2);
+
         ThumbnailUtils.addThumbnailURL(aColumnIndex, aRowIndex, thumbURL, aCsvList);
     }
 
@@ -228,13 +247,14 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
      * Select the index for the thumbnail from a list of images.
      *
      * @param aCount The number of images
+     * @return An index
      */
     private int chooseThumbIndex(final int aCount) {
-        if (aCount <= 3) {
+        if (aCount <= THUMBNAIL_COUNT_THRESHOLD) {
             return 0;
-        } else {
-            return ThumbnailUtils.pickThumbnailIndex(aCount - 1);
         }
+
+        return ThumbnailUtils.pickThumbnailIndex(aCount - 1);
     }
 
     /**
@@ -249,6 +269,7 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
             final HttpServerResponse aResponse) {
         final StringWriter writer = new StringWriter();
         final String responseMessage = LOGGER.getMessage(MessageCodes.MFS_038, aFileName, aFilePath);
+
         try (CSVWriter csvWriter = new CSVWriter(writer)) {
             csvWriter.writeAll(aCsvList);
 
@@ -266,7 +287,7 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
     /**
      * Logs error for developers/administrators.
      *
-     * @param aThrowable The error that halded processing
+     * @param aThrowable The error that halted processing
      */
     private void logError(final Throwable aThrowable) {
         LOGGER.error(aThrowable, LOGGER.getMessage(MessageCodes.MFS_166, aThrowable.getMessage()));
@@ -277,7 +298,7 @@ public class PostThumbnailsHandler extends AbstractFesterHandler {
      *
      * @param aResponse A HTTP response
      * @param aStatusCode A HTTP response code
-     * @param aThrowable A throwable exception
+     * @param aError A throwable exception
      */
     private void returnError(final HttpServerResponse aResponse, final int aStatusCode, final String aError) {
         final String body = LOGGER.getMessage(MessageCodes.MFS_166, aError.replaceAll(Constants.EOL_REGEX, BR_TAG));

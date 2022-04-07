@@ -40,4 +40,15 @@ public class CsvParsingException extends I18nException {
     public CsvParsingException(final String aMessageCode, final Object... aDetails) {
         super(Constants.MESSAGES, aMessageCode, aDetails);
     }
+
+    /**
+     * Creates a new CSV parsing exception.
+     *
+     * @param aThrowable A parent exception
+     * @param aMessageCode A message code
+     * @param aDetailsArray Additional details about the exception
+     */
+    public CsvParsingException(final Throwable aThrowable, final String aMessageCode, final Object... aDetailsArray) {
+        super(aThrowable, Constants.MESSAGES, aMessageCode, aDetailsArray);
+    }
 }

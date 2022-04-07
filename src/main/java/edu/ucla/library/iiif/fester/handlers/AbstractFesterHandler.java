@@ -28,12 +28,16 @@ import io.vertx.ext.web.RoutingContext;
  */
 abstract class AbstractFesterHandler implements Handler<RoutingContext> {
 
+    /** The abstract handler's logger. */
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFesterHandler.class, Constants.MESSAGES);
 
+    /** Local reference to the Vert.x instance. */
     protected final Vertx myVertx;
 
+    /** An S3 client that can be used by handlers. */
     protected S3Client myS3Client;
 
+    /** An S3 bucket that handlers may use. */
     protected String myS3Bucket;
 
     /**

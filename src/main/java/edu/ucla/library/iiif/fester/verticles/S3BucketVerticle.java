@@ -39,16 +39,34 @@ import io.vertx.core.shareddata.Counter;
  */
 public class S3BucketVerticle extends AbstractFesterVerticle {
 
+    /**
+     * The logger used by this verticle.
+     */
     private static final Logger LOGGER = LoggerFactory.getLogger(S3BucketVerticle.class, Constants.MESSAGES);
 
+    /**
+     * The default maximum number of retries this verticle will attempt.
+     */
     private static final long MAX_RETRIES = 10;
 
+    /**
+     * An S3 client used by this verticle.
+     */
     private S3Client myS3Client;
 
+    /**
+     * The S3 bucket this verticle uses.
+     */
     private String myS3Bucket;
 
+    /**
+     * The verticle's URL.
+     */
     private String myUrl;
 
+    /**
+     * A placeholder URL pattern.
+     */
     private final String myUrlPlaceholderPattern = Pattern.quote(Constants.URL_PLACEHOLDER);
 
     /**
@@ -121,6 +139,7 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
                 default:
                     message.fail(CodeUtils.getInt(MessageCodes.MFS_139), StringUtils.format(MessageCodes.MFS_139,
                             getClass().toString(), message.toString(), action));
+                    break;
             }
         });
 
@@ -133,7 +152,7 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
      * @param aS3Key The S3 key to use for the manifest
      * @param aMessage A event queue message
      */
-    @SuppressWarnings("checkstyle:indentation")
+    @SuppressWarnings({ "checkstyle:indentation", "PMD.CognitiveComplexity" })
     private void get(final String aS3Key, final Message<JsonObject> aMessage) {
         myS3Client.get(myS3Bucket, aS3Key, get -> {
             if (get.failed()) {
@@ -190,7 +209,7 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
         final String derivedManifestS3Key;
         final String idKey;
 
-        if (context.equals(Constants.CONTEXT_V2)) {
+        if (Constants.CONTEXT_V2.equals(context)) {
             idKey = Constants.ID_V2;
         } else { // Constants.CONTEXT_V3
             idKey = Constants.ID_V3;
@@ -262,6 +281,7 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
      * @param aManifestID A Manifest ID
      * @param aHandler A retry handler
      */
+    @SuppressWarnings("PMD.CognitiveComplexity")
     private void shouldRetry(final String aManifestID, final Handler<AsyncResult<Boolean>> aHandler) {
         final Promise<Boolean> promise = Promise.promise();
 
@@ -300,8 +320,10 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
      * incremented).
      *
      * @param aMessage A message requesting an S3 upload
+     * @param aCode A status code for the reply message
      * @param aDetails The result of the S3 upload
      */
+    @SuppressWarnings("PMD.CognitiveComplexity")
     private void sendReply(final Message<JsonObject> aMessage, final int aCode, final String aDetails) {
         getVertx().sharedData().getLocalCounter(Constants.S3_REQUEST_COUNT, getCounter -> {
             if (getCounter.succeeded()) {

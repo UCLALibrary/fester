@@ -1,5 +1,5 @@
 
-package edu.ucla.library.iiif.fester.verticles;
+package edu.ucla.library.iiif.fester.verticles; // NOPMD - ExcessiveImports
 
 import java.io.IOException;
 import java.net.URI;
@@ -75,12 +75,18 @@ import io.vertx.core.json.JsonObject;
  */
 public class V3ManifestVerticle extends AbstractFesterVerticle {
 
+    /**
+     * The logger for this verticle.
+     */
     private static final Logger LOGGER = LoggerFactory.getLogger(V3ManifestVerticle.class, MessageCodes.BUNDLE);
 
+    /** A substitution pattern. */
     private static final String SUBSTITUTION_PATTERN = "{}";
 
+    /** A manifest URI template. */
     private static final String MANIFEST_URI = "{}/{}/manifest";
 
+    /** A simple URI template. */
     private static final String SIMPLE_URI = "{}/{}";
 
     /**
@@ -438,10 +444,13 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
      *
      * @param aCsvHeaders A CSV headers
      * @param aPageList A list of pages to add
-     * @param aSequence A sequence to add pages to
      * @param aImageHost An image host for image links
+     * @param aPlaceholderImage A placeholder image link
      * @param aMinter An ID minter
+     * @return An array of canvases
      */
+    @SuppressWarnings({ "PMD.ExcessiveMethodLength", "PMD.NcssCount", "PMD.CognitiveComplexity",
+        "PMD.CyclomaticComplexity" })
     private Canvas[] createCanvases(final CsvHeaders aCsvHeaders, final List<String[]> aPageList,
             final String aImageHost, final String aPlaceholderImage, final Minter aMinter) {
         final Iterator<String[]> iterator = aPageList.iterator();
@@ -579,6 +588,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         return canvases.toArray(new Canvas[] {});
     }
 
+    @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
     private VideoContent[] getVideoContent(final String aResourceURI) {
         final int substitutionCount = countSubstitutionPatterns(aResourceURI);
         final VideoContent[] videos;
@@ -601,6 +611,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         return videos;
     }
 
+    @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
     private SoundContent[] getSoundContent(final String aResourceURI) {
         final int substitutionCount = countSubstitutionPatterns(aResourceURI);
         final SoundContent[] audios;
@@ -647,10 +658,11 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
     /**
      * Updates existing metadata.
      *
-     * @param aMetadata A metadata property
+     * @param aMetadataList A list of metadata properties
      * @param aStringArray A metadata label and, optionally, its value
      * @return Metadata about the work
      */
+    @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
     private List<Metadata> updateMetadata(final List<Metadata> aMetadataList, final String... aStringArray) {
         final List<Metadata> metadataList = new ArrayList<>();
 

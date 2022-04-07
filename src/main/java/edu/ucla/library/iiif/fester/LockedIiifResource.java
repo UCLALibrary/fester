@@ -9,10 +9,13 @@ import io.vertx.core.shareddata.Lock;
  */
 public class LockedIiifResource {
 
+    /** A resource lock. */
     private final Lock myLock;
 
+    /** A resource. */
     private final JsonObject myResource;
 
+    /** Whether a resource is a collection or work. */
     private final boolean myResourceIsCollection;
 
     /**

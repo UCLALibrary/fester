@@ -22,6 +22,7 @@ import io.vertx.ext.web.RoutingContext;
  */
 public class PutManifestHandler extends AbstractFesterHandler {
 
+    /** This handler's logger. */
     private static final Logger LOGGER = LoggerFactory.getLogger(PutManifestHandler.class, Constants.MESSAGES);
 
     /**
@@ -75,6 +76,8 @@ public class PutManifestHandler extends AbstractFesterHandler {
                         response.setStatusCode(statusCode);
                         response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
                         response.end(errorMessage);
+
+                        break;
                 }
             } else {
                 response.setStatusCode(HTTP.OK);

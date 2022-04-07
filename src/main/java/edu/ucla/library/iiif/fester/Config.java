@@ -6,61 +6,61 @@ package edu.ucla.library.iiif.fester;
  */
 public final class Config {
 
-    /* Configuration parameter for the URL Fester is available at */
+    /** Configuration parameter for the URL Fester is available at */
     public static final String FESTER_URL = "fester.url";
 
-    /* The HTTP port configuration parameter */
+    /** The HTTP port configuration parameter */
     public static final String HTTP_PORT = "fester.http.port";
 
-    /* The OpenAPI specification configuration parameter */
+    /** The OpenAPI specification configuration parameter */
     public static final String OPENAPI_SPEC_PATH = "openapi.spec.path";
 
-    /* The AWS S3 access key */
+    /** The AWS S3 access key */
     public static final String S3_ACCESS_KEY = "fester.s3.access_key";
 
-    /* The AWS S3 secret key */
+    /** The AWS S3 secret key */
     public static final String S3_SECRET_KEY = "fester.s3.secret_key";
 
-    /* The AWS S3 region used for signing communications */
+    /** The AWS S3 region used for signing communications */
     public static final String S3_REGION = "fester.s3.region";
 
-    /* The AWS S3 bucket into which manifests and collection docs are put */
+    /** The AWS S3 bucket into which manifests and collection docs are put */
     public static final String S3_BUCKET = "fester.s3.bucket";
 
-    /* The base IIIF server URL that is used to get width and height for canvases */
+    /** The base IIIF server URL that is used to get width and height for canvases */
     public static final String IIIF_BASE_URL = "iiif.base.url";
 
-    /* The placeholder image URL, used for images that are missing */
+    /** The placeholder image URL, used for images that are missing */
     public static final String PLACEHOLDER_IMAGE = "fester.placeholder.url";
 
-    /* The S3 endpoint that's used when storing and retrieving manifests */
+    /** The S3 endpoint that's used when storing and retrieving manifests */
     public static final String S3_ENDPOINT = "fester.s3.endpoint";
 
-    /* Config property for turning logs on while running in test mode */
+    /** Config property for turning logs on while running in test mode */
     public static final String LOGS_ON = "fester.logs.output";
 
-    /* A feature flags configuration for the Docker container */
+    /** A feature flags configuration for the Docker container */
     public static final String FEATURE_FLAGS = "feature.flags";
 
-    /* The port a debugger may listen on to debug a containerized Fester instance */
+    /** The port a debugger may listen on to debug a containerized Fester instance */
     public static final String JDWP_HOST_PORT = "jdwp.host.port";
 
-    /* The version of Festerize that is compatible with this version of Fester */
+    /** The version of Festerize that is compatible with this version of Fester */
     public static final String FESTERIZE_VERSION = "festerize.version";
 
-    /* A string to distinguish A/V access URLs from generic IIF access URLs */
+    /** A string to distinguish A/V access URLs from generic IIF access URLs */
     public static final String AV_URL_STRING = "fester.av.string";
 
-    /* The URL of the default thumbnail image for Canvases with Sound content */
+    /** The URL of the default thumbnail image for Canvases with Sound content */
     public static final String DEFAULT_AUDIO_THUMBNAIL = "fester.av.default_audio_thumbnail.url";
 
-    /* The URL of the default thumbnail image for Canvases with Video content */
+    /** The URL of the default thumbnail image for Canvases with Video content */
     public static final String DEFAULT_VIDEO_THUMBNAIL = "fester.av.default_video_thumbnail.url";
 
-    /* A string for different manifest versions which will be appended onto the generic AV_URL_STRING */
+    /** A string for different manifest versions which will be appended onto the generic AV_URL_STRING */
     public static final String AV_URL_EXTENSIONS = "fester.av.string.exts";
 
-    /* A string specifying the default IIIF Image API 2 size parameter to use for thumbnail IDs */
+    /** A string specifying the default IIIF Image API 2 size parameter to use for thumbnail IDs */
     @SuppressWarnings({ "PMD.LongVariable" })
     public static final String DEFAULT_IMAGE_THUMBNAIL_SIZE = "fester.default_image_thumbnail.size";
 
