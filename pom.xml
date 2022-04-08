@@ -79,19 +79,16 @@
     <vertx.version>4.2.6</vertx.version>
     <opencsv.version>5.0</opencsv.version>
     <moirai.version>2.0.0</moirai.version>
-    <slf4j.ext.version>1.7.32</slf4j.ext.version>
     <jcl.over.slf4j.version>1.7.32</jcl.over.slf4j.version>
     <commons.lang.version>3.9</commons.lang.version>
     <freelib.utils.version>3.0.1</freelib.utils.version>
-    <freelib.maven.version>0.3.0</freelib.maven.version>
-    <vertx.s3.service.version>0.0.0-SNAPSHOT</vertx.s3.service.version>
+    <vertx.s3.service.version>2.0.0-alpha-1</vertx.s3.service.version>
     <netty.epoll.version>4.1.59.Final</netty.epoll.version>
-    <jiiify.presentation.v2.version>0.5.6</jiiify.presentation.v2.version>
+    <jiiify.presentation.v2.version> 0.5.7</jiiify.presentation.v2.version>
     <jiiify.presentation.v3.version>0.12.0</jiiify.presentation.v3.version>
     <alphanumeric.comparator.version>1.4.1</alphanumeric.comparator.version>
 
     <!-- Dependencies pulled out for security reasons -->
-    <jackson.databind.version>2.12.6.1</jackson.databind.version>
     <commons.io.version>2.7</commons.io.version>
 
     <!-- Exclusions/Replacements -->
@@ -255,16 +252,6 @@
 
     <!-- Below is a dependency that needs updating due to security issue (may be able to remove in future) -->
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-ext</artifactId>
-      <version>${slf4j.ext.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>${jackson.databind.version}</version>
-    </dependency>
-    <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
       <version>${commons.io.version}</version>
@@ -424,7 +411,6 @@
       <plugin>
         <groupId>info.freelibrary</groupId>
         <artifactId>freelib-maven-plugins</artifactId>
-        <version>${freelib.maven.version}</version>
         <executions>
           <execution>
             <phase>process-resources</phase>
