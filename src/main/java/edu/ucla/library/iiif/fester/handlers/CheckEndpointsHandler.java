@@ -86,7 +86,7 @@ public class CheckEndpointsHandler extends AbstractFesterHandler {
                         final int statusCode = error.getStatusCode();
                         final String message = error.getMessage();
 
-                        determineEndpointStatus(Status.GET_RESPONSE, statusCode, message, endpoints, delete);
+                        determineEndpointStatus(Status.DELETE_RESPONSE, statusCode, message, endpoints, delete);
                     } else {
                         determineEndpointStatus(Status.DELETE_RESPONSE, HTTP.OK, Status.OK, endpoints, delete);
                     }
