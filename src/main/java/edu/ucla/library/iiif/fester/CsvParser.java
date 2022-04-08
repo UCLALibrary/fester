@@ -29,34 +29,40 @@ import com.opencsv.exceptions.CsvException;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 import info.freelibrary.util.StringUtils;
+import info.freelibrary.util.warnings.JDK;
 
 import edu.ucla.library.iiif.fester.utils.IDUtils;
 
 /**
  * A parser for ingested CSV data.
  */
+@SuppressWarnings({ "PMD.GodClass", "PMD.CyclomaticComplexity" })
 public class CsvParser {
 
+    /** The parser's logger. */
     private static final Logger LOGGER = LoggerFactory.getLogger(CsvParser.class, Constants.MESSAGES);
 
+    /** A EOL regular expression pattern. */
     private static final Pattern EOL_PATTERN = Pattern.compile(".*\\R");
 
+    /** A map of the CSV's works. */
     private final Map<String, List<String[]>> myWorksMap = new HashMap<>();
 
+    /** A map of the CSV's pages. */
     private final Map<String, List<String[]>> myPagesMap = new LinkedHashMap<>();
 
+    /** A list of works from the CSV. */
     private final List<String[]> myWorksList = new ArrayList<>();
 
+    /**
+     * Information about collections from the CSV.
+     */
     private String[] myCollectionData;
 
-    private CsvHeaders myCsvHeaders;
-
     /**
-     * Creates a new CsvParser.
+     * The CSV's headers.
      */
-    public CsvParser() {
-
-    }
+    private CsvHeaders myCsvHeaders;
 
     /**
      * Parses the CSV file at the supplied path. This is not thread-safe. Optional CSV columns: IIIF Access URL, Item
@@ -71,6 +77,7 @@ public class CsvParser {
      * @throws CsvException If there is trouble reading the CSV data
      * @throws CsvParsingException If there is trouble parsing the CSV data
      */
+    @SuppressWarnings({ "PMD.CognitiveComplexity", "PMD.NPathComplexity", "PMD.AvoidCatchingGenericException" })
     public CsvParser parse(final Path aPath, final String aIiifVersion, final String aAVUrlString)
             throws IOException, CsvException, CsvParsingException {
         reset();
@@ -103,19 +110,28 @@ public class CsvParser {
             // Required CSV columns
             if (!myCsvHeaders.hasItemArkIndex()) {
                 throw new CsvParsingException(MessageCodes.MFS_113);
-            } else if (!myCsvHeaders.hasParentArkIndex()) {
+            }
+
+            if (!myCsvHeaders.hasParentArkIndex()) {
                 throw new CsvParsingException(MessageCodes.MFS_114);
-            } else if (!myCsvHeaders.hasTitleIndex()) {
+            }
+
+            if (!myCsvHeaders.hasTitleIndex()) {
                 throw new CsvParsingException(MessageCodes.MFS_111);
-            } else if (!myCsvHeaders.hasFileNameIndex()) {
+            }
+
+            if (!myCsvHeaders.hasFileNameIndex()) {
                 throw new CsvParsingException(MessageCodes.MFS_112);
-            } else if (!myCsvHeaders.hasItemSequenceIndex() && csvObjectTypes.contains(ObjectType.PAGE)) {
+            }
+
+            if (!myCsvHeaders.hasItemSequenceIndex() && csvObjectTypes.contains(ObjectType.PAGE)) {
                 throw new CsvParsingException(MessageCodes.MFS_123);
             }
 
             for (final String[] row : rows) {
                 checkForEOLs(row);
                 trimValues(row);
+
                 if (aIiifVersion != null) {
                     checkApiCompatibility(row, aPath, aIiifVersion, aAVUrlString);
                 }
@@ -196,7 +212,10 @@ public class CsvParser {
 
     /**
      * Reset the CSV parser.
+     *
+     * @return This parser
      */
+    @SuppressWarnings("PMD.NullAssignment")
     private CsvParser reset() {
         myCollectionData = null;
         myCsvHeaders = null;
@@ -215,23 +234,20 @@ public class CsvParser {
      * @throws CsvParsingException If there is trouble parsing the data
      */
     private void extractCollectionMetadata(final String... aRow) throws CsvParsingException {
-        if (getMetadata(aRow, myCsvHeaders.getItemArkIndex()).isPresent()) {
-            if (getMetadata(aRow, myCsvHeaders.getTitleIndex()).isEmpty()) {
-                throw new CsvParsingException(MessageCodes.MFS_104);
-            }
-
-            myCollectionData = aRow;
-        } else {
+        if (!getMetadata(aRow, myCsvHeaders.getItemArkIndex()).isPresent()) {
             throw new CsvParsingException(MessageCodes.MFS_106);
         }
+        if (getMetadata(aRow, myCsvHeaders.getTitleIndex()).isEmpty()) {
+            throw new CsvParsingException(MessageCodes.MFS_104);
+        }
+
+        myCollectionData = aRow;
     }
 
     /**
      * Add a Work manifest.
      *
      * @param aRow A CSV row representing a Work
-     * @param aHeaders The CSV headers
-     * @param aWorksMap A collection of Work manifests
      * @throws CsvParsingException If there is trouble getting the necessary info from the CSV
      */
     private void extractWorkMetadata(final String... aRow) throws CsvParsingException {
@@ -243,31 +259,31 @@ public class CsvParser {
         myWorksList.add(aRow);
 
         // Create a brief work manifest for inclusion in the collection manifest
-        if (workIdOpt.isPresent() && labelOpt.isPresent()) {
-            final String workID = workIdOpt.get();
-            final URI uri = IDUtils.getResourceURI(Constants.URL_PLACEHOLDER, IDUtils.getWorkS3Key(workID));
-            final String[] workData = new String[] { uri.toString(), labelOpt.get() };
-
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug(MessageCodes.MFS_119, workID, parentIdOpt.orElse(Constants.EMPTY));
-            }
-
-            if (parentIdOpt.isPresent()) {
-                final String parentID = parentIdOpt.get();
-
-                if (myWorksMap.containsKey(parentID)) {
-                    myWorksMap.get(parentID).add(workData);
-                } else {
-                    final List<String[]> worksData = new ArrayList<>();
-
-                    worksData.add(workData);
-                    myWorksMap.put(parentID, worksData);
-                }
-            } else {
-                throw new CsvParsingException(MessageCodes.MFS_107);
-            }
-        } else {
+        if (!workIdOpt.isPresent() || !labelOpt.isPresent()) {
             throw new CsvParsingException(MessageCodes.MFS_108);
+        }
+
+        final String workID = workIdOpt.get();
+        final URI uri = IDUtils.getResourceURI(Constants.URL_PLACEHOLDER, IDUtils.getWorkS3Key(workID));
+        final String[] workData = { uri.toString(), labelOpt.get() };
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(MessageCodes.MFS_119, workID, parentIdOpt.orElse(EMPTY));
+        }
+
+        if (!parentIdOpt.isPresent()) {
+            throw new CsvParsingException(MessageCodes.MFS_107);
+        }
+
+        final String parentID = parentIdOpt.get();
+
+        if (myWorksMap.containsKey(parentID)) {
+            myWorksMap.get(parentID).add(workData);
+        } else {
+            final List<String[]> worksData = new ArrayList<>();
+
+            worksData.add(workData);
+            myWorksMap.put(parentID, worksData);
         }
     }
 
@@ -275,26 +291,23 @@ public class CsvParser {
      * Add a page's metadata to our pages map for later processing.
      *
      * @param aRow A metadata row
-     * @param aHeaders A CSV headers object
-     * @param aPageMap A map of pages
-     * @throws CsvParsingException
+     * @throws CsvParsingException If there is trouble parsing the CSV data
      */
     private void extractPageMetadata(final String... aRow) throws CsvParsingException {
         final Optional<String> workIdOpt = getMetadata(aRow, myCsvHeaders.getParentArkIndex());
 
-        if (workIdOpt.isPresent()) {
-            final String workID = workIdOpt.get();
-            final List<String[]> page;
-
-            if (myPagesMap.containsKey(workID)) {
-                myPagesMap.get(workID).add(aRow);
-            } else {
-                page = new ArrayList<>();
-                page.add(aRow);
-                myPagesMap.put(workID, page);
-            }
-        } else {
+        if (!workIdOpt.isPresent()) {
             throw new CsvParsingException(MessageCodes.MFS_121);
+        }
+        final String workID = workIdOpt.get();
+        final List<String[]> page;
+
+        if (myPagesMap.containsKey(workID)) {
+            myPagesMap.get(workID).add(aRow);
+        } else {
+            page = new ArrayList<>();
+            page.add(aRow);
+            myPagesMap.put(workID, page);
         }
     }
 
@@ -334,12 +347,14 @@ public class CsvParser {
      *
      * @param aRow A row from the metadata CSV
      * @param aPath A path to a CSV file
+     * @param aIiifVersion A version of the IIIF Presentation specification
+     * @param aAvUrlString An A/V URL in string form
      * @return The row
      * @throws CsvParsingException If the row represents a v2 canvas and contains any A/V metadata
      */
-    @SuppressWarnings({ "unchecked", "BooleanExpressionComplexity" })
+    @SuppressWarnings({ JDK.UNCHECKED, "BooleanExpressionComplexity", "PMD.CognitiveComplexity" })
     private String[] checkApiCompatibility(final String[] aRow, final Path aPath, final String aIiifVersion,
-            final String aAVUrlString) throws CsvParsingException {
+            final String aAvUrlString) throws CsvParsingException {
         final String rowId = getMetadata(aRow, myCsvHeaders.getItemArkIndex()).get();
 
         final Optional<Integer> mediaWidth =
@@ -354,56 +369,54 @@ public class CsvParser {
         if (Constants.IIIF_API_V2.equals(aIiifVersion)) {
             if (mediaWidth.isPresent() || mediaHeight.isPresent() || mediaDuration.isPresent() ||
                     mediaFormat.isPresent() ||
-                    audioVideoAccessUrl.isPresent() && audioVideoAccessUrl.toString().contains(aAVUrlString)) {
+                    audioVideoAccessUrl.isPresent() && audioVideoAccessUrl.toString().contains(aAvUrlString)) {
                 throw new CsvParsingException(MessageCodes.MFS_168, rowId, aPath);
             }
-        } else { // Constants.IIIF_API_V3
-            if (mediaFormat.isPresent()) {
-                final String format = mediaFormat.get();
-                final String primaryType;
+        } else if (mediaFormat.isPresent()) {
+            final String format = mediaFormat.get();
+            final String primaryType;
 
-                try {
-                    primaryType = new MimeType(format).getPrimaryType();
-                } catch (final MimeTypeParseException details) {
-                    throw new CsvParsingException(MessageCodes.MFS_169, format, rowId, aPath);
-                }
-
-                switch (primaryType) {
-                    case "video": {
-                        if (mediaWidth.isEmpty() || mediaHeight.isEmpty() || mediaDuration.isEmpty() ||
-                                audioVideoAccessUrl.isEmpty()) {
-                            throw new CsvParsingException(MessageCodes.MFS_170, rowId, format, aPath);
-                        }
-
-                        if (audioVideoAccessUrl.isPresent() && !audioVideoAccessUrl.toString().contains(aAVUrlString)) {
-                            throw new CsvParsingException(MessageCodes.MFS_176, rowId, format, aPath);
-                        }
-
-                        break;
-                    }
-                    case "audio": {
-                        if (mediaDuration.isEmpty() || audioVideoAccessUrl.isEmpty()) {
-                            throw new CsvParsingException(MessageCodes.MFS_174, rowId, format, aPath);
-                        }
-
-                        if (!mediaWidth.isEmpty() || !mediaHeight.isEmpty()) {
-                            throw new CsvParsingException(MessageCodes.MFS_175, rowId, format, aPath);
-                        }
-
-                        if (audioVideoAccessUrl.isPresent() && !audioVideoAccessUrl.toString().contains(aAVUrlString)) {
-                            throw new CsvParsingException(MessageCodes.MFS_176, rowId, format, aPath);
-                        }
-
-                        break;
-                    }
-                    default: {
-                        throw new CsvParsingException(MessageCodes.MFS_171, primaryType, rowId, aPath);
-                    }
-                }
-            } else if (mediaWidth.isPresent() || mediaHeight.isPresent() || mediaDuration.isPresent() ||
-                    audioVideoAccessUrl.isPresent() && audioVideoAccessUrl.toString().contains(aAVUrlString)) {
-                throw new CsvParsingException(MessageCodes.MFS_172, rowId, aPath);
+            try {
+                primaryType = new MimeType(format).getPrimaryType();
+            } catch (final MimeTypeParseException details) {
+                throw new CsvParsingException(details, MessageCodes.MFS_169, format, rowId, aPath);
             }
+
+            switch (primaryType) {
+                case "video": {
+                    if (mediaWidth.isEmpty() || mediaHeight.isEmpty() || mediaDuration.isEmpty() ||
+                            audioVideoAccessUrl.isEmpty()) {
+                        throw new CsvParsingException(MessageCodes.MFS_170, rowId, format, aPath);
+                    }
+
+                    if (audioVideoAccessUrl.isPresent() && !audioVideoAccessUrl.toString().contains(aAvUrlString)) {
+                        throw new CsvParsingException(MessageCodes.MFS_176, rowId, format, aPath);
+                    }
+
+                    break;
+                }
+                case "audio": {
+                    if (mediaDuration.isEmpty() || audioVideoAccessUrl.isEmpty()) {
+                        throw new CsvParsingException(MessageCodes.MFS_174, rowId, format, aPath);
+                    }
+
+                    if (!mediaWidth.isEmpty() || !mediaHeight.isEmpty()) {
+                        throw new CsvParsingException(MessageCodes.MFS_175, rowId, format, aPath);
+                    }
+
+                    if (audioVideoAccessUrl.isPresent() && !audioVideoAccessUrl.toString().contains(aAvUrlString)) {
+                        throw new CsvParsingException(MessageCodes.MFS_176, rowId, format, aPath);
+                    }
+
+                    break;
+                }
+                default: {
+                    throw new CsvParsingException(MessageCodes.MFS_171, primaryType, rowId, aPath);
+                }
+            }
+        } else if (mediaWidth.isPresent() || mediaHeight.isPresent() || mediaDuration.isPresent() ||
+                audioVideoAccessUrl.isPresent() && audioVideoAccessUrl.toString().contains(aAvUrlString)) {
+            throw new CsvParsingException(MessageCodes.MFS_172, rowId, aPath);
         }
         return aRow;
     }
@@ -419,30 +432,39 @@ public class CsvParser {
      */
     public static ObjectType getObjectType(final String[] aRow, final CsvHeaders aCsvHeaders)
             throws CsvParsingException {
-        if (aCsvHeaders.hasObjectTypeIndex()) {
-            final int objectTypeIndex = aCsvHeaders.getObjectTypeIndex();
+        final int objectTypeIndex;
+        final String objectType;
 
-            if (aRow.length > objectTypeIndex) {
-                final String objectType = aRow[objectTypeIndex];
-
-                if (ObjectType.COLLECTION.equals(objectType)) {
-                    return ObjectType.COLLECTION;
-                } else if (ObjectType.WORK.equals(objectType)) {
-                    return ObjectType.WORK;
-                } else if (ObjectType.PAGE.equals(objectType)) {
-                    return ObjectType.PAGE;
-                } else if (ObjectType.MISSING.equals(StringUtils.trimTo(objectType, Constants.EMPTY))) {
-                    return ObjectType.MISSING;
-                } else {
-                    // Disallow unknown types
-                    throw new CsvParsingException(MessageCodes.MFS_094, objectType);
-                }
-            } else {
-                throw new CsvParsingException(MessageCodes.MFS_098, objectTypeIndex, Arrays.toString(aRow));
-            }
-        } else {
+        if (!aCsvHeaders.hasObjectTypeIndex()) {
             throw new CsvParsingException(MessageCodes.MFS_115);
         }
+
+        objectTypeIndex = aCsvHeaders.getObjectTypeIndex();
+
+        if (aRow.length <= objectTypeIndex) {
+            throw new CsvParsingException(MessageCodes.MFS_098, objectTypeIndex, Arrays.toString(aRow));
+        }
+
+        objectType = aRow[objectTypeIndex];
+
+        if (ObjectType.COLLECTION.equals(objectType)) {
+            return ObjectType.COLLECTION;
+        }
+
+        if (ObjectType.WORK.equals(objectType)) {
+            return ObjectType.WORK;
+        }
+
+        if (ObjectType.PAGE.equals(objectType)) {
+            return ObjectType.PAGE;
+        }
+
+        if (ObjectType.MISSING.equals(StringUtils.trimTo(objectType, EMPTY))) {
+            return ObjectType.MISSING;
+        }
+
+        // Disallow unknown types
+        throw new CsvParsingException(MessageCodes.MFS_094, objectType);
     }
 
     /**
@@ -497,20 +519,24 @@ public class CsvParser {
 
             if (rawValue.equals(EMPTY)) {
                 return Optional.empty();
-            } else {
-                try {
-                    if (aType == Integer.class) {
-                        return Optional.of(Integer.parseInt(StringUtils.trimTo(rawValue, EMPTY)));
-                    } else if (aType == Float.class) {
-                        return Optional.of(Float.parseFloat(StringUtils.trimTo(rawValue, EMPTY)));
-                    } else if (aType == String.class) {
-                        return getMetadata(aRow, aIndex);
-                    } else {
-                        throw new CsvParsingException(MessageCodes.MFS_173, rawValue, aPath, aType);
-                    }
-                } catch (final NumberFormatException details) {
-                    throw new CsvParsingException(MessageCodes.MFS_173, rawValue, aPath, aType);
+            }
+
+            try {
+                if (aType == Integer.class) {
+                    return Optional.of(Integer.parseInt(StringUtils.trimTo(rawValue, EMPTY)));
                 }
+
+                if (aType == Float.class) {
+                    return Optional.of(Float.parseFloat(StringUtils.trimTo(rawValue, EMPTY)));
+                }
+
+                if (aType == String.class) {
+                    return getMetadata(aRow, aIndex);
+                }
+
+                throw new CsvParsingException(MessageCodes.MFS_173, rawValue, aPath, aType);
+            } catch (final NumberFormatException details) {
+                throw new CsvParsingException(details, MessageCodes.MFS_173, rawValue, aPath, aType);
             }
         } catch (final IndexOutOfBoundsException details) {
             return Optional.empty();

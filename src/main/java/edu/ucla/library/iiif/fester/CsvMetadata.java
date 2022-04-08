@@ -12,10 +12,13 @@ import java.util.Optional;
  */
 public class CsvMetadata {
 
+    /** A map of CSV works. */
     private final Map<String, List<String[]>> myWorksMap;
 
+    /** A map of CSV pages. */
     private final Map<String, List<String[]>> myPagesMap;
 
+    /** A list of works from the CSV. */
     private final List<String[]> myWorksList;
 
     /**
@@ -56,7 +59,7 @@ public class CsvMetadata {
      * @return True if our metadata has works; else, false
      */
     public boolean hasWorks() {
-        return myWorksList.size() > 0;
+        return !myWorksList.isEmpty();
     }
 
     /**
@@ -68,9 +71,9 @@ public class CsvMetadata {
     public Optional<String> getFirstCollectionID(final int aIndex) {
         if (hasWorks()) {
             return Optional.ofNullable(myWorksList.get(0)[aIndex]);
-        } else {
-            return Optional.empty();
         }
+
+        return Optional.empty();
     }
 
     /**
@@ -88,7 +91,7 @@ public class CsvMetadata {
      * @return True if pages are found; else, false
      */
     public boolean hasPages() {
-        return myPagesMap.size() > 0;
+        return !myPagesMap.isEmpty();
     }
 
     /**

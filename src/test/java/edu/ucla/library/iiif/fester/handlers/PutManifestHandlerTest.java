@@ -21,6 +21,8 @@ import edu.ucla.library.iiif.fester.utils.IDUtils;
 import edu.ucla.library.iiif.fester.utils.TestUtils;
 
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.RequestOptions;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -81,7 +83,6 @@ public class PutManifestHandlerTest extends AbstractFesterHandlerTest {
      * @throws IOException If there is trouble reading the manifest
      */
     @Test
-    @SuppressWarnings("deprecation")
     public void testPutManifestHandler(final TestContext aContext) throws IOException {
         final String manifestPath = V2_MANIFEST_FILE.getAbsolutePath();
         final Buffer manifest = myVertx.fileSystem().readFileBlocking(manifestPath);
@@ -89,25 +90,29 @@ public class PutManifestHandlerTest extends AbstractFesterHandlerTest {
         final int port = aContext.get(Config.HTTP_PORT);
         final String requestPath = IDUtils.getResourceURIPath(myPutManifestS3Key);
         final RequestOptions requestOpts = new RequestOptions();
+        final HttpClient client = myVertx.createHttpClient();
 
         LOGGER.debug(MessageCodes.MFS_016, requestPath);
 
+        requestOpts.setMethod(HttpMethod.PUT);
         requestOpts.setPort(port).setHost(Constants.UNSPECIFIED_HOST).setURI(requestPath);
         requestOpts.addHeader(Constants.CONTENT_TYPE, Constants.JSON_MEDIA_TYPE);
 
-        myVertx.createHttpClient().put(requestOpts, response -> {
-            final int statusCode = response.statusCode();
+        client.request(requestOpts).onSuccess(handler -> {
+            handler.response(response -> {
+                final int statusCode = response.result().statusCode();
 
-            switch (statusCode) {
-                case HTTP.OK:
-                    aContext.assertTrue(myS3Client.doesObjectExist(myS3Bucket, myPutManifestS3Key));
-                    TestUtils.complete(asyncTask);
+                switch (statusCode) {
+                    case HTTP.OK:
+                        aContext.assertTrue(myS3Client.doesObjectExist(myS3Bucket, myPutManifestS3Key));
+                        TestUtils.complete(asyncTask);
 
-                    break;
-                default:
-                    aContext.fail(LOGGER.getMessage(MessageCodes.MFS_018, manifestPath, statusCode));
-            }
-        }).end(manifest);
+                        break;
+                    default:
+                        aContext.fail(LOGGER.getMessage(MessageCodes.MFS_018, manifestPath, statusCode));
+                }
+            }).end(manifest);
+        }).onFailure(aContext::fail);
     }
 
     /**
@@ -153,7 +158,6 @@ public class PutManifestHandlerTest extends AbstractFesterHandlerTest {
      * @throws IOException If there is trouble reading the manifest
      */
     @Test
-    @SuppressWarnings("deprecation")
     public void testPutManifestHandlerUnsupportedMediaType(final TestContext aContext) throws IOException {
         final String manifestPath = V2_MANIFEST_FILE.getAbsolutePath();
         final Buffer manifest = myVertx.fileSystem().readFileBlocking(manifestPath);
@@ -161,26 +165,30 @@ public class PutManifestHandlerTest extends AbstractFesterHandlerTest {
         final int port = aContext.get(Config.HTTP_PORT);
         final String requestPath = IDUtils.getResourceURIPath(myPutManifestS3Key);
         final RequestOptions requestOpts = new RequestOptions();
+        final HttpClient client = myVertx.createHttpClient();
 
         LOGGER.debug(MessageCodes.MFS_016, requestPath);
 
+        requestOpts.setMethod(HttpMethod.PUT);
         requestOpts.setPort(port).setHost(Constants.UNSPECIFIED_HOST).setURI(requestPath);
         requestOpts.addHeader(Constants.CONTENT_TYPE, "text/plain"); // wrong media type
 
-        myVertx.createHttpClient().put(requestOpts, response -> {
-            final int statusCode = response.statusCode();
+        client.request(requestOpts).onSuccess(handler -> {
+            handler.response(response -> {
+                final int statusCode = response.result().statusCode();
 
-            switch (statusCode) {
-                case HTTP.UNSUPPORTED_MEDIA_TYPE:
-                case HTTP.METHOD_NOT_ALLOWED:
-                    aContext.assertFalse(myS3Client.doesObjectExist(myS3Bucket, myPutManifestS3Key));
-                    TestUtils.complete(asyncTask);
+                switch (statusCode) {
+                    case HTTP.UNSUPPORTED_MEDIA_TYPE:
+                    case HTTP.METHOD_NOT_ALLOWED:
+                        aContext.assertFalse(myS3Client.doesObjectExist(myS3Bucket, myPutManifestS3Key));
+                        TestUtils.complete(asyncTask);
 
-                    break;
-                default:
-                    aContext.fail(LOGGER.getMessage(MessageCodes.MFS_022, statusCode));
-            }
-        }).end(manifest);
+                        break;
+                    default:
+                        aContext.fail(LOGGER.getMessage(MessageCodes.MFS_022, statusCode));
+                }
+            }).end(manifest);
+        }).onFailure(aContext::fail);
     }
 
 }

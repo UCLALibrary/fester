@@ -12,8 +12,12 @@ import edu.ucla.library.iiif.fester.MessageCodes;
  */
 public final class CodeUtils {
 
+    /** The logger used by the code utilities. */
     private static final Logger LOGGER = LoggerFactory.getLogger(CodeUtils.class, Constants.MESSAGES);
 
+    /**
+     * Creates a new utilities class.
+     */
     private CodeUtils() {
         // This is a utility class
     }
@@ -25,7 +29,7 @@ public final class CodeUtils {
      * @return A message code in integer form
      * @throws IllegalArgumentException If the supplied string isn't a message code
      */
-    public static int getInt(final String aMessageCode) throws IllegalArgumentException {
+    public static int getInt(final String aMessageCode) {
         try {
             return Integer.parseInt(aMessageCode.substring(aMessageCode.lastIndexOf('-') + 1));
         } catch (final NumberFormatException details) {

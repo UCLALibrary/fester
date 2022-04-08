@@ -21,6 +21,7 @@ import io.vertx.ext.web.RoutingContext;
  */
 public class PutCollectionHandler extends AbstractFesterHandler {
 
+    /** This handler's logger. */
     private static final Logger LOGGER = LoggerFactory.getLogger(PutCollectionHandler.class, Constants.MESSAGES);
 
     /**

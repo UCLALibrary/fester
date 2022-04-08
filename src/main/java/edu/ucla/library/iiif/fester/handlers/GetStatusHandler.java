@@ -18,15 +18,28 @@ import io.vertx.ext.web.RoutingContext;
  */
 public class GetStatusHandler implements Handler<RoutingContext> {
 
+    /**
+     * The logger for this handler.
+     */
     private static final Logger LOGGER = LoggerFactory.getLogger(GetStatusHandler.class, Constants.MESSAGES);
 
+    /**
+     * The number of megabytes used to calculate memory usage.
+     */
     private static final int MB = 1024 * 1024;
 
+    /**
+     * A hard-coded level of usage to warn about.
+     */
     private static final double WARN_PERCENT = 85.0D;
 
+    /**
+     * A hard-coded level of usage to report as an error.
+     */
     private static final double ERROR_PERCENT = 95.0D;
 
     @Override
+    @SuppressWarnings("PMD.AvoidCatchingThrowable")
     public void handle(final RoutingContext aContext) {
         final HttpServerResponse response = aContext.response();
         final JsonObject status = new JsonObject();
@@ -50,6 +63,7 @@ public class GetStatusHandler implements Handler<RoutingContext> {
             } else {
                 status.put(Status.STATUS, Status.OK);
             }
+
             status.put(Status.MEMORY, memory);
             memory.put(Status.TOTAL_MEMORY, totalMemStr).put(Status.FREE_MEMORY, freeMemStr)
                 .put(Status.USED_MEMORY, usedMemStr).put(Status.PERCENT_MEMORY, percentMem);

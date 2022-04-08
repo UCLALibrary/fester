@@ -1,18 +1,20 @@
 
 package edu.ucla.library.iiif.fester.handlers;
 
-import java.net.MalformedURLException;
-
-import com.amazonaws.regions.Region;
 import com.amazonaws.regions.RegionUtils;
 
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
+
+import info.freelibrary.vertx.s3.LocalStackEndpoint;
 import info.freelibrary.vertx.s3.S3Client;
+import info.freelibrary.vertx.s3.S3ClientOptions;
+import info.freelibrary.vertx.s3.S3Endpoint;
 
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.MessageCodes;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -26,12 +28,16 @@ import io.vertx.ext.web.RoutingContext;
  */
 abstract class AbstractFesterHandler implements Handler<RoutingContext> {
 
+    /** The abstract handler's logger. */
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFesterHandler.class, Constants.MESSAGES);
 
+    /** Local reference to the Vert.x instance. */
     protected final Vertx myVertx;
 
+    /** An S3 client that can be used by handlers. */
     protected S3Client myS3Client;
 
+    /** An S3 bucket that handlers may use. */
     protected String myS3Bucket;
 
     /**
@@ -45,33 +51,26 @@ abstract class AbstractFesterHandler implements Handler<RoutingContext> {
             final String s3AccessKey = aConfig.getString(Config.S3_ACCESS_KEY);
             final String s3SecretKey = aConfig.getString(Config.S3_SECRET_KEY);
             final String s3RegionName = aConfig.getString(Config.S3_REGION);
-            final Region s3Region = RegionUtils.getRegion(s3RegionName);
+            final S3ClientOptions config = new S3ClientOptions().setCredentials(s3AccessKey, s3SecretKey);
 
             LOGGER.debug(MessageCodes.MFS_003, s3RegionName);
 
-            if (s3Region != null) {
+            if (RegionUtils.getRegion(s3RegionName) != null) {
                 final String endpoint = aConfig.getString(Config.S3_ENDPOINT);
 
-                try {
-                    // Check to see that we're not overriding the default S3 endpoint
-                    if (endpoint == null || Constants.S3_ENDPOINT.equals(endpoint)) {
-                        final String regionEndpoint = RegionUtils.getRegion(s3RegionName).getServiceEndpoint("s3");
-
-                        LOGGER.debug(MessageCodes.MFS_034, regionEndpoint, "default");
-                        myS3Client = new S3Client(aVertx, s3AccessKey, s3SecretKey, "https://" + regionEndpoint);
-                    } else {
-                        LOGGER.debug(MessageCodes.MFS_034, endpoint, "supplied");
-                        myS3Client = new S3Client(aVertx, s3AccessKey, s3SecretKey, endpoint);
-                    }
-
-                    myS3Client.useV2Signature(true);
-                } catch (final MalformedURLException details) {
-                    throw new IllegalArgumentException(details);
+                if (endpoint == null) {
+                    config.setEndpoint(S3Endpoint.fromRegion(s3RegionName));
+                    LOGGER.debug(MessageCodes.MFS_034, config.getEndpoint().getRegion(), "region");
+                } else if (Constants.S3_ENDPOINT.equals(endpoint)) {
+                    config.setEndpoint(S3Endpoint.US_EAST_1);
+                    LOGGER.debug(MessageCodes.MFS_034, S3Endpoint.US_EAST_1.getRegion(), "default");
+                } else {
+                    config.setEndpoint(new LocalStackEndpoint(endpoint));
+                    LOGGER.debug(MessageCodes.MFS_034, endpoint, "supplied");
                 }
-            } else {
-                myS3Client = new S3Client(aVertx, s3AccessKey, s3SecretKey);
             }
 
+            myS3Client = new S3Client(aVertx, config);
             myS3Bucket = aConfig.getString(Config.S3_BUCKET);
         }
 

@@ -23,11 +23,21 @@ import edu.ucla.library.iiif.fester.MessageCodes;
  */
 public final class IDUtils {
 
+    /**
+     * A maximum number of IDs count.
+     */
     private static final int MAX_ID_COUNT = 1000;
 
+    /**
+     * The default ID length.
+     */
     private static final int DEFAULT_ID_LENGTH = 6;
 
+    /**
+     * Creates a new ID utilities instance.
+     */
     private IDUtils() {
+        // This is intentionally left empty
     }
 
     /**
@@ -46,6 +56,7 @@ public final class IDUtils {
      * @param aIDLength The length of an ID to generate
      * @return A list of unique IDs
      */
+    @SuppressWarnings("PMD.AvoidReassigningLoopVariables")
     public static List<String> getIDs(final int aCount, final int aIDLength) {
         final Set<String> idSet = new HashSet<>(aCount);
 
@@ -91,7 +102,7 @@ public final class IDUtils {
      * @throws MalformedPathException If the supplied S3 key doesn't start with {@link Constants#WORK_S3_KEY_PREFIX} or
      *         {@link Constants#COLLECTION_S3_KEY_PREFIX}
      */
-    public static String getResourceURIPath(final String aS3Key) throws MalformedPathException {
+    public static String getResourceURIPath(final String aS3Key) {
         final String encodedID = URLEncoder.encode(getResourceID(aS3Key), StandardCharsets.UTF_8);
         final String path;
 
@@ -114,7 +125,7 @@ public final class IDUtils {
      * @throws MalformedPathException If the supplied S3 key doesn't start with {@link Constants#WORK_S3_KEY_PREFIX} or
      *         {@link Constants#COLLECTION_S3_KEY_PREFIX}
      */
-    public static String getResourceID(final String aS3Key) throws MalformedPathException {
+    public static String getResourceID(final String aS3Key) {
         final String s3KeyPrefix;
 
         checkPrefixValidity(aS3Key);
@@ -146,7 +157,7 @@ public final class IDUtils {
      * @throws MalformedPathException If the supplied URI doesn't contain {@link Constants#MANIFEST_URI_PATH_SUFFIX} or
      *         {@link Constants#COLLECTION_URI_PATH_PREFIX}
      */
-    public static String getResourceS3Key(final URI aURI) throws MalformedPathException {
+    public static String getResourceS3Key(final URI aURI) {
         final String path = aURI.getPath();
         final String encodedID;
         final String uriPathPrefix;
