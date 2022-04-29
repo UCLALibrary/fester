@@ -4,7 +4,7 @@
 
   <appender name="FLUENCY_SYNC" class="ch.qos.logback.more.appenders.FluencyLogbackAppender">
     <!-- Tag for Fluentd. Farther information: http://docs.fluentd.org/articles/config-file -->
-    <tag>debug</tag>
+    <tag>fluency</tag>
     <!-- Host name/address and port number which Fluentd placed -->
     <remoteHost>192.168.4.33</remoteHost>
     <port>24224</port>
