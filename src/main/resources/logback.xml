@@ -1,4 +1,5 @@
-<configuration debug="false">
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration>
   <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
   <timestamp key="byDay" datePattern="yyyy-MM-dd" />
 
@@ -7,41 +8,31 @@
       <level>${logLevel}</level>
     </filter>
     <encoder>
-      <pattern>[%level] %logger{45}:%X{line} | %msg%n</pattern>
+      <pattern>avuongtest[%level] %logger{45}:%X{line} | %msg%n</pattern>
     </encoder>
   </appender>
 
-  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>/var/log/fester/fester-${byDay}.log</file>
-    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <fileNamePattern>/var/log/fester/fester.%d{yyyy-MM-dd}.log</fileNamePattern>
-      <maxHistory>30</maxHistory>
-      <totalSizeCap>2GB</totalSizeCap>
-    </rollingPolicy>
-    <encoder>
-      <pattern>[%level] %logger{45}:%X{line} | %msg%n</pattern>
-    </encoder>
-  </appender>
+  <include resource="logback-appenders-fluentd.xml" />
 
   <logger name="io.netty" level="ERROR" additivity="false">
     <appender-ref ref="STDOUT" />
-    <appender-ref ref="FILEOUT" />
+  <!--  <appender-ref ref="FLUENCY" /> -->
   </logger>
   <logger name="io.vertx" level="ERROR" additivity="false">
     <appender-ref ref="STDOUT" />
-    <appender-ref ref="FILEOUT" />
+  <!--  <appender-ref ref="FLUENCY" /> -->
   </logger>
 
   <!-- Loggers for our application -->
   <logger name="edu.ucla.library.iiif.fester" level="DEBUG" additivity="false">
     <appender-ref ref="STDOUT" />
-    <appender-ref ref="FILEOUT" />
+  <!--  <appender-ref ref="FLUENCY" /> -->
   </logger>
 
   <!-- Default logging level for everything else -->
-  <root level="INFO">
+  <root level="DEBUG">
     <appender-ref ref="STDOUT" />
-    <appender-ref ref="FILEOUT" />
+  <!--  <appender-ref ref="FLUENCY" /> -->
   </root>
 
 </configuration>

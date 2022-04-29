@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<included>
+  <!-- Fluency -->
+
+  <appender name="FLUENCY_SYNC" class="ch.qos.logback.more.appenders.FluencyLogbackAppender">
+    <!-- Tag for Fluentd. Farther information: http://docs.fluentd.org/articles/config-file -->
+    <tag>debug</tag>
+    <!-- Host name/address and port number which Fluentd placed -->
+    <remoteHost>192.168.4.33</remoteHost>
+    <port>24224</port>
+
+    <!-- [Optional] Configurations to customize Fluency's behavior: https://github.com/komamitsu/fluency#usage  -->
+    <ackResponseMode>true</ackResponseMode>
+    <!-- <fileBackupDir>/tmp</fileBackupDir> -->
+    <bufferChunkInitialSize>2097152</bufferChunkInitialSize>
+    <bufferChunkRetentionSize>16777216</bufferChunkRetentionSize>
+    <maxBufferSize>268435456</maxBufferSize>
+    <bufferChunkRetentionTimeMillis>1000</bufferChunkRetentionTimeMillis>
+    <connectionTimeoutMilli>5000</connectionTimeoutMilli>
+    <readTimeoutMilli>5000</readTimeoutMilli>
+    <waitUntilBufferFlushed>30</waitUntilBufferFlushed>
+    <waitUntilFlusherTerminated>40</waitUntilFlusherTerminated>
+    <flushAttemptIntervalMillis>200</flushAttemptIntervalMillis>
+    <senderMaxRetryCount>12</senderMaxRetryCount>
+    <!-- [Optional] Enable/Disable use of EventTime to get sub second resolution of log event date-time -->
+    <useEventTime>true</useEventTime>
+    <sslEnabled>false</sslEnabled>
+    <!-- [Optional] Enable/Disable use the of JVM Heap for buffering -->
+    <jvmHeapBufferMode>false</jvmHeapBufferMode>
+    <!-- [Optional] If true, Map Marker is expanded instead of nesting in the marker name -->
+    <flattenMapMarker>false</flattenMapMarker>
+    <!--  [Optional] default "marker" -->
+    <markerPrefix></markerPrefix>
+
+    <!-- [Optional] Message encoder if you want to customize message -->
+    <encoder>
+      <pattern><![CDATA[%date{HH:mm:ss.SSS} [%thread] %-5level %logger{15}#%line %message]]></pattern>
+    </encoder>
+
+    <!-- [Optional] Message field key name. Default: "message" -->
+    <messageFieldKeyName>msg</messageFieldKeyName>
+
+  </appender>
+
+  <appender name="FLUENCY" class="ch.qos.logback.classic.AsyncAppender">
+    <!-- Max queue size of logs which is waiting to be sent (When it reach to the max size, the log will be disappeared). -->
+    <queueSize>999</queueSize>
+    <!-- Never block when the queue becomes full. -->
+    <neverBlock>true</neverBlock>
+    <maxFlushTime>1000</maxFlushTime>
+    <appender-ref ref="FLUENCY_SYNC" />
+  </appender>
+
+</included>
