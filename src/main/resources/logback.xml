@@ -13,26 +13,28 @@
   </appender>
 
   <include resource="logback-appenders-fluentd.xml" />
+  <!-- <include resource="logback-appenders-fluentjava.xml" /> -->
+  <include resource="logback-appenders-stdout.xml" />
 
-  <logger name="io.netty" level="ERROR" additivity="false">
+  <logger name="io.netty" level="DEBUG" additivity="true">
     <appender-ref ref="STDOUT" />
-  <!--  <appender-ref ref="FLUENCY" /> -->
+    <appender-ref ref="FLUENCY" />
   </logger>
-  <logger name="io.vertx" level="ERROR" additivity="false">
+  <logger name="io.vertx" level="DEBUG" additivity="true">
     <appender-ref ref="STDOUT" />
-  <!--  <appender-ref ref="FLUENCY" /> -->
+    <appender-ref ref="FLUENCY" />
   </logger>
 
   <!-- Loggers for our application -->
-  <logger name="edu.ucla.library.iiif.fester" level="DEBUG" additivity="false">
+  <logger name="edu.ucla.library.iiif.fester" level="DEBUG" additivity="true">
     <appender-ref ref="STDOUT" />
-  <!--  <appender-ref ref="FLUENCY" /> -->
+    <appender-ref ref="FLUENCY" />
   </logger>
 
   <!-- Default logging level for everything else -->
   <root level="DEBUG">
     <appender-ref ref="STDOUT" />
-  <!--  <appender-ref ref="FLUENCY" /> -->
+    <appender-ref ref="FLUENCY" />
   </root>
 
 </configuration>

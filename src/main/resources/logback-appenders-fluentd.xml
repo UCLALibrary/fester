@@ -34,7 +34,7 @@
 
     <!-- [Optional] Message encoder if you want to customize message -->
     <encoder>
-      <pattern><![CDATA[%date{HH:mm:ss.SSS} [%thread] %-5level %logger{15}#%line %message]]></pattern>
+      <pattern>avuongtest[%level] %logger{45}:%X{line} | %msg%n</pattern>
     </encoder>
 
     <!-- [Optional] Message field key name. Default: "message" -->

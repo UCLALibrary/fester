@@ -314,13 +314,6 @@
       <version>${jsoup.version}</version>
     </dependency>
 
-    <!-- Logback Appenders to support Fluentd Shipping-->
-    <dependency>
-      <groupId>com.sndyuk</groupId>
-      <artifactId>logback-more-appenders</artifactId>
-      <version>1.8.7</version>
-    </dependency>
-
     <!-- Below dependencies only used for testing -->
     <dependency>
       <groupId>com.github.stephenc.jcip</groupId>
@@ -958,11 +951,11 @@
     <profile>
       <id>fluency</id>
       <properties>
-        <fluency.core.version>2.4.1</fluency.core.version>
-        <fluency.fluentd.version>2.4.1</fluency.fluentd.version>
-        <msgpack.core.version>0.8.20</msgpack.core.version>
-        <jackson.dataformat.msgpack.version>0.8.20</jackson.dataformat.msgpack.version>
-        <logback.more.appenders.version>1.8.0</logback.more.appenders.version>
+        <fluency.core.version>2.6.4</fluency.core.version>
+        <fluency.fluentd.version>2.6.4</fluency.fluentd.version>
+        <msgpack.core.version>0.9.1</msgpack.core.version>
+        <jackson.dataformat.msgpack.version>0.9.1</jackson.dataformat.msgpack.version>
+        <logback.more.appenders.version>1.8.7</logback.more.appenders.version>
       </properties>
       <dependencies>
         <dependency>
