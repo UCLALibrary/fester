@@ -42,3 +42,8 @@ DEFAULT_IMAGE_THUMBNAIL_SIZE=
 
 # The version of Festerize that is compatible with this version of Fester
 FESTERIZE_VERSION=
+
+# Optional: Ship logs via Fluency to fluentd endpoint
+FLUENCY_ENABLED=false
+FLUENCY_ENDPOINT=localhost
+FLUENCY_PORT=24224
