@@ -6,8 +6,8 @@
     <!-- Tag for Fluentd. Farther information: http://docs.fluentd.org/articles/config-file -->
     <tag>fluency</tag>
     <!-- Host name/address and port number which Fluentd placed -->
-    <remoteHost>192.168.4.33</remoteHost>
-    <port>24224</port>
+    <remoteHost>${fluency.endpoint}</remoteHost>
+    <port>${fluency.port}</port>
 
     <!-- [Optional] Configurations to customize Fluency's behavior: https://github.com/komamitsu/fluency#usage  -->
     <ackResponseMode>true</ackResponseMode>
@@ -32,9 +32,11 @@
     <!--  [Optional] default "marker" -->
     <markerPrefix></markerPrefix>
 
+    <ignoredField>throwable</ignoredField>
+
     <!-- [Optional] Message encoder if you want to customize message -->
     <encoder>
-      <pattern>avuongtest[%level] %logger{45}:%X{line} | %msg%n</pattern>
+      <pattern>[%level] %logger{45}:%X{line} | %msg%n</pattern>
     </encoder>
 
     <!-- [Optional] Message field key name. Default: "message" -->

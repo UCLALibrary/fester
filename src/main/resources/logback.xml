@@ -1,40 +1,44 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <configuration>
-  <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
-  <timestamp key="byDay" datePattern="yyyy-MM-dd" />
-
-  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-      <level>${logLevel}</level>
-    </filter>
-    <encoder>
-      <pattern>avuongtest[%level] %logger{45}:%X{line} | %msg%n</pattern>
-    </encoder>
-  </appender>
 
   <include resource="logback-appenders-fluentd.xml" />
-  <!-- <include resource="logback-appenders-fluentjava.xml" /> -->
   <include resource="logback-appenders-stdout.xml" />
 
   <logger name="io.netty" level="DEBUG" additivity="true">
     <appender-ref ref="STDOUT" />
-    <appender-ref ref="FLUENCY" />
+    <if condition='property("fluency.enabled").contains("true")'>
+    <then>
+      <appender-ref ref="FLUENCY" />
+    </then>
+    </if>
   </logger>
   <logger name="io.vertx" level="DEBUG" additivity="true">
     <appender-ref ref="STDOUT" />
-    <appender-ref ref="FLUENCY" />
+    <if condition='property("fluency.enabled").contains("true")'>
+    <then>
+      <appender-ref ref="FLUENCY" />
+    </then>
+    </if>
   </logger>
 
   <!-- Loggers for our application -->
   <logger name="edu.ucla.library.iiif.fester" level="DEBUG" additivity="true">
     <appender-ref ref="STDOUT" />
-    <appender-ref ref="FLUENCY" />
+    <if condition='property("fluency.enabled").contains("true")'>
+    <then>
+      <appender-ref ref="FLUENCY" />
+    </then>
+    </if>
   </logger>
 
   <!-- Default logging level for everything else -->
   <root level="DEBUG">
     <appender-ref ref="STDOUT" />
-    <appender-ref ref="FLUENCY" />
+    <if condition='property("fluency.enabled").contains("true")'>
+    <then>
+      <appender-ref ref="FLUENCY" />
+    </then>
+    </if>
   </root>
 
 </configuration>
