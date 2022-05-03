@@ -94,6 +94,16 @@
     <snakeyaml.version>1.26</snakeyaml.version>
     <commons.codec.version>1.14</commons.codec.version>
 
+    <!-- Fluency logback dependencies -->
+    <fluency.core.version>2.6.4</fluency.core.version>
+    <fluency.fluentd.version>2.6.4</fluency.fluentd.version>
+    <msgpack.core.version>0.9.1</msgpack.core.version>
+    <jackson.dataformat.msgpack.version>0.9.1</jackson.dataformat.msgpack.version>
+    <logback.more.appenders.version>1.8.7</logback.more.appenders.version>
+
+    <!-- Add Janino to support if/else in logback file -->
+    <janino.version>3.1.7</janino.version>
+
     <!-- Versions of tools used for testing -->
     <jsoup.version>1.14.2</jsoup.version>
     <aws.sdk.version>1.12.192</aws.sdk.version>
@@ -127,7 +137,7 @@
     <seeLogsFfT>false</seeLogsFfT>
 
     <!-- What level of logging we want to see, by default, in our tests and default container config -->
-    <logLevel>ERROR</logLevel>
+    <logLevel>INFO</logLevel>
     <testLogLevel>ERROR</testLogLevel>
 
     <!-- AWS configuration properties -->
@@ -174,6 +184,12 @@
     <docker.registry.password />
     <!-- The Docker registry account, if supplied, must end with a slash (e.g. "account/") -->
     <docker.registry.account />
+
+    <!-- The flag to enable Fluency logback appenders -->
+    <fluency.enabled />
+    <fluency.endpoint />
+    <fluency.port />
+
   </properties>
 
   <dependencyManagement>
@@ -312,6 +328,38 @@
       <groupId>org.jsoup</groupId>
       <artifactId>jsoup</artifactId>
       <version>${jsoup.version}</version>
+    </dependency>
+
+    <!-- Fluency logback dependencies -->
+    <dependency>
+      <groupId>org.komamitsu</groupId>
+      <artifactId>fluency-core</artifactId>
+      <version>${fluency.core.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.komamitsu</groupId>
+      <artifactId>fluency-fluentd</artifactId>
+      <version>${fluency.fluentd.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.msgpack</groupId>
+      <artifactId>msgpack-core</artifactId>
+      <version>${msgpack.core.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.msgpack</groupId>
+      <artifactId>jackson-dataformat-msgpack</artifactId>
+      <version>${jackson.dataformat.msgpack.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.sndyuk</groupId>
+      <artifactId>logback-more-appenders</artifactId>
+      <version>${logback.more.appenders.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.janino</groupId>
+      <artifactId>janino</artifactId>
+      <version>${janino.version}</version>
     </dependency>
 
     <!-- Below dependencies only used for testing -->
@@ -716,6 +764,8 @@
                   <exclude>org.komamitsu:phi-accural-failure-detector</exclude>
                   <exclude>org.msgpack:jackson-dataformat-msgpack</exclude>
                   <exclude>org.msgpack:msgpack-core</exclude>
+                  <exclude>org.codehaus.janino:janino</exclude>
+                  <exclude>org.codehaus.janino:commons-compiler</exclude>
                   <exclude>org.slf4j:jcl-over-slf4j</exclude>
                   <exclude>org.slf4j:slf4j-api</exclude>
                   <exclude>org.slf4j:slf4j-ext</exclude>
