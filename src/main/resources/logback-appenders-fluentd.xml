@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <included>
   <!-- Fluency -->
-
   <appender name="FLUENCY_SYNC" class="ch.qos.logback.more.appenders.FluencyLogbackAppender">
     <!-- Tag for Fluentd. Farther information: http://docs.fluentd.org/articles/config-file -->
     <tag>fluency</tag>

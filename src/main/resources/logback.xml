@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<configuration>
+<configuration debug="false">
+  <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener" />
+  <property file="/etc/fester/fester.properties" />
 
   <include resource="logback-appenders-fluentd.xml" />
   <include resource="logback-appenders-stdout.xml" />
 
   <logger name="io.netty" level="DEBUG" additivity="true">
     <appender-ref ref="STDOUT" />
-    <if condition='property("fluency.enabled").contains("true")'>
+    <if condition='property("fluency.enabled").equals("true")'>
     <then>
       <appender-ref ref="FLUENCY" />
     </then>
@@ -14,7 +16,7 @@
   </logger>
   <logger name="io.vertx" level="DEBUG" additivity="true">
     <appender-ref ref="STDOUT" />
-    <if condition='property("fluency.enabled").contains("true")'>
+    <if condition='property("fluency.enabled").equals("true")'>
     <then>
       <appender-ref ref="FLUENCY" />
     </then>
@@ -24,7 +26,7 @@
   <!-- Loggers for our application -->
   <logger name="edu.ucla.library.iiif.fester" level="DEBUG" additivity="true">
     <appender-ref ref="STDOUT" />
-    <if condition='property("fluency.enabled").contains("true")'>
+    <if condition='property("fluency.enabled").equals("true")'>
     <then>
       <appender-ref ref="FLUENCY" />
     </then>
@@ -34,7 +36,7 @@
   <!-- Default logging level for everything else -->
   <root level="DEBUG">
     <appender-ref ref="STDOUT" />
-    <if condition='property("fluency.enabled").contains("true")'>
+    <if condition='property("fluency.enabled").equals("true")'>
     <then>
       <appender-ref ref="FLUENCY" />
     </then>
