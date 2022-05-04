@@ -3,10 +3,19 @@
   <!-- Fluency -->
   <appender name="FLUENCY_SYNC" class="ch.qos.logback.more.appenders.FluencyLogbackAppender">
     <!-- Tag for Fluentd. Farther information: http://docs.fluentd.org/articles/config-file -->
-    <tag>fester</tag>
+    <tag>fluentd</tag>
     <!-- Host name/address and port number which Fluentd placed -->
     <remoteHost>${fluency.endpoint}</remoteHost>
     <port>${fluency.port}</port>
+
+    <additionalField>
+      <key>environment</key>
+      <value>${fluency.environment}</value>
+    </additionalField>
+    <additionalField>
+      <key>app</key>
+      <value>${fluency.app}</value>
+    </additionalField>
 
     <!-- [Optional] Configurations to customize Fluency's behavior: https://github.com/komamitsu/fluency#usage  -->
     <ackResponseMode>true</ackResponseMode>

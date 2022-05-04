@@ -189,6 +189,8 @@
     <fluency.enabled />
     <fluency.endpoint />
     <fluency.port />
+    <fluency.environment />
+    <fluency.app />
 
   </properties>
 
