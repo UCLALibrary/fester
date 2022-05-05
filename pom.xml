@@ -1001,44 +1001,6 @@
     </profile>
 
     <profile>
-      <id>fluency</id>
-      <properties>
-        <fluency.core.version>2.6.4</fluency.core.version>
-        <fluency.fluentd.version>2.6.4</fluency.fluentd.version>
-        <msgpack.core.version>0.9.1</msgpack.core.version>
-        <jackson.dataformat.msgpack.version>0.9.1</jackson.dataformat.msgpack.version>
-        <logback.more.appenders.version>1.8.7</logback.more.appenders.version>
-      </properties>
-      <dependencies>
-        <dependency>
-          <groupId>org.komamitsu</groupId>
-          <artifactId>fluency-core</artifactId>
-          <version>${fluency.core.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>org.komamitsu</groupId>
-          <artifactId>fluency-fluentd</artifactId>
-          <version>${fluency.fluentd.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>org.msgpack</groupId>
-          <artifactId>msgpack-core</artifactId>
-          <version>${msgpack.core.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>org.msgpack</groupId>
-          <artifactId>jackson-dataformat-msgpack</artifactId>
-          <version>${jackson.dataformat.msgpack.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>com.sndyuk</groupId>
-          <artifactId>logback-more-appenders</artifactId>
-          <version>${logback.more.appenders.version}</version>
-        </dependency>
-      </dependencies>
-    </profile>
-
-    <profile>
       <id>default</id>
       <activation>
         <property>
