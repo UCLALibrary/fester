@@ -1,47 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
 <configuration debug="false">
-  <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
-  <timestamp key="byDay" datePattern="yyyy-MM-dd" />
+  <property file="/etc/fester/fester.properties" />
 
-  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-      <level>${logLevel}</level>
-    </filter>
-    <encoder>
-      <pattern>[%level] %logger{45}:%X{line} | %msg%n</pattern>
-    </encoder>
-  </appender>
+  <include resource="logback-appenders-fluentd.xml" />
+  <include resource="logback-appenders-stdout.xml" />
 
-  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>/var/log/fester/fester-${byDay}.log</file>
-    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <fileNamePattern>/var/log/fester/fester.%d{yyyy-MM-dd}.log</fileNamePattern>
-      <maxHistory>30</maxHistory>
-      <totalSizeCap>2GB</totalSizeCap>
-    </rollingPolicy>
-    <encoder>
-      <pattern>[%level] %logger{45}:%X{line} | %msg%n</pattern>
-    </encoder>
-  </appender>
-
-  <logger name="io.netty" level="ERROR" additivity="false">
+  <logger name="io.netty" level="${logLevel}" additivity="true">
     <appender-ref ref="STDOUT" />
-    <appender-ref ref="FILEOUT" />
+    <if condition='property("fluency.enabled").equals("true")'>
+    <then>
+      <appender-ref ref="FLUENCY" />
+    </then>
+    </if>
   </logger>
-  <logger name="io.vertx" level="ERROR" additivity="false">
+  <logger name="io.vertx" level="${logLevel}" additivity="true">
     <appender-ref ref="STDOUT" />
-    <appender-ref ref="FILEOUT" />
+    <if condition='property("fluency.enabled").equals("true")'>
+    <then>
+      <appender-ref ref="FLUENCY" />
+    </then>
+    </if>
   </logger>
 
   <!-- Loggers for our application -->
-  <logger name="edu.ucla.library.iiif.fester" level="DEBUG" additivity="false">
+  <logger name="edu.ucla.library.iiif.fester" level="${logLevel}" additivity="true">
     <appender-ref ref="STDOUT" />
-    <appender-ref ref="FILEOUT" />
+    <if condition='property("fluency.enabled").equals("true")'>
+    <then>
+      <appender-ref ref="FLUENCY" />
+    </then>
+    </if>
   </logger>
 
   <!-- Default logging level for everything else -->
-  <root level="INFO">
+  <root level="DEBUG">
     <appender-ref ref="STDOUT" />
-    <appender-ref ref="FILEOUT" />
+    <if condition='property("fluency.enabled").equals("true")'>
+    <then>
+      <appender-ref ref="FLUENCY" />
+    </then>
+    </if>
   </root>
 
 </configuration>
