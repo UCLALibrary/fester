@@ -184,14 +184,6 @@
     <docker.registry.password />
     <!-- The Docker registry account, if supplied, must end with a slash (e.g. "account/") -->
     <docker.registry.account />
-
-    <!-- The flag to enable Fluency logback appenders -->
-    <fluency.enabled />
-    <fluency.endpoint />
-    <fluency.port />
-    <fluency.environment />
-    <fluency.app />
-
   </properties>
 
   <dependencyManagement>
