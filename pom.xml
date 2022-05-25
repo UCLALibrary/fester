@@ -75,7 +75,7 @@
     <curl.version>7.68.0-1ubuntu2.10</curl.version>
 
     <!-- Application dependencies -->
-    <vertx.version>4.2.6</vertx.version>
+    <vertx.version>4.3.1</vertx.version>
     <opencsv.version>5.0</opencsv.version>
     <moirai.version>2.0.0</moirai.version>
     <jcl.over.slf4j.version>1.7.32</jcl.over.slf4j.version>
@@ -177,13 +177,13 @@
     <jdwp.host.port>5556</jdwp.host.port>
 
     <!-- The JDWP configuration for debugging a containerized Fester instance; see "debug" profile -->
-    <jdwp.client.config />
+    <jdwp.client.config/>
 
     <!-- The Docker registry user and password used for publishing images -->
-    <docker.registry.username />
-    <docker.registry.password />
+    <docker.registry.username/>
+    <docker.registry.password/>
     <!-- The Docker registry account, if supplied, must end with a slash (e.g. "account/") -->
-    <docker.registry.account />
+    <docker.registry.account/>
   </properties>
 
   <dependencyManagement>
