@@ -149,6 +149,10 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
             metadata.add(MetadataLabels.REPOSITORY_NAME, repoName);
         });
 
+        CsvParser.getMetadata(collectionData, csvHeaders.getViewingHintIndex()).ifPresent(viewingHint -> {
+            collection.setViewingHint(new ViewingHint(viewingHint));
+        });
+
         CsvParser.getMetadata(collectionData, csvHeaders.getLocalRightsStatementIndex()).ifPresent(rightsStatement -> {
             collection.setAttribution(new Attribution(rightsStatement));
         });

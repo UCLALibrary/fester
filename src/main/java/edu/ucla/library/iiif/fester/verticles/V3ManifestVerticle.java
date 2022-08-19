@@ -44,6 +44,7 @@ import info.freelibrary.iiif.presentation.v3.properties.RequiredStatement;
 import info.freelibrary.iiif.presentation.v3.properties.SeeAlso;
 import info.freelibrary.iiif.presentation.v3.properties.ViewingDirection;
 import info.freelibrary.iiif.presentation.v3.properties.behaviors.CanvasBehavior;
+import info.freelibrary.iiif.presentation.v3.properties.behaviors.CollectionBehavior;
 import info.freelibrary.iiif.presentation.v3.properties.behaviors.ManifestBehavior;
 import info.freelibrary.iiif.presentation.v3.services.ImageService2;
 
@@ -156,6 +157,10 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
 
         CsvParser.getMetadata(collectionData, csvHeaders.getLocalRightsStatementIndex()).ifPresent(rightsStatement -> {
             collection.setRequiredStatement(new RequiredStatement(MetadataLabels.ATTRIBUTION, rightsStatement));
+        });
+
+	CsvParser.getMetadata(collectionData, csvHeaders.getViewingHintIndex()).ifPresent(behavior -> {
+            collection.setBehaviors(CollectionBehavior.fromString(behavior));
         });
 
         CsvParser.getMetadata(collectionData, csvHeaders.getRightsContactIndex()).ifPresent(rightsContract -> {
