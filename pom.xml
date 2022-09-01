@@ -70,7 +70,7 @@
   <properties>
     <!-- Docker image dependencies -->
     <ubuntu.tag>20.04</ubuntu.tag>
-    <jdk.version>11.0.15+10-0ubuntu0.20.04.1</jdk.version>
+    <jdk.version>11.0.16+8-0ubuntu1~18.04</jdk.version>
     <python3.version>3.8.2-0ubuntu2</python3.version>
     <curl.version>7.68.0-1ubuntu2.10</curl.version>
 
