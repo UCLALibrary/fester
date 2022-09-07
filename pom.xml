@@ -70,9 +70,9 @@
   <properties>
     <!-- Docker image dependencies -->
     <ubuntu.tag>20.04</ubuntu.tag>
-    <jdk.version>11.0.16+8-0ubuntu1~18.04</jdk.version>
-    <python3.version>3.8.2-0ubuntu2</python3.version>
-    <curl.version>7.68.0-1ubuntu2.10</curl.version>
+    <jdk.version>11.0.16+8-0ubuntu1~20.04</jdk.version>
+    <python3.version>3.10.4-0ubuntu2</python3.version>
+    <curl.version>7.68.0-1ubuntu2.13</curl.version>
 
     <!-- Application dependencies -->
     <vertx.version>4.2.6</vertx.version>
