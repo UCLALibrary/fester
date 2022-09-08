@@ -69,10 +69,10 @@
 
   <properties>
     <!-- Docker image dependencies -->
-    <ubuntu.tag>20.04</ubuntu.tag>
-    <jdk.version>11.0.16+8-0ubuntu1~20.04</jdk.version>
+    <ubuntu.tag>22.04</ubuntu.tag>
+    <jdk.version>17.0.4+8-1~22.04</jdk.version>
     <python3.version>3.10.4-0ubuntu2</python3.version>
-    <curl.version>7.68.0-1ubuntu2.13</curl.version>
+    <curl.version>7.81.0-1ubuntu1.4</curl.version>
 
     <!-- Application dependencies -->
     <vertx.version>4.2.6</vertx.version>
@@ -91,8 +91,8 @@
     <commons.io.version>2.7</commons.io.version>
 
     <!-- Exclusions/Replacements -->
-    <snakeyaml.version>1.26</snakeyaml.version>
     <commons.codec.version>1.14</commons.codec.version>
+    <snakeyaml.version>1.31</snakeyaml.version>
 
     <!-- Fluency logback dependencies -->
     <fluency.core.version>2.6.4</fluency.core.version>
@@ -105,9 +105,9 @@
     <janino.version>3.1.7</janino.version>
 
     <!-- Versions of tools used for testing -->
-    <jsoup.version>1.14.2</jsoup.version>
-    <aws.sdk.version>1.12.192</aws.sdk.version>
-    <testcontainers.version>1.16.3</testcontainers.version>
+    <jsoup.version>1.15.3</jsoup.version>
+    <aws.sdk.version>1.12.298</aws.sdk.version>
+    <testcontainers.version>1.17.3</testcontainers.version>
     <jcip.annotations.version>1.0-1</jcip.annotations.version>
 
     <!-- Build plug-in versions -->
