@@ -159,7 +159,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
             collection.setRequiredStatement(new RequiredStatement(MetadataLabels.ATTRIBUTION, rightsStatement));
         });
 
-	CsvParser.getMetadata(collectionData, csvHeaders.getViewingHintIndex()).ifPresent(behavior -> {
+        CsvParser.getMetadata(collectionData, csvHeaders.getViewingHintIndex()).ifPresent(behavior -> {
             collection.setBehaviors(CollectionBehavior.fromString(behavior));
         });
 
