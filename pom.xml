@@ -71,11 +71,11 @@
     <!-- Docker image dependencies -->
     <ubuntu.tag>22.04</ubuntu.tag>
     <jdk.version>17.0.4+8-1~22.04</jdk.version>
-    <python3.version>3.10.4-0ubuntu2</python3.version>
+    <python3.version>3.10.6-1~22.04</python3.version>
     <curl.version>7.81.0-1ubuntu1.4</curl.version>
 
     <!-- Application dependencies -->
-    <vertx.version>4.2.6</vertx.version>
+    <vertx.version>4.2.7</vertx.version>
     <opencsv.version>5.0</opencsv.version>
     <moirai.version>2.0.0</moirai.version>
     <jcl.over.slf4j.version>1.7.32</jcl.over.slf4j.version>
@@ -89,10 +89,13 @@
 
     <!-- Dependencies pulled out for security reasons -->
     <commons.io.version>2.7</commons.io.version>
+    <jackson.version>2.13.4</jackson.version>
+    <jackson.databind.version>2.14.0-rc1</jackson.databind.version>
+    <netty.version>4.1.77.Final</netty.version>
 
     <!-- Exclusions/Replacements -->
     <commons.codec.version>1.14</commons.codec.version>
-    <snakeyaml.version>1.31</snakeyaml.version>
+    <snakeyaml.version>1.32</snakeyaml.version>
 
     <!-- Fluency logback dependencies -->
     <fluency.core.version>2.6.4</fluency.core.version>
@@ -265,6 +268,16 @@
       <artifactId>commons-io</artifactId>
       <version>${commons.io.version}</version>
     </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-common</artifactId>
+      <version>${netty.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-handler</artifactId>
+      <version>${netty.version}</version>
+    </dependency>
 
     <!-- A Vert.x plug-in for more flexible configuration control -->
     <dependency>
@@ -322,6 +335,16 @@
       <groupId>org.jsoup</groupId>
       <artifactId>jsoup</artifactId>
       <version>${jsoup.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson.databind.version}</version>
     </dependency>
 
     <!-- Fluency logback dependencies -->
@@ -1256,3 +1279,4 @@
     <version>7.2.2</version>
   </parent>
 </project>
+
