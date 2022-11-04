@@ -75,7 +75,7 @@
     <curl.version>7.81.0-1ubuntu1.6</curl.version>
 
     <!-- Application dependencies -->
-    <vertx.version>3.9.12</vertx.version>
+    <vertx.version>3.9.14</vertx.version>
     <opencsv.version>5.7.1</opencsv.version>
     <moirai.version>2.0.0</moirai.version>
     <slf4j.ext.version>1.7.32</slf4j.ext.version>
