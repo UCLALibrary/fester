@@ -1,17 +1,14 @@
 
 package edu.ucla.library.iiif.fester.handlers;
 
-import info.freelibrary.util.Logger;
-import info.freelibrary.util.LoggerFactory;
-
-import info.freelibrary.iiif.presentation.v2.Manifest;
-
-import info.freelibrary.vertx.s3.UnexpectedStatusException;
-
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.Status;
+
+import info.freelibrary.iiif.presentation.v2.Manifest;
+import info.freelibrary.util.Logger;
+import info.freelibrary.util.LoggerFactory;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -26,72 +23,54 @@ import io.vertx.ext.web.RoutingContext;
  */
 public class CheckEndpointsHandler extends AbstractFesterHandler {
 
-    /** The logger for this handler. */
     private static final Logger LOGGER = LoggerFactory.getLogger(CheckEndpointsHandler.class, Constants.MESSAGES);
 
-    /** A key for a test of the S3 endpoints. */
     private static final String UPLOAD_KEY = "test_load.json";
 
-    /** A delimiter used in appending. */
     private static final String APPEND = " : ";
 
     /**
-     * Creates a handler that checks S3 endpoint statuses.
+     *  Creates a handler that checks S3 endpoint statuses.
      *
      * @param aVertx A Vert.x instance
      * @param aConfig A JSON configuration
      */
-    public CheckEndpointsHandler(final Vertx aVertx, final JsonObject aConfig) {
-        super(aVertx, aConfig);
+    public CheckEndpointsHandler( final Vertx aVertx, final JsonObject aConfig ) {
+        super( aVertx, aConfig );
     }
 
     @Override
-    public void handle(final RoutingContext aContext) {
+    public void handle( final RoutingContext aContext ) {
         final HttpServerResponse response = aContext.response();
-        final Manifest upload = new Manifest("id", "label");
+        final Manifest upload = new Manifest("id","label");
         final JsonObject endpoints = new JsonObject();
         final JsonObject status = new JsonObject();
 
         Future.future(put -> {
             myS3Client.put(myS3Bucket, UPLOAD_KEY, Buffer.buffer(upload.toJSON().encodePrettily()), putResponse -> {
-                if (putResponse.failed()) {
-                    final UnexpectedStatusException error = (UnexpectedStatusException) putResponse.cause();
-                    final int statusCode = error.getStatusCode();
-                    final String message = error.getMessage();
-
-                    determineEndpointStatus(Status.PUT_RESPONSE, statusCode, message, endpoints, put);
-                } else {
-                    determineEndpointStatus(Status.PUT_RESPONSE, HTTP.OK, Status.OK, endpoints, put);
-                }
+                final int statusCode = putResponse.statusCode();
+                final String statusMessage = putResponse.statusMessage();
+                endpoints.put(Status.PUT_RESPONSE, statusCode);
+                determineEndpointStatus(statusCode, statusMessage, endpoints, put);
             });
         }).compose(addGet -> {
             return Future.future(get -> {
                 myS3Client.get(myS3Bucket, UPLOAD_KEY, getResponse -> {
-                    if (getResponse.failed()) {
-                        final UnexpectedStatusException error = (UnexpectedStatusException) getResponse.cause();
-                        final int statusCode = error.getStatusCode();
-                        final String message = error.getMessage();
-
-                        determineEndpointStatus(Status.GET_RESPONSE, statusCode, message, endpoints, get);
-                    } else {
-                        determineEndpointStatus(Status.GET_RESPONSE, HTTP.OK, Status.OK, endpoints, get);
-                    }
+                    final int statusCode = getResponse.statusCode();
+                    final String statusMessage = getResponse.statusMessage();
+                    endpoints.put(Status.GET_RESPONSE, statusCode);
+                    determineEndpointStatus(statusCode, statusMessage, endpoints, get);
                 });
-            });
+            } );
         }).compose(addDel -> {
             return Future.future(delete -> {
                 myS3Client.delete(myS3Bucket, UPLOAD_KEY, deleteResponse -> {
-                    if (deleteResponse.failed()) {
-                        final UnexpectedStatusException error = (UnexpectedStatusException) deleteResponse.cause();
-                        final int statusCode = error.getStatusCode();
-                        final String message = error.getMessage();
-
-                        determineEndpointStatus(Status.DELETE_RESPONSE, statusCode, message, endpoints, delete);
-                    } else {
-                        determineEndpointStatus(Status.DELETE_RESPONSE, HTTP.OK, Status.OK, endpoints, delete);
-                    }
+                    final int statusCode = deleteResponse.statusCode();
+                    final String statusMessage = deleteResponse.statusMessage();
+                    endpoints.put(Status.DELETE_RESPONSE, statusCode);
+                    determineEndpointStatus(statusCode, statusMessage, endpoints, delete);
                 });
-            });
+            } );
         }).onSuccess(success -> {
             status.put(Status.STATUS, determineOverallStatus(endpoints)).put(Status.ENDPOINTS, endpoints);
 
@@ -102,7 +81,6 @@ public class CheckEndpointsHandler extends AbstractFesterHandler {
             final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_155, statusMessage);
 
             LOGGER.error(errorMessage);
-
             response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
             response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
             response.end(errorMessage);
@@ -110,46 +88,29 @@ public class CheckEndpointsHandler extends AbstractFesterHandler {
 
     }
 
-    /**
-     * Determines the endpoint's status.
-     *
-     * @param aEndpoint A service endpoint
-     * @param aCode A status code
-     * @param aStatus A status message
-     * @param aMessage Additional details in the form of a JsonObject
-     * @param aPromise A promise of completion
-     */
-    private void determineEndpointStatus(final String aEndpoint, final int aCode, final String aStatus,
+    private void determineEndpointStatus(final int aCode, final String aStatus,
             final JsonObject aMessage, final Promise<Object> aPromise) {
-        aMessage.put(aEndpoint, aCode);
-
         if (aCode >= HTTP.BAD_REQUEST && aCode < HTTP.INTERNAL_SERVER_ERROR) {
+            final String failMessage = LOGGER.getMessage(MessageCodes.MFS_156, aStatus);
             aMessage.put(Status.STATUS, Status.WARN + APPEND + aStatus);
-            aPromise.fail("4XX error: " + LOGGER.getMessage(MessageCodes.MFS_156, aStatus));
+            aPromise.fail("4XX error: " + failMessage);
         } else if (aCode >= HTTP.INTERNAL_SERVER_ERROR) {
+            final String failMessage = LOGGER.getMessage(MessageCodes.MFS_156, aStatus);
             aMessage.put(Status.STATUS, Status.ERROR + APPEND + aStatus);
-            aPromise.fail("5XX error: " + LOGGER.getMessage(MessageCodes.MFS_156, aStatus));
+            aPromise.fail("5XX error: " + failMessage);
         } else {
             aPromise.complete();
         }
     }
 
-    /**
-     * Determines the overall status from the details in the supplied JsonObject.
-     *
-     * @param aMessage Additional details in the form of a JsonObject
-     * @return The overall status
-     */
     private String determineOverallStatus(final JsonObject aMessage) {
-        if (aMessage.encode().contains(Status.WARN)) {
+        if (aMessage.encode().contains( Status.WARN )) {
             return Status.WARN;
-        }
-
-        if (aMessage.encode().contains(Status.ERROR)) {
+        } else if (aMessage.encode().contains( Status.ERROR )) {
             return Status.ERROR;
+        } else {
+            return Status.OK;
         }
-
-        return Status.OK;
     }
 
 }

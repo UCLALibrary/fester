@@ -18,8 +18,6 @@ import edu.ucla.library.iiif.fester.utils.TestUtils;
 
 import ch.qos.logback.classic.Level;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -77,25 +75,23 @@ public class GetCollectionHandlerTest extends AbstractFesterHandlerTest {
      * @param aContext A testing context
      */
     @Test
+    @SuppressWarnings("deprecation")
     public void testGetCollectionHandler404(final TestContext aContext) {
         final Async asyncTask = aContext.async();
         final int port = aContext.get(Config.HTTP_PORT);
         final String missingPath = "/collections/missingIdentifier";
         final Level logLevel = setLogLevel(GetCollectionHandler.class, Level.OFF);
-        final HttpClient client = myVertx.createHttpClient();
 
-        client.request(HttpMethod.GET, port, Constants.UNSPECIFIED_HOST, missingPath).onSuccess(handler -> {
-            handler.response(response -> {
-                final int statusCode = response.result().statusCode();
+        myVertx.createHttpClient().getNow(port, Constants.UNSPECIFIED_HOST, missingPath, response -> {
+            final int statusCode = response.statusCode();
 
-                setLogLevel(GetCollectionHandler.class, logLevel); // Turn logger back on after expected error
+            setLogLevel(GetCollectionHandler.class, logLevel); // Turn logger back on after expected error
 
-                if (statusCode != HTTP.NOT_FOUND) {
-                    aContext.fail(LOGGER.getMessage(MessageCodes.MFS_004, HTTP.NOT_FOUND, statusCode));
-                }
+            if (response.statusCode() != HTTP.NOT_FOUND) {
+                aContext.fail(LOGGER.getMessage(MessageCodes.MFS_004, HTTP.NOT_FOUND, statusCode));
+            }
 
-                TestUtils.complete(asyncTask);
-            }).end();
-        }).onFailure(aContext::fail);
+            TestUtils.complete(asyncTask);
+        });
     }
 }

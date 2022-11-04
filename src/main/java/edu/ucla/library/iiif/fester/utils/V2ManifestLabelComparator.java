@@ -13,7 +13,6 @@ import se.sawano.java.text.AlphanumericComparator;
  */
 public class V2ManifestLabelComparator implements Comparator<Collection.Manifest> {
 
-    /** An alphanumeric comparator. */
     private final AlphanumericComparator myComparator = new AlphanumericComparator();
 
     @Override

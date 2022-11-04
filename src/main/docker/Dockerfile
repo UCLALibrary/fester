@@ -24,16 +24,16 @@ COPY configs/${project.artifactId}.properties.tmpl /etc/${project.artifactId}/${
 COPY configs/${project.artifactId}.properties.default \
     /etc/${project.artifactId}/${project.artifactId}.properties.default
 
-RUN mkdir -p /var/log/${project.artifactId} /var/cache/${project.artifactId} /tmp/vertx-cache \
+RUN mkdir -p /var/log/${project.artifactId} /var/cache/${project.artifactId} \
     /usr/local/${project.artifactId}/file-uploads /etc/${project.artifactId} \
  && touch /etc/${project.artifactId}/${project.artifactId}.properties \
  && chown -R ${project.artifactId} /var/log/${project.artifactId} /var/cache/${project.artifactId} \
-    /usr/local/${project.artifactId}/file-uploads /etc/${project.artifactId} /tmp/vertx-cache \
+    /usr/local/${project.artifactId}/file-uploads /etc/${project.artifactId} \
     /etc/${project.artifactId}/${project.artifactId}.properties /usr/local/bin/docker-entrypoint.sh
 
 USER ${project.artifactId}
 ENTRYPOINT ["docker-entrypoint.sh"]
-ENV CACHE_DIR="-Dvertx.cacheDirBase=/tmp/vertx-cache"
+ENV CACHE_DIR="-Dvertx.cacheDirBase=/tmp"
 ENV CONFIG_FILE="-Dvertx-config-path=/etc/${project.artifactId}/${project.artifactId}.properties"
 ENV JAVA_TOOL_OPTIONS="${jdwp.client.config}"
 ENV JAR_PATH="/usr/local/${project.artifactId}/${project.artifactId}-${project.version}.jar"

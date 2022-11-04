@@ -23,8 +23,6 @@ import edu.ucla.library.iiif.fester.utils.TestUtils;
 
 import ch.qos.logback.classic.Level;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.RequestOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
@@ -76,50 +74,45 @@ public class PutCollectionHandlerTest extends AbstractFesterHandlerTest {
      * @throws IOException If there is trouble reading a manifest
      */
     @Test
+    @SuppressWarnings("deprecation")
     public void testPutCollectionHandler(final TestContext aContext) throws IOException {
         final String manifestPath = V2_COLLECTION_FILE.getAbsolutePath();
         final Buffer manifest = myVertx.fileSystem().readFileBlocking(manifestPath);
         final Async asyncTask = aContext.async();
         final int port = aContext.get(Config.HTTP_PORT);
-        final String path = IDUtils.getResourceURIPath(myPutCollectionS3Key);
+        final String requestPath = IDUtils.getResourceURIPath(myPutCollectionS3Key);
         final RequestOptions requestOpts = new RequestOptions();
-        final HttpClient client = myVertx.createHttpClient();
 
-        LOGGER.debug(MessageCodes.MFS_016, path);
+        LOGGER.debug(MessageCodes.MFS_016, requestPath);
 
-        requestOpts.setMethod(HttpMethod.PUT);
-        requestOpts.setPort(port).setHost(Constants.UNSPECIFIED_HOST).setURI(path);
+        requestOpts.setPort(port).setHost(Constants.UNSPECIFIED_HOST).setURI(requestPath);
         requestOpts.addHeader(Constants.CONTENT_TYPE, Constants.JSON_MEDIA_TYPE);
 
-        client.request(requestOpts).onSuccess(putHandler -> {
-            putHandler.response(putResponse -> {
-                final int putStatusCode = putResponse.result().statusCode();
+        myVertx.createHttpClient().put(requestOpts, putResponse -> {
+            final int putStatusCode = putResponse.statusCode();
 
-                if (putStatusCode == HTTP.OK) {
-                    // Send a GET request to the same path to make sure PUT succeeded
-                    client.request(HttpMethod.GET, port, Constants.UNSPECIFIED_HOST, path).onSuccess(getHandler -> {
-                        getHandler.response(getResponse -> {
-                            final int getStatusCode = getResponse.result().statusCode();
+            if (putStatusCode == HTTP.OK) {
+                // Send a GET request to the same path to make sure PUT succeeded
+                myVertx.createHttpClient().getNow(port, Constants.UNSPECIFIED_HOST, requestPath, getResponse -> {
+                    final int getStatusCode = getResponse.statusCode();
 
-                            if (getStatusCode == HTTP.OK) {
-                                getResponse.result().bodyHandler(body -> {
-                                    final String json = manifest.toString(StandardCharsets.UTF_8);
-                                    final JsonObject expected = new JsonObject(json.replaceAll(myUrlPattern, myUrl));
-                                    final JsonObject found = new JsonObject(body);
+                    if (getStatusCode == HTTP.OK) {
+                        getResponse.bodyHandler(body -> {
+                            final JsonObject expected = new JsonObject(
+                                    manifest.toString(StandardCharsets.UTF_8).replaceAll(myUrlPattern, myUrl));
+                            final JsonObject found = new JsonObject(body);
+                            aContext.assertEquals(expected, found);
 
-                                    aContext.assertEquals(expected, found);
-                                    TestUtils.complete(asyncTask);
-                                });
-                            } else {
-                                aContext.fail(LOGGER.getMessage(MessageCodes.MFS_140, myPutCollectionID));
-                            }
-                        }).end();
-                    });
-                } else {
-                    aContext.fail(LOGGER.getMessage(MessageCodes.MFS_018, manifestPath, putStatusCode));
-                }
-            }).end(manifest);
-        }).onFailure(aContext::fail);
+                            TestUtils.complete(asyncTask);
+                        });
+                    } else {
+                        aContext.fail(LOGGER.getMessage(MessageCodes.MFS_140, myPutCollectionID));
+                    }
+                });
+            } else {
+                aContext.fail(LOGGER.getMessage(MessageCodes.MFS_018, manifestPath, putStatusCode));
+            }
+        }).end(manifest);
     }
 
     /**
@@ -167,56 +160,45 @@ public class PutCollectionHandlerTest extends AbstractFesterHandlerTest {
      * @throws IOException If there is trouble reading a manifest
      */
     @Test
+    @SuppressWarnings("deprecation")
     public void testPutCollectionHandlerUnsupportedMediaType(final TestContext aContext) throws IOException {
         final String manifestPath = V2_COLLECTION_FILE.getAbsolutePath();
         final Buffer manifest = myVertx.fileSystem().readFileBlocking(manifestPath);
         final Async asyncTask = aContext.async();
         final int port = aContext.get(Config.HTTP_PORT);
-        final String path = IDUtils.getResourceURIPath(myPutCollectionS3Key);
+        final String requestPath = IDUtils.getResourceURIPath(myPutCollectionS3Key);
         final RequestOptions requestOpts = new RequestOptions();
         final Level logLevel = setLogLevel(GetCollectionHandler.class, Level.OFF);
-        final HttpClient client = myVertx.createHttpClient();
 
-        LOGGER.debug(MessageCodes.MFS_016, path);
+        LOGGER.debug(MessageCodes.MFS_016, requestPath);
 
-        requestOpts.setMethod(HttpMethod.PUT);
-        requestOpts.setPort(port).setHost(Constants.UNSPECIFIED_HOST).setURI(path);
+        requestOpts.setPort(port).setHost(Constants.UNSPECIFIED_HOST).setURI(requestPath);
         requestOpts.addHeader(Constants.CONTENT_TYPE, "text/plain"); // wrong media type
 
-        client.request(requestOpts).onSuccess(putHandler -> {
-            putHandler.response(putResponse -> {
-                final int putStatusCode = putResponse.result().statusCode();
+        myVertx.createHttpClient().put(requestOpts, putResponse -> {
+            final int putStatusCode = putResponse.statusCode();
 
-                switch (putStatusCode) {
-                    case HTTP.UNSUPPORTED_MEDIA_TYPE:
-                    case HTTP.METHOD_NOT_ALLOWED:
+            switch (putStatusCode) {
+                case HTTP.UNSUPPORTED_MEDIA_TYPE:
+                case HTTP.METHOD_NOT_ALLOWED:
+                    // Send a GET request to the same path to make sure PUT failed
+                    myVertx.createHttpClient().getNow(port, Constants.UNSPECIFIED_HOST, requestPath, getResponse -> {
+                        final int getStatusCode = getResponse.statusCode();
 
-                        // Send a GET request to the same path to make sure PUT failed
-                        requestOpts.setMethod(HttpMethod.GET).removeHeader(Constants.CONTENT_TYPE);
-                        requestOpts.addHeader(Constants.CONTENT_TYPE, Constants.JSON_MEDIA_TYPE);
+                        setLogLevel(GetCollectionHandler.class, logLevel); // Turn logger back on after expected error
 
-                        client.request(requestOpts).onSuccess(getHandler -> {
-                            getHandler.response(getResponse -> {
-                                final int getStatusCode = getResponse.result().statusCode();
-
-                                // Turn logger back on after getting our result
-                                setLogLevel(GetCollectionHandler.class, logLevel);
-
-                                if (getStatusCode == HTTP.NOT_FOUND) {
-                                    TestUtils.complete(asyncTask);
-                                } else if (getStatusCode == HTTP.OK) {
-                                    aContext.fail(LOGGER.getMessage(MessageCodes.MFS_141, myPutCollectionID));
-                                } else {
-                                    aContext.fail(LOGGER.getMessage(MessageCodes.MFS_010, getStatusCode));
-                                }
-                            }).end();
-                        }).onFailure(aContext::fail);
-
-                        break;
-                    default:
-                        aContext.fail(LOGGER.getMessage(MessageCodes.MFS_022, manifestPath, putStatusCode));
-                }
-            }).end(manifest);
-        }).onFailure(aContext::fail);
+                        if (getStatusCode == HTTP.NOT_FOUND) {
+                            TestUtils.complete(asyncTask);
+                        } else if (getStatusCode == HTTP.OK) {
+                            aContext.fail(LOGGER.getMessage(MessageCodes.MFS_141, myPutCollectionID));
+                        } else {
+                            aContext.fail(LOGGER.getMessage(MessageCodes.MFS_010, getStatusCode));
+                        }
+                    });
+                    break;
+                default:
+                    aContext.fail(LOGGER.getMessage(MessageCodes.MFS_022, manifestPath, putStatusCode));
+            }
+        }).end(manifest);
     }
 }

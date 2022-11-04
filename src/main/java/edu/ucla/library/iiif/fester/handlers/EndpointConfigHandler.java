@@ -20,7 +20,6 @@ import edu.ucla.library.iiif.fester.Features;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.Op;
-
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
@@ -34,37 +33,18 @@ import io.vertx.ext.web.handler.StaticHandler;
 /**
  * An OpenAPI endpoint configuration handler.
  */
-@SuppressWarnings("deprecation")
 public class EndpointConfigHandler implements Handler<AsyncResult<OpenAPI3RouterFactory>> {
 
-    /**
-     * The config handler's logger.
-     */
     private static final Logger LOGGER = LoggerFactory.getLogger(EndpointConfigHandler.class, Constants.MESSAGES);
 
-    /**
-     * A feature-flags configuration file.
-     */
     private static final String FEATURE_FLAGS_FILE = "/etc/fester/fester-features.conf";
 
-    /**
-     * The batch upload form's URL path.
-     */
     private static final String BATCH_UPLOAD_FORM = "/fester/upload/csv";
 
-    /**
-     * A promise of completion.
-     */
     private final Promise<Router> myPromise;
 
-    /**
-     * A configuration object.
-     */
     private final JsonObject myConfig;
 
-    /**
-     * A reference to the Vert.x instance.
-     */
     private final Vertx myVertx;
 
     /**
@@ -215,7 +195,8 @@ public class EndpointConfigHandler implements Handler<AsyncResult<OpenAPI3Router
             return Optional.of(ConfigFeatureFlagChecker.forConfigSupplier(Suppliers.supplierAndThen(
                     FileResourceLoaders.forFile(new File(FEATURE_FLAGS_FILE)), TypesafeConfigReader.FROM_STRING),
                     TypesafeConfigDecider.FEATURE_ENABLED));
+        } else {
+            return Optional.empty();
         }
-        return Optional.empty();
     }
 }

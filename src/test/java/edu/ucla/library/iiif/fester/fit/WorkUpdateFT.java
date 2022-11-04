@@ -21,9 +21,9 @@ import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.MetadataLabels;
 import edu.ucla.library.iiif.fester.utils.ManifestTestUtils;
-import edu.ucla.library.iiif.fester.utils.TestUtils;
 import edu.ucla.library.iiif.fester.utils.V2ManifestTestUtils;
 import edu.ucla.library.iiif.fester.utils.V3ManifestTestUtils;
+import edu.ucla.library.iiif.fester.utils.TestUtils;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -139,6 +139,7 @@ public class WorkUpdateFT extends BaseFesterFT {
     /**
      * Checks a manifest to make sure it's been updated.
      *
+     * @param aContext A test context
      * @param aManifestUtils A utilities class for a particular version of IIIF manifests
      * @return A future result of the check
      */
@@ -202,7 +203,6 @@ public class WorkUpdateFT extends BaseFesterFT {
      * A method to upload a CSV file.
      *
      * @param aForm A form with the CSV file's information
-     * @param aCsvFile A CSV file to upload
      * @param aPromise A promise that the upload happens
      */
     private void uploadCSV(final MultipartForm aForm, final File aCsvFile, final Promise<Void> aPromise) {

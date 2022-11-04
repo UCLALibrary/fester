@@ -1,36 +1,13 @@
 
 package edu.ucla.library.iiif.fester;
 
-import static edu.ucla.library.iiif.fester.Constants.EMPTY;
-
 /**
  * An enumeration of the expected object types.
  */
 public enum ObjectType {
 
-    /**
-     * A collection type.
-     */
-    COLLECTION("Collection"),
+    COLLECTION("Collection"), WORK("Work"), PAGE("Page"), MISSING("");
 
-    /**
-     * A work type.
-     */
-    WORK("Work"),
-
-    /**
-     * A page type.
-     */
-    PAGE("Page"),
-
-    /**
-     * A page missing.
-     */
-    MISSING(EMPTY);
-
-    /**
-     * An object type.
-     */
     private String myValue;
 
     /**
@@ -62,7 +39,6 @@ public enum ObjectType {
      * @param aString A string to compare to the string value of this object type
      * @return True if the two strings are equal; else, false
      */
-    @SuppressWarnings("PMD.SuspiciousEqualsMethodName") // Cannot override enum's equals
     public boolean equals(final String aString) {
         return getValue().equalsIgnoreCase(aString);
     }

@@ -169,7 +169,6 @@ public class PagesManifestFT extends BaseFesterFT {
      * Check the results of our test.
      *
      * @param aAsyncTask An asynchronous task
-     * @param aContext A testing context
      */
     private void checkResults(final Async aAsyncTask, final TestContext aContext) {
         for (int index = 0; index < MANIFESTS.length; index++) {

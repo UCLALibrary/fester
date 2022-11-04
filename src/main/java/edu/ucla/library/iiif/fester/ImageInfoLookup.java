@@ -20,23 +20,14 @@ import io.vertx.core.json.JsonObject;
  */
 public class ImageInfoLookup {
 
-    /** A fake IIIF server URL. */
     public static final String FAKE_IIIF_SERVER = "https://test.example.com/iiif";
 
-    /** The ImageInfoLookup's logger. */
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageInfoLookup.class, Constants.MESSAGES);
 
-    /** A lookup timeout. */
-    private static final int CANTALOUPE_TIMEOUT = 300_000; // Five minutes
+    private static final int CANTALOUPE_TIMEOUT = 300000; // Five minutes
 
-    /**
-     * An image width.
-     */
     private final int myWidth;
 
-    /**
-     * An image height.
-     */
     private final int myHeight;
 
     /**
@@ -47,7 +38,6 @@ public class ImageInfoLookup {
      * @throws MalformedURLException If the supplied URL isn't well-formed
      * @throws ImageNotFoundException If the requested image cannot be found
      */
-    @SuppressWarnings({ "PMD.CognitiveComplexity", "PMD.CyclomaticComplexity" })
     public ImageInfoLookup(final String aURL) throws MalformedURLException, IOException, ImageNotFoundException {
         LOGGER.debug(MessageCodes.MFS_072, aURL);
 

@@ -11,23 +11,14 @@ import info.freelibrary.util.LoggerFactory;
  */
 public final class Features {
 
-    /** A constant for the batch ingest feature. */
     public static final String BATCH_INGEST = "fester.batch.ingest";
 
-    /** Features' logger. */
     private static final Logger LOGGER = LoggerFactory.getLogger(Features.class, Constants.MESSAGES);
 
-    /**
-     * A map of feature names.
-     */
     private static final Map<String, String> FEATURE_NAMES =
             Map.of(BATCH_INGEST, LOGGER.getMessage(MessageCodes.MFS_084));
 
-    /**
-     * Creates a new features instance.
-     */
     private Features() {
-        // This is intentionally left empty.
     }
 
     /**

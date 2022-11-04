@@ -164,7 +164,6 @@ public class MissingImageFT extends BaseFesterFT {
      * Check the results of our test.
      *
      * @param aAsyncTask An asynchronous task
-     * @param aContext A testing context
      */
     private void checkResults(final Async aAsyncTask, final TestContext aContext) {
         final Manifest manifest = Manifest.fromString(myS3Client.getObjectAsString(BUCKET, MANIFEST_S3_KEY));

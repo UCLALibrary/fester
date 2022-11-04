@@ -30,29 +30,18 @@ import io.vertx.ext.web.api.contract.openapi3.OpenAPI3RouterFactory;
 /**
  * The verticle that starts the Fester service.
  */
-@SuppressWarnings("deprecation")
 public class MainVerticle extends AbstractVerticle {
 
-    /**
-     * The main verticle's logger.
-     */
     private static final Logger LOGGER = LoggerFactory.getLogger(MainVerticle.class, MESSAGES);
 
-    /**
-     * The OpenAPI specification used by the application.
-     */
     private static final String DEFAULT_SPEC = "fester.yaml";
 
-    /**
-     * The default port the application runs on (can be overridden).
-     */
     private static final int DEFAULT_PORT = 8888;
 
     /**
      * Starts the Fester service.
      */
     @Override
-    @SuppressWarnings({ "PMD.CognitiveComplexity" })
     public void start(final Promise<Void> aPromise) {
         getConfigRetriever().getConfig(configuration -> {
             if (configuration.failed()) {
@@ -153,7 +142,6 @@ public class MainVerticle extends AbstractVerticle {
      * @param aVerticleName The name of the verticle to deploy
      * @param aOptions Any deployment options that should be considered
      * @param aPromise A promise to deploy the requested verticle
-     * @return A future completion
      */
     private Future<Void> deployVerticle(final String aVerticleName, final DeploymentOptions aOptions,
             final Promise<Void> aPromise) {
