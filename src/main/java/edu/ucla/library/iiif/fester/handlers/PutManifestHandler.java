@@ -4,13 +4,10 @@ package edu.ucla.library.iiif.fester.handlers;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
-import info.freelibrary.vertx.s3.UnexpectedStatusException;
-
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
-
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
@@ -22,7 +19,6 @@ import io.vertx.ext.web.RoutingContext;
  */
 public class PutManifestHandler extends AbstractFesterHandler {
 
-    /** This handler's logger. */
     private static final Logger LOGGER = LoggerFactory.getLogger(PutManifestHandler.class, Constants.MESSAGES);
 
     /**
@@ -45,44 +41,41 @@ public class PutManifestHandler extends AbstractFesterHandler {
 
         // For now we're not going to check if it exists before we overwrite it
         myS3Client.put(myS3Bucket, manifestS3Key, body.toBuffer(), put -> {
-            if (put.failed()) {
-                final UnexpectedStatusException error = (UnexpectedStatusException) put.cause();
-                final int statusCode = error.getStatusCode();
+            final int statusCode = put.statusCode();
 
-                switch (statusCode) {
-                    case HTTP.FORBIDDEN:
-                        LOGGER.debug(MessageCodes.MFS_023, manifestID);
+            switch (statusCode) {
+                case HTTP.OK:
+                    response.setStatusCode(HTTP.OK);
+                    response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
+                    response.end(LOGGER.getMessage(MessageCodes.MFS_092, manifestID));
 
-                        response.setStatusCode(HTTP.FORBIDDEN);
-                        response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
-                        response.end(LOGGER.getMessage(MessageCodes.MFS_089, manifestID));
+                    break;
+                case HTTP.FORBIDDEN:
+                    LOGGER.debug(MessageCodes.MFS_023, manifestID);
 
-                        break;
-                    case HTTP.INTERNAL_SERVER_ERROR:
-                        final String serverErrorMessage = LOGGER.getMessage(MessageCodes.MFS_015, manifestID);
+                    response.setStatusCode(HTTP.FORBIDDEN);
+                    response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
+                    response.end(LOGGER.getMessage(MessageCodes.MFS_089, manifestID));
 
-                        LOGGER.error(serverErrorMessage);
+                    break;
+                case HTTP.INTERNAL_SERVER_ERROR:
+                    final String serverErrorMessage = LOGGER.getMessage(MessageCodes.MFS_015, manifestID);
 
-                        response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
-                        response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
-                        response.end(serverErrorMessage);
+                    LOGGER.error(serverErrorMessage);
 
-                        break;
-                    default:
-                        final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_013, statusCode, manifestID);
+                    response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
+                    response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
+                    response.end(serverErrorMessage);
 
-                        LOGGER.warn(errorMessage);
+                    break;
+                default:
+                    final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_013, statusCode, manifestID);
 
-                        response.setStatusCode(statusCode);
-                        response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
-                        response.end(errorMessage);
+                    LOGGER.warn(errorMessage);
 
-                        break;
-                }
-            } else {
-                response.setStatusCode(HTTP.OK);
-                response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
-                response.end(LOGGER.getMessage(MessageCodes.MFS_092, manifestID));
+                    response.setStatusCode(statusCode);
+                    response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
+                    response.end(errorMessage);
             }
         });
     }

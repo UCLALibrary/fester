@@ -23,7 +23,6 @@ import io.vertx.core.shareddata.LocalMap;
  */
 public abstract class AbstractFesterVerticle extends AbstractVerticle {
 
-    /** The logger for this verticle. */
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFesterVerticle.class, Constants.MESSAGES);
 
     @Override

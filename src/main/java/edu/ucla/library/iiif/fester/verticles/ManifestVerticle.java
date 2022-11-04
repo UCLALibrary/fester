@@ -1,5 +1,5 @@
 
-package edu.ucla.library.iiif.fester.verticles; // NOPMD - ExcessiveImports
+package edu.ucla.library.iiif.fester.verticles;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -76,31 +76,18 @@ public class ManifestVerticle extends AbstractFesterVerticle {
      */
     public static final String CREATE_WORK = "create-work";
 
-    /**
-     * This verticle's logger.
-     */
     private static final Logger LOGGER = LoggerFactory.getLogger(ManifestVerticle.class, Constants.MESSAGES);
 
-    /**
-     * A kludge for long image lookups. Image lookups will one day be removed from Fester and h/w pulled from the CSV.
-     */
     private static final long TIMEOUT = Long.MAX_VALUE; // A temporary over the top setting for image lookups
 
-    /**
-     * A placeholder image.
-     */
     private String myPlaceholderImage;
 
-    /**
-     * An image host (e.g. Cantaloupe).
-     */
     private String myImageHost;
 
     /**
      * Starts a verticle to handle manifest creation requests.
      */
     @Override
-    @SuppressWarnings({ "PMD.CognitiveComplexity", "PMD.ExcessiveMethodLength" })
     public void start(final Promise<Void> aPromise) {
         if (myImageHost == null) {
             myImageHost = StringUtils.trimToNull(config().getString(Config.IIIF_BASE_URL));
@@ -257,7 +244,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
             }
         });
 
-        lockResource(id, false, promise);
+        getLockedIiifResource(id, false, promise);
     }
 
     /**
@@ -354,7 +341,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
             }
         });
 
-        lockResource(aWorkID, false, promise);
+        getLockedIiifResource(aWorkID, false, promise);
     }
 
     /**
@@ -403,7 +390,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
             }
         });
 
-        lockResource(collectionID, true, promise);
+        getLockedIiifResource(collectionID, true, promise);
     }
 
     /**
@@ -469,8 +456,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
      * @param aCollDoc Whether the resource is a collection or a manifest ("work")
      * @param aPromise A promise that we'll get a lock
      */
-    @SuppressWarnings({ "PMD.CognitiveComplexity", "PMD.AvoidCatchingNPE", "PMD.AvoidCatchingGenericException" })
-    private void lockResource(final String aID, final boolean aCollDoc,
+    private void getLockedIiifResource(final String aID, final boolean aCollDoc,
             final Promise<LockedIiifResource> aPromise) {
         final SharedData sharedData = vertx.sharedData();
 
@@ -512,7 +498,7 @@ public class ManifestVerticle extends AbstractFesterVerticle {
             } else {
                 // If we can't get a lock, keep trying (forever, really?)
                 vertx.setTimer(1000, timer -> {
-                    lockResource(aID, aCollDoc, aPromise);
+                    getLockedIiifResource(aID, aCollDoc, aPromise);
                 });
             }
         });
@@ -527,7 +513,8 @@ public class ManifestVerticle extends AbstractFesterVerticle {
     private String getManifestVerticleName(final String aApiVersion) {
         if (Constants.IIIF_API_V3.equals(aApiVersion)) {
             return V3ManifestVerticle.class.getName();
+        } else {
+            return V2ManifestVerticle.class.getName();
         }
-        return V2ManifestVerticle.class.getName();
     }
 }

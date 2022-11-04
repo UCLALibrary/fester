@@ -1,5 +1,5 @@
 
-package edu.ucla.library.iiif.fester.verticles; // NOPMD - ExcessiveImports
+package edu.ucla.library.iiif.fester.verticles;
 
 import java.io.IOException;
 import java.net.URI;
@@ -63,22 +63,16 @@ import io.vertx.core.json.JsonObject;
  */
 public class V2ManifestVerticle extends AbstractFesterVerticle {
 
-    /** The verticle's logger. */
     private static final Logger LOGGER = LoggerFactory.getLogger(V2ManifestVerticle.class, MessageCodes.BUNDLE);
 
-    /** A sequence URI template. */
     private static final String SEQUENCE_URI = "{}/{}/manifest/sequence/normal";
 
-    /** A manifest URI template. */
     private static final String MANIFEST_URI = "{}/{}/manifest";
 
-    /** A canvas URI template. */
     private static final String CANVAS_URI = "{}/{}/manifest/canvas/{}";
 
-    /** An annotation URI template. */
     private static final String ANNOTATION_URI = "{}/{}/annotation/{}";
 
-    /** A simple URI template. */
     private static final String SIMPLE_URI = "{}/{}";
 
     /**
@@ -442,13 +436,11 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
      *
      * @param aCsvHeaders A CSV headers
      * @param aPageList A list of pages to add
+     * @param aSequence A sequence to add pages to
      * @param aImageHost An image host for image links
-     * @param aPlaceholderImage A placeholder image link
      * @param aWorkID A URL encoded work ID
      * @throws IOException If there is trouble adding a page
-     * @return An array of canvases
      */
-    @SuppressWarnings("PMD.CognitiveComplexity")
     private Canvas[] createCanvases(final CsvHeaders aCsvHeaders, final List<String[]> aPageList,
             final String aImageHost, final String aPlaceholderImage, final String aWorkID) {
         final Iterator<String[]> iterator = aPageList.iterator();

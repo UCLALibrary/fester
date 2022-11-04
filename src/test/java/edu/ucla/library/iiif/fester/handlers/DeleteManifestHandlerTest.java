@@ -15,8 +15,6 @@ import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
 import edu.ucla.library.iiif.fester.utils.TestUtils;
 
-import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 
@@ -34,26 +32,24 @@ public class DeleteManifestHandlerTest extends AbstractFesterHandlerTest {
      * @throws IOException If there is trouble reading a manifest
      */
     @Test
+    @SuppressWarnings("deprecation")
     public void testDeleteManifestHandler(final TestContext aContext) throws IOException {
         final Async asyncTask = aContext.async();
         final int port = aContext.get(Config.HTTP_PORT);
         final String requestPath = IDUtils.getResourceURIPath(myManifestS3Key);
-        final HttpClient client = myVertx.createHttpClient();
 
         LOGGER.debug(MessageCodes.MFS_012, myManifestS3Key);
 
-        client.request(HttpMethod.DELETE, port, Constants.UNSPECIFIED_HOST, requestPath).onSuccess(handler -> {
-            handler.response(response -> {
-                final int statusCode = response.result().statusCode();
+        myVertx.createHttpClient().delete(port, Constants.UNSPECIFIED_HOST, requestPath, response -> {
+            final int statusCode = response.statusCode();
 
-                if (statusCode == HTTP.SUCCESS_NO_CONTENT) {
-                    aContext.assertFalse(myS3Client.doesObjectExist(myS3Bucket, myManifestS3Key));
-                    TestUtils.complete(asyncTask);
-                } else {
-                    aContext.fail(LOGGER.getMessage(MessageCodes.MFS_004, HTTP.SUCCESS_NO_CONTENT, statusCode));
-                }
-            }).end();
-        }).onFailure(aContext::fail);
+            if (response.statusCode() == HTTP.SUCCESS_NO_CONTENT) {
+                aContext.assertFalse(myS3Client.doesObjectExist(myS3Bucket, myManifestS3Key));
+                TestUtils.complete(asyncTask);
+            } else {
+                aContext.fail(LOGGER.getMessage(MessageCodes.MFS_004, HTTP.SUCCESS_NO_CONTENT, statusCode));
+            }
+        }).end();
     }
 
     /**
@@ -62,23 +58,21 @@ public class DeleteManifestHandlerTest extends AbstractFesterHandlerTest {
      * @param aContext A testing context
      */
     @Test
+    @SuppressWarnings("deprecation")
     public void testDeleteManifestHandler404(final TestContext aContext) {
         final Async asyncTask = aContext.async();
         final int port = aContext.get(Config.HTTP_PORT);
         final String testIDPath = "/testIdentifier"; // path should be: /{id}/manifest
-        final HttpClient client = myVertx.createHttpClient();
 
-        client.request(HttpMethod.DELETE, port, Constants.UNSPECIFIED_HOST, testIDPath).onSuccess(handler -> {
-            handler.response(response -> {
-                final int statusCode = response.result().statusCode();
+        myVertx.createHttpClient().delete(port, Constants.UNSPECIFIED_HOST, testIDPath, response -> {
+            final int statusCode = response.statusCode();
 
-                if (statusCode != HTTP.NOT_FOUND) {
-                    aContext.fail(LOGGER.getMessage(MessageCodes.MFS_004, HTTP.NOT_FOUND, statusCode));
-                }
+            if (response.statusCode() != HTTP.NOT_FOUND) {
+                aContext.fail(LOGGER.getMessage(MessageCodes.MFS_004, HTTP.NOT_FOUND, statusCode));
+            }
 
-                TestUtils.complete(asyncTask);
-            }).end();
-        }).onFailure(aContext::fail);
+            TestUtils.complete(asyncTask);
+        }).end();
     }
 
 }

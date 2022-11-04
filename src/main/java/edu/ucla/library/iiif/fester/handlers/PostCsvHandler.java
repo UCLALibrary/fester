@@ -1,5 +1,5 @@
 
-package edu.ucla.library.iiif.fester.handlers; // NOPMD - ExcessiveImports
+package edu.ucla.library.iiif.fester.handlers;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -42,27 +42,18 @@ import io.vertx.ext.web.RoutingContext;
  */
 public class PostCsvHandler extends AbstractFesterHandler {
 
-    /** The logger for this handler. */
     private static final Logger LOGGER = LoggerFactory.getLogger(PostCsvHandler.class, Constants.MESSAGES);
 
-    /** The template for attachments. */
     private static final String ATTACHMENT = "attachment; filename=\"{}\"";
 
-    /** A break tag constants. */
     private static final String BR_TAG = "<br>";
 
-    /** The exception page used by this handler. */
     private final String myExceptionPage;
 
-    /** The Fester URL. */
     private final String myUrl;
 
-    /** The festerize version. */
     private final String myFesterizeVersion;
 
-    /**
-     * The festerize user agent pattern.
-     */
     private final Pattern myFesterizeUserAgentPattern;
 
     /**
@@ -84,7 +75,6 @@ public class PostCsvHandler extends AbstractFesterHandler {
     }
 
     @Override
-    @SuppressWarnings("PMD.CognitiveComplexity")
     public void handle(final RoutingContext aContext) {
         final HttpServerRequest request = aContext.request();
         final HttpServerResponse response = aContext.response();
@@ -94,7 +84,7 @@ public class PostCsvHandler extends AbstractFesterHandler {
         final String errorMessage;
 
         // An uploaded CSV is required
-        if (csvUploads.isEmpty()) {
+        if (csvUploads.size() == 0) {
             errorMessage = LOGGER.getMessage(MessageCodes.MFS_037);
 
             response.setStatusCode(HTTP.BAD_REQUEST);
@@ -182,7 +172,6 @@ public class PostCsvHandler extends AbstractFesterHandler {
      * Return an error page (and response code) to the requester.
      *
      * @param aResponse A HTTP response
-     * @param aStatusCode A status code
      * @param aThrowable A throwable exception
      */
     private void returnError(final HttpServerResponse aResponse, final int aStatusCode, final Throwable aThrowable) {

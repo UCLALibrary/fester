@@ -19,7 +19,6 @@ public class MalformedPathException extends I18nRuntimeException {
      * Creates a new path structure exception.
      */
     public MalformedPathException() {
-        // This is intentionally left empty
     }
 
     /**

@@ -19,7 +19,6 @@ public final class Constants {
     /**
      * The IP for an unspecified host.
      */
-    @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
     public static final String UNSPECIFIED_HOST = "0.0.0.0";
 
     /**

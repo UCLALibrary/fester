@@ -1,5 +1,5 @@
 
-package edu.ucla.library.iiif.fester; // NOPMD - ExcessivePublicCount
+package edu.ucla.library.iiif.fester;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -11,7 +11,6 @@ import io.vertx.core.json.JsonObject;
 /**
  * The CSV file's headers.
  */
-@SuppressWarnings({ "PMD.TooManyMethods", "PMD.TooManyFields" })
 public class CsvHeaders {
 
     /**
@@ -104,8 +103,7 @@ public class CsvHeaders {
      *
      * @param aRow CSV header data
      */
-    @SuppressWarnings("PMD.CyclomaticComplexity")
-    public CsvHeaders(final String... aRow) {
+    public CsvHeaders(final String[] aRow) {
         for (int index = 0; index < aRow.length; index++) {
 
             // Trim whitespace before attempting to match

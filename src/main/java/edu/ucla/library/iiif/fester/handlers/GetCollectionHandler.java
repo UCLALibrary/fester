@@ -23,9 +23,6 @@ import io.vertx.ext.web.RoutingContext;
  */
 public class GetCollectionHandler extends AbstractFesterHandler implements Handler<RoutingContext> {
 
-    /**
-     * The logger for this handler.
-     */
     private static final Logger LOGGER = LoggerFactory.getLogger(GetCollectionHandler.class, Constants.MESSAGES);
 
     /**

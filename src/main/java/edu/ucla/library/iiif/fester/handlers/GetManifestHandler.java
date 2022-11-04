@@ -9,7 +9,6 @@ import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.verticles.S3BucketVerticle;
-
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.ReplyException;
@@ -22,7 +21,6 @@ import io.vertx.ext.web.RoutingContext;
  */
 public class GetManifestHandler extends AbstractFesterHandler {
 
-    /** The logger for this handler. */
     private static final Logger LOGGER = LoggerFactory.getLogger(GetManifestHandler.class, Constants.MESSAGES);
 
     /**

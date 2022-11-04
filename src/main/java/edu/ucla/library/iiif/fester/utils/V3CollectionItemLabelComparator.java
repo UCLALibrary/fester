@@ -13,9 +13,6 @@ import se.sawano.java.text.AlphanumericComparator;
  */
 public class V3CollectionItemLabelComparator implements Comparator<Collection.Item> {
 
-    /**
-     * An alphanumeric comparator.
-     */
     private final AlphanumericComparator myComparator = new AlphanumericComparator();
 
     @Override
@@ -31,11 +28,13 @@ public class V3CollectionItemLabelComparator implements Comparator<Collection.It
             secondLabel = aSecondCollectionItem.getLabel().getString();
 
             return myComparator.compare(firstLabel, secondLabel);
-        }
-        if (firstType.equals(Collection.Item.Type.COLLECTION) && secondType.equals(Collection.Item.Type.MANIFEST)) {
-            return -1;
         } else {
-            return 1;
+            // Sort Collections before Manifests
+            if (firstType.equals(Collection.Item.Type.COLLECTION) && secondType.equals(Collection.Item.Type.MANIFEST)) {
+                return -1;
+            } else {
+                return 1;
+            }
         }
     }
 }
