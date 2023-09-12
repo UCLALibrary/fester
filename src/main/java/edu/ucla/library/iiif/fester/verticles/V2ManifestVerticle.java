@@ -288,7 +288,7 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
         final Stream<Collection.Manifest> stream = collection.getManifests().stream();
 
         try {
-            // Below can throw a RuntimeException if duplicate IDs are found
+            // Below can throw a IllegalStateException if duplicate IDs are found
             manifestMap.putAll(stream.collect(Collectors.toMap(Collection.Manifest::getID, manifest -> manifest)));
 
             // Next, add the new manifests to the map, replacing any that already exist
@@ -314,7 +314,7 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
                     error(aMessage, update.cause(), MessageCodes.MFS_152, update.cause().getMessage());
                 }
             });
-        } catch (final RuntimeException details) {
+        } catch (final IllegalStateException details) {
             LOGGER.error(details, details.getMessage());
             aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, details.getMessage());
         }
