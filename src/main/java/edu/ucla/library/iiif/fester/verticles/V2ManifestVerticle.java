@@ -286,31 +286,38 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
 
         // First, add the old manifests to the map
         final Stream<Collection.Manifest> stream = collection.getManifests().stream();
-        manifestMap.putAll(stream.collect(Collectors.toMap(Collection.Manifest::getID, manifest -> manifest)));
 
-        // Next, add the new manifests to the map, replacing any that already exist
-        worksMap.get(IDUtils.getResourceID(collection.getID())).stream().forEach(workArray -> {
-            final URI manifestURI = URI.create(workArray[0]);
-            manifestMap.put(manifestURI, new Collection.Manifest(manifestURI, new Label(workArray[1])));
-        });
+        try {
+            // Below can throw a RuntimeException if duplicate IDs are found
+            manifestMap.putAll(stream.collect(Collectors.toMap(Collection.Manifest::getID, manifest -> manifest)));
 
-        // Update the manifest list with the manifests in the map, ordered by their label
-        sortedManifestSet.addAll(manifestMap.values());
+            // Next, add the new manifests to the map, replacing any that already exist
+            worksMap.get(IDUtils.getResourceID(collection.getID())).stream().forEach(workArray -> {
+                final URI manifestURI = URI.create(workArray[0]);
+                manifestMap.put(manifestURI, new Collection.Manifest(manifestURI, new Label(workArray[1])));
+            });
 
-        collection.getManifests().clear();
-        collection.getManifests().addAll(sortedManifestSet);
+            // Update the manifest list with the manifests in the map, ordered by their label
+            sortedManifestSet.addAll(manifestMap.values());
 
-        message.put(Constants.DATA, collection.toJSON());
-        message.put(Constants.COLLECTION_NAME, collectionName);
-        options.addHeader(Constants.ACTION, Op.PUT_COLLECTION);
+            collection.getManifests().clear();
+            collection.getManifests().addAll(sortedManifestSet);
 
-        sendMessage(S3BucketVerticle.class.getName(), message, options, update -> {
-            if (update.succeeded()) {
-                aMessage.reply(collection.toJSON());
-            } else {
-                error(aMessage, update.cause(), MessageCodes.MFS_152, update.cause().getMessage());
-            }
-        });
+            message.put(Constants.DATA, collection.toJSON());
+            message.put(Constants.COLLECTION_NAME, collectionName);
+            options.addHeader(Constants.ACTION, Op.PUT_COLLECTION);
+
+            sendMessage(S3BucketVerticle.class.getName(), message, options, update -> {
+                if (update.succeeded()) {
+                    aMessage.reply(collection.toJSON());
+                } else {
+                    error(aMessage, update.cause(), MessageCodes.MFS_152, update.cause().getMessage());
+                }
+            });
+        } catch (final RuntimeException details) {
+            LOGGER.error(details, details.getMessage());
+            aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, details.getMessage());
+        }
     }
 
     /**
@@ -355,11 +362,11 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
         });
 
         CsvParser.getMetadata(workRow, csvHeaders.getLocalRightsStatementIndex())
-            .ifPresentOrElse(localRightsStatement -> {
-                manifest.setAttribution(new Attribution(localRightsStatement));
-            }, () -> {
-                manifest.clearAttribution();
-            });
+                .ifPresentOrElse(localRightsStatement -> {
+                    manifest.setAttribution(new Attribution(localRightsStatement));
+                }, () -> {
+                    manifest.clearAttribution();
+                });
 
         CsvParser.getMetadata(workRow, csvHeaders.getRightsContactIndex()).ifPresentOrElse(rightsContact -> {
             manifest.setMetadata(updateMetadata(manifest.getMetadata(), MetadataLabels.RIGHTS_CONTACT, rightsContact));
@@ -456,10 +463,10 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
             final String pageURI = StringUtils.format(SIMPLE_URI, aImageHost, encodedPageID);
             final String contentURI = StringUtils.format(ANNOTATION_URI, Constants.URL_PLACEHOLDER, aWorkID, idPart);
 
-            String resourceURI = StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, pageURI,
-                    Constants.DEFAULT_SAMPLE_SIZE);
-            ImageResource imageResource = new ImageResource(resourceURI,
-                    new ImageInfoService(APIComplianceLevel.TWO, pageURI));
+            String resourceURI =
+                    StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, pageURI, Constants.DEFAULT_SAMPLE_SIZE);
+            ImageResource imageResource =
+                    new ImageResource(resourceURI, new ImageInfoService(APIComplianceLevel.TWO, pageURI));
             ImageContent imageContent;
             Canvas canvas;
 

@@ -34,45 +34,19 @@
       <organization>UCLA Library</organization>
       <organizationUrl>http://github.com/uclalibrary</organizationUrl>
       <timezone>America/New_York</timezone>
+      <roles>
+        <role>Lead Developer</role>
+      </roles>
     </developer>
-    <developer>
-      <id>hardyoyo</id>
-      <name>Hardy Pottinger</name>
-      <email>hardy.pottinger@gmail.com</email>
-      <timezone>America/Chicago</timezone>
-    </developer>
-    <developer>
-      <id>cachemeoutside</id>
-      <name>Anthony Vuong</name>
-      <email>avuong@cachemeoutside.io</email>
-      <organization>UCLA Library</organization>
-      <organizationUrl>http://github.com/uclalibrary</organizationUrl>
-      <timezone>America/Los_Angeles</timezone>
-    </developer>
-    <developer>
-      <id>markmatney</id>
-      <name>Mark A. Matney, Jr.</name>
-      <email>mmatney@library.ucla.edu</email>
-      <organization>UCLA Library</organization>
-      <organizationUrl>http://github.com/uclalibrary</organizationUrl>
-      <timezone>America/Los_Angeles</timezone>
-    </developer>
-    <developer>
-      <id>DRickard</id>
-      <name>David Rickard</name>
-      <email>drickard1967@library.ucla.edu</email>
-      <organization>UCLA Library</organization>
-      <organizationUrl>http://github.com/uclalibrary</organizationUrl>
-      <timezone>America/Los_Angeles</timezone>
-    </developer>
+    <!-- Also https://github.com/UCLALibrary/fester/graphs/contributors -->
   </developers>
 
   <properties>
     <!-- Docker image dependencies -->
     <ubuntu.tag>22.04</ubuntu.tag>
-    <jdk.version>17.0.4+8-1~22.04</jdk.version>
+    <jdk.version>17.0.8.1+1~us1-0ubuntu1~22.04</jdk.version>
     <python3.version>3.10.6-1~22.04</python3.version>
-    <curl.version>7.81.0-1ubuntu1.6</curl.version>
+    <curl.version>7.81.0-1ubuntu1.13</curl.version>
 
     <!-- Application dependencies -->
     <vertx.version>3.9.14</vertx.version>
