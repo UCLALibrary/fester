@@ -5,20 +5,30 @@
   <include resource="logback-appenders-fluentd.xml" />
   <include resource="logback-appenders-stdout.xml" />
 
-  <logger name="io.netty" level="${logLevel}" additivity="true">
+  <logger name="io.netty" level="WARN" additivity="true">
     <appender-ref ref="STDOUT" />
     <if condition='property("fluency.enabled").equals("true")'>
-    <then>
-      <appender-ref ref="FLUENCY" />
-    </then>
+      <then>
+        <appender-ref ref="FLUENCY" />
+      </then>
     </if>
   </logger>
-  <logger name="io.vertx" level="${logLevel}" additivity="true">
+
+  <logger name="io.vertx" level="INFO" additivity="true">
     <appender-ref ref="STDOUT" />
     <if condition='property("fluency.enabled").equals("true")'>
-    <then>
-      <appender-ref ref="FLUENCY" />
-    </then>
+      <then>
+        <appender-ref ref="FLUENCY" />
+      </then>
+    </if>
+  </logger>
+
+  <logger name="info.freelibrary.util.I18nException" level="WARN" additivity="true">
+    <appender-ref ref="STDOUT" />
+    <if condition='property("fluency.enabled").equals("true")'>
+      <then>
+        <appender-ref ref="FLUENCY" />
+      </then>
     </if>
   </logger>
 
@@ -26,9 +36,9 @@
   <logger name="edu.ucla.library.iiif.fester" level="${logLevel}" additivity="true">
     <appender-ref ref="STDOUT" />
     <if condition='property("fluency.enabled").equals("true")'>
-    <then>
-      <appender-ref ref="FLUENCY" />
-    </then>
+      <then>
+        <appender-ref ref="FLUENCY" />
+      </then>
     </if>
   </logger>
 
@@ -36,9 +46,9 @@
   <root level="DEBUG">
     <appender-ref ref="STDOUT" />
     <if condition='property("fluency.enabled").equals("true")'>
-    <then>
-      <appender-ref ref="FLUENCY" />
-    </then>
+      <then>
+        <appender-ref ref="FLUENCY" />
+      </then>
     </if>
   </root>
 
