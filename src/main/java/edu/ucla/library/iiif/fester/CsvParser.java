@@ -440,7 +440,7 @@ public class CsvParser {
             } else {
                 throw new CsvParsingException(MessageCodes.MFS_098, iiifObjectTypeIndex, Arrays.toString(aRow));
             }
-	} else if (aCsvHeaders.hasObjectTypeIndex()) {
+        } else if (aCsvHeaders.hasObjectTypeIndex()) {
             final int objectTypeIndex = aCsvHeaders.getObjectTypeIndex();
 
             if (aRow.length > objectTypeIndex) {

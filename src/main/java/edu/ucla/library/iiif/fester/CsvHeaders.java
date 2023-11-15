@@ -348,7 +348,7 @@ public class CsvHeaders {
     /**
      * Sets the Object Type index position.
      *
-     * @param aObjectTypeIndex The index position of the Object Type
+     * @param anIiifObjectTypeIndex The index position of the IIIF Object Type
      * @return This CSV headers
      */
     @JsonSetter
