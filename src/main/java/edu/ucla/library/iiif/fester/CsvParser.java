@@ -419,7 +419,28 @@ public class CsvParser {
      */
     public static ObjectType getObjectType(final String[] aRow, final CsvHeaders aCsvHeaders)
             throws CsvParsingException {
-        if (aCsvHeaders.hasObjectTypeIndex()) {
+        if (aCsvHeaders.hasIiifObjectTypeIndex()) {
+            final int iiifObjectTypeIndex = aCsvHeaders.getIiifObjectTypeIndex();
+
+            if (aRow.length > iiifObjectTypeIndex) {
+                final String objectType = aRow[iiifObjectTypeIndex];
+
+                if (ObjectType.COLLECTION.equals(objectType)) {
+                    return ObjectType.COLLECTION;
+                } else if (ObjectType.WORK.equals(objectType)) {
+                    return ObjectType.WORK;
+                } else if (ObjectType.PAGE.equals(objectType)) {
+                    return ObjectType.PAGE;
+                } else if (ObjectType.MISSING.equals(StringUtils.trimTo(objectType, Constants.EMPTY))) {
+                    return ObjectType.MISSING;
+                } else {
+                    // Disallow unknown types
+                    throw new CsvParsingException(MessageCodes.MFS_094, objectType);
+                }
+            } else {
+                throw new CsvParsingException(MessageCodes.MFS_098, iiifObjectTypeIndex, Arrays.toString(aRow));
+            }
+	} else if (aCsvHeaders.hasObjectTypeIndex()) {
             final int objectTypeIndex = aCsvHeaders.getObjectTypeIndex();
 
             if (aRow.length > objectTypeIndex) {

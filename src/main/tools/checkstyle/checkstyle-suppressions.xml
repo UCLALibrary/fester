@@ -6,5 +6,4 @@
 <suppressions>
   <suppress files="src[\\/]main[\\/]generated[\\/]" checks="."/>
   <suppress files="target[\\/]" checks="."/>
-  <suppress files=".mvn[\\/]" checks="."/>
 </suppressions>

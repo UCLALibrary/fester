@@ -61,6 +61,8 @@ public class PostCsvFIT {
 
     private static final File ALL_IN_ONE_CSV = new File(DIR, "csv/hathaway.csv");
 
+    private static final File IIIF_TYPES_CSV = new File(DIR, "csv/hathaway_iiif_type.csv");
+
     private static final File WORKS_CSV_COLLECTION = new File(DIR, "csv/hathaway/batch1/works.csv");
 
     private static final File WORKS_CSV_NO_COLLECTION = new File(DIR, "csv/hathaway/batch2/works.csv");
@@ -871,6 +873,52 @@ public class PostCsvFIT {
                 }
             });
         }
+
+        /**
+         * Tests submitting a CSV with IIIF Object Type header with IIIF Presentation API 3 specified. 
+         *
+         * @param aContext A test context
+         */
+        @Test
+        public final void testIiifObjectTypeV3(final TestContext aContext) {
+            final Async asyncTask = aContext.async();
+
+            postCSV(IIIF_TYPES_CSV, Constants.IIIF_API_V3, post -> {
+                if (post.succeeded()) {
+                    final HttpResponse<Buffer> response = post.result();
+                    final int statusCode = response.statusCode();
+                    final String statusMessage = response.statusMessage();
+
+                    if (statusCode == HTTP.CREATED) {
+                        // Just check the second manifest, since another test already uses the first manifest
+                        final Optional<JsonObject> optJsonObject = checkS3(HATHAWAY_SECOND_WORK_ARK, false);
+
+                        if (optJsonObject.isPresent()) {
+                            try {
+                                final JsonObject expected = readJsonFile(HATHAWAY_SECOND_MANIFEST);
+                                final JsonObject found = optJsonObject.get();
+
+                                aContext.assertTrue(TestUtils.manifestsAreEffectivelyEqual(expected, found));
+                            } catch (final IOException details) {
+                                LOGGER.error(details, details.getMessage());
+                                aContext.fail(details);
+                            }
+                        } else {
+                            aContext.fail(LOGGER.getMessage(MessageCodes.MFS_154, ALL_IN_ONE_CSV));
+                        }
+                        TestUtils.complete(asyncTask);
+                    } else {
+                        aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, statusCode, statusMessage));
+                    }
+                } else {
+                    final Throwable exception = post.cause();
+
+                    LOGGER.error(exception, exception.getMessage());
+                    aContext.fail(exception);
+                }
+            });
+        }
+
 
         /**
          * Tests submitting a CSV using an outdated version of Festerize.
