@@ -27,6 +27,11 @@ public final class CSV {
     public static final String OBJECT_TYPE = "Object Type";
 
     /**
+     * The IIIF object type for the row
+     */
+    public static final String IIIF_OBJECT_TYPE = "IIIF Object Type";
+
+    /**
      * The row's file name. Not all rows are intended to have files.
      */
     public static final String FILE_NAME = "File Name";
