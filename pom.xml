@@ -84,20 +84,19 @@
     <freelib.utils.version>3.0.1</freelib.utils.version>
     <vertx.super.s3.version>1.3.3</vertx.super.s3.version>
     <netty.epoll.version>4.1.59.Final</netty.epoll.version>
-    <jiiify.presentation.v2.version>0.5.7</jiiify.presentation.v2.version>
-    <jiiify.presentation.v3.version>0.12.0</jiiify.presentation.v3.version>
+    <jiiify.presentation.v2.version>0.5.10</jiiify.presentation.v2.version>
+    <jiiify.presentation.v3.version>0.12.4</jiiify.presentation.v3.version>
     <alphanumeric.comparator.version>1.4.1</alphanumeric.comparator.version>
 
     <!-- Dependencies pulled out for security reasons -->
     <commons.io.version>2.7</commons.io.version>
-    <jackson.version>2.13.4</jackson.version>
-    <jackson.databind.version>2.14.0-rc1</jackson.databind.version>
+    <jackson.version>2.16.0</jackson.version>
+    <jackson.databind.version>2.16.0</jackson.databind.version>
     <netty.handler.version>4.1.79.Final</netty.handler.version>
     <netty.common.version>4.1.84.Final</netty.common.version>
 
     <!-- Exclusions/Replacements -->
     <commons.codec.version>1.14</commons.codec.version>
-    <snakeyaml.version>1.32</snakeyaml.version>
 
     <!-- Fluency logback dependencies -->
     <fluency.core.version>2.6.4</fluency.core.version>
@@ -253,20 +252,9 @@
 
     <!-- OpenAPI for Vert.x - https://vertx.io/docs/vertx-web-api-contract/java/ -->
     <dependency>
-      <groupId>org.yaml</groupId>
-      <artifactId>snakeyaml</artifactId>
-      <version>${snakeyaml.version}</version>
-    </dependency>
-    <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-web-api-contract</artifactId>
       <version>${vertx.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.yaml</groupId>
-          <artifactId>snakeyaml</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
     <!-- Below is a dependency that needs updating due to security issue (may be able to remove in future) -->
