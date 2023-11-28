@@ -39,6 +39,11 @@ public class CsvHeaders {
     private int myObjectTypeIndex = -1;
 
     /**
+     * The index position for the IIIF object type column.
+     */
+    private int myIiifObjectTypeIndex = -1;
+
+    /**
      * The index position for the file name column.
      */
     private int myFileNameIndex = -1;
@@ -127,6 +132,9 @@ public class CsvHeaders {
                     break;
                 case CSV.OBJECT_TYPE:
                     setObjectTypeIndex(index);
+                    break;
+                case CSV.IIIF_OBJECT_TYPE:
+                    setIiifObjectTypeIndex(index);
                     break;
                 case CSV.FILE_NAME:
                     setFileNameIndex(index);
@@ -364,6 +372,37 @@ public class CsvHeaders {
      */
     public boolean hasObjectTypeIndex() {
         return myObjectTypeIndex != -1;
+    }
+
+    /**
+     * Gets the Object Type index position.
+     *
+     * @return The index position of the Object Type
+     */
+    @JsonGetter
+    public int getIiifObjectTypeIndex() {
+        return myIiifObjectTypeIndex;
+    }
+
+    /**
+     * Sets the Object Type index position.
+     *
+     * @param anIiifObjectTypeIndex The index position of the IIIF Object Type
+     * @return This CSV headers
+     */
+    @JsonSetter
+    public CsvHeaders setIiifObjectTypeIndex(final int anIiifObjectTypeIndex) {
+        myIiifObjectTypeIndex = anIiifObjectTypeIndex;
+        return this;
+    }
+
+    /**
+     * Checks whether there is an Object Type index position
+     *
+     * @return True if there is an IIIF Object Type index position; else, false
+     */
+    public boolean hasIiifObjectTypeIndex() {
+        return myIiifObjectTypeIndex != -1;
     }
 
     /**
