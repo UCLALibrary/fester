@@ -24,6 +24,11 @@ public class CsvHeaders {
     private int myParentArkIndex = -1;
 
     /**
+     * The index position for the parent IIIF ARK column.
+     */
+    private int myIiifParentArkIndex = -1;
+
+    /**
      * The index position for the title column.
      */
     private int myTitleIndex = -1;
@@ -116,6 +121,9 @@ public class CsvHeaders {
                     break;
                 case CSV.PARENT_ARK:
                     setParentArkIndex(index);
+                    break;
+                case CSV.IIIF_PARENT_ARK:
+                    setIiifParentArkIndex(index);
                     break;
                 case CSV.OBJECT_TYPE:
                     setObjectTypeIndex(index);
@@ -263,6 +271,37 @@ public class CsvHeaders {
      */
     public boolean hasParentArkIndex() {
         return myParentArkIndex != -1;
+    }
+
+    /**
+     * Gets the IIIF Parent ARK index position.
+     *
+     * @return The Parent ARK index position
+     */
+    @JsonGetter
+    public int getIiifParentArkIndex() {
+        return myIiifParentArkIndex;
+    }
+
+    /**
+     * Sets the IIIF Parent ARK index position.
+     *
+     * @param aIiifParentArkIndex The index position of the Parent ARK
+     * @return This CSV headers
+     */
+    @JsonSetter
+    public CsvHeaders setIiifParentArkIndex(final int aIiifParentArkIndex) {
+        myIiifParentArkIndex = aIiifParentArkIndex;
+        return this;
+    }
+
+    /**
+     * Checks whether there is an IIIF Parent ARK index position
+     *
+     * @return True if there is an IIIF Parent ARK index position; else, false
+     */
+    public boolean hasIiifParentArkIndex() {
+        return myIiifParentArkIndex != -1;
     }
 
     /**
