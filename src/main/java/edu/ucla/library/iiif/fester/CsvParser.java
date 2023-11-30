@@ -235,8 +235,8 @@ public class CsvParser {
      * @throws CsvParsingException If there is trouble getting the necessary info from the CSV
      */
     private void extractWorkMetadata(final String... aRow) throws CsvParsingException {
-        final Optional<String> parentIdOpt = getMetadata(aRow, 
-            myCsvHeaders.hasIiifParentArkIndex() ? myCsvHeaders.getIiifParentArkIndex() : 
+        final Optional<String> parentIdOpt = getMetadata(aRow,
+            myCsvHeaders.hasIiifParentArkIndex() ? myCsvHeaders.getIiifParentArkIndex() :
             myCsvHeaders.getParentArkIndex());
         final Optional<String> workIdOpt = getMetadata(aRow, myCsvHeaders.getItemArkIndex());
         final Optional<String> labelOpt = getMetadata(aRow, myCsvHeaders.getTitleIndex());
@@ -282,8 +282,8 @@ public class CsvParser {
      * @throws CsvParsingException
      */
     private void extractPageMetadata(final String... aRow) throws CsvParsingException {
-        final Optional<String> workIdOpt = getMetadata(aRow, 
-            myCsvHeaders.hasIiifParentArkIndex() ? myCsvHeaders.getIiifParentArkIndex() : 
+        final Optional<String> workIdOpt = getMetadata(aRow,
+            myCsvHeaders.hasIiifParentArkIndex() ? myCsvHeaders.getIiifParentArkIndex() :
             myCsvHeaders.getParentArkIndex());
 
         if (workIdOpt.isPresent()) {
