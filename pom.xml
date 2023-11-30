@@ -1081,7 +1081,7 @@
               <systemPropertyVariables>
                 <vertx.logger-delegate-factory-class-name>io.vertx.core.logging.SLF4JLogDelegateFactory</vertx.logger-delegate-factory-class-name>
                 <fester.url>${fester.url}</fester.url>
-                <fester.http.port>${http.test.port}</fester.http.port>
+                <fester.http.port>${test.http.port}</fester.http.port>
                 <vertx-config-path>${project.basedir}/target/test-classes/test-config.properties</vertx-config-path>
               </systemPropertyVariables>
               <argLine>${jacoco.agent.arg}</argLine>
@@ -1266,7 +1266,7 @@
   <parent>
     <artifactId>freelib-parent</artifactId>
     <groupId>info.freelibrary</groupId>
-    <version>7.2.2</version>
+    <version>8.0.4</version>
   </parent>
 </project>
 
