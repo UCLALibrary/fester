@@ -90,6 +90,7 @@ public class CsvParserTest {
         assertEquals(-1, csvHeaders.getLocalRightsStatementIndex());
         assertEquals(5, csvHeaders.getObjectTypeIndex());
         assertEquals(39, csvHeaders.getIiifObjectTypeIndex());
+        assertEquals(40, csvHeaders.getIiifParentArkIndex());
         assertEquals(2, csvHeaders.getParentArkIndex());
         assertEquals(20, csvHeaders.getRepositoryNameIndex());
         assertEquals(17, csvHeaders.getRightsContactIndex());
@@ -113,6 +114,7 @@ public class CsvParserTest {
         assertEquals(2, csvHeaders.getParentArkIndex());
         assertEquals(3, csvHeaders.getObjectTypeIndex());
         assertEquals(24, csvHeaders.getIiifObjectTypeIndex());
+        assertEquals(25, csvHeaders.getIiifParentArkIndex());
         assertEquals(4, csvHeaders.getFileNameIndex());
         assertEquals(5, csvHeaders.getItemSequenceIndex());
         assertEquals(12, csvHeaders.getTitleIndex());
