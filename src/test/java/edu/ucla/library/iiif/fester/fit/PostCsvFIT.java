@@ -928,7 +928,7 @@ public class PostCsvFIT {
          * @param aContext A test context
          */
         @Test
-        public final void testIiifObjectTypeV3(final TestContext aContext) {
+        public final void testIiifParentArkV3(final TestContext aContext) {
             final Async asyncTask = aContext.async();
 
             postCSV(IIIF_ARK_CSV, Constants.IIIF_API_V3, post -> {
