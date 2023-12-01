@@ -17,6 +17,11 @@ public final class CSV {
     public static final String PARENT_ARK = "Parent ARK";
 
     /**
+     * Optional alternate ARK identifier for the parent object.
+     */
+    public static final String IIIF_PARENT_ARK = "IIIF Parent ARK";
+
+    /**
      * The manifest URL for works and collections.
      */
     public static final String MANIFEST_URL = "IIIF Manifest URL";
