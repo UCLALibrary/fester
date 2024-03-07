@@ -218,6 +218,12 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         final Stream<Optional<String>> pageFormats;
         final boolean videoAccompanyingCanvas;
 
+        CsvParser.getMetadata(workRow, csvHeaders.getThumbnailIndex()).ifPresentOrElse(thumbnailURL -> {
+            manifest.setThumbnails(new ImageContent(thumbnailURL));
+        }, () -> {
+            // Do we want to try and get a source image to use as a thumbnail?
+        });
+
         CsvParser.getMetadata(workRow, csvHeaders.getViewingDirectionIndex()).ifPresent(viewingDirection -> {
             manifest.setViewingDirection(ViewingDirection.fromString(viewingDirection));
         });
@@ -348,6 +354,13 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         final DeliveryOptions options = new DeliveryOptions();
         final JsonObject message = new JsonObject();
 
+        CsvParser.getMetadata(workRow, csvHeaders.getThumbnailIndex()).ifPresentOrElse(thumbnailURL -> {
+            manifest.setThumbnails(new ImageContent(thumbnailURL));
+        }, () -> {
+            // Do we want to try and get a source image to use as a thumbnail? If so, it's probably easier
+            // to pull it from the manifest after it's been constructed.
+        });
+
         CsvParser.getMetadata(workRow, csvHeaders.getTitleIndex()).ifPresentOrElse(title -> {
             manifest.setLabel(new Label(title));
         }, () -> {
@@ -461,9 +474,10 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
             final String imageThumbnailSize = StringUtils.trimTo(
                     config().getString(Config.DEFAULT_IMAGE_THUMBNAIL_SIZE), Constants.DEFAULT_IMAGE_THUMBNAIL_SIZE);
             final String encodedPageID = URLEncoder.encode(pageID, StandardCharsets.UTF_8);
+            final Optional<String> thumbnailOpt = CsvParser.getMetadata(columns, aCsvHeaders.getThumbnailIndex());
             final Canvas canvas = new Canvas(aMinter, pageLabel);
-            final String pageURI;
             final String thumbnail;
+            final String pageURI;
             final float duration;
 
             int width;
@@ -474,8 +488,12 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                 final String resourceURI = CsvParser.getMetadata(columns, aCsvHeaders.getContentAccessUrlIndex()).get();
                 final VideoContent[] videos = getVideoContent(resourceURI);
 
-                thumbnail = StringUtils.trimTo(config().getString(Config.DEFAULT_VIDEO_THUMBNAIL),
-                        Constants.UCLA_VIDEO_THUMBNAIL);
+                if (thumbnailOpt.isPresent()) {
+                    thumbnail = thumbnailOpt.get();
+                } else {
+                    thumbnail = StringUtils.trimTo(config().getString(Config.DEFAULT_VIDEO_THUMBNAIL),
+                            Constants.UCLA_VIDEO_THUMBNAIL);
+                }
 
                 // We've already validated these numeric values in CsvParser
                 width = Integer.parseInt(CsvParser.getMetadata(columns, aCsvHeaders.getMediaWidthIndex()).get());
@@ -488,8 +506,12 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                 final String resourceURI = CsvParser.getMetadata(columns, aCsvHeaders.getContentAccessUrlIndex()).get();
                 final SoundContent[] audios = getSoundContent(resourceURI);
 
-                thumbnail = StringUtils.trimTo(config().getString(Config.DEFAULT_AUDIO_THUMBNAIL),
-                        Constants.UCLA_AUDIO_THUMBNAIL);
+                if (thumbnailOpt.isPresent()) {
+                    thumbnail = thumbnailOpt.get();
+                } else {
+                    thumbnail = StringUtils.trimTo(config().getString(Config.DEFAULT_AUDIO_THUMBNAIL),
+                            Constants.UCLA_AUDIO_THUMBNAIL);
+                }
 
                 // We've already validated this numeric value in CsvParser
                 duration = Float.parseFloat(CsvParser.getMetadata(columns, aCsvHeaders.getMediaDurationIndex()).get());
@@ -507,22 +529,39 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                     anno.setSeeAlsoRefs(waveform);
                 });
             } else {
+                final String accessURI = StringUtils.trimToNull(columns[aCsvHeaders.getContentAccessUrlIndex()]);
+
                 String resourceURI;
                 ImageContent image;
 
                 pageURI = StringUtils.format(SIMPLE_URI, aImageHost, encodedPageID);
                 resourceURI = StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, pageURI, Constants.DEFAULT_SAMPLE_SIZE);
-                thumbnail = StringUtils.format(Constants.IIIF_THUMBNAIL_URI_TEMPLATE, pageURI, imageThumbnailSize);
+
+                if (thumbnailOpt.isPresent()) {
+                    thumbnail = thumbnailOpt.get();
+                } else {
+                    thumbnail = StringUtils.format(Constants.IIIF_THUMBNAIL_URI_TEMPLATE, pageURI, imageThumbnailSize);
+                }
 
                 // Try to look up the w/h but on failure, fall back to a placeholder image
                 try {
-                    final ImageInfoLookup infoLookup = new ImageInfoLookup(pageURI);
+                    final Optional<String> mediaWidth =
+                            CsvParser.getMetadata(columns, aCsvHeaders.getMediaWidthIndex());
+                    final Optional<String> mediaHeight =
+                            CsvParser.getMetadata(columns, aCsvHeaders.getMediaHeightIndex());
 
-                    width = infoLookup.getWidth();
-                    height = infoLookup.getHeight();
-                    image = new ImageContent(resourceURI).setServices(new ImageService2(pageURI));
+                    if (mediaWidth.isPresent() && mediaHeight.isPresent()) {
+                        width = Integer.parseInt(mediaWidth.get());
+                        height = Integer.parseInt(mediaHeight.get());
+                        image = new ImageContent(accessURI).setWidthHeight(width, height);
+                    } else {
+                        final ImageInfoLookup infoLookup = new ImageInfoLookup(pageURI);
 
-                    // Create a canvas using the width and height of the related image
+                        width = infoLookup.getWidth();
+                        height = infoLookup.getHeight();
+                        image = new ImageContent(resourceURI).setServices(new ImageService2(pageURI));
+                    }
+
                     canvas.setWidthHeight(width, height).setThumbnails(new ImageContent(thumbnail));
                     canvas.paintWith(aMinter, image);
                 } catch (final ImageNotFoundException | IOException details) {

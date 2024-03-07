@@ -55,7 +55,7 @@ public class CsvParser {
      * Creates a new CsvParser.
      */
     public CsvParser() {
-
+        // This is intentionally left empty.
     }
 
     /**
@@ -103,19 +103,28 @@ public class CsvParser {
             // Required CSV columns
             if (!myCsvHeaders.hasItemArkIndex()) {
                 throw new CsvParsingException(MessageCodes.MFS_113);
-            } else if (!myCsvHeaders.hasParentArkIndex() && !myCsvHeaders.hasIiifParentArkIndex()) {
+            }
+
+            if (!myCsvHeaders.hasParentArkIndex() && !myCsvHeaders.hasIiifParentArkIndex()) {
                 throw new CsvParsingException(MessageCodes.MFS_114);
-            } else if (!myCsvHeaders.hasTitleIndex()) {
+            }
+
+            if (!myCsvHeaders.hasTitleIndex()) {
                 throw new CsvParsingException(MessageCodes.MFS_111);
-            } else if (!myCsvHeaders.hasFileNameIndex()) {
+            }
+
+            if (!myCsvHeaders.hasFileNameIndex()) {
                 throw new CsvParsingException(MessageCodes.MFS_112);
-            } else if (!myCsvHeaders.hasItemSequenceIndex() && csvObjectTypes.contains(ObjectType.PAGE)) {
+            }
+
+            if (!myCsvHeaders.hasItemSequenceIndex() && csvObjectTypes.contains(ObjectType.PAGE)) {
                 throw new CsvParsingException(MessageCodes.MFS_123);
             }
 
             for (final String[] row : rows) {
                 checkForEOLs(row);
                 trimValues(row);
+
                 if (aIiifVersion != null) {
                     checkApiCompatibility(row, aPath, aIiifVersion, aAVUrlString);
                 }
@@ -215,15 +224,15 @@ public class CsvParser {
      * @throws CsvParsingException If there is trouble parsing the data
      */
     private void extractCollectionMetadata(final String... aRow) throws CsvParsingException {
-        if (getMetadata(aRow, myCsvHeaders.getItemArkIndex()).isPresent()) {
-            if (getMetadata(aRow, myCsvHeaders.getTitleIndex()).isEmpty()) {
-                throw new CsvParsingException(MessageCodes.MFS_104);
-            }
-
-            myCollectionData = aRow;
-        } else {
+        if (!getMetadata(aRow, myCsvHeaders.getItemArkIndex()).isPresent()) {
             throw new CsvParsingException(MessageCodes.MFS_106);
         }
+
+        if (getMetadata(aRow, myCsvHeaders.getTitleIndex()).isEmpty()) {
+            throw new CsvParsingException(MessageCodes.MFS_104);
+        }
+
+        myCollectionData = aRow;
     }
 
     /**
@@ -235,9 +244,8 @@ public class CsvParser {
      * @throws CsvParsingException If there is trouble getting the necessary info from the CSV
      */
     private void extractWorkMetadata(final String... aRow) throws CsvParsingException {
-        final Optional<String> parentIdOpt = getMetadata(aRow,
-            myCsvHeaders.hasIiifParentArkIndex() ? myCsvHeaders.getIiifParentArkIndex() :
-            myCsvHeaders.getParentArkIndex());
+        final Optional<String> parentIdOpt = getMetadata(aRow, myCsvHeaders.hasIiifParentArkIndex()
+                ? myCsvHeaders.getIiifParentArkIndex() : myCsvHeaders.getParentArkIndex());
         final Optional<String> workIdOpt = getMetadata(aRow, myCsvHeaders.getItemArkIndex());
         final Optional<String> labelOpt = getMetadata(aRow, myCsvHeaders.getTitleIndex());
 
@@ -245,31 +253,31 @@ public class CsvParser {
         myWorksList.add(aRow);
 
         // Create a brief work manifest for inclusion in the collection manifest
-        if (workIdOpt.isPresent() && labelOpt.isPresent()) {
-            final String workID = workIdOpt.get();
-            final URI uri = IDUtils.getResourceURI(Constants.URL_PLACEHOLDER, IDUtils.getWorkS3Key(workID));
-            final String[] workData = new String[] { uri.toString(), labelOpt.get() };
-
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug(MessageCodes.MFS_119, workID, parentIdOpt.orElse(Constants.EMPTY));
-            }
-
-            if (parentIdOpt.isPresent()) {
-                final String parentID = parentIdOpt.get();
-
-                if (myWorksMap.containsKey(parentID)) {
-                    myWorksMap.get(parentID).add(workData);
-                } else {
-                    final List<String[]> worksData = new ArrayList<>();
-
-                    worksData.add(workData);
-                    myWorksMap.put(parentID, worksData);
-                }
-            } else {
-                throw new CsvParsingException(MessageCodes.MFS_107);
-            }
-        } else {
+        if (!workIdOpt.isPresent() || !labelOpt.isPresent()) {
             throw new CsvParsingException(MessageCodes.MFS_108);
+        }
+
+        final String workID = workIdOpt.get();
+        final URI uri = IDUtils.getResourceURI(Constants.URL_PLACEHOLDER, IDUtils.getWorkS3Key(workID));
+        final String[] workData = new String[] { uri.toString(), labelOpt.get() };
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(MessageCodes.MFS_119, workID, parentIdOpt.orElse(Constants.EMPTY));
+        }
+
+        if (!parentIdOpt.isPresent()) {
+            throw new CsvParsingException(MessageCodes.MFS_107);
+        }
+
+        final String parentID = parentIdOpt.get();
+
+        if (myWorksMap.containsKey(parentID)) {
+            myWorksMap.get(parentID).add(workData);
+        } else {
+            final List<String[]> worksData = new ArrayList<>();
+
+            worksData.add(workData);
+            myWorksMap.put(parentID, worksData);
         }
     }
 
@@ -282,23 +290,22 @@ public class CsvParser {
      * @throws CsvParsingException
      */
     private void extractPageMetadata(final String... aRow) throws CsvParsingException {
-        final Optional<String> workIdOpt = getMetadata(aRow,
-            myCsvHeaders.hasIiifParentArkIndex() ? myCsvHeaders.getIiifParentArkIndex() :
-            myCsvHeaders.getParentArkIndex());
+        final Optional<String> workIdOpt = getMetadata(aRow, myCsvHeaders.hasIiifParentArkIndex()
+                ? myCsvHeaders.getIiifParentArkIndex() : myCsvHeaders.getParentArkIndex());
 
-        if (workIdOpt.isPresent()) {
-            final String workID = workIdOpt.get();
-            final List<String[]> page;
-
-            if (myPagesMap.containsKey(workID)) {
-                myPagesMap.get(workID).add(aRow);
-            } else {
-                page = new ArrayList<>();
-                page.add(aRow);
-                myPagesMap.put(workID, page);
-            }
-        } else {
+        if (!workIdOpt.isPresent()) {
             throw new CsvParsingException(MessageCodes.MFS_121);
+        }
+
+        final String workID = workIdOpt.get();
+        final List<String[]> page;
+
+        if (myPagesMap.containsKey(workID)) {
+            myPagesMap.get(workID).add(aRow);
+        } else {
+            page = new ArrayList<>();
+            page.add(aRow);
+            myPagesMap.put(workID, page);
         }
     }
 
@@ -315,6 +322,7 @@ public class CsvParser {
                 throw new CsvParsingException(MessageCodes.MFS_093, element);
             }
         }
+
         return aRow;
     }
 
@@ -330,6 +338,7 @@ public class CsvParser {
                 aRow[index] = aRow[index].trim();
             }
         }
+
         return aRow;
     }
 
@@ -356,59 +365,61 @@ public class CsvParser {
         final Optional<String> audioVideoAccessUrl = getMetadata(aRow, myCsvHeaders.getContentAccessUrlIndex());
 
         if (Constants.IIIF_API_V2.equals(aIiifVersion)) {
-            if (mediaWidth.isPresent() || mediaHeight.isPresent() || mediaDuration.isPresent() ||
-                    mediaFormat.isPresent() ||
+            if (mediaDuration.isPresent() ||
                     audioVideoAccessUrl.isPresent() && audioVideoAccessUrl.toString().contains(aAVUrlString)) {
                 throw new CsvParsingException(MessageCodes.MFS_168, rowId, aPath);
             }
-        } else { // Constants.IIIF_API_V3
-            if (mediaFormat.isPresent()) {
-                final String format = mediaFormat.get();
-                final String primaryType;
+        } else if (mediaFormat.isPresent()) {
+            final String format = mediaFormat.get();
+            final String primaryType;
 
-                try {
-                    primaryType = new MimeType(format).getPrimaryType();
-                } catch (final MimeTypeParseException details) {
-                    throw new CsvParsingException(MessageCodes.MFS_169, format, rowId, aPath);
-                }
-
-                switch (primaryType) {
-                    case "video": {
-                        if (mediaWidth.isEmpty() || mediaHeight.isEmpty() || mediaDuration.isEmpty() ||
-                                audioVideoAccessUrl.isEmpty()) {
-                            throw new CsvParsingException(MessageCodes.MFS_170, rowId, format, aPath);
-                        }
-
-                        if (audioVideoAccessUrl.isPresent() && !audioVideoAccessUrl.toString().contains(aAVUrlString)) {
-                            throw new CsvParsingException(MessageCodes.MFS_176, rowId, format, aPath);
-                        }
-
-                        break;
-                    }
-                    case "audio": {
-                        if (mediaDuration.isEmpty() || audioVideoAccessUrl.isEmpty()) {
-                            throw new CsvParsingException(MessageCodes.MFS_174, rowId, format, aPath);
-                        }
-
-                        if (!mediaWidth.isEmpty() || !mediaHeight.isEmpty()) {
-                            throw new CsvParsingException(MessageCodes.MFS_175, rowId, format, aPath);
-                        }
-
-                        if (audioVideoAccessUrl.isPresent() && !audioVideoAccessUrl.toString().contains(aAVUrlString)) {
-                            throw new CsvParsingException(MessageCodes.MFS_176, rowId, format, aPath);
-                        }
-
-                        break;
-                    }
-                    default: {
-                        throw new CsvParsingException(MessageCodes.MFS_171, primaryType, rowId, aPath);
-                    }
-                }
-            } else if (mediaWidth.isPresent() || mediaHeight.isPresent() || mediaDuration.isPresent() ||
-                    audioVideoAccessUrl.isPresent() && audioVideoAccessUrl.toString().contains(aAVUrlString)) {
-                throw new CsvParsingException(MessageCodes.MFS_172, rowId, aPath);
+            try {
+                primaryType = new MimeType(format).getPrimaryType();
+            } catch (final MimeTypeParseException details) {
+                throw new CsvParsingException(MessageCodes.MFS_169, format, rowId, aPath);
             }
+
+            switch (primaryType) {
+                case "video": {
+                    if (mediaWidth.isEmpty() || mediaHeight.isEmpty() || mediaDuration.isEmpty() ||
+                            audioVideoAccessUrl.isEmpty()) {
+                        throw new CsvParsingException(MessageCodes.MFS_170, rowId, format, aPath);
+                    }
+
+                    if (audioVideoAccessUrl.isPresent() && !audioVideoAccessUrl.toString().contains(aAVUrlString)) {
+                        throw new CsvParsingException(MessageCodes.MFS_176, rowId, format, aPath);
+                    }
+
+                    break;
+                }
+                case "audio": {
+                    if (mediaDuration.isEmpty() || audioVideoAccessUrl.isEmpty()) {
+                        throw new CsvParsingException(MessageCodes.MFS_174, rowId, format, aPath);
+                    }
+
+                    if (!mediaWidth.isEmpty() || !mediaHeight.isEmpty()) {
+                        throw new CsvParsingException(MessageCodes.MFS_175, rowId, format, aPath);
+                    }
+
+                    if (audioVideoAccessUrl.isPresent() && !audioVideoAccessUrl.toString().contains(aAVUrlString)) {
+                        throw new CsvParsingException(MessageCodes.MFS_176, rowId, format, aPath);
+                    }
+
+                    break;
+                }
+                case "image": {
+                    // Do nothing for now? This just accepts it as one of the types we process.
+                    break;
+                }
+                default: {
+                    throw new CsvParsingException(MessageCodes.MFS_171, primaryType, rowId, aPath);
+                }
+            }
+        } else if (mediaWidth.isPresent() || mediaHeight.isPresent() || mediaDuration.isPresent() ||
+                audioVideoAccessUrl.isPresent() && audioVideoAccessUrl.toString().contains(aAVUrlString)) {
+            throw new CsvParsingException(MessageCodes.MFS_172, rowId, aPath);
         }
+
         return aRow;
     }
 
@@ -426,48 +437,60 @@ public class CsvParser {
         if (aCsvHeaders.hasIiifObjectTypeIndex()) {
             final int iiifObjectTypeIndex = aCsvHeaders.getIiifObjectTypeIndex();
 
-            if (aRow.length > iiifObjectTypeIndex) {
-                final String objectType = aRow[iiifObjectTypeIndex];
-
-                if (ObjectType.COLLECTION.equals(objectType)) {
-                    return ObjectType.COLLECTION;
-                } else if (ObjectType.WORK.equals(objectType)) {
-                    return ObjectType.WORK;
-                } else if (ObjectType.PAGE.equals(objectType)) {
-                    return ObjectType.PAGE;
-                } else if (ObjectType.MISSING.equals(StringUtils.trimTo(objectType, Constants.EMPTY))) {
-                    return ObjectType.MISSING;
-                } else {
-                    // Disallow unknown types
-                    throw new CsvParsingException(MessageCodes.MFS_094, objectType);
-                }
-            } else {
+            if (aRow.length <= iiifObjectTypeIndex) {
                 throw new CsvParsingException(MessageCodes.MFS_098, iiifObjectTypeIndex, Arrays.toString(aRow));
             }
-        } else if (aCsvHeaders.hasObjectTypeIndex()) {
-            final int objectTypeIndex = aCsvHeaders.getObjectTypeIndex();
 
-            if (aRow.length > objectTypeIndex) {
-                final String objectType = aRow[objectTypeIndex];
+            final String objectType = aRow[iiifObjectTypeIndex];
 
-                if (ObjectType.COLLECTION.equals(objectType)) {
-                    return ObjectType.COLLECTION;
-                } else if (ObjectType.WORK.equals(objectType)) {
-                    return ObjectType.WORK;
-                } else if (ObjectType.PAGE.equals(objectType)) {
-                    return ObjectType.PAGE;
-                } else if (ObjectType.MISSING.equals(StringUtils.trimTo(objectType, Constants.EMPTY))) {
-                    return ObjectType.MISSING;
-                } else {
-                    // Disallow unknown types
-                    throw new CsvParsingException(MessageCodes.MFS_094, objectType);
-                }
-            } else {
-                throw new CsvParsingException(MessageCodes.MFS_098, objectTypeIndex, Arrays.toString(aRow));
+            if (ObjectType.COLLECTION.equals(objectType)) {
+                return ObjectType.COLLECTION;
             }
-        } else {
+
+            if (ObjectType.WORK.equals(objectType)) {
+                return ObjectType.WORK;
+            }
+
+            if (ObjectType.PAGE.equals(objectType)) {
+                return ObjectType.PAGE;
+            }
+
+            if (ObjectType.MISSING.equals(StringUtils.trimTo(objectType, Constants.EMPTY))) {
+                return ObjectType.MISSING;
+            }
+
+            // Disallow unknown types
+            throw new CsvParsingException(MessageCodes.MFS_094, objectType);
+        }
+
+        if (!aCsvHeaders.hasObjectTypeIndex()) {
             throw new CsvParsingException(MessageCodes.MFS_115);
         }
+
+        final int objectTypeIndex = aCsvHeaders.getObjectTypeIndex();
+
+        if (aRow.length <= objectTypeIndex) {
+            throw new CsvParsingException(MessageCodes.MFS_098, objectTypeIndex, Arrays.toString(aRow));
+        }
+
+        final String objectType = aRow[objectTypeIndex];
+
+        if (ObjectType.COLLECTION.equals(objectType)) {
+            return ObjectType.COLLECTION;
+        }
+
+        if (ObjectType.WORK.equals(objectType)) {
+            return ObjectType.WORK;
+        }
+
+        if (ObjectType.PAGE.equals(objectType)) {
+            return ObjectType.PAGE;
+        }
+        if (ObjectType.MISSING.equals(StringUtils.trimTo(objectType, Constants.EMPTY))) {
+            return ObjectType.MISSING;
+        }
+        // Disallow unknown types
+        throw new CsvParsingException(MessageCodes.MFS_094, objectType);
     }
 
     /**
@@ -522,20 +545,24 @@ public class CsvParser {
 
             if (rawValue.equals(EMPTY)) {
                 return Optional.empty();
-            } else {
-                try {
-                    if (aType == Integer.class) {
-                        return Optional.of(Integer.parseInt(StringUtils.trimTo(rawValue, EMPTY)));
-                    } else if (aType == Float.class) {
-                        return Optional.of(Float.parseFloat(StringUtils.trimTo(rawValue, EMPTY)));
-                    } else if (aType == String.class) {
-                        return getMetadata(aRow, aIndex);
-                    } else {
-                        throw new CsvParsingException(MessageCodes.MFS_173, rawValue, aPath, aType);
-                    }
-                } catch (final NumberFormatException details) {
-                    throw new CsvParsingException(MessageCodes.MFS_173, rawValue, aPath, aType);
+            }
+
+            try {
+                if (aType == Integer.class) {
+                    return Optional.of(Integer.parseInt(StringUtils.trimTo(rawValue, EMPTY)));
                 }
+
+                if (aType == Float.class) {
+                    return Optional.of(Float.parseFloat(StringUtils.trimTo(rawValue, EMPTY)));
+                }
+
+                if (aType == String.class) {
+                    return getMetadata(aRow, aIndex);
+                }
+
+                throw new CsvParsingException(MessageCodes.MFS_173, rawValue, aPath, aType);
+            } catch (final NumberFormatException details) {
+                throw new CsvParsingException(MessageCodes.MFS_173, rawValue, aPath, aType);
             }
         } catch (final IndexOutOfBoundsException details) {
             return Optional.empty();

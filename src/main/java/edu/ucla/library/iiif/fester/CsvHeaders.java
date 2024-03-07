@@ -109,6 +109,11 @@ public class CsvHeaders {
     private int myWaveformIndex = -1;
 
     /**
+     * The index position for the thumbnail column.
+     */
+    private int myThumbnailIndex = -1;
+
+    /**
      * Create a new CSV headers object.
      *
      * @param aRow CSV header data
@@ -175,6 +180,9 @@ public class CsvHeaders {
                 case CSV.WAVEFORM:
                     setWaveformIndex(index);
                     break;
+                case CSV.THUMBNAIL:
+                    setThumbnailIndex(index);
+                    break;
                 default:
                     // Our default is to ignore things we don't care about
             }
@@ -186,6 +194,29 @@ public class CsvHeaders {
      */
     @SuppressWarnings("unused")
     private CsvHeaders() {
+        // This is intentionally left empty.
+    }
+
+    /**
+     * Gets the thumbnail index position.
+     *
+     * @return The thumbnail index position
+     */
+    @JsonGetter
+    public int getThumbnailIndex() {
+        return myThumbnailIndex;
+    }
+
+    /**
+     * Sets the thumbnail index position.
+     *
+     * @param aThumbnailIndex The position of the thumbnail header
+     * @return This CSV headers
+     */
+    @JsonSetter
+    public CsvHeaders setThumbnailIndex(final int aThumbnailIndex) {
+        myThumbnailIndex = aThumbnailIndex;
+        return this;
     }
 
     /**

@@ -1,0 +1,32 @@
+{
+  "@context" : "http://iiif.io/api/presentation/2/context.json",
+  "@id" : "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz19s79m2/manifest",
+  "@type" : "sc:Manifest",
+  "label" : "ملصق لمعرض نُصب تذكارية مقارنة، لتوم نِكلسون، 2012",
+  "thumbnail" : "https://d7rm5xoig729r.cloudfront.net/collectiveaccess/images/9/9/48686_ca_object_representations_media_9945_preview.jpg",
+  "sequences" : [ {
+    "@id" : "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz19s79m2/manifest/sequence/normal",
+    "@type" : "sc:Sequence",
+    "canvases" : [ {
+      "@type" : "sc:Canvas",
+      "label" : "ملصق لمعرض نُصب تذكارية مقارنة، لتوم نِكلسون، 2012",
+      "@id" : "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz19s79m2/manifest/canvas/z19s79m2",
+      "width" : 4864,
+      "height" : 4744,
+      "thumbnail" : "https://d7rm5xoig729r.cloudfront.net/collectiveaccess/images/9/9/48686_ca_object_representations_media_9945_preview.jpg",
+      "images" : [ {
+        "@type" : "oa:Annotation",
+        "@id" : "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz19s79m2/annotation/z19s79m2",
+        "motivation" : "sc:painting",
+        "on" : "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fz19s79m2/manifest/canvas/z19s79m2",
+        "resource" : {
+          "@id" : "https://d7rm5xoig729r.cloudfront.net/collectiveaccess/images/9/9/23209_ca_object_representations_media_9945_original.jpg",
+          "@type" : "dctypes:Image",
+          "format" : "image/jpeg",
+          "height" : 4744,
+          "width" : 4864
+        }
+      } ]
+    } ]
+  } ]
+}

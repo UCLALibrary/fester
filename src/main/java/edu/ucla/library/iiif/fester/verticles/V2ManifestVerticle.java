@@ -212,6 +212,12 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
         final Metadata metadata = new Metadata();
         final JsonObject jsonManifest;
 
+        CsvParser.getMetadata(workRow, csvHeaders.getThumbnailIndex()).ifPresentOrElse(thumbnailURL -> {
+            manifest.setThumbnail(thumbnailURL);
+        }, () -> {
+            // Do we want to try and get a source image to use as a thumbnail?
+        });
+
         CsvParser.getMetadata(workRow, csvHeaders.getViewingDirectionIndex()).ifPresent(viewingDirection -> {
             manifest.setViewingDirection(ViewingDirection.fromString(viewingDirection));
         });
@@ -330,10 +336,17 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
         final DeliveryOptions options = new DeliveryOptions();
         final JsonObject message = new JsonObject();
 
+        CsvParser.getMetadata(workRow, csvHeaders.getThumbnailIndex()).ifPresentOrElse(thumbnailURL -> {
+            manifest.setThumbnail(thumbnailURL);
+        }, () -> {
+            // Do we want to try and get a source image to use as a thumbnail? If so, it's probably easier
+            // to pull it from the manifest after it's been constructed.
+        });
+
         CsvParser.getMetadata(workRow, csvHeaders.getTitleIndex()).ifPresentOrElse(title -> {
             manifest.setLabel(title);
         }, () -> {
-            manifest.setLabel("");
+            manifest.setLabel(Constants.EMPTY);
         });
 
         CsvParser.getMetadata(workRow, csvHeaders.getViewingDirectionIndex()).ifPresentOrElse(viewingDirection -> {
@@ -355,11 +368,11 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
         });
 
         CsvParser.getMetadata(workRow, csvHeaders.getLocalRightsStatementIndex())
-            .ifPresentOrElse(localRightsStatement -> {
-                manifest.setAttribution(new Attribution(localRightsStatement));
-            }, () -> {
-                manifest.clearAttribution();
-            });
+                .ifPresentOrElse(localRightsStatement -> {
+                    manifest.setAttribution(new Attribution(localRightsStatement));
+                }, () -> {
+                    manifest.clearAttribution();
+                });
 
         CsvParser.getMetadata(workRow, csvHeaders.getRightsContactIndex()).ifPresentOrElse(rightsContact -> {
             manifest.setMetadata(updateMetadata(manifest.getMetadata(), MetadataLabels.RIGHTS_CONTACT, rightsContact));
@@ -455,24 +468,64 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
             final String canvasID = StringUtils.format(CANVAS_URI, Constants.URL_PLACEHOLDER, aWorkID, idPart);
             final String pageURI = StringUtils.format(SIMPLE_URI, aImageHost, encodedPageID);
             final String contentURI = StringUtils.format(ANNOTATION_URI, Constants.URL_PLACEHOLDER, aWorkID, idPart);
+            final String accessURI = StringUtils.trimToNull(columns[aCsvHeaders.getContentAccessUrlIndex()]);
+            final Optional<String> thumbnail = CsvParser.getMetadata(columns, aCsvHeaders.getThumbnailIndex());
 
-            String resourceURI = StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, pageURI,
-                    Constants.DEFAULT_SAMPLE_SIZE);
-            ImageResource imageResource = new ImageResource(resourceURI,
-                    new ImageInfoService(APIComplianceLevel.TWO, pageURI));
+            String resourceURI =
+                    StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, pageURI, Constants.DEFAULT_SAMPLE_SIZE);
+            ImageResource imageResource;
             ImageContent imageContent;
             Canvas canvas;
 
             try {
-                final ImageInfoLookup infoLookup = new ImageInfoLookup(pageURI);
-                final int width = infoLookup.getWidth();
-                final int height = infoLookup.getHeight();
+                final Optional<String> width = CsvParser.getMetadata(columns, aCsvHeaders.getMediaWidthIndex());
+                final Optional<String> height = CsvParser.getMetadata(columns, aCsvHeaders.getMediaHeightIndex());
+
+                int mediaWidth;
+                int mediaHeight;
+
+                try {
+                    if (width.isPresent() && height.isPresent()) {
+                        mediaWidth = Integer.parseInt(width.get());
+                        mediaHeight = Integer.parseInt(height.get());
+
+                        imageResource = new ImageResource(accessURI);
+                        imageResource.setWidth(mediaWidth);
+                        imageResource.setHeight(mediaHeight);
+                    } else {
+                        // If we don't have both width and height in the CSV, we can also try to look it up
+                        final ImageInfoLookup infoLookup = new ImageInfoLookup(pageURI);
+
+                        mediaWidth = infoLookup.getWidth();
+                        mediaHeight = infoLookup.getHeight();
+
+                        imageResource = new ImageResource(resourceURI);
+                        imageResource.setService(new ImageInfoService(APIComplianceLevel.TWO, pageURI));
+                    }
+                } catch (final NumberFormatException details) {
+                    // If we don't have a valid information w/h in the CSV, we can also try to look it up
+                    final ImageInfoLookup infoLookup = new ImageInfoLookup(pageURI);
+
+                    mediaWidth = infoLookup.getWidth();
+                    mediaHeight = infoLookup.getHeight();
+
+                    imageResource = new ImageResource(resourceURI);
+                    imageResource.setService(new ImageInfoService(APIComplianceLevel.TWO, pageURI));
+                }
 
                 // Create a canvas using the width and height of the related image
-                canvas = new Canvas(canvasID, pageLabel, width, height);
+                canvas = new Canvas(canvasID, pageLabel, mediaWidth, mediaHeight);
                 imageContent = new ImageContent(contentURI, canvas);
                 imageContent.addResource(imageResource);
                 canvas.addImageContent(imageContent);
+
+                // Add a thumbnail if we have one and one hasn't already been added
+                if (thumbnail.isPresent() && canvas.getThumbnail() == null) {
+                    canvas.setThumbnail(thumbnail.get());
+                } else {
+                    // Fallback to using the original image as thumbnail and let browser resize
+                    canvas.setThumbnail(accessURI);
+                }
             } catch (final ImageNotFoundException | IOException details) {
                 LOGGER.info(MessageCodes.MFS_078, pageID);
 
