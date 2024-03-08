@@ -432,6 +432,7 @@ public class CsvParser {
      * @throws CsvParsingException If object type isn't included in the CSV headers, or the object type index is out of
      *         bounds of the CSV row, or the metadata contains an unknown object type
      */
+    @SuppressWarnings("PMD.NPathComplexity")
     public static ObjectType getObjectType(final String[] aRow, final CsvHeaders aCsvHeaders)
             throws CsvParsingException {
         if (aCsvHeaders.hasIiifObjectTypeIndex()) {
@@ -486,9 +487,11 @@ public class CsvParser {
         if (ObjectType.PAGE.equals(objectType)) {
             return ObjectType.PAGE;
         }
-        if (ObjectType.MISSING.equals(StringUtils.trimTo(objectType, Constants.EMPTY))) {
+
+        if (ObjectType.MISSING.equals(StringUtils.trimTo(objectType, EMPTY))) {
             return ObjectType.MISSING;
         }
+
         // Disallow unknown types
         throw new CsvParsingException(MessageCodes.MFS_094, objectType);
     }

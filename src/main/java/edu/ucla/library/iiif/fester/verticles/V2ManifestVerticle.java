@@ -452,6 +452,7 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
      * @param aSequence A sequence to add pages to
      * @param aImageHost An image host for image links
      * @param aWorkID A URL encoded work ID
+     * @return An array of canvases
      * @throws IOException If there is trouble adding a page
      */
     @SuppressWarnings({ "PMD.CyclomaticComplexity", "PMD.NcssCount" })
