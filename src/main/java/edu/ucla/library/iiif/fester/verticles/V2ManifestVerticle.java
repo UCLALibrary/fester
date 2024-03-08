@@ -454,6 +454,7 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
      * @param aWorkID A URL encoded work ID
      * @throws IOException If there is trouble adding a page
      */
+    @SuppressWarnings({ "PMD.CyclomaticComplexity", "PMD.NcssCount" })
     private Canvas[] createCanvases(final CsvHeaders aCsvHeaders, final List<String[]> aPageList,
             final String aImageHost, final String aPlaceholderImage, final String aWorkID) {
         final Iterator<String[]> iterator = aPageList.iterator();

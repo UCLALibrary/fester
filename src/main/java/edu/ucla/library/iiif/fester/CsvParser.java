@@ -455,7 +455,7 @@ public class CsvParser {
                 return ObjectType.PAGE;
             }
 
-            if (ObjectType.MISSING.equals(StringUtils.trimTo(objectType, Constants.EMPTY))) {
+            if (ObjectType.MISSING.equals(StringUtils.trimTo(objectType, EMPTY))) {
                 return ObjectType.MISSING;
             }
 
@@ -502,6 +502,7 @@ public class CsvParser {
      * @throws CsvParsingException If object type isn't included in the CSV headers, or the object type index is out of
      *         bounds of the CSV row, or the metadata contains an unknown object type
      */
+    @SuppressWarnings("PMD.NPathComplexity")
     public static Set<ObjectType> getObjectTypes(final List<String[]> aCsvRows, final CsvHeaders aCsvHeaders)
             throws CsvParsingException {
         final Set<ObjectType> objectTypes = EnumSet.noneOf(ObjectType.class);
