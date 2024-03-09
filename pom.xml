@@ -70,7 +70,7 @@
   <properties>
     <!-- Docker image dependencies -->
     <ubuntu.tag>22.04</ubuntu.tag>
-    <jdk.version>17.0.9+9-1~22.04</jdk.version>
+    <jdk.version>17.0.10+7-1~22.04.1</jdk.version>
     <python3.version>3.10.6-1~22.04</python3.version>
     <curl.version>7.81.0-1ubuntu1.15</curl.version>
 
@@ -110,7 +110,7 @@
 
     <!-- Versions of tools used for testing -->
     <jsoup.version>1.15.3</jsoup.version>
-    <aws.sdk.version>1.12.298</aws.sdk.version>
+    <aws.sdk.version>1.12.664</aws.sdk.version>
     <testcontainers.version>1.16.3</testcontainers.version>
     <jcip.annotations.version>1.0-1</jcip.annotations.version>
 
@@ -1266,7 +1266,7 @@
   <parent>
     <artifactId>freelib-parent</artifactId>
     <groupId>info.freelibrary</groupId>
-    <version>8.0.4</version>
+    <version>8.0.5</version>
   </parent>
 </project>
 

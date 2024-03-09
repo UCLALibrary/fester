@@ -106,6 +106,15 @@ public final class CSV {
      */
     public static final String WAVEFORM = "Waveform";
 
+    /**
+     * The row's thumbnail URL.
+     */
+    public static final String THUMBNAIL = "Thumbnail";
+
+    /**
+     * A private constructor for the CSV constants class.
+     */
     private CSV() {
+        // This is intentionally left empty.
     }
 }

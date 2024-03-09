@@ -9,6 +9,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -84,6 +85,10 @@ public class V3ManifestVerticleTest {
     private static final String POSTCARDS = "capostcards";
 
     private static final String WORKS = "works";
+
+    private static final String THUMBNAIL_TEST_FILE = "z19s79m2.json";
+
+    private static final String ORIGINAL_TEST_FILE = "z1fj82dp.json";
 
     @Rule
     public Timeout myTestTimeout = Timeout.seconds(600);
@@ -164,6 +169,83 @@ public class V3ManifestVerticleTest {
     @After
     public void tearDown(final TestContext aContext) {
         myVertx.close(aContext.asyncAssertSuccess());
+    }
+
+    /**
+     * Tests whether the test CSV with a thumbnail is accurately transformed into a manifest.
+     *
+     * @param aContext A test context
+     */
+    @Test
+    public final void testStaticResourceThumbnail(final TestContext aContext) {
+        final DeliveryOptions options = new DeliveryOptions().addHeader(Constants.ACTION, Op.POST_CSV);
+        final JsonObject message = new JsonObject();
+        final Async asyncTask = aContext.async();
+
+        message.put(Constants.CSV_FILE_NAME, myRunID)
+                .put(Constants.CSV_FILE_PATH, "src/test/resources/csv/static-image-dims.csv")
+                .put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V3);
+
+        myVertx.eventBus().request(ManifestVerticle.class.getName(), message, options, request -> {
+            if (request.succeeded()) {
+                try {
+                    final List<Path> results = Files.list(Path.of(myJsonFiles))
+                            .filter(path -> path.toString().endsWith(THUMBNAIL_TEST_FILE)).collect(Collectors.toList());
+
+                    if (results.isEmpty()) {
+                        aContext.fail(new FileNotFoundException(THUMBNAIL_TEST_FILE));
+                    } else {
+                        new JsonObject(StringUtils.read(results.get(0).toFile())).equals(new JsonObject(
+                                StringUtils.read(new File("src/test/resources/json/v3/thumbnail.json"))));
+                    }
+                } catch (final IOException details) {
+                    aContext.fail(details);
+                }
+
+                TestUtils.complete(asyncTask);
+            } else {
+                aContext.fail(request.cause());
+            }
+        });
+    }
+
+    /**
+     * Tests whether the test CSV without a thumbnail is accurately transformed into a manifest using the original
+     * source image as the thumbnail.
+     *
+     * @param aContext A test context
+     */
+    @Test
+    public final void testStaticResourceOriginal(final TestContext aContext) {
+        final DeliveryOptions options = new DeliveryOptions().addHeader(Constants.ACTION, Op.POST_CSV);
+        final JsonObject message = new JsonObject();
+        final Async asyncTask = aContext.async();
+
+        message.put(Constants.CSV_FILE_NAME, myRunID)
+                .put(Constants.CSV_FILE_PATH, "src/test/resources/csv/static-image-dims.csv")
+                .put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V3);
+
+        myVertx.eventBus().request(ManifestVerticle.class.getName(), message, options, request -> {
+            if (request.succeeded()) {
+                try {
+                    final List<Path> results = Files.list(Path.of(myJsonFiles))
+                            .filter(path -> path.toString().endsWith(ORIGINAL_TEST_FILE)).collect(Collectors.toList());
+
+                    if (results.isEmpty()) {
+                        aContext.fail(new FileNotFoundException(ORIGINAL_TEST_FILE));
+                    } else {
+                        new JsonObject(StringUtils.read(results.get(0).toFile())).equals(new JsonObject(
+                                StringUtils.read(new File("src/test/resources/json/v3/thumbnail.json"))));
+                    }
+                } catch (final IOException details) {
+                    aContext.fail(details);
+                }
+
+                TestUtils.complete(asyncTask);
+            } else {
+                aContext.fail(request.cause());
+            }
+        });
     }
 
     /**

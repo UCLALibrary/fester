@@ -18,16 +18,17 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import info.freelibrary.iiif.presentation.v2.Manifest;
-import info.freelibrary.iiif.presentation.v2.Sequence;
-import info.freelibrary.iiif.presentation.v2.io.Manifestor;
-import info.freelibrary.iiif.presentation.v2.properties.ViewingDirection;
-import info.freelibrary.iiif.presentation.v2.properties.ViewingHint;
 import info.freelibrary.util.FileUtils;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 import info.freelibrary.util.RegexDirFilter;
 import info.freelibrary.util.StringUtils;
+
+import info.freelibrary.iiif.presentation.v2.Manifest;
+import info.freelibrary.iiif.presentation.v2.Sequence;
+import info.freelibrary.iiif.presentation.v2.io.Manifestor;
+import info.freelibrary.iiif.presentation.v2.properties.ViewingDirection;
+import info.freelibrary.iiif.presentation.v2.properties.ViewingHint;
 
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
@@ -104,8 +105,8 @@ public class ManifestVerticleTest {
                 @SuppressWarnings("rawtypes")
                 final List<Future> futures = new ArrayList<>();
 
-                options.setConfig(config.put(Config.IIIF_BASE_URL, getConfig.result().getString(
-                        Config.IIIF_BASE_URL)).put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V2));
+                options.setConfig(config.put(Config.IIIF_BASE_URL, getConfig.result().getString(Config.IIIF_BASE_URL))
+                        .put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V2));
 
                 for (final String verticleName : Arrays.asList(TEST_VERTICLES)) {
                     final Promise<String> promise = Promise.promise();
