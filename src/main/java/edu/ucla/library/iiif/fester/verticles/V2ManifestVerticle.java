@@ -610,6 +610,9 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
                 } // If label matches but we have no updated value, ignore the metadata
             }
         } else {
+            // Our metadata comes in pairs so, when looping through an array of all the values, we
+            // need to skip every other one (move the index to the the start of the pair) and halve
+            // the total array count (since we're counting the pair of values as one thing).
             for (int index = 0; index < aStringArray.length / 2; index += 2) {
                 metadata.add(aStringArray[index], aStringArray[index + 1]);
             }
