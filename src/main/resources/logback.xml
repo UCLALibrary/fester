@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <configuration debug="false">
   <property file="/etc/fester/fester.properties" />
 
@@ -24,6 +24,15 @@
   </logger>
 
   <logger name="info.freelibrary.util.I18nException" level="WARN" additivity="true">
+    <appender-ref ref="STDOUT" />
+    <if condition='property("fluency.enabled").equals("true")'>
+      <then>
+        <appender-ref ref="FLUENCY" />
+      </then>
+    </if>
+  </logger>
+
+  <logger name="info.freelibrary.iiif.presentation.v2.ServiceImage" level="ERROR">
     <appender-ref ref="STDOUT" />
     <if condition='property("fluency.enabled").equals("true")'>
       <then>

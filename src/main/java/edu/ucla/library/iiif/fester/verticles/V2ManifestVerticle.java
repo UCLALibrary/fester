@@ -609,6 +609,10 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
                     metadata.add(entry);
                 } // If label matches but we have no updated value, ignore the metadata
             }
+        } else {
+            for (int index = 0; index < aStringArray.length / 2; index += 2) {
+                metadata.add(aStringArray[index], aStringArray[index + 1]);
+            }
         }
 
         return metadata;
