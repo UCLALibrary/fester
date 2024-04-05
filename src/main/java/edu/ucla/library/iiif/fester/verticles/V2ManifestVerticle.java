@@ -475,6 +475,7 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
 
             String resourceURI =
                     StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, pageURI, Constants.DEFAULT_SAMPLE_SIZE);
+            boolean staticImage = false;
             ImageResource imageResource;
             ImageContent imageContent;
             Canvas canvas;
@@ -494,6 +495,7 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
                         imageResource = new ImageResource(accessURI);
                         imageResource.setWidth(mediaWidth);
                         imageResource.setHeight(mediaHeight);
+                        staticImage = true;
                     } else {
                         // If we don't have both width and height in the CSV, we can also try to look it up
                         final ImageInfoLookup infoLookup = new ImageInfoLookup(pageURI);
@@ -524,7 +526,7 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
                 // Add a thumbnail if we have one and one hasn't already been added
                 if (thumbnail.isPresent() && canvas.getThumbnail() == null) {
                     canvas.setThumbnail(thumbnail.get());
-                } else {
+                } else if (staticImage) {
                     // Fallback to using the original image as thumbnail and let browser resize
                     canvas.setThumbnail(accessURI);
                 }
