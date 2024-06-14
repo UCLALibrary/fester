@@ -47,6 +47,19 @@ public class CsvParserTest {
     }
 
     /**
+     * Tests parsing the correct object type, with two possible options.
+     *
+     * @throws CsvParsingException If there is an error while parsing the CSV data
+     * @throws CsvException If there is a generic CSV error
+     * @throws IOException If there is trouble reading the CSV data
+     */
+    @Test
+    public final void testObjTypeTest() throws CsvParsingException, CsvException, IOException {
+        final CsvMetadata metadata = myCsvParser.parse(getTestPath("iiif-object-type-test.csv")).getCsvMetadata();
+        assertEquals(0, metadata.getWorksMap().size()); // Should contain a collection record, not work
+    }
+
+    /**
      * Tests handling spaces in non-header rows in a CSV file.
      *
      * @throws CsvParsingException If there is an error while parsing the CSV data
@@ -196,8 +209,7 @@ public class CsvParserTest {
      * @throws IOException If there is trouble reading the CSV data
      */
     @Test(expected = CsvParsingException.class)
-    public final void testCollectionWorkPageCsvNoItemSequence() throws CsvParsingException, CsvException,
-            IOException {
+    public final void testCollectionWorkPageCsvNoItemSequence() throws CsvParsingException, CsvException, IOException {
         myCsvParser.parse(getTestPath("hathaway_combined_no_item_seq.csv"));
     }
 
