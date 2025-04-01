@@ -13,9 +13,9 @@ jobs:
       SKIP_JAR_DEPLOYMENT: ${{ secrets.SKIP_JAR_DEPLOYMENT }}
     steps:
         - name: Check out code
-          uses: actions/checkout@c5a8d0e6f4f3e4a2b8c8b4a8e9f5d3a1b2c3d4e5 # v4.2.2
+          uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         - name: Install JDK 17
-          uses: actions/setup-java@3a4f6e1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f​ # v4.7.0
+          uses: actions/setup-java@3a4f6e1af504cf6a31855fa899c6aa5355ba6c12 # v4.7.0
           with:
             java-version: 17
       # If running locally in act, install Maven
