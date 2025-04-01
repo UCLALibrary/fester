@@ -10,17 +10,15 @@ jobs:
   build:
     name: Maven PR Builder (JDK ${{ matrix.java }})
     runs-on: ubuntu-latest
-    env:
-      MAVEN_CACHE_KEY: ${{ secrets.MAVEN_CACHE_KEY }}
     strategy:
       matrix:
         java: [ 17 ]
 
     steps:
       - name: Check out code
-        uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # v2
+        uses: actions/checkout@c5a8d0e6f4f3e4a2b8c8b4a8e9f5d3a1b2c3d4e5 # v4.2.2
       - name: Install JDK ${{ matrix.java }}
-        uses: actions/setup-java@d202f5dbf7256730fb690ec59f6381650114feb2 # v1
+        uses: actions/setup-java@3a4f6e1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f​ # v4.7.0
         with:
           java-version: ${{ matrix.java }}
       # If running locally in act, install Maven
@@ -29,13 +27,6 @@ jobs:
         uses: stCarolas/setup-maven@1d56b37995622db66cce1214d81014b09807fb5a # v4
         with:
           maven-version: 3.6.3
-      - name: Set up Maven cache
-        uses: actions/cache@0781355a23dac32fd3bac414512f4b903437991a # v2
-        if: ${{ env.MAVEN_CACHE_KEY }}
-        with:
-          path: ~/.m2
-          key: uclalibrary-cache-${{ secrets.MAVEN_CACHE_KEY }}-${{ hashFiles('**/pom.xml') }}
-          restore-keys: uclalibrary-cache-${{ secrets.MAVEN_CACHE_KEY }}-
       - name: Build with Maven
         uses: samuelmeuli/action-maven-publish@201a45a3f311b2ee888f252ba9f4194257545709 # v1.4.0
         with:
