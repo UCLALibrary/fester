@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import info.freelibrary.util.Logger;
@@ -427,7 +428,13 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
         }
 
         sequence.getCanvases().clear(); // Overwrite whatever canvases are on the manifest
-        pagesList.sort(new ItemSequenceComparator(csvHeaders.getItemSequenceIndex()));
+
+        try {
+            pagesList.sort(new ItemSequenceComparator(csvHeaders.getItemSequenceIndex()));
+        } catch (final NumberFormatException details) {
+            throw new JsonMappingException(null, details.getMessage(), details);
+        }
+
         sequence.addCanvas(createCanvases(csvHeaders, pagesList, imageHost, placeholderImage, encodedWorkID));
 
         jsonManifest = manifest.toJSON();
