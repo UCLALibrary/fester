@@ -4,6 +4,8 @@ package edu.ucla.library.iiif.fester.handlers;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
+import info.freelibrary.iiif.presentation.v3.ResourceTypes;
+
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
@@ -42,9 +44,22 @@ public class PutManifestHandler extends AbstractFesterHandler {
         final String manifestID = request.getParam(Constants.MANIFEST_ID);
         final DeliveryOptions options = new DeliveryOptions();
         final JsonObject message = new JsonObject();
+        final JsonObject manifest = aContext.getBodyAsJson();
+
+        try {
+            // Check that the uploaded manifest is valid before allowing it to be PUT
+            validate(manifest, ResourceTypes.MANIFEST);
+        } catch (final ValidationException details) {
+            response.setStatusCode(HTTP.BAD_REQUEST);
+            response.setStatusMessage(details.getMessage());
+            response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
+            response.end(details.getMessage());
+
+            return;
+        }
 
         message.put(Constants.MANIFEST_ID, manifestID);
-        message.put(Constants.DATA, aContext.getBodyAsJson());
+        message.put(Constants.DATA, manifest);
         options.addHeader(Constants.ACTION, Op.PUT_MANIFEST);
 
         sendMessage(S3BucketVerticle.class.getName(), message, options, send -> {
