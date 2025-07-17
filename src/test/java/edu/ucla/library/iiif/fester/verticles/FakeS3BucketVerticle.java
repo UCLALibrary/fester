@@ -23,6 +23,7 @@ import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.utils.CodeUtils;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
+
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 
@@ -60,15 +61,16 @@ public class FakeS3BucketVerticle extends AbstractFesterVerticle {
                 StringUtils.format("src/test/resources/json/{}/ark%3A%2F21198%2Fzz0009gsq9.json", myIiifApiVersion)));
         JSON_FILES.put(IDUtils.getWorkS3Key("ark:/21198/zz0009gv8j"), new File(
                 StringUtils.format("src/test/resources/json/{}/ark%3A%2F21198%2Fzz0009gv8j.json", myIiifApiVersion)));
-        JSON_FILES.put(IDUtils.getWorkS3Key("ark:/21198/z12f8rtw"),
-                new File(StringUtils.format("src/test/resources/json/{}/ark%3A%2F21198%2Fz12f8rtw.json",
-                        myIiifApiVersion)));
+        JSON_FILES.put(IDUtils.getWorkS3Key("ark:/21198/z12f8rtw"), new File(
+                StringUtils.format("src/test/resources/json/{}/ark%3A%2F21198%2Fz12f8rtw.json", myIiifApiVersion)));
 
         vertx.eventBus().<JsonObject>consumer(S3BucketVerticle.class.getName()).handler(message -> {
             final JsonObject body = message.body();
             final String manifestID;
             final JsonObject manifest;
             final String action = message.headers().get(Constants.ACTION);
+
+            LOGGER.debug("action: " + action);
 
             switch (action) {
                 case Op.GET_MANIFEST:

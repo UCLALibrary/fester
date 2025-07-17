@@ -21,6 +21,7 @@ import edu.ucla.library.iiif.fester.utils.IDUtils;
 import edu.ucla.library.iiif.fester.utils.TestUtils;
 
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.RequestOptions;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -89,24 +90,37 @@ public class PutManifestHandlerTest extends AbstractFesterHandlerTest {
         final int port = aContext.get(Config.HTTP_PORT);
         final String requestPath = IDUtils.getResourceURIPath(myPutManifestS3Key);
         final RequestOptions requestOpts = new RequestOptions();
+        final HttpClient httpClient;
 
         LOGGER.debug(MessageCodes.MFS_016, requestPath);
 
         requestOpts.setPort(port).setHost(Constants.UNSPECIFIED_HOST).setURI(requestPath);
         requestOpts.addHeader(Constants.CONTENT_TYPE, Constants.JSON_MEDIA_TYPE);
+        httpClient = myVertx.createHttpClient();
 
-        myVertx.createHttpClient().put(requestOpts, response -> {
-            final int statusCode = response.statusCode();
-
-            switch (statusCode) {
+        httpClient.put(requestOpts, putResponse -> {
+            switch (putResponse.statusCode()) {
                 case HTTP.OK:
-                    aContext.assertTrue(myS3Client.doesObjectExist(myS3Bucket, myPutManifestS3Key));
-                    TestUtils.complete(asyncTask);
+                    httpClient.get(requestOpts, getResponse -> {
+                        if (getResponse.statusCode() != HTTP.OK) {
+                            aContext.fail(
+                                    LOGGER.getMessage(MessageCodes.MFS_018, manifestPath, getResponse.statusCode()));
+                        }
+
+                        TestUtils.complete(asyncTask);
+                    }).exceptionHandler(error -> {
+                        aContext.fail(error);
+                        TestUtils.complete(asyncTask);
+                    }).end();
 
                     break;
                 default:
-                    aContext.fail(LOGGER.getMessage(MessageCodes.MFS_018, manifestPath, statusCode));
+                    aContext.fail(LOGGER.getMessage(MessageCodes.MFS_018, manifestPath, putResponse.statusCode()));
+                    TestUtils.complete(asyncTask);
             }
+        }).exceptionHandler(error -> {
+            aContext.fail(error);
+            TestUtils.complete(asyncTask);
         }).end(manifest);
     }
 
@@ -134,9 +148,7 @@ public class PutManifestHandlerTest extends AbstractFesterHandlerTest {
 
                 if (statusCode == HTTP.BAD_REQUEST) {
                     aContext.assertFalse(myS3Client.doesObjectExist(myS3Bucket, myPutManifestS3Key));
-
                     TestUtils.complete(asyncTask);
-
                 } else {
                     aContext.fail(LOGGER.getMessage(MessageCodes.MFS_019, statusCode));
                 }

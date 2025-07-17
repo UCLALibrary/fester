@@ -40,7 +40,8 @@ public class PutCollectionHandler extends AbstractFesterHandler {
         final JsonObject message = new JsonObject();
         final DeliveryOptions options = new DeliveryOptions();
 
-        message.put(Constants.COLLECTION_NAME, collectionName).put(Constants.DATA, aContext.getBodyAsJson());
+        message.put(Constants.COLLECTION_NAME, collectionName);
+        message.put(Constants.DATA, aContext.getBodyAsJson());
         options.addHeader(Constants.ACTION, Op.PUT_COLLECTION);
 
         sendMessage(S3BucketVerticle.class.getName(), message, options, send -> {
