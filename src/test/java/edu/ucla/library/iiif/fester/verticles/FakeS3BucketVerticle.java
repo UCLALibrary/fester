@@ -70,8 +70,6 @@ public class FakeS3BucketVerticle extends AbstractFesterVerticle {
             final JsonObject manifest;
             final String action = message.headers().get(Constants.ACTION);
 
-            LOGGER.debug("action: " + action);
-
             switch (action) {
                 case Op.GET_MANIFEST:
                     manifestID = body.getString(Constants.MANIFEST_ID);
