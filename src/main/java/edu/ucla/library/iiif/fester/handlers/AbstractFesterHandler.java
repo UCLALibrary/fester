@@ -131,6 +131,7 @@ abstract class AbstractFesterHandler implements Handler<RoutingContext> {
         }
 
         try {
+            // Constructing manifests or collection documents will throw an exception if JSON is invalid
             switch (context) {
                 case "http://iiif.io/api/presentation/2/context.json":
                     if (ResourceTypes.MANIFEST.equals(aType)) {
