@@ -7,8 +7,12 @@ import info.freelibrary.util.LoggerFactory;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
-import edu.ucla.library.iiif.fester.utils.IDUtils;
+import edu.ucla.library.iiif.fester.Op;
+import edu.ucla.library.iiif.fester.verticles.S3BucketVerticle;
+
 import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.DeliveryOptions;
+import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
@@ -35,47 +39,32 @@ public class PutManifestHandler extends AbstractFesterHandler {
     public void handle(final RoutingContext aContext) {
         final HttpServerResponse response = aContext.response();
         final HttpServerRequest request = aContext.request();
-        final JsonObject body = aContext.getBodyAsJson();
         final String manifestID = request.getParam(Constants.MANIFEST_ID);
-        final String manifestS3Key = IDUtils.getWorkS3Key(manifestID);
+        final DeliveryOptions options = new DeliveryOptions();
+        final JsonObject message = new JsonObject();
 
-        // For now we're not going to check if it exists before we overwrite it
-        myS3Client.put(myS3Bucket, manifestS3Key, body.toBuffer(), put -> {
-            final int statusCode = put.statusCode();
+        message.put(Constants.MANIFEST_ID, manifestID);
+        message.put(Constants.DATA, aContext.getBodyAsJson());
+        options.addHeader(Constants.ACTION, Op.PUT_MANIFEST);
 
-            switch (statusCode) {
-                case HTTP.OK:
-                    response.setStatusCode(HTTP.OK);
-                    response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
-                    response.end(LOGGER.getMessage(MessageCodes.MFS_092, manifestID));
+        sendMessage(S3BucketVerticle.class.getName(), message, options, send -> {
+            response.headers().set(Constants.CORS_HEADER, Constants.STAR);
 
-                    break;
-                case HTTP.FORBIDDEN:
-                    LOGGER.debug(MessageCodes.MFS_023, manifestID);
+            if (send.succeeded()) {
+                response.setStatusCode(HTTP.OK);
+                response.end(Op.SUCCESS);
+            } else {
+                final ReplyException failure = (ReplyException) send.cause();
+                final int status = failure.failureCode();
+                final String statusMessage = failure.getMessage();
+                final String error = LOGGER.getMessage(MessageCodes.MFS_009, manifestID, status, statusMessage);
 
-                    response.setStatusCode(HTTP.FORBIDDEN);
-                    response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
-                    response.end(LOGGER.getMessage(MessageCodes.MFS_089, manifestID));
+                LOGGER.error(error);
 
-                    break;
-                case HTTP.INTERNAL_SERVER_ERROR:
-                    final String serverErrorMessage = LOGGER.getMessage(MessageCodes.MFS_015, manifestID);
-
-                    LOGGER.error(serverErrorMessage);
-
-                    response.setStatusCode(HTTP.INTERNAL_SERVER_ERROR);
-                    response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
-                    response.end(serverErrorMessage);
-
-                    break;
-                default:
-                    final String errorMessage = LOGGER.getMessage(MessageCodes.MFS_013, statusCode, manifestID);
-
-                    LOGGER.warn(errorMessage);
-
-                    response.setStatusCode(statusCode);
-                    response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
-                    response.end(errorMessage);
+                response.setStatusCode(status);
+                response.setStatusMessage(statusMessage);
+                response.putHeader(Constants.CONTENT_TYPE, Constants.PLAIN_TEXT_TYPE);
+                response.end(error);
             }
         });
     }

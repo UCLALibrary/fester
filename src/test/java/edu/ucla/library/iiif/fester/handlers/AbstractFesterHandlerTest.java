@@ -22,6 +22,7 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
+import info.freelibrary.util.StringUtils;
 
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
@@ -34,6 +35,8 @@ import edu.ucla.library.iiif.fester.verticles.S3BucketVerticle;
 
 import ch.qos.logback.classic.Level;
 import io.vertx.config.ConfigRetriever;
+import io.vertx.config.ConfigRetrieverOptions;
+import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -50,10 +53,10 @@ abstract class AbstractFesterHandlerTest {
     protected static final String IIIF_URL = "http://0.0.0.0";
 
     protected static final File V2_MANIFEST_FILE =
-        new File("src/test/resources/json/v2/ark%3A%2F21198%2Fzz0009gv8j.json");
+            new File("src/test/resources/json/v2/ark%3A%2F21198%2Fzz0009gv8j.json");
 
     protected static final File V2_COLLECTION_FILE =
-        new File("src/test/resources/json/v2/ark%3A%2F21198%2Fzz0009gsq9.json");
+            new File("src/test/resources/json/v2/ark%3A%2F21198%2Fzz0009gsq9.json");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFesterHandlerTest.class, Constants.MESSAGES);
 
@@ -142,7 +145,7 @@ abstract class AbstractFesterHandlerTest {
      */
     protected Level setLogLevel(final Class<?> aLogClass, final Level aLogLevel) {
         final ch.qos.logback.classic.Logger logger =
-            (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(aLogClass, Constants.MESSAGES).getLoggerImpl();
+                (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(aLogClass, Constants.MESSAGES).getLoggerImpl();
         final Level level = logger.getEffectiveLevel();
 
         logger.setLevel(aLogLevel);
@@ -172,7 +175,7 @@ abstract class AbstractFesterHandlerTest {
                     myVertx.undeploy(s3BucketDeploymentId, undeployment -> {
                         if (undeployment.succeeded()) {
                             final DeploymentOptions options = new DeploymentOptions()
-                                .setConfig(new JsonObject().put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V2));
+                                    .setConfig(new JsonObject().put(Constants.IIIF_API_VERSION, Constants.IIIF_API_V2));
 
                             myVertx.deployVerticle(FakeS3BucketVerticle.class.getName(), options, fakeDeployment -> {
                                 if (fakeDeployment.succeeded()) {
@@ -204,10 +207,20 @@ abstract class AbstractFesterHandlerTest {
      * @throws IOException If there is trouble reading from the configuration file
      */
     private void initialize(final Promise<Void> aPromise) throws IOException {
+        final String configFilePath = StringUtils.trimToNull(System.getProperty("vertx-config-path"));
+        final ConfigRetrieverOptions configOptions = new ConfigRetrieverOptions().setIncludeDefaultStores(false);
+        final ConfigStoreOptions fileConfigs = new ConfigStoreOptions().setType("file").setFormat("properties");
+        final ConfigStoreOptions systemConfigs = new ConfigStoreOptions().setType("sys");
         final ConfigRetriever configRetriever;
 
+        if (configFilePath != null) {
+            configOptions.addStore(fileConfigs.setConfig(new JsonObject().put("path", configFilePath)));
+        } else {
+            LOGGER.warn(MessageCodes.MFS_040);
+        }
+
         myVertx = Vertx.vertx();
-        configRetriever = ConfigRetriever.create(myVertx);
+        configRetriever = ConfigRetriever.create(myVertx, configOptions.addStore(systemConfigs));
 
         // We pull our application's configuration in for the S3 client configuration
         configRetriever.getConfig(configuration -> {

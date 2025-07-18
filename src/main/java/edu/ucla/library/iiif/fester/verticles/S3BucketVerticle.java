@@ -10,6 +10,7 @@ import com.amazonaws.regions.RegionUtils;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 import info.freelibrary.util.StringUtils;
+
 import info.freelibrary.vertx.s3.S3Client;
 
 import edu.ucla.library.iiif.fester.Config;
@@ -19,6 +20,7 @@ import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.Op;
 import edu.ucla.library.iiif.fester.utils.CodeUtils;
 import edu.ucla.library.iiif.fester.utils.IDUtils;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
@@ -172,8 +174,8 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
         final Buffer manifestContent = aManifest.toBuffer();
         final String manifestID = IDUtils.getResourceID(aS3Key);
         final String context = aManifest.getString("@context");
-        final String idKey;
         final String derivedManifestS3Key;
+        final String idKey;
 
         if (context.equals(Constants.CONTEXT_V2)) {
             idKey = Constants.ID_V2;
