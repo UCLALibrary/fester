@@ -14,6 +14,8 @@ import com.amazonaws.SdkClientException;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
+import info.freelibrary.iiif.presentation.v3.ResourceTypes;
+
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
@@ -23,6 +25,7 @@ import edu.ucla.library.iiif.fester.utils.TestUtils;
 
 import ch.qos.logback.classic.Level;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.RequestOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
@@ -113,6 +116,56 @@ public class PutCollectionHandlerTest extends AbstractFesterHandlerTest {
                 aContext.fail(LOGGER.getMessage(MessageCodes.MFS_018, manifestPath, putStatusCode));
             }
         }).end(manifest);
+    }
+
+    /**
+     * Test the PutCollectionHandler with an invalid collection doc.
+     *
+     * @param aContext A testing context
+     * @throws IOException If there is trouble reading the manifest
+     */
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testPutCollectionHandlerInvalidDoc(final TestContext aContext) throws IOException {
+        final String docPath = V2_INVALID_COLLECTION_FILE.getAbsolutePath();
+        final Buffer collection = myVertx.fileSystem().readFileBlocking(docPath);
+        final Async asyncTask = aContext.async();
+        final int port = aContext.get(Config.HTTP_PORT);
+        final String requestPath = IDUtils.getResourceURIPath(myPutCollectionS3Key);
+        final RequestOptions requestOpts = new RequestOptions();
+        final HttpClient httpClient;
+
+        LOGGER.debug(MessageCodes.MFS_184, requestPath);
+
+        requestOpts.setPort(port).setHost(Constants.UNSPECIFIED_HOST).setURI(requestPath);
+        requestOpts.addHeader(Constants.CONTENT_TYPE, Constants.JSON_MEDIA_TYPE);
+        httpClient = myVertx.createHttpClient();
+
+        httpClient.put(requestOpts, putResponse -> {
+            switch (putResponse.statusCode()) {
+                case HTTP.BAD_REQUEST:
+                    httpClient.get(requestOpts, getResponse -> {
+                        if (getResponse.statusCode() != HTTP.NOT_FOUND) {
+                            aContext.fail(LOGGER.getMessage(MessageCodes.MFS_183, ResourceTypes.COLLECTION,
+                                    getResponse.statusCode()));
+                        }
+
+                        TestUtils.complete(asyncTask);
+                    }).exceptionHandler(error -> {
+                        aContext.fail(error);
+                        TestUtils.complete(asyncTask);
+                    }).end();
+
+                    break;
+                default:
+                    aContext.fail(LOGGER.getMessage(MessageCodes.MFS_183, ResourceTypes.COLLECTION,
+                            putResponse.statusCode()));
+                    TestUtils.complete(asyncTask);
+            }
+        }).exceptionHandler(error -> {
+            aContext.fail(error);
+            TestUtils.complete(asyncTask);
+        }).end(collection);
     }
 
     /**
