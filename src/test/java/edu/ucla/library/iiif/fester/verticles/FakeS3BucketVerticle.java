@@ -138,8 +138,9 @@ public class FakeS3BucketVerticle extends AbstractFesterVerticle {
         // URL-encoding makes it so we don't have to worry about creating subdirectories
         final String path = URLEncoder.encode(aS3Key, StandardCharsets.UTF_8);
         final File tmpFile = new File(myTmpDir, path);
-        final String idKey;
         final String derivedManifestS3Key;
+        final String idKey;
+        final String id;
 
         switch (myIiifApiVersion) {
             case Constants.IIIF_API_V2:
@@ -149,22 +150,27 @@ public class FakeS3BucketVerticle extends AbstractFesterVerticle {
                 idKey = Constants.ID_V3;
                 break;
         }
-        derivedManifestS3Key = IDUtils.getResourceS3Key(URI.create(aManifest.getString(idKey)));
 
-        if (!aS3Key.equals(derivedManifestS3Key)) {
-            LOGGER.warn(MessageCodes.MFS_138, aS3Key, derivedManifestS3Key);
-        }
+        if ((id = aManifest.getString(idKey)) == null) {
+            aMessage.fail(400, "ID must be present");
+        } else {
+            derivedManifestS3Key = IDUtils.getResourceS3Key(URI.create(id));
 
-        try (BufferedFileWriter writer = new BufferedFileWriter(tmpFile)) {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug(MessageCodes.MFS_124, aManifest.encode());
+            if (!aS3Key.equals(derivedManifestS3Key)) {
+                LOGGER.warn(MessageCodes.MFS_138, aS3Key, derivedManifestS3Key);
             }
-            writer.write(aManifest.encodePrettily());
-            JSON_FILES.put(aS3Key, tmpFile);
 
-            aMessage.reply(Op.SUCCESS);
-        } catch (final IOException details) {
-            aMessage.fail(100, details.getMessage());
+            try (BufferedFileWriter writer = new BufferedFileWriter(tmpFile)) {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug(MessageCodes.MFS_124, aManifest.encode());
+                }
+                writer.write(aManifest.encodePrettily());
+                JSON_FILES.put(aS3Key, tmpFile);
+
+                aMessage.reply(Op.SUCCESS);
+            } catch (final IOException details) {
+                aMessage.fail(100, details.getMessage());
+            }
         }
     }
 }

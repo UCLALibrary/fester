@@ -190,4 +190,8 @@
   <entry key="MFS-177">Test server was responsive: {}</entry>
   <entry key="MFS-178">Looking for test application's server port: {}</entry>
   <entry key="MFS-179">A/V server URL substitution only supports up to one replacement: {}</entry>
+  <entry key="MFS-180">{} validation error: {}</entry>
+  <entry key="MFS-181">Unsupported {} value: {}</entry>
+  <entry key="MFS-182">{} is missing</entry>
+  <entry key="MFS-183">Failed to detect invalid '{}' [status: {}]</entry>
 </properties>

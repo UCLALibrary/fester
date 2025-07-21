@@ -58,6 +58,12 @@ abstract class AbstractFesterHandlerTest {
     protected static final File V2_COLLECTION_FILE =
             new File("src/test/resources/json/v2/ark%3A%2F21198%2Fzz0009gsq9.json");
 
+    protected static final File V2_INVALID_MANIFEST_FILE =
+            new File("src/test/resources/json/v2/invalid-manifest-v2.json");
+
+    protected static final File V2_INVALID_MANIFEST_FILE_ID =
+            new File("src/test/resources/json/v2/invalid-manifest-v2-id.json");
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFesterHandlerTest.class, Constants.MESSAGES);
 
     @Rule

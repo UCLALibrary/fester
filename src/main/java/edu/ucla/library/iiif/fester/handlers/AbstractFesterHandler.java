@@ -8,16 +8,24 @@ import com.amazonaws.regions.RegionUtils;
 
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
+import info.freelibrary.util.StringUtils;
+
+import info.freelibrary.iiif.presentation.v3.JsonParsingException;
+import info.freelibrary.iiif.presentation.v3.ResourceTypes;
+import info.freelibrary.iiif.presentation.v3.utils.JsonKeys;
+
 import info.freelibrary.vertx.s3.S3Client;
 
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.MessageCodes;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 
@@ -106,5 +114,51 @@ abstract class AbstractFesterHandler implements Handler<RoutingContext> {
     protected void sendMessage(final String aVerticleName, final JsonObject aMessage, final DeliveryOptions aHeaders,
             final Handler<AsyncResult<Message<JsonObject>>> aHandler) {
         sendMessage(aVerticleName, aMessage, aHeaders, DeliveryOptions.DEFAULT_TIMEOUT, aHandler);
+    }
+
+    /**
+     * Validate a supplied manifest, considering its version of the spec (e.g., v2 or v3) and the resource type.
+     *
+     * @param aJsonObj A manifest or collection in JSON form
+     * @param aType A type of resource (e.g., manifest or collection)
+     * @throws ValidationException If the supplied JSON isn't valid
+     */
+    protected void validate(final JsonObject aJsonObj, final String aType) throws ValidationException {
+        final String context = aJsonObj.getString(JsonKeys.CONTEXT);
+
+        if (StringUtils.trimToNull(context) == null) {
+            throw new ValidationException(aType, LOGGER.getMessage(MessageCodes.MFS_182, JsonKeys.CONTEXT));
+        }
+
+        try {
+            // Constructing manifests or collection documents will throw an exception if JSON is invalid
+            switch (context) {
+                case "http://iiif.io/api/presentation/2/context.json":
+                    if (ResourceTypes.MANIFEST.equals(aType)) {
+                        info.freelibrary.iiif.presentation.v2.Manifest.fromJSON(aJsonObj);
+                    } else if (ResourceTypes.COLLECTION.equals(aType)) {
+                        info.freelibrary.iiif.presentation.v2.Collection.fromJSON(aJsonObj);
+                    } else {
+                        throw new ValidationException(aType, LOGGER.getMessage(MessageCodes.MFS_181, JsonKeys.V2_TYPE));
+                    }
+
+                    break; // It's valid
+                case "http://iiif.io/api/presentation/3/context.json":
+                    if (ResourceTypes.MANIFEST.equals(aType)) {
+                        info.freelibrary.iiif.presentation.v3.Manifest.from(aJsonObj.encode());
+                    } else if (ResourceTypes.COLLECTION.equals(aType)) {
+                        info.freelibrary.iiif.presentation.v3.Collection.from(aJsonObj.encode());
+                    } else {
+                        throw new ValidationException(aType, LOGGER.getMessage(MessageCodes.MFS_181, JsonKeys.TYPE));
+                    }
+
+                    break; // It's valid
+                default:
+                    throw new ValidationException(aType, LOGGER.getMessage(MessageCodes.MFS_181, JsonKeys.CONTEXT));
+            }
+        } catch (final JsonParsingException | DecodeException | IllegalArgumentException |
+                NullPointerException details) {
+            throw new ValidationException(aType, details);
+        }
     }
 }
