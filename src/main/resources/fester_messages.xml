@@ -194,4 +194,5 @@
   <entry key="MFS-181">Unsupported {} value: {}</entry>
   <entry key="MFS-182">{} is missing</entry>
   <entry key="MFS-183">Failed to detect invalid '{}' [status: {}]</entry>
+  <entry key="MFS-184">Test PUTing a test collection doc to: {}</entry>
 </properties>
