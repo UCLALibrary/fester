@@ -52,6 +52,7 @@ jobs:
           nexus_username: ${{ secrets.SONATYPE_USERNAME }}
           nexus_password: ${{ secrets.SONATYPE_PASSWORD }}
           maven_profiles: release
+          server_id: github
           maven_args: >
             -Drevision=${{ github.event.release.tag_name }}
             -ntp -Dorg.slf4j.simpleLogger.log.net.sourceforge.pmd=error -DlogLevel=DEBUG -DtestLogLevel=DEBUG

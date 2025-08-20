@@ -39,6 +39,7 @@ jobs:
         with:
           maven_goals_phases: "clean verify"
           maven_profiles: default
+          server_id: github
           maven_args: >
             -U -V -ntp -Dorg.slf4j.simpleLogger.log.net.sourceforge.pmd=error -DlogLevel=DEBUG -DtestLogLevel=DEBUG
             -Dfester.s3.access_key="${{ secrets.AWS_ACCESS_KEY }}" -Dsurefire.skipAfterFailureCount=1
