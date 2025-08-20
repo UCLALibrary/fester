@@ -18,6 +18,7 @@ jobs:
       - name: Install JDK 21
         uses: actions/setup-java@3a4f6e1af504cf6a31855fa899c6aa5355ba6c12 # v4.7.0
         with:
+          cache: maven
           distribution: 'temurin'
           java-version: 21
           server-id: github
@@ -45,15 +46,13 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Release with Maven
-        uses: samuelmeuli/action-maven-publish@201a45a3f311b2ee888f252ba9f4194257545709 # v1.4.0
-        with:
-          gpg_private_key: ${{ secrets.BUILD_KEY }}
-          gpg_passphrase: ${{ secrets.BUILD_PASSPHRASE }}
-          nexus_username: ${{ secrets.SONATYPE_USERNAME }}
-          nexus_password: ${{ secrets.SONATYPE_PASSWORD }}
-          maven_profiles: release
-          server_id: github
-          maven_args: >
+        env:
+          MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.BUILD_PASSPHRASE }}
+          MAVEN_GPG_KEY: ${{ secrets.BUILD_KEY }}
+        run: |
+          mvn -U -ntp clean verify \
             -Drevision=${{ github.event.release.tag_name }}
             -ntp -Dorg.slf4j.simpleLogger.log.net.sourceforge.pmd=error -DlogLevel=DEBUG -DtestLogLevel=DEBUG
             -DskipNexusStagingDeployMojo="${{ env.SKIP_JAR_DEPLOYMENT }}"
@@ -62,4 +61,4 @@ jobs:
             -Ddocker.registry.password="${{ secrets.DOCKER_PASSWORD }}"
             -Dfester.s3.access_key="${{ secrets.AWS_ACCESS_KEY }}"
             -Dfester.s3.secret_key="${{ secrets.AWS_SECRET_KEY }}"
-            -Dfester.s3.bucket="${{ secrets.S3_BUCKET }}" -U
+            -Dfester.s3.bucket="${{ secrets.S3_BUCKET }}"
