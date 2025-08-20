@@ -1,7 +1,7 @@
 {
-  "@context": "http://iiif.io/api/presentation/2/context.json",
+  "@context": "https://iiif.io/api/presentation/2/context.json",
   "label": { "none": [ "Protesta Humana (La) : periódico anarquista" ] },
-  "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/collections/ark%3A%2F21198%2Fzz0025hqmb",
+  "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/collections/ark%3A%2F21198%2Fzz0025hqmb",
   "type": "Collection",
   "metadata": [
     {
@@ -12,152 +12,152 @@
   "items": [
     {
       "type": "Manifest",
-      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025j2zs/manifest",
+      "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025j2zs/manifest",
       "label": { "none": [ "Año 2, número 21. 2 enero 1898" ] }
     },
     {
       "type": "Manifest",
-      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025j30s/manifest",
+      "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025j30s/manifest",
       "label": { "none": [ "Año 2, número 22. 9 enero, 1898" ] }
     },
     {
       "type": "Manifest",
-      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025j319/manifest",
+      "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025j319/manifest",
       "label": { "none": [ "Año 2, número 23. 16 enero 1898" ] }
     },
     {
       "type": "Manifest",
-      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025j32t/manifest",
+      "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025j32t/manifest",
       "label": { "none": [ "Año 2, número 24. 23 enero 1898" ] }
     },
     {
       "type": "Manifest",
-      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025jb47/manifest",
+      "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025jb47/manifest",
       "label": { "none": [ "Año 2, número 25. 30 enero 1898" ] }
     },
     {
       "type": "Manifest",
-      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025jb5r/manifest",
+      "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025jb5r/manifest",
       "label": { "none": [ "Año 2, número 26. 6 febrero 1898" ] }
     },
     {
       "type": "Manifest",
-      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025jb68/manifest",
+      "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025jb68/manifest",
       "label": { "none": [ "Año 2, número 27. 13 febrero 1898" ] }
     },
     {
       "type": "Manifest",
-      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025jb7s/manifest",
+      "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025jb7s/manifest",
       "label": { "none": [ "Año 2, número 28. 20 febrero, 1898" ] }
     },
     {
       "type": "Manifest",
-      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025jb89/manifest",
+      "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025jb89/manifest",
       "label": { "none": [ "Año 2, número 29. 27 febrero 1898" ] }
     },
     {
       "type": "Manifest",
-      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025jb9t/manifest",
+      "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025jb9t/manifest",
       "label": { "none": [ "Año 2, número 30. 6 marzo 1898" ] }
     },
     {
       "type": "Manifest",
-      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025k0g1/manifest",
+      "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025k0g1/manifest",
       "label": { "none": [ "Año 2, número 31. 18 marzo 1898" ] }
     },
     {
       "type": "Manifest",
-      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025k0hj/manifest",
+      "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025k0hj/manifest",
       "label": { "none": [ "Año 2, número 32. 1 abril 1898" ] }
     },
     {
       "type": "Manifest",
-      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025k0j2/manifest",
+      "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025k0j2/manifest",
       "label": { "none": [ "Año 2, número 33. 17 abril 1898" ] }
     },
     {
       "type": "Manifest",
-      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025k0kk/manifest",
+      "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025k0kk/manifest",
       "label": { "none": [ "Año 2, número 34. 1 mayo 1898" ] }
     },
     {
       "type": "Manifest",
-      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025k0m3/manifest",
+      "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025k0m3/manifest",
       "label": { "none": [ "Año 2, número 35. 15 mayo 1898" ] }
     },
     {
       "type": "Manifest",
-      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025k0nm/manifest",
+      "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025k0nm/manifest",
       "label": { "none": [ "Año 2, número 36. 29 mayo 1898" ] }
     },
     {
       "type": "Manifest",
-      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025k8vk/manifest",
+      "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025k8vk/manifest",
       "label": { "none": [ "Año 2, número 37. 12 junio, 1898" ] }
     },
     {
       "type": "Manifest",
-      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025k8w3/manifest",
+      "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025k8w3/manifest",
       "label": { "none": [ "Año 2, número 38. 26 junio 1898" ] }
     },
     {
       "type": "Manifest",
-      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025k8xm/manifest",
+      "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025k8xm/manifest",
       "label": { "none": [ "Año 2, número 39. 10 julio 1898" ] }
     },
     {
       "type": "Manifest",
-      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025k8z4/manifest",
+      "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025k8z4/manifest",
       "label": { "none": [ "Año 2, número 40. 24 julio 1898" ] }
     },
     {
       "type": "Manifest",
-      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025k904/manifest",
+      "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025k904/manifest",
       "label": { "none": [ "Año 2, número 41. 7 agosto 1898" ] }
     },
     {
       "type": "Manifest",
-      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025k91n/manifest",
+      "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025k91n/manifest",
       "label": { "none": [ "Año 2, número 42. 21 agosto 1898" ] }
     },
     {
       "type": "Manifest",
-      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025km6k/manifest",
+      "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025km6k/manifest",
       "label": { "none": [ "Año 2, número 43. 4 septiembre 1898" ] }
     },
     {
       "type": "Manifest",
-      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025km73/manifest",
+      "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025km73/manifest",
       "label": { "none": [ "Año 2, número 44. 25 septiembre 1898" ] }
     },
     {
       "type": "Manifest",
-      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025km8m/manifest",
+      "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025km8m/manifest",
       "label": { "none": [ "Año 2, número 45. 9 octubre 1898" ] }
     },
     {
       "type": "Manifest",
-      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025kmbn/manifest",
+      "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025kmbn/manifest",
       "label": { "none": [ "Año 2, número 46. 23 octubre 1898" ] }
     },
     {
       "type": "Manifest",
-      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025kmc5/manifest",
+      "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025kmc5/manifest",
       "label": { "none": [ "Año 2, número 47. 6 noviembre 1898" ] }
     },
     {
       "type": "Manifest",
-      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025kmdp/manifest",
+      "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025kmdp/manifest",
       "label": { "none": [ "Año 2, número 48. 20 noviembre 1898" ] }
     },
     {
       "type": "Manifest",
-      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025kx8z/manifest",
+      "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025kx8z/manifest",
       "label": { "none": [ "Año 2, número 49. 4 diciembre 1898" ] }
     },
     {
       "type": "Manifest",
-      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025kx9g/manifest",
+      "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0025kx9g/manifest",
       "label": { "none": [ "Año 2, número 50. 18 diciembre 1898" ] }
     }
   ]

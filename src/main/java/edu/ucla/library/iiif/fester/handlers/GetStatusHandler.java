@@ -42,7 +42,6 @@ public class GetStatusHandler implements Handler<RoutingContext> {
             final String freeMemStr = freeMem + Constants.SPACE + Constants.MB_STR;
             final String usedMemStr = usedMem + Constants.SPACE + Constants.MB_STR;
 
-
             if (percentMem >= WARN_PERCENT && percentMem < ERROR_PERCENT) {
                 status.put(Status.STATUS, Status.WARN);
             } else if (percentMem >= ERROR_PERCENT) {
@@ -52,7 +51,7 @@ public class GetStatusHandler implements Handler<RoutingContext> {
             }
             status.put(Status.MEMORY, memory);
             memory.put(Status.TOTAL_MEMORY, totalMemStr).put(Status.FREE_MEMORY, freeMemStr)
-                .put(Status.USED_MEMORY, usedMemStr).put(Status.PERCENT_MEMORY, percentMem);
+                    .put(Status.USED_MEMORY, usedMemStr).put(Status.PERCENT_MEMORY, percentMem);
 
             response.setStatusCode(200);
             response.putHeader(Constants.CONTENT_TYPE, Constants.JSON_MEDIA_TYPE).end(status.encodePrettily());

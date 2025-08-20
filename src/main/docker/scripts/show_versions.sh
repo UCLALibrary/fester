@@ -14,7 +14,7 @@ print_line() {
 }
 
 declare -a DEPENDENCIES=(
-  "openjdk-17-jre-headless"
+  "openjdk-21-jre-headless"
   "python3"
   "curl"
 )

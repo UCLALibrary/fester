@@ -1,33 +1,46 @@
 name: Maven Release
 
-# Performs a Maven release using JDK 17 when a new GitHub release has been published
+# Performs a Maven release using JDK 21 when a new GitHub release has been published
 on:
   release:
     types: [ published ]
 
 jobs:
   publish:
-    name: Maven Artifact Publisher (JDK 17)
+    name: Maven Artifact Publisher (JDK 21)
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: read
+
     env:
       SKIP_JAR_DEPLOYMENT: ${{ secrets.SKIP_JAR_DEPLOYMENT }}
+
     steps:
       - name: Check out code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Install JDK 17
-        uses: actions/setup-java@3a4f6e1af504cf6a31855fa899c6aa5355ba6c12 # v4.7.0
+
+      - name: Install JDK 21
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
         with:
+          cache: maven
           distribution: 'temurin'
-          java-version: 17
+          java-version: 21
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+
       # If running locally in act, install Maven
       - name: Set up Maven if needed
         if: ${{ env.ACT }}
         uses: stCarolas/setup-maven@1d56b37995622db66cce1214d81014b09807fb5a # v4
         with:
           maven-version: 3.6.3
+
       - name: Set Jar deployment config
         if: env.SKIP_JAR_DEPLOYMENT == null
         run: echo "SKIP_JAR_DEPLOYMENT=false" >> $GITHUB_ENV
+
       - name: Optionally, login to Docker repository
         uses: docker/login-action@f3364599c6aa293cdc2b8391b1b56d0c30e45c8a # v1.8.0
         env:
@@ -36,21 +49,21 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+
       - name: Release with Maven
-        uses: samuelmeuli/action-maven-publish@201a45a3f311b2ee888f252ba9f4194257545709 # v1.4.0
-        with:
-          gpg_private_key: ${{ secrets.BUILD_KEY }}
-          gpg_passphrase: ${{ secrets.BUILD_PASSPHRASE }}
-          nexus_username: ${{ secrets.SONATYPE_USERNAME }}
-          nexus_password: ${{ secrets.SONATYPE_PASSWORD }}
-          maven_profiles: release
-          maven_args: >
-            -Drevision=${{ github.event.release.tag_name }}
-            -ntp -Dorg.slf4j.simpleLogger.log.net.sourceforge.pmd=error -DlogLevel=DEBUG -DtestLogLevel=DEBUG
-            -DskipNexusStagingDeployMojo="${{ env.SKIP_JAR_DEPLOYMENT }}"
-            -Ddocker.registry.username="${{ secrets.DOCKER_USERNAME }}"
-            -Ddocker.registry.account="${{ secrets.DOCKER_REGISTRY_ACCOUNT}}"
-            -Ddocker.registry.password="${{ secrets.DOCKER_PASSWORD }}"
-            -Dfester.s3.access_key="${{ secrets.AWS_ACCESS_KEY }}"
-            -Dfester.s3.secret_key="${{ secrets.AWS_SECRET_KEY }}"
+        env:
+          MAVEN_USERNAME: ${{ secrets.JPV3_GH_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.JPV3_GH_PAT }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.BUILD_PASSPHRASE }}
+          MAVEN_GPG_KEY: ${{ secrets.BUILD_KEY }}
+        run: |
+          mvn -U -ntp clean verify \
+            -Drevision=${{ github.event.release.tag_name }} \
+            -ntp -Dorg.slf4j.simpleLogger.log.net.sourceforge.pmd=error -DlogLevel=DEBUG -DtestLogLevel=DEBUG \
+            -DskipNexusStagingDeployMojo="${{ env.SKIP_JAR_DEPLOYMENT }}" \
+            -Ddocker.registry.username="${{ secrets.DOCKER_USERNAME }}" \
+            -Ddocker.registry.account="${{ secrets.DOCKER_REGISTRY_ACCOUNT}}" \
+            -Ddocker.registry.password="${{ secrets.DOCKER_PASSWORD }}" \
+            -Dfester.s3.access_key="${{ secrets.AWS_ACCESS_KEY }}" \
+            -Dfester.s3.secret_key="${{ secrets.AWS_SECRET_KEY }}" \
             -Dfester.s3.bucket="${{ secrets.S3_BUCKET }}"

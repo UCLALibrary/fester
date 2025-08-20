@@ -1,7 +1,7 @@
 {
   "@context" : "http://iiif.io/api/presentation/3/context.json",
   "type" : "Manifest",
-  "id" : "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest",
+  "id" : "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest",
   "label" : {
     "none" : [ 
 	  "Test Audio 1" 
@@ -15,7 +15,7 @@
 		  "Test Audio 1" 
 		]
     },
-    "id" : "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/canvas-wh66",
+    "id" : "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/canvas-wh66",
     "duration" : 1985.024,
     "thumbnail" : [
       {
@@ -27,18 +27,18 @@
     "items" : [ 
 	  {
         "type" : "AnnotationPage",
-        "id" : "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/canvas-wh66/anno-page-93hg",
+        "id" : "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/canvas-wh66/anno-page-93hg",
         "items" : [ 
 		{
           "type" : "Annotation",
-          "id" : "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/annotations/anno-1mwr",
+          "id" : "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/annotations/anno-1mwr",
           "motivation" : "painting",
           "body" : {
             "id" : "https://wowza.library.ucla.edu/iiif_av_public/audio/indiana/mahler-symphony-3/CD1/medium/128Kbps.mp4",
             "type" : "Sound",
             "format" : "audio/mp4"
           },
-          "target" : "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/canvas-wh66",
+          "target" : "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/canvas-wh66",
           "seeAlso" : [
           {
             "type" : "Dataset",

@@ -2,8 +2,11 @@
 package edu.ucla.library.iiif.fester.utils;
 
 import java.util.Comparator;
+import java.util.Optional;
 
 import info.freelibrary.iiif.presentation.v3.Collection;
+import info.freelibrary.iiif.presentation.v3.ResourceTypes;
+import info.freelibrary.iiif.presentation.v3.properties.Label;
 
 import se.sawano.java.text.AlphanumericComparator;
 
@@ -17,20 +20,19 @@ public class V3CollectionItemLabelComparator implements Comparator<Collection.It
 
     @Override
     public int compare(final Collection.Item aFirstCollectionItem, final Collection.Item aSecondCollectionItem) {
-        final Collection.Item.Type firstType = aFirstCollectionItem.getType();
-        final Collection.Item.Type secondType = aSecondCollectionItem.getType();
 
-        final String firstLabel;
-        final String secondLabel;
+        final String firstType = aFirstCollectionItem.getType();
+        final String secondType = aSecondCollectionItem.getType();
 
         if (firstType.equals(secondType)) {
-            firstLabel = aFirstCollectionItem.getLabel().getString();
-            secondLabel = aSecondCollectionItem.getLabel().getString();
+            final Optional<Label> firstLabel = aFirstCollectionItem.getLabel();
+            final Optional<Label> secondLabel = aSecondCollectionItem.getLabel();
 
-            return myComparator.compare(firstLabel, secondLabel);
+            return Comparator.nullsLast(myComparator).compare(firstLabel.flatMap(Label::getFirstValue).orElse(null),
+                    secondLabel.flatMap(Label::getFirstValue).orElse(null));
         } else {
             // Sort Collections before Manifests
-            if (firstType.equals(Collection.Item.Type.COLLECTION) && secondType.equals(Collection.Item.Type.MANIFEST)) {
+            if (firstType.equals(ResourceTypes.COLLECTION) && secondType.equals(ResourceTypes.MANIFEST)) {
                 return -1;
             } else {
                 return 1;

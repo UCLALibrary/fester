@@ -1,12 +1,13 @@
 
 package edu.ucla.library.iiif.fester.utils;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
 import info.freelibrary.iiif.presentation.v3.Manifest;
+import info.freelibrary.iiif.presentation.v3.properties.Label;
 import info.freelibrary.iiif.presentation.v3.properties.Metadata;
+import info.freelibrary.iiif.presentation.v3.utils.JSON;
 
 /**
  * Test utilities related to v3 manifests.
@@ -26,16 +27,14 @@ public class V3ManifestTestUtils implements ManifestTestUtils {
 
     @Override
     public Optional<String> getMetadata(final String aJsonManifest, final String aMetadataLabel) {
-        final Manifest manifest = Manifest.from(aJsonManifest);
+        final Manifest manifest = JSON.readValue(aJsonManifest, Manifest.class);
         final List<Metadata> metadataList = manifest.getMetadata();
-        final Iterator<Metadata> iterator = metadataList.iterator();
 
-        while (iterator.hasNext()) {
-            final Metadata metadata = iterator.next();
-            final String label = metadata.getLabel().getString();
+        for (Metadata metadata : metadataList) {
+            Optional<String> labelOpt = metadata.getLabel().getFirstValue();
 
-            if (label.equals(aMetadataLabel)) {
-                return Optional.of(metadata.getValue().getString());
+            if (labelOpt.isPresent() && labelOpt.get().equals(aMetadataLabel)) {
+                return metadata.getValue().getFirstValue();
             }
         }
 
@@ -44,10 +43,15 @@ public class V3ManifestTestUtils implements ManifestTestUtils {
 
     @Override
     public Optional<String> getLabel(final String aJsonManifest) {
-        final Manifest manifest = Manifest.from(aJsonManifest);
+        final Manifest manifest = JSON.readValue(aJsonManifest, Manifest.class);
+        final Optional<Label> optLabel = manifest.getLabel();
 
         // All our manifests currently have only one label
-        return Optional.of(manifest.getLabel().getString());
+        if (optLabel.isPresent()) {
+            return optLabel.get().getFirstValue();
+        } else {
+            return Optional.empty();
+        }
     }
 
 }

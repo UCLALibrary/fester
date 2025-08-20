@@ -1,7 +1,7 @@
 {
   "@context": "http://iiif.io/api/presentation/3/context.json",
+  "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest",
   "type": "Manifest",
-  "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest",
   "label": {
     "none": [
       "Texas Chainsaw Massacre"
@@ -15,10 +15,10 @@
           "Texas Chainsaw Massacre"
         ]
       },
-      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/canvas-s39o",
+      "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/canvas-s39o",
       "width": 720,
       "height": 540,
-      "duration": 5021,
+      "duration": 5021.0,
       "thumbnail" : [
         {
           "type" : "Image",
@@ -29,18 +29,18 @@
       "items": [
         {
           "type": "AnnotationPage",
-          "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/canvas-s39o/anno-page-u590",
+          "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/canvas-s39o/anno-page-u590",
           "items": [
             {
               "type": "Annotation",
-              "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/annotations/anno-g334",
+              "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/annotations/anno-g334",
               "motivation": "painting",
               "body": {
                 "type": "Video",
                 "id": "https://wowza.library.ucla.edu/iiif_av_public/mp4:woolseytexaschainsawmassacre.mp4/manifest.mpd",
                 "format": "application/dash+xml"
               },
-              "target": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/canvas-s39o"
+              "target": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/canvas-s39o"
             }
           ]
         }
@@ -49,24 +49,24 @@
   ],
   "accompanyingCanvas": {
     "type": "Canvas",
-    "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/canvas-t40p",
+    "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/canvas-t40p",
     "width": 129,
     "height": 129,
     "items": [
       {
         "type": "AnnotationPage",
-        "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/canvas-t40p/anno-page-v601",
+        "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/canvas-t40p/anno-page-v601",
         "items": [
           {
             "type": "Annotation",
-            "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/annotations/anno-h445",
+            "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/annotations/anno-h445",
             "motivation": "painting",
             "body": {
               "type": "Image",
               "id":"https://prod-uclalibrary-resources.s3-us-west-2.amazonaws.com/video_icon.svg",
               "format":"image/svg+xml"
             },
-            "target": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/canvas-t40p"
+            "target": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz00000001/manifest/canvas-t40p"
           }
         ]
       }

@@ -30,19 +30,19 @@ public class CheckEndpointsHandler extends AbstractFesterHandler {
     private static final String APPEND = " : ";
 
     /**
-     *  Creates a handler that checks S3 endpoint statuses.
+     * Creates a handler that checks S3 endpoint statuses.
      *
      * @param aVertx A Vert.x instance
      * @param aConfig A JSON configuration
      */
-    public CheckEndpointsHandler( final Vertx aVertx, final JsonObject aConfig ) {
-        super( aVertx, aConfig );
+    public CheckEndpointsHandler(final Vertx aVertx, final JsonObject aConfig) {
+        super(aVertx, aConfig);
     }
 
     @Override
-    public void handle( final RoutingContext aContext ) {
+    public void handle(final RoutingContext aContext) {
         final HttpServerResponse response = aContext.response();
-        final Manifest upload = new Manifest("id","label");
+        final Manifest upload = new Manifest("id", "label");
         final JsonObject endpoints = new JsonObject();
         final JsonObject status = new JsonObject();
 
@@ -61,7 +61,7 @@ public class CheckEndpointsHandler extends AbstractFesterHandler {
                     endpoints.put(Status.GET_RESPONSE, statusCode);
                     determineEndpointStatus(statusCode, statusMessage, endpoints, get);
                 });
-            } );
+            });
         }).compose(addDel -> {
             return Future.future(delete -> {
                 myS3Client.delete(myS3Bucket, UPLOAD_KEY, deleteResponse -> {
@@ -70,7 +70,7 @@ public class CheckEndpointsHandler extends AbstractFesterHandler {
                     endpoints.put(Status.DELETE_RESPONSE, statusCode);
                     determineEndpointStatus(statusCode, statusMessage, endpoints, delete);
                 });
-            } );
+            });
         }).onSuccess(success -> {
             status.put(Status.STATUS, determineOverallStatus(endpoints)).put(Status.ENDPOINTS, endpoints);
 
@@ -88,8 +88,8 @@ public class CheckEndpointsHandler extends AbstractFesterHandler {
 
     }
 
-    private void determineEndpointStatus(final int aCode, final String aStatus,
-            final JsonObject aMessage, final Promise<Object> aPromise) {
+    private void determineEndpointStatus(final int aCode, final String aStatus, final JsonObject aMessage,
+            final Promise<Object> aPromise) {
         if (aCode >= HTTP.BAD_REQUEST && aCode < HTTP.INTERNAL_SERVER_ERROR) {
             final String failMessage = LOGGER.getMessage(MessageCodes.MFS_156, aStatus);
             aMessage.put(Status.STATUS, Status.WARN + APPEND + aStatus);
@@ -104,9 +104,9 @@ public class CheckEndpointsHandler extends AbstractFesterHandler {
     }
 
     private String determineOverallStatus(final JsonObject aMessage) {
-        if (aMessage.encode().contains( Status.WARN )) {
+        if (aMessage.encode().contains(Status.WARN)) {
             return Status.WARN;
-        } else if (aMessage.encode().contains( Status.ERROR )) {
+        } else if (aMessage.encode().contains(Status.ERROR)) {
             return Status.ERROR;
         } else {
             return Status.OK;

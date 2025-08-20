@@ -24,6 +24,7 @@ import info.freelibrary.util.StringUtils;
  * Tests of thumbnail utilities.
  */
 public class ThumbnailUtilsTest {
+
     private static final String TEST_CSV = "src/test/resources/csv/hathaway/batch1/works.csv";
 
     private static final String EXPECTED_HEADER = "src/test/resources/csv/empty_thumbs.csv";
@@ -68,14 +69,13 @@ public class ThumbnailUtilsTest {
 
     /**
      * Tests selecting thumbnail index.
-     *
      */
     @Test
     public final void testPickThumbnailIndex() {
         final int min = 2;
         final int max = 20;
 
-        for (int i = 0; i < 10; i++ ) {
+        for (int i = 0; i < 10; i++) {
             final int selected = ThumbnailUtils.pickThumbnailIndex(max);
             assertTrue(selected >= min && selected <= max);
         }

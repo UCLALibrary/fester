@@ -44,18 +44,18 @@ public class CheckEndpointsHandlerTest extends AbstractFesterHandlerTest {
         LOGGER.debug(MessageCodes.MFS_157, requestPath);
 
         webClient.get(port, Constants.UNSPECIFIED_HOST, requestPath).expect(ResponsePredicate.SC_SUCCESS)
-            .as(BodyCodec.jsonObject()).send(ar -> {
-                if (ar.succeeded()) {
-                    final HttpResponse<JsonObject> response = ar.result();
+                .as(BodyCodec.jsonObject()).send(ar -> {
+                    if (ar.succeeded()) {
+                        final HttpResponse<JsonObject> response = ar.result();
 
-                    aContext.assertEquals(HTTP.OK, response.statusCode());
-                    aContext.assertEquals(Status.OK, response.body().getValue(Status.STATUS));
+                        aContext.assertEquals(HTTP.OK, response.statusCode());
+                        aContext.assertEquals(Status.OK, response.body().getValue(Status.STATUS));
 
-                    TestUtils.complete(asyncTask);
-                } else {
-                    aContext.fail(ar.cause());
-                }
-            });
+                        TestUtils.complete(asyncTask);
+                    } else {
+                        aContext.fail(ar.cause());
+                    }
+                });
 
     }
 

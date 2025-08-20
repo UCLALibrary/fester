@@ -61,8 +61,7 @@ public class MalformedPathException extends I18nRuntimeException {
     }
 
     /**
-     * Creates a new path structure exception from the supplied exception message (or message key) and parent
-     * exception.
+     * Creates a new path structure exception from the supplied exception message (or message key) and parent exception.
      *
      * @param aCause An underlying exception
      * @param aMessageKey An exception message (or message key)

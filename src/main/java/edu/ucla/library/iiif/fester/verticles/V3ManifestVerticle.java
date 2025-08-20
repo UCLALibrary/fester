@@ -30,16 +30,16 @@ import info.freelibrary.util.StringUtils;
 import info.freelibrary.iiif.presentation.v3.AccompanyingCanvas;
 import info.freelibrary.iiif.presentation.v3.Canvas;
 import info.freelibrary.iiif.presentation.v3.Collection;
-import info.freelibrary.iiif.presentation.v3.ImageContent;
 import info.freelibrary.iiif.presentation.v3.Manifest;
-import info.freelibrary.iiif.presentation.v3.MediaType;
-import info.freelibrary.iiif.presentation.v3.PaintingAnnotation;
 import info.freelibrary.iiif.presentation.v3.ResourceTypes;
-import info.freelibrary.iiif.presentation.v3.SoundContent;
-import info.freelibrary.iiif.presentation.v3.VideoContent;
-import info.freelibrary.iiif.presentation.v3.ids.Minter;
-import info.freelibrary.iiif.presentation.v3.ids.MinterFactory;
+import info.freelibrary.iiif.presentation.v3.annotation.PaintingAnnotation;
+import info.freelibrary.iiif.presentation.v3.content.ImageContent;
+import info.freelibrary.iiif.presentation.v3.content.SoundContent;
+import info.freelibrary.iiif.presentation.v3.content.VideoContent;
+import info.freelibrary.iiif.presentation.v3.id.Minter;
+import info.freelibrary.iiif.presentation.v3.id.MinterFactory;
 import info.freelibrary.iiif.presentation.v3.properties.Label;
+import info.freelibrary.iiif.presentation.v3.properties.MediaType;
 import info.freelibrary.iiif.presentation.v3.properties.Metadata;
 import info.freelibrary.iiif.presentation.v3.properties.RequiredStatement;
 import info.freelibrary.iiif.presentation.v3.properties.SeeAlso;
@@ -48,6 +48,7 @@ import info.freelibrary.iiif.presentation.v3.properties.behaviors.CanvasBehavior
 import info.freelibrary.iiif.presentation.v3.properties.behaviors.CollectionBehavior;
 import info.freelibrary.iiif.presentation.v3.properties.behaviors.ManifestBehavior;
 import info.freelibrary.iiif.presentation.v3.services.ImageService2;
+import info.freelibrary.iiif.presentation.v3.utils.JSON;
 
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
@@ -117,6 +118,11 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
             } catch (final JsonProcessingException | DecodeException details) {
                 LOGGER.error(details, details.getMessage());
                 message.fail(HTTP.INTERNAL_SERVER_ERROR, details.getMessage());
+            } catch (final RuntimeException details) {
+                System.err.println("============================================");
+                details.printStackTrace();
+                System.err.println(message.body().encodePrettily());
+                System.err.println("============================================");
             }
         });
 
@@ -143,7 +149,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         final URI uri = IDUtils.getResourceURI(Constants.URL_PLACEHOLDER, IDUtils.getCollectionS3Key(collectionID));
         final Label label = new Label(collectionData[csvHeaders.getTitleIndex()]);
         final Optional<String> manifests = Optional.ofNullable(body.getString(Constants.MANIFEST_CONTENT));
-        final Collection collection = new Collection(uri, label);
+        final Collection collection = new Collection(uri.toString(), label);
 
         // Add optional properties below
         CsvParser.getMetadata(collectionData, csvHeaders.getRepositoryNameIndex()).ifPresent(repoName -> {
@@ -155,7 +161,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         });
 
         CsvParser.getMetadata(collectionData, csvHeaders.getViewingHintIndex()).ifPresent(behavior -> {
-            collection.setBehaviors(CollectionBehavior.fromString(behavior));
+            CollectionBehavior.fromLabel(behavior).ifPresent(value -> collection.setBehaviors(value));
         });
 
         CsvParser.getMetadata(collectionData, csvHeaders.getRightsContactIndex()).ifPresent(rightsContract -> {
@@ -168,8 +174,9 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
             final TypeReference<List<String[]>> listTypeRef = new TypeReference<>() {};
 
             for (final String[] workArray : mapper.readValue(manifests.get(), listTypeRef)) {
-                final Collection.Item item = new Collection.Item(Collection.Item.Type.MANIFEST,
-                        URI.create(workArray[0]), new Label(workArray[1]));
+                final String id = URI.create(workArray[0]).toString();
+                final Collection.Item item = new Collection.Item(new Manifest(id, new Label(workArray[1])));
+
                 sortedSet.add(item);
             }
 
@@ -209,7 +216,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         final String workID = workRow[csvHeaders.getItemArkIndex()];
         final String encodedWorkID = URLEncoder.encode(workID, StandardCharsets.UTF_8);
         final String manifestID = StringUtils.format(MANIFEST_URI, Constants.URL_PLACEHOLDER, encodedWorkID);
-        final Manifest manifest = new Manifest(manifestID, workRow[csvHeaders.getTitleIndex()]);
+        final Manifest manifest = new Manifest(manifestID, new Label(workRow[csvHeaders.getTitleIndex()]));
         final Minter minter = MinterFactory.getMinter(manifest);
         final DeliveryOptions options = new DeliveryOptions();
         final JsonObject message = new JsonObject();
@@ -226,11 +233,11 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         });
 
         CsvParser.getMetadata(workRow, csvHeaders.getViewingDirectionIndex()).ifPresent(viewingDirection -> {
-            manifest.setViewingDirection(ViewingDirection.fromString(viewingDirection));
+            ViewingDirection.fromLabel(viewingDirection).ifPresent(value -> manifest.setViewingDirection(value));
         });
 
         CsvParser.getMetadata(workRow, csvHeaders.getViewingHintIndex()).ifPresent(behavior -> {
-            manifest.setBehaviors(ManifestBehavior.from(behavior));
+            ManifestBehavior.fromLabel(behavior).ifPresent(value -> manifest.setBehaviors(value));
         });
 
         CsvParser.getMetadata(workRow, csvHeaders.getRepositoryNameIndex()).ifPresent(repositoryName -> {
@@ -250,12 +257,12 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
             pageList = pagesMap.get(workID);
             pageList.sort(new ItemSequenceComparator(csvHeaders.getItemSequenceIndex()));
             canvases = createCanvases(csvHeaders, pageList, imageHost, placeholderImage, minter);
-            manifest.addCanvases(canvases);
+            manifest.setCanvases(canvases);
         } else if (CsvParser.getMetadata(workRow, csvHeaders.getContentAccessUrlIndex()).isPresent()) {
             pageList = new ArrayList<>(1);
             pageList.add(workRow);
             canvases = createCanvases(csvHeaders, pageList, imageHost, placeholderImage, minter);
-            manifest.addCanvases(canvases);
+            manifest.setCanvases(canvases);
         } else {
             // This manifest will have zero canvases
             pageList = new ArrayList<>(0);
@@ -273,7 +280,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
             final String videoIconURL = StringUtils.trimTo(config().getString(Config.DEFAULT_VIDEO_THUMBNAIL),
                     Constants.UCLA_VIDEO_THUMBNAIL);
 
-            accompanyingCanvas.setWidthHeight(129, 129).paintWith(minter, new ImageContent(videoIconURL));
+            accompanyingCanvas.setWidthHeight(129, 129).paintWith(new ImageContent(videoIconURL));
             manifest.setAccompanyingCanvas(accompanyingCanvas);
         }
 
@@ -299,12 +306,13 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
     private void updateCollection(final Message<JsonObject> aMessage) throws JsonProcessingException {
         final JsonObject body = aMessage.body();
         final String collectionName = body.getString(Constants.COLLECTION_NAME);
-        final JsonObject worksJSON = body.getJsonObject(Constants.MANIFEST_CONTENT);
-        final Collection collection = Collection.from(body.getJsonObject(Constants.COLLECTION_CONTENT).toString());
+        final String worksJSON = body.getJsonObject(Constants.MANIFEST_CONTENT).encode();
+        final String collectionJSON = body.getJsonObject(Constants.COLLECTION_CONTENT).encode();
+        final Collection collection = JSON.readValue(collectionJSON, Collection.class);
         final TypeReference<Map<String, List<String[]>>> type = new TypeReference<>() {};
-        final Map<String, List<String[]>> worksMap = new ObjectMapper().readValue(worksJSON.encode(), type);
+        final Map<String, List<String[]>> worksMap = new ObjectMapper().readValue(worksJSON, type);
         final SortedSet<Collection.Item> sortedCollectionItemSet = new TreeSet<>(new V3CollectionItemLabelComparator());
-        final Map<URI, Collection.Item> collectionItemMap = new HashMap<>(); // Using to eliminate duplicates
+        final Map<String, Collection.Item> collectionItemMap = new HashMap<>(); // Using to eliminate duplicates
         final DeliveryOptions options = new DeliveryOptions();
         final JsonObject message = new JsonObject();
 
@@ -314,9 +322,9 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
 
         // Next, add the new manifests to the map, replacing any that already exist
         worksMap.get(IDUtils.getResourceID(collection.getID())).stream().forEach(workArray -> {
-            final URI manifestURI = URI.create(workArray[0]);
+            final String manifestURI = URI.create(workArray[0]).toString();
             final Label label = new Label(workArray[1]);
-            collectionItemMap.put(manifestURI, new Collection.Item(Collection.Item.Type.MANIFEST, manifestURI, label));
+            collectionItemMap.put(manifestURI, new Collection.Item(new Manifest(manifestURI, label)));
         });
 
         // Update the item list with the manifests in the map, ordered by their label
@@ -348,7 +356,8 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         final JsonObject body = aMessage.body();
         final ObjectMapper mapper = new ObjectMapper();
         final CsvHeaders csvHeaders = CsvHeaders.fromJSON(body.getJsonObject(Constants.CSV_HEADERS));
-        final Manifest manifest = Manifest.from(body.getJsonObject(Constants.MANIFEST_CONTENT).toString());
+        final String workJSON = body.getJsonObject(Constants.MANIFEST_CONTENT).encode();
+        final Manifest manifest = JSON.readValue(workJSON, Manifest.class);
         final JsonArray workArray = body.getJsonArray(Constants.UPDATED_CONTENT);
         final String[] workRow = mapper.readValue(workArray.encode(), new TypeReference<String[]>() {});
         final String id = body.getString(Constants.MANIFEST_ID);
@@ -362,22 +371,20 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
             // to pull it from the manifest after it's been constructed.
         });
 
-        CsvParser.getMetadata(workRow, csvHeaders.getTitleIndex()).ifPresentOrElse(title -> {
+        CsvParser.getMetadata(workRow, csvHeaders.getTitleIndex()).ifPresent(title -> {
             manifest.setLabel(new Label(title));
-        }, () -> {
-            manifest.setLabel(Constants.EMPTY);
         });
 
         CsvParser.getMetadata(workRow, csvHeaders.getViewingDirectionIndex()).ifPresentOrElse(viewingDirection -> {
-            manifest.setViewingDirection(ViewingDirection.fromString(viewingDirection));
+            ViewingDirection.fromLabel(viewingDirection).ifPresent(value -> manifest.setViewingDirection(value));
         }, () -> {
-            manifest.setViewingDirection(null);
+            manifest.clearViewingDirection();
         });
 
         CsvParser.getMetadata(workRow, csvHeaders.getViewingHintIndex()).ifPresentOrElse(behavior -> {
-            manifest.setBehaviors(ManifestBehavior.from(behavior));
+            ManifestBehavior.fromLabel(behavior).ifPresent(value -> manifest.setBehaviors(value));
         }, () -> {
-            manifest.clearBehaviors();
+            manifest.getBehaviors().clear();
         });
 
         CsvParser.getMetadata(workRow, csvHeaders.getRepositoryNameIndex()).ifPresentOrElse(repoName -> {
@@ -424,17 +431,17 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         final String workID = body.getString(Constants.MANIFEST_ID);
         final String imageHost = body.getString(Constants.IIIF_HOST);
         final String placeholderImage = body.getString(Constants.PLACEHOLDER_IMAGE);
-        final Manifest manifest = Manifest.from(body.getJsonObject(Constants.MANIFEST_CONTENT).toString());
+        final String workJSON = body.getJsonObject(Constants.MANIFEST_CONTENT).encode();
+        final Manifest manifest = JSON.readValue(workJSON, Manifest.class);
         final Minter minter = MinterFactory.getMinter(manifest);
         final CsvHeaders csvHeaders = CsvHeaders.fromJSON(body.getJsonObject(Constants.CSV_HEADERS));
         final TypeReference<List<String[]>> typeRef = new TypeReference<>() {};
         final JsonArray pagesArray = body.getJsonArray(Constants.MANIFEST_PAGES);
         final List<String[]> pagesList = new ObjectMapper().readValue(pagesArray.encode(), typeRef);
         final DeliveryOptions options = new DeliveryOptions();
+        final List<Canvas> canvases = manifest.getCanvases();
         final JsonObject message = new JsonObject();
         final JsonObject jsonManifest;
-
-        manifest.getCanvases().clear(); // Overwrite whatever canvases are on the manifest
 
         try {
             pagesList.sort(new ItemSequenceComparator(csvHeaders.getItemSequenceIndex()));
@@ -442,7 +449,8 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
             throw new JsonMappingException(null, details.getMessage(), details);
         }
 
-        manifest.addCanvases(createCanvases(csvHeaders, pagesList, imageHost, placeholderImage, minter));
+        canvases.clear(); // Overwrite whatever canvases are on the manifest
+        canvases.addAll(List.of(createCanvases(csvHeaders, pagesList, imageHost, placeholderImage, minter)));
 
         jsonManifest = new JsonObject(manifest.toString());
         message.put(Constants.DATA, jsonManifest);
@@ -475,7 +483,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         while (iterator.hasNext()) {
             final String[] columns = iterator.next();
             final String pageID = columns[aCsvHeaders.getItemArkIndex()];
-            final String pageLabel = columns[aCsvHeaders.getTitleIndex()];
+            final Label pageLabel = new Label(columns[aCsvHeaders.getTitleIndex()]);
             final Optional<String> format = CsvParser.getMetadata(columns, aCsvHeaders.getMediaFormatIndex());
 
             final String imageThumbnailSize = StringUtils.trimTo(
@@ -483,6 +491,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
             final String encodedPageID = URLEncoder.encode(pageID, StandardCharsets.UTF_8);
             final Optional<String> thumbnailOpt = CsvParser.getMetadata(columns, aCsvHeaders.getThumbnailIndex());
             final Canvas canvas = new Canvas(aMinter, pageLabel);
+
             final String thumbnail;
             final String pageURI;
             final float duration;
@@ -508,7 +517,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                 duration = Float.parseFloat(CsvParser.getMetadata(columns, aCsvHeaders.getMediaDurationIndex()).get());
 
                 canvas.setWidthHeight(width, height).setDuration(duration).setThumbnails(new ImageContent(thumbnail));
-                canvas.paintWith(aMinter, true, videos);
+                canvas.paintWith(true, videos);
             } else if (format.isPresent() && format.get().contains("audio/")) {
                 final String resourceURI = CsvParser.getMetadata(columns, aCsvHeaders.getContentAccessUrlIndex()).get();
                 final SoundContent[] audios = getSoundContent(resourceURI);
@@ -524,7 +533,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                 duration = Float.parseFloat(CsvParser.getMetadata(columns, aCsvHeaders.getMediaDurationIndex()).get());
 
                 canvas.setDuration(duration).setThumbnails(new ImageContent(thumbnail));
-                canvas.paintWith(aMinter, true, audios);
+                canvas.paintWith(true, audios);
 
                 // Possibly modify the annotation created with the above call to paintWith
                 CsvParser.getMetadata(columns, aCsvHeaders.getWaveformIndex()).ifPresent(waveformURI -> {
@@ -570,7 +579,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                     }
 
                     canvas.setWidthHeight(width, height).setThumbnails(new ImageContent(thumbnail));
-                    canvas.paintWith(aMinter, image);
+                    canvas.paintWith(image);
                 } catch (final ImageNotFoundException | IOException details) {
                     LOGGER.info(MessageCodes.MFS_078, pageID);
 
@@ -594,7 +603,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
 
                             // Create a canvas using the width and height of the placeholder image
                             canvas.setWidthHeight(width, height).setThumbnails(new ImageContent(thumbnail));
-                            canvas.paintWith(aMinter, image);
+                            canvas.paintWith(image);
                         } catch (final ImageNotFoundException | IOException lookupDetails) {
                             // We couldn't find the placeholder image so we create an empty canvas
                             LOGGER.error(lookupDetails, lookupDetails.getMessage());
@@ -617,7 +626,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                     final ObjectType objectType = CsvParser.getObjectType(columns, aCsvHeaders);
 
                     if (objectType == ObjectType.PAGE && behavior != null) {
-                        canvas.setBehaviors(CanvasBehavior.fromString(behavior));
+                        CanvasBehavior.fromLabel(behavior).ifPresent(canvas::setBehaviors);
                     }
                 } catch (final CsvParsingException details) {
                     LOGGER.error(details.getMessage());
@@ -706,9 +715,10 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         final List<Metadata> metadataList = new ArrayList<>();
 
         // Add all the metadata entries except the one we're updating
-        aMetadataList.stream().filter(entry -> !aStringArray[0].equals(entry.getLabel().getString())).forEach(entry -> {
-            metadataList.add(entry);
-        });
+        aMetadataList
+                .stream().filter(entry -> entry.getLabel().getFirstValue()
+                        .map(labelValue -> !labelValue.equals(aStringArray[0])).orElse(true))
+                .forEach(metadataList::add);
 
         // Add the metadata entry we're updating if it has a value
         if (aStringArray.length == 2) {

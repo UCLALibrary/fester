@@ -3,4 +3,3 @@
  */
 
 package edu.ucla.library.iiif.fester.verticles;
-

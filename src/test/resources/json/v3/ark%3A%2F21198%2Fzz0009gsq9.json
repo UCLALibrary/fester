@@ -1,7 +1,7 @@
 {
     "@context": "http://iiif.io/api/presentation/3/context.json",
     "label": { "none": [ "Hathaway Manuscripts" ] },
-    "@id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/collections/ark%3A%2F21198%2Fzz0009gsq9",
+    "@id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/collections/ark%3A%2F21198%2Fzz0009gsq9",
     "@type": "Collection",
     "metadata": [
         {
@@ -16,22 +16,22 @@
     "items": [
         {
             "type": "Manifest",
-            "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0009gv8j/manifest",
+            "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0009gv8j/manifest",
             "label": { "none": [ "Hathaway 1" ] }
         },
         {
             "type": "Manifest",
-            "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz000bjdtv/manifest",
+            "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz000bjdtv/manifest",
             "label": { "none": [ "Hathaway 2" ] }
         },
         {
             "type": "Manifest",
-            "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz000bjfhp/manifest",
+            "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz000bjfhp/manifest",
             "label": { "none": [ "Hathaway 3" ] }
         },
         {
             "type": "Manifest",
-            "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz000bjfj6/manifest",
+            "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz000bjfj6/manifest",
             "label": { "none": [ "Hathaway 4" ] }
         }
     ]

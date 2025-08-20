@@ -70,7 +70,7 @@
   <properties>
     <!-- Docker image dependencies -->
     <ubuntu.tag>22.04</ubuntu.tag>
-    <jdk.version>17.0.15+6~us1-0ubuntu1~22.04</jdk.version>
+    <jdk.version>21.0.8+9~us1-0ubuntu1~22.04.1</jdk.version>
     <python3.version>3.10.6-1~22.04.1</python3.version>
     <curl.version>7.81.0-1ubuntu1.20</curl.version>
 
@@ -79,13 +79,13 @@
     <opencsv.version>5.7.1</opencsv.version>
     <moirai.version>2.0.0</moirai.version>
     <slf4j.ext.version>1.7.32</slf4j.ext.version>
-    <jcl.over.slf4j.version>1.7.32</jcl.over.slf4j.version>
+    <jcl.over.slf4j.version>1.7.36</jcl.over.slf4j.version>
     <commons.lang.version>3.9</commons.lang.version>
-    <freelib.utils.version>3.0.1</freelib.utils.version>
+    <freelib.utils.version>5.2.1</freelib.utils.version>
     <vertx.super.s3.version>1.3.3</vertx.super.s3.version>
     <netty.epoll.version>4.1.59.Final</netty.epoll.version>
     <jiiify.presentation.v2.version>0.5.10</jiiify.presentation.v2.version>
-    <jiiify.presentation.v3.version>0.12.4</jiiify.presentation.v3.version>
+    <jiiify.presentation.v3.version>0.0.0-SNAPSHOT</jiiify.presentation.v3.version><!-- Was 0.12.4 -->
     <alphanumeric.comparator.version>1.4.1</alphanumeric.comparator.version>
 
     <!-- Dependencies pulled out for security reasons -->
@@ -193,6 +193,9 @@
     <pmd.skip>true</pmd.skip>
     <cpd.skip>true</cpd.skip>
     <checkstyle.skip>true</checkstyle.skip>
+    
+    <!-- Temporary so we can use jpv3 snapshot -->
+    <enforcer.skip>true</enforcer.skip>
   </properties>
 
   <dependencyManagement>
@@ -223,6 +226,11 @@
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-web-client</artifactId>
+      <version>${vertx.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-codegen</artifactId>
       <version>${vertx.version}</version>
     </dependency>
 
@@ -554,21 +562,6 @@
       <!-- Enforcer enforces some basic characteristics of the project -->
       <plugin>
         <artifactId>maven-enforcer-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>enforce-java</id>
-            <goals>
-              <goal>enforce</goal>
-            </goals>
-            <configuration>
-              <rules>
-                <requireJavaVersion>
-                  <version>[1.11.0,)</version>
-                </requireJavaVersion>
-              </rules>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
 
       <!-- Maven dependency helps freelib-resources copy files into the project -->
@@ -1263,10 +1256,24 @@
     </profile>
   </profiles>
 
+  <!-- Configuration for a SNAPSHOTs repository -->
+  <repositories>
+    <repository>
+      <id>github</id>
+      <url>https://maven.pkg.github.com/freelibrary/jiiify-presentation</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+    </repository>
+  </repositories>
+
   <parent>
     <artifactId>freelib-parent</artifactId>
     <groupId>info.freelibrary</groupId>
-    <version>8.0.5</version>
+    <version>13.0.0</version>
   </parent>
 </project>
 

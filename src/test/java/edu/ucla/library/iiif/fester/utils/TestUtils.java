@@ -14,13 +14,13 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 
-
 /**
  * Utilities related to working with test IDs.
  */
 public final class TestUtils {
 
     private TestUtils() {
+        // This is intentionally left empty
     }
 
     /**
@@ -44,12 +44,10 @@ public final class TestUtils {
     }
 
     /**
-     * Determines if the given manifests are effectively equal.
-     *
-     * Note that this method does not consider integers and their corresponding floating point representations to be
-     * equal (e.g., 60 != 60.0), so any JSON test fixtures with integral duration values should be modified so that they
-     * all have a ".0" appended to the end of the value. For example, <code>"duration": 60</code> should be changed to
-     * <code>"duration": 60.0</code>.
+     * Determines if the given manifests are effectively equal. Note that this method does not consider integers and
+     * their corresponding floating point representations to be equal (e.g., 60 != 60.0), so any JSON test fixtures with
+     * integral duration values should be modified so that they all have a ".0" appended to the end of the value. For
+     * example, <code>"duration": 60</code> should be changed to <code>"duration": 60.0</code>.
      *
      * @param aManifestArray An array of IIIF manifests
      * @return true if they are all equal after "de-randomizing" IIIF resource IDs, false otherwise
@@ -108,8 +106,10 @@ public final class TestUtils {
                         canvasIdReplacementMap.put(canvasIdMatch, replacementId);
                     }
                 }
+
                 idMatcher.appendReplacement(sb, replacementId);
             }
+
             idMatcher.appendTail(sb);
 
             return new JsonObject(sb.toString());

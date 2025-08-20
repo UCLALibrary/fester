@@ -10,8 +10,8 @@ import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 import info.freelibrary.util.StringUtils;
 
-import info.freelibrary.iiif.presentation.v3.JsonParsingException;
 import info.freelibrary.iiif.presentation.v3.ResourceTypes;
+import info.freelibrary.iiif.presentation.v3.utils.JSON;
 import info.freelibrary.iiif.presentation.v3.utils.JsonKeys;
 
 import info.freelibrary.vertx.s3.S3Client;
@@ -145,9 +145,9 @@ abstract class AbstractFesterHandler implements Handler<RoutingContext> {
                     break; // It's valid
                 case "http://iiif.io/api/presentation/3/context.json":
                     if (ResourceTypes.MANIFEST.equals(aType)) {
-                        info.freelibrary.iiif.presentation.v3.Manifest.from(aJsonObj.encode());
+                        JSON.readValue(aJsonObj.encode(), info.freelibrary.iiif.presentation.v3.Manifest.class);
                     } else if (ResourceTypes.COLLECTION.equals(aType)) {
-                        info.freelibrary.iiif.presentation.v3.Collection.from(aJsonObj.encode());
+                        JSON.readValue(aJsonObj.encode(), info.freelibrary.iiif.presentation.v3.Collection.class);
                     } else {
                         throw new ValidationException(aType, LOGGER.getMessage(MessageCodes.MFS_181, JsonKeys.TYPE));
                     }
@@ -156,8 +156,7 @@ abstract class AbstractFesterHandler implements Handler<RoutingContext> {
                 default:
                     throw new ValidationException(aType, LOGGER.getMessage(MessageCodes.MFS_181, JsonKeys.CONTEXT));
             }
-        } catch (final JsonParsingException | DecodeException | IllegalArgumentException |
-                NullPointerException details) {
+        } catch (final DecodeException | IllegalArgumentException | NullPointerException details) {
             throw new ValidationException(aType, details);
         }
     }

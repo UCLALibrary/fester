@@ -118,6 +118,7 @@ public class CsvHeaders {
      *
      * @param aRow CSV header data
      */
+    @SuppressWarnings({ "this-escape" })
     public CsvHeaders(final String[] aRow) {
         for (int index = 0; index < aRow.length; index++) {
 
@@ -192,7 +193,7 @@ public class CsvHeaders {
     /**
      * A constructor used by Jackson for deserialization.
      */
-    @SuppressWarnings("unused")
+    @SuppressWarnings({ "unused" })
     private CsvHeaders() {
         // This is intentionally left empty.
     }

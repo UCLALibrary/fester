@@ -157,7 +157,7 @@ public final class Constants {
      * A unique random placeholder URL that prefixes all IIIF Presentation API resource URLs in all manifests at rest in
      * S3. It gets replaced with Constants.URL on each GET request.
      */
-    public static final String URL_PLACEHOLDER = "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu";
+    public static final String URL_PLACEHOLDER = "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu";
 
     /**
      * The HTTP POST route for CSV uploads.
@@ -309,7 +309,7 @@ public final class Constants {
     /**
      * The context property of a v3 IIIF resource.
      */
-    public static final String CONTEXT_V3 = "http://iiif.io/api/presentation/3/context.json";
+    public static final String CONTEXT_V3 = "https://iiif.io/api/presentation/3/context.json";
 
     /**
      * The default pattern for A/V URLs. .
