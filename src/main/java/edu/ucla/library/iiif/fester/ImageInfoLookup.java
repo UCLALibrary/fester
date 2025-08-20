@@ -8,7 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
 
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
@@ -46,7 +46,7 @@ public class ImageInfoLookup {
             myHeight = 1000;
             myWidth = 1000;
         } else {
-            final HttpURLConnection connection = (HttpURLConnection) new URL(aURL).openConnection();
+            final HttpURLConnection connection = (HttpURLConnection) URI.create(aURL).toURL().openConnection();
             final int responseCode;
 
             connection.setReadTimeout(CANTALOUPE_TIMEOUT);

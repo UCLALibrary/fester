@@ -31,9 +31,10 @@ import info.freelibrary.util.RegexDirFilter;
 import info.freelibrary.util.StringUtils;
 
 import info.freelibrary.iiif.presentation.v3.Manifest;
-import info.freelibrary.iiif.presentation.v3.PaintingAnnotation;
+import info.freelibrary.iiif.presentation.v3.annotation.PaintingAnnotation;
 import info.freelibrary.iiif.presentation.v3.properties.ViewingDirection;
 import info.freelibrary.iiif.presentation.v3.properties.behaviors.ManifestBehavior;
+import info.freelibrary.iiif.presentation.v3.utils.JSON;
 import info.freelibrary.iiif.presentation.v3.utils.Manifestor;
 
 import edu.ucla.library.iiif.fester.Constants;
@@ -333,8 +334,9 @@ public class V3ManifestVerticleTest {
         myVertx.eventBus().request(ManifestVerticle.class.getName(), message, options, request -> {
             final Buffer fileBuffer = myVertx.fileSystem().readFileBlocking(outputFile);
             final String json = fileBuffer.toString(StandardCharsets.UTF_8);
+            final Manifest manifest = JSON.readValue(json, Manifest.class);
             final PaintingAnnotation annotation =
-                    Manifest.from(json).getCanvases().get(0).getPaintingPages().get(0).getAnnotations().get(0);
+                    manifest.getCanvases().get(0).getPaintingPages().get(0).getAnnotations().get(0);
 
             // Make sure the painting annotation has a choice
             assertTrue(annotation.bodyHasChoice());

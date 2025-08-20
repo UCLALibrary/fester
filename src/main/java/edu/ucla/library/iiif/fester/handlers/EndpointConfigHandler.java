@@ -192,8 +192,9 @@ public class EndpointConfigHandler implements Handler<AsyncResult<OpenAPI3Router
      */
     private Optional<FeatureFlagChecker> getFeatureFlagChecker() {
         if (myVertx.fileSystem().existsBlocking(FEATURE_FLAGS_FILE)) {
-            return Optional.of(ConfigFeatureFlagChecker.forConfigSupplier(Suppliers.supplierAndThen(
-                    FileResourceLoaders.forFile(new File(FEATURE_FLAGS_FILE)), TypesafeConfigReader.FROM_STRING),
+            return Optional.of(ConfigFeatureFlagChecker.forConfigSupplier(
+                    Suppliers.supplierAndThen(FileResourceLoaders.forFile(new File(FEATURE_FLAGS_FILE)),
+                            TypesafeConfigReader.FROM_STRING),
                     TypesafeConfigDecider.FEATURE_ENABLED));
         } else {
             return Optional.empty();

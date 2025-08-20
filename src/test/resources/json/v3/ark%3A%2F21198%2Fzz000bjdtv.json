@@ -1,6 +1,6 @@
 {
   "@context": "http://iiif.io/api/presentation/3/context.json",
-  "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz000bjdtv/manifest",
+  "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz000bjdtv/manifest",
   "type": "Manifest",
   "label": {
     "none": [
@@ -35,7 +35,7 @@
   ],
   "items": [
     {
-      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz000bjdtv/manifest/canvas-shy7",
+      "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz000bjdtv/manifest/canvas-shy7",
       "type": "Canvas",
       "label": {
         "none": [
@@ -53,11 +53,11 @@
       ],
       "items": [
         {
-          "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz000bjdtv/manifest/canvas-shy7/anno-page-2v4v",
+          "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz000bjdtv/manifest/canvas-shy7/anno-page-2v4v",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz000bjdtv/manifest/annotations/anno-xb1i",
+              "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz000bjdtv/manifest/annotations/anno-xb1i",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -72,14 +72,14 @@
                   }
                 ]
               },
-              "target": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz000bjdtv/manifest/canvas-shy7"
+              "target": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz000bjdtv/manifest/canvas-shy7"
             }
           ]
         }
       ]
     },
     {
-      "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz000bjdtv/manifest/canvas-dqg0",
+      "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz000bjdtv/manifest/canvas-dqg0",
       "type": "Canvas",
       "label": {
         "none": [
@@ -97,11 +97,11 @@
       ],
       "items": [
         {
-          "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz000bjdtv/manifest/canvas-dqg0/anno-page-tbno",
+          "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz000bjdtv/manifest/canvas-dqg0/anno-page-tbno",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz000bjdtv/manifest/annotations/anno-h8q6",
+              "id": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz000bjdtv/manifest/annotations/anno-h8q6",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -116,7 +116,7 @@
                   }
                 ]
               },
-              "target": "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz000bjdtv/manifest/canvas-dqg0"
+              "target": "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz000bjdtv/manifest/canvas-dqg0"
             }
           ]
         }

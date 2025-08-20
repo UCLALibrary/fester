@@ -275,7 +275,9 @@ public class PostCsvFIT {
 
                             if (optJsonObject.isPresent()) {
                                 final JsonObject expectedJSON = readJsonFile(HATHAWAY_COLLECTION_MANIFEST);
-                                aContext.assertEquals(expectedJSON, optJsonObject.get());
+                                final JsonObject foundJSON = optJsonObject.get();
+
+                                aContext.assertTrue(TestUtils.manifestsAreEffectivelyEqual(expectedJSON, foundJSON));
                             } else {
                                 aContext.fail(LOGGER.getMessage(MessageCodes.MFS_154, WORKS_CSV_COLLECTION));
                             }
@@ -573,7 +575,6 @@ public class PostCsvFIT {
                                 final JsonObject expected = readJsonFile(VIDEO_MPD_MANIFEST);
                                 final JsonObject found = optJsonObject.get();
 
-
                                 aContext.assertTrue(TestUtils.manifestsAreEffectivelyEqual(expected, found));
                             } catch (final IOException details) {
                                 LOGGER.error(details, details.getMessage());
@@ -708,6 +709,7 @@ public class PostCsvFIT {
                         } else {
                             aContext.fail(LOGGER.getMessage(MessageCodes.MFS_154, AUDIO_CSV));
                         }
+
                         TestUtils.complete(asyncTask);
                     } else {
                         aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, statusCode, statusMessage));
@@ -877,7 +879,7 @@ public class PostCsvFIT {
         }
 
         /**
-         * Tests submitting a CSV with IIIF Object Type header with IIIF Presentation API 3 specified. 
+         * Tests submitting a CSV with IIIF Object Type header with IIIF Presentation API 3 specified.
          *
          * @param aContext A test context
          */
@@ -921,9 +923,8 @@ public class PostCsvFIT {
             });
         }
 
-
         /**
-         * Tests submitting a CSV with IIIF Parent ARK header with IIIF Presentation API 3 specified. 
+         * Tests submitting a CSV with IIIF Parent ARK header with IIIF Presentation API 3 specified.
          *
          * @param aContext A test context
          */

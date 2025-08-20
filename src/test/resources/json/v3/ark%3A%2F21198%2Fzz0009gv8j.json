@@ -1,6 +1,6 @@
 {
   "@context" : "http://iiif.io/api/presentation/3/context.json",
   "label" : { "none": [ "Hathaway 1" ] },
-  "id" : "http://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0009gv8j/manifest",
+  "id" : "https://b1dbe4a0-443c-479f-bf0a-25c352df0d8f.iiif.library.ucla.edu/ark%3A%2F21198%2Fzz0009gv8j/manifest",
   "type" : "Manifest"
 }

@@ -20,8 +20,8 @@ import info.freelibrary.util.LoggerFactory;
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
-import edu.ucla.library.iiif.fester.utils.ThumbnailUtilsTest;
 import edu.ucla.library.iiif.fester.utils.TestUtils;
+import edu.ucla.library.iiif.fester.utils.ThumbnailUtilsTest;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;

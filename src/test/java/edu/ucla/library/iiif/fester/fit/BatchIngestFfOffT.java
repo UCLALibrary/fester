@@ -39,12 +39,12 @@ public class BatchIngestFfOffT extends BaseFesterFfT {
     public final void testCsvPostEndpoint(final TestContext aContext) {
         final Async asyncTask = aContext.async();
 
-        myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE).sendMultipartForm(
-                CSV_UPLOAD_FORM, request -> {
+        myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE)
+                .sendMultipartForm(CSV_UPLOAD_FORM, request -> {
                     if (request.succeeded()) {
                         final HttpResponse<Buffer> response = request.result();
-                        final String expectedStatusMessage = LOGGER.getMessage(MessageCodes.MFS_085,
-                                BATCH_INGEST_FEATURE);
+                        final String expectedStatusMessage =
+                                LOGGER.getMessage(MessageCodes.MFS_085, BATCH_INGEST_FEATURE);
 
                         aContext.assertEquals(HTTP.SERVICE_UNAVAILABLE, response.statusCode());
                         aContext.assertEquals(expectedStatusMessage, response.statusMessage());

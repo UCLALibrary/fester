@@ -73,8 +73,8 @@ public class IDUtilsTest {
      */
     @Test
     public final void testGetLastPartString() {
-        assertEquals("z1z61s9k", IDUtils.getLastPart(
-                "https://iiif.sinaimanuscripts.library.ucla.edu/iiif/2/21198%2Fz1z61s9k"));
+        assertEquals("z1z61s9k",
+                IDUtils.getLastPart("https://iiif.sinaimanuscripts.library.ucla.edu/iiif/2/21198%2Fz1z61s9k"));
     }
 
     /**
@@ -98,8 +98,7 @@ public class IDUtilsTest {
      */
     @Test
     public final void testGetResourceURICollection() {
-        assertEquals(COLLECTION_MANIFEST_URI, IDUtils.getResourceURI(FAKE_HOST, COLLECTION_MANIFEST_S3_KEY)
-                .toString());
+        assertEquals(COLLECTION_MANIFEST_URI, IDUtils.getResourceURI(FAKE_HOST, COLLECTION_MANIFEST_S3_KEY).toString());
     }
 
     /**

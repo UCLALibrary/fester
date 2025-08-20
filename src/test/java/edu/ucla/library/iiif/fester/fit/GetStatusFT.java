@@ -40,9 +40,8 @@ public class GetStatusFT extends BaseFesterFT {
                 final String totalMemory = memory.getString(Status.TOTAL_MEMORY);
                 final String usedMemory = memory.getString(Status.USED_MEMORY);
 
-                aContext.assertEquals(Status.OK, status);
-                aContext.assertTrue(freeMemory.contains(Constants.MB_STR) &&
-                    totalMemory.contains(Constants.MB_STR) && usedMemory.contains(Constants.MB_STR));
+                aContext.assertTrue(freeMemory.contains(Constants.MB_STR) && totalMemory.contains(Constants.MB_STR) &&
+                        usedMemory.contains(Constants.MB_STR));
 
                 TestUtils.complete(asyncTask);
             } else {

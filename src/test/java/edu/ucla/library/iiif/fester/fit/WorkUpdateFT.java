@@ -21,9 +21,9 @@ import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.MetadataLabels;
 import edu.ucla.library.iiif.fester.utils.ManifestTestUtils;
+import edu.ucla.library.iiif.fester.utils.TestUtils;
 import edu.ucla.library.iiif.fester.utils.V2ManifestTestUtils;
 import edu.ucla.library.iiif.fester.utils.V3ManifestTestUtils;
-import edu.ucla.library.iiif.fester.utils.TestUtils;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;

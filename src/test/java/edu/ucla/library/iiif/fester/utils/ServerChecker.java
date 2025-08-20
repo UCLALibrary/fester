@@ -3,6 +3,7 @@ package edu.ucla.library.iiif.fester.utils;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 
 import info.freelibrary.util.Logger;
@@ -52,7 +53,7 @@ public class ServerChecker implements Runnable {
             }
 
             try {
-                final URL url = new URL(StringUtils.format(URL, myPort));
+                final URL url = URI.create(StringUtils.format(URL, myPort)).toURL();
                 final HttpURLConnection http = (HttpURLConnection) url.openConnection();
 
                 http.setRequestMethod(HttpMethod.GET.name());
