@@ -61,4 +61,4 @@ jobs:
             -Ddocker.registry.password="${{ secrets.DOCKER_PASSWORD }}"
             -Dfester.s3.access_key="${{ secrets.AWS_ACCESS_KEY }}"
             -Dfester.s3.secret_key="${{ secrets.AWS_SECRET_KEY }}"
-            -Dfester.s3.bucket="${{ secrets.S3_BUCKET }}"
+            -Dfester.s3.bucket="${{ secrets.S3_BUCKET }}" -U
