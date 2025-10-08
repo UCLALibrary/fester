@@ -72,7 +72,7 @@
     <ubuntu.tag>22.04</ubuntu.tag>
     <jdk.version>21.0.8+9~us1-0ubuntu1~22.04.1</jdk.version>
     <python3.version>3.10.6-1~22.04.1</python3.version>
-    <curl.version>7.81.0-1ubuntu1.20</curl.version>
+    <curl.version>7.81.0-1ubuntu1.21</curl.version>
 
     <!-- Application dependencies -->
     <vertx.version>3.9.16</vertx.version>
