@@ -24,7 +24,7 @@ info:
     name: UCLA Library Services Team
     email: lib_softwaredev-services@library.ucla.edu
 servers:
-  - url: http://iiif.library.ucla.edu/fester
+  - url: http://iiif.library.ucla.edu/
 paths:
   /fester/status:
     get:
