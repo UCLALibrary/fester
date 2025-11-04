@@ -57,6 +57,11 @@ public final class Op {
     public static final String POST_UPDATE_CSV = "postUpdateCSV";
 
     /**
+     * Post a Zip file to Fester for the upload of existing manifests and collections.
+     */
+    public static final String POST_ZIP = "postZip";
+
+    /**
      * Get S3 endpoints status.
      */
     public static final String CHECK_ENDPOINTS = "checkEndpoints";

@@ -78,6 +78,11 @@ public final class Constants {
     public static final String PLAIN_TEXT_TYPE = "text/plain";
 
     /**
+     * The ZIP file media type.
+     */
+    public static final String ZIP_MEDIA_TYPE = "application/zip";
+
+    /**
      * COR header for allowing access to our manifests to the world.
      */
     public static final String CORS_HEADER = "Access-Control-Allow-Origin";
