@@ -425,6 +425,9 @@
       <testResource>
         <directory>src/test/resources</directory>
         <filtering>true</filtering>
+        <excludes>
+          <exclude>zip/**</exclude>
+        </excludes>
       </testResource>
 
       <!-- We can also override the default logging configuration with a file in our root project directory -->
@@ -764,6 +767,7 @@
                   <exclude>org.komamitsu:phi-accural-failure-detector</exclude>
                   <exclude>org.msgpack:jackson-dataformat-msgpack</exclude>
                   <exclude>org.msgpack:msgpack-core</exclude>
+                  <exclude>org.mvel:mvel2</exclude>
                   <exclude>org.codehaus.janino:janino</exclude>
                   <exclude>org.codehaus.janino:commons-compiler</exclude>
                   <exclude>org.slf4j:jcl-over-slf4j</exclude>

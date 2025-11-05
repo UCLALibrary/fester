@@ -66,6 +66,35 @@ paths:
                 schema:
                   type: string
                   example: The status request failed because the slithy toves did gyre
+  /package:
+    post:
+      tags: [Collection, Manifest]
+      summary: Post a Zip file containing Collections and Manifests
+      description: "This endpoint accepts a Zip file containing JSON files representing Collections and Manifests. The
+        uploaded JSON files should be valid IIIF documents."
+      operationId: postZip
+      requestBody:
+        required: true
+        content:
+          application/zip:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '200':
+          description: Successfully processed the uploaded Zip file
+          content:
+            text/html:
+              schema:
+                type: string
+                format: binary
+        '500':
+          description: There was an internal server error
+          content:
+            text/html:
+              schema:
+                type: string
+                format: binary
   /collections:
     post:
       tags: [Collection]

@@ -20,6 +20,7 @@ import edu.ucla.library.iiif.fester.Features;
 import edu.ucla.library.iiif.fester.HTTP;
 import edu.ucla.library.iiif.fester.MessageCodes;
 import edu.ucla.library.iiif.fester.Op;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
@@ -158,8 +159,12 @@ public class EndpointConfigHandler implements Handler<AsyncResult<OpenAPI3Router
             final PostThumbnailsHandler thumbHandler = new PostThumbnailsHandler(myVertx, aConfig);
             final BodyHandler bodyHandlerThumb = BodyHandler.create().setDeleteUploadedFilesOnEnd(true);
 
+            final PostZipHandler zipHandler = new PostZipHandler(myVertx, aConfig);
+            final BodyHandler bodyHandlerZip = BodyHandler.create().setDeleteUploadedFilesOnEnd(true);
+
             aFactory.addHandlerByOperationId(Op.POST_CSV, postHandler).setBodyHandler(bodyHandlerCSV);
             aFactory.addHandlerByOperationId(Op.POST_THUMB, thumbHandler).setBodyHandler(bodyHandlerThumb);
+            aFactory.addHandlerByOperationId(Op.POST_ZIP, zipHandler).setBodyHandler(bodyHandlerZip);
 
             aPromise.complete(true);
         } catch (final IOException details) {
