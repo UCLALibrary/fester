@@ -259,7 +259,7 @@ public class S3BucketVerticle extends AbstractFesterVerticle {
     }
 
     /**
-     * A check to see whether an errored request should be retried.
+     * A check to see whether an failed request should be retried.
      *
      * @param aManifestID A Manifest ID
      * @param aHandler A retry handler

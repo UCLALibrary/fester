@@ -51,7 +51,7 @@ public class BaseFesterFT extends AbstractFesterFIT {
 
         final AWSCredentialsProvider s3Credentials = FESTER_CONFIG.getAwsCredsProvider();
         final AmazonS3ClientBuilder s3ClientBuilder = AmazonS3ClientBuilder.standard();
-        final EndpointConfiguration endpoint = FESTER_CONFIG.getEndpointConfiguration();
+        final EndpointConfiguration endpoint = new EndpointConfiguration(FESTER_CONFIG.getS3Endpoint(), "us-east-1");
 
         s3ClientBuilder.withEndpointConfiguration(endpoint).withCredentials(s3Credentials);
         s3ClientBuilder.withClientConfiguration(new ClientConfiguration().withProtocol(Protocol.HTTP));

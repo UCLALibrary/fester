@@ -68,6 +68,7 @@ public final class Config {
      * Private constructor for the Constants class.
      */
     private Config() {
+        // This is intentionally empty
     }
 
 }

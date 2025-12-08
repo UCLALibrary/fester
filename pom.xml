@@ -80,16 +80,16 @@
     <moirai.version>2.0.0</moirai.version>
     <slf4j.ext.version>1.7.32</slf4j.ext.version>
     <jcl.over.slf4j.version>1.7.36</jcl.over.slf4j.version>
-    <commons.lang.version>3.9</commons.lang.version>
+    <commons.lang.version>3.20.0</commons.lang.version>
     <freelib.utils.version>5.2.1</freelib.utils.version>
     <vertx.super.s3.version>1.3.3</vertx.super.s3.version>
     <netty.epoll.version>4.1.59.Final</netty.epoll.version>
     <jiiify.presentation.v2.version>0.5.10</jiiify.presentation.v2.version>
     <jiiify.presentation.v3.version>0.0.0-SNAPSHOT</jiiify.presentation.v3.version><!-- Was 0.12.4 -->
     <alphanumeric.comparator.version>1.4.1</alphanumeric.comparator.version>
+    <commons.io.version>2.21.0</commons.io.version>
 
     <!-- Dependencies pulled out for security reasons -->
-    <commons.io.version>2.7</commons.io.version>
     <jackson.version>2.16.0</jackson.version>
     <jackson.databind.version>2.16.0</jackson.databind.version>
     <netty.handler.version>4.1.79.Final</netty.handler.version>
@@ -110,8 +110,8 @@
 
     <!-- Versions of tools used for testing -->
     <jsoup.version>1.15.3</jsoup.version>
-    <aws.sdk.version>1.12.664</aws.sdk.version>
-    <testcontainers.version>1.16.3</testcontainers.version>
+    <aws.sdk.version>1.12.794</aws.sdk.version>
+    <testcontainers.version>2.0.2</testcontainers.version>
     <jcip.annotations.version>1.0-1</jcip.annotations.version>
 
     <!-- Build plug-in versions -->
@@ -121,7 +121,8 @@
     <vertx.plugin.version>1.0.27</vertx.plugin.version>
     <codacy.plugin.version>1.2.0</codacy.plugin.version>
     <xml.maven.plugin.version>1.0.2</xml.maven.plugin.version>
-    <docker.maven.plugin.version>0.39.1</docker.maven.plugin.version>
+    <docker.maven.plugin.version>0.48.0</docker.maven.plugin.version>
+    <localstack.version>1.21.3</localstack.version>
 
     <!-- Name of the main Vert.x verticle -->
     <main.verticle>edu.ucla.library.iiif.fester.verticles.MainVerticle</main.verticle>
@@ -207,6 +208,13 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <dependency>
+        <groupId>com.amazonaws</groupId>
+        <artifactId>aws-java-sdk-bom</artifactId>
+        <version>${aws.sdk.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -264,17 +272,17 @@
       <artifactId>vertx-web-api-contract</artifactId>
       <version>${vertx.version}</version>
     </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>${commons.io.version}</version>
+    </dependency>
 
     <!-- Below is a dependency that needs updating due to security issue (may be able to remove in future) -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-ext</artifactId>
       <version>${slf4j.ext.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-      <version>${commons.io.version}</version>
     </dependency>
 
     <!-- A Vert.x plug-in for more flexible configuration control -->
@@ -309,20 +317,8 @@
       <version>${commons.lang.version}</version>
     </dependency>
     <dependency>
-      <groupId>commons-codec</groupId>
-      <artifactId>commons-codec</artifactId>
-      <version>${commons.codec.version}</version>
-    </dependency>
-    <dependency>
       <groupId>com.amazonaws</groupId>
       <artifactId>aws-java-sdk-s3</artifactId>
-      <version>${aws.sdk.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>commons-codec</groupId>
-          <artifactId>commons-codec</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>se.sawano.java</groupId>
@@ -403,6 +399,7 @@
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>localstack</artifactId>
+      <version>${localstack.version}</version>
       <scope>test</scope>
     </dependency>
     <!-- Allows us to suppress warnings from the AWS SDK (see https://github.com/aws/aws-sdk-java/issues/1707) -->
@@ -636,6 +633,7 @@
                   <exclude>com.fasterxml.jackson.core:jackson-databind</exclude>
                   <exclude>com.fasterxml.jackson.dataformat:jackson-dataformat-cbor</exclude>
                   <exclude>com.fasterxml.jackson.dataformat:jackson-dataformat-yaml</exclude>
+                  <exclude>com.fasterxml.jackson.dataformat:jackson-dataformat-csv</exclude>
                   <exclude>com.fasterxml.jackson.datatype:jackson-datatype-jdk8</exclude>
                   <exclude>com.fasterxml.jackson.datatype:jackson-datatype-jsr310</exclude>
                   <exclude>com.github.dblock:oshi-core</exclude>
@@ -1084,6 +1082,7 @@
               <argLine>${jacoco.agent.arg}</argLine>
               <skipTests>${skipUTs}</skipTests>
               <forkCount>1</forkCount> <!-- Multiple forks == multiple containers; should use failsafe, probably -->
+              <skipAfterFailureCount>1</skipAfterFailureCount>
             </configuration>
             <executions>
               <execution>
@@ -1111,6 +1110,7 @@
                     <feature.flags>https://iiif-manifest-store.s3.amazonaws.com/fester-features-off.conf</feature.flags>
                     <jdwp.host.port>${jdwp.host.port}</jdwp.host.port>
                     <jdwp.client.config>${jdwp.client.config}</jdwp.client.config>
+                    <aws.java.v1.disableDeprecationAnnouncement>true</aws.java.v1.disableDeprecationAnnouncement>
                   </systemPropertyVariables>
                 </configuration>
               </execution>
@@ -1139,6 +1139,7 @@
                     <feature.flags>https://iiif-manifest-store.s3.amazonaws.com/fester-features-on.conf</feature.flags>
                     <jdwp.host.port>${jdwp.host.port}</jdwp.host.port>
                     <jdwp.client.config>${jdwp.client.config}</jdwp.client.config>
+                    <aws.java.v1.disableDeprecationAnnouncement>true</aws.java.v1.disableDeprecationAnnouncement>
                   </systemPropertyVariables>
                 </configuration>
               </execution>
@@ -1167,6 +1168,7 @@
                     <festerize.version>${festerize.version}</festerize.version>
                     <jdwp.host.port>${jdwp.host.port}</jdwp.host.port>
                     <jdwp.client.config>${jdwp.client.config}</jdwp.client.config>
+                    <aws.java.v1.disableDeprecationAnnouncement>true</aws.java.v1.disableDeprecationAnnouncement>
                   </systemPropertyVariables>
                 </configuration>
               </execution>
@@ -1197,6 +1199,7 @@
                     <fester.container.tag>${docker.registry.account}${project.artifactId}:${project.version}</fester.container.tag>
                     <jdwp.host.port>${jdwp.host.port}</jdwp.host.port>
                     <jdwp.client.config>${jdwp.client.config}</jdwp.client.config>
+                    <aws.java.v1.disableDeprecationAnnouncement>true</aws.java.v1.disableDeprecationAnnouncement>
                   </systemPropertyVariables>
                 </configuration>
               </execution>

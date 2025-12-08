@@ -2,16 +2,14 @@
 package edu.ucla.library.iiif.fester.utils;
 
 import org.testcontainers.containers.localstack.LocalStackContainer;
-import org.testcontainers.containers.localstack.LocalStackContainer.Service;
 
-import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
 
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
+import info.freelibrary.util.StringUtils;
 
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.MessageCodes;
@@ -21,31 +19,32 @@ import edu.ucla.library.iiif.fester.MessageCodes;
  */
 public class ContainerConfig {
 
-    /* A network alias for the LocalStack S3 service */
+    /** A network alias for the LocalStack S3 service. */
     public static final String S3_ALIAS = "s3.localstack";
 
+    /** A logger for the container configuration. */
     private static final Logger LOGGER = LoggerFactory.getLogger(ContainerConfig.class, Constants.MESSAGES);
 
-    /* A name for our test container */
+    /** A name for our test container. */
     private final String myContainerName;
 
-    /* An expected port for our container */
+    /** An expected port for our container. */
     private final int myContainerPort;
 
-    /* An S3 access key for our back-end */
+    /** An S3 access key for our back-end. */
     private String myAccessKey;
 
-    /* An S3 access key for our back-end */
+    /** An S3 access key for our back-end. */
     private String mySecretKey;
 
-    /* An S3 region for our back-end */
+    /** An S3 region for our back-end. */
     private String myRegion;
 
-    /* A port for our S3 back-end */
-    private int myExposedS3Port;
+    /** An S3 host for our back-end. */
+    private String myHost;
 
-    /* An endpoint configuration for an S3 client */
-    private EndpointConfiguration myEndpointConfig;
+    /** A port for our S3 back-end. */
+    private int myExposedS3Port;
 
     /**
      * Creates a new configuration.
@@ -68,19 +67,16 @@ public class ContainerConfig {
      */
     public ContainerConfig(final String aContainerName, final int aContainerPort,
             final LocalStackContainer aS3Container) {
-        final AWSCredentialsProvider credentialsProvider = aS3Container.getDefaultCredentialsProvider();
-        final AWSCredentials credentials = credentialsProvider.getCredentials();
-
-        myEndpointConfig = aS3Container.getEndpointConfiguration(Service.S3);
         myContainerName = aContainerName;
         myContainerPort = aContainerPort;
-        myAccessKey = credentials.getAWSAccessKeyId();
-        mySecretKey = credentials.getAWSSecretKey();
-        myRegion = myEndpointConfig.getSigningRegion();
-        myExposedS3Port = aS3Container.getExposedPorts().get(0);
+        myAccessKey = aS3Container.getAccessKey();
+        mySecretKey = aS3Container.getSecretKey();
+        myRegion = aS3Container.getRegion();
+        myExposedS3Port = aS3Container.getMappedPort(4566);
+        myHost = aS3Container.getHost();
 
         // This is the endpoint that the S3 client uses when setting up test resources
-        LOGGER.debug(MessageCodes.MFS_079, myEndpointConfig.getServiceEndpoint());
+        LOGGER.debug(MessageCodes.MFS_079, aS3Container.getEndpoint());
     }
 
     /**
@@ -182,25 +178,21 @@ public class ContainerConfig {
     }
 
     /**
+     * Gets the S3 endpoint.
+     *
+     * @return A string representation of the S3 endpoint
+     */
+    public String getS3Endpoint() {
+        return StringUtils.format("http://{}:{}", myHost, myExposedS3Port);
+    }
+
+    /**
      * Returns whether the container configuration includes an S3 configuration.
      *
      * @return True if there is an S3 configuration; else, false
      */
     public boolean hasS3Config() {
         return myAccessKey != null && mySecretKey != null && myRegion != null;
-    }
-
-    /**
-     * Gets the endpoint configuration for an S3 client.
-     *
-     * @return An endpoint configuration for an S3 client
-     */
-    public EndpointConfiguration getEndpointConfiguration() {
-        if (hasS3Config()) {
-            return myEndpointConfig;
-        } else {
-            throw new UnsupportedOperationException();
-        }
     }
 
     /**
