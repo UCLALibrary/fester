@@ -10,9 +10,11 @@ import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 import info.freelibrary.util.StringUtils;
 
+import info.freelibrary.iiif.presentation.v2.Collection;
+import info.freelibrary.iiif.presentation.v2.Manifest;
 import info.freelibrary.iiif.presentation.v3.ResourceTypes;
-import info.freelibrary.iiif.presentation.v3.utils.JSON;
 import info.freelibrary.iiif.presentation.v3.utils.JsonKeys;
+import info.freelibrary.iiif.presentation.v3.utils.Manifestor;
 
 import info.freelibrary.vertx.s3.S3Client;
 
@@ -25,7 +27,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 
@@ -135,19 +136,21 @@ abstract class AbstractFesterHandler implements Handler<RoutingContext> {
             switch (context) {
                 case "http://iiif.io/api/presentation/2/context.json":
                     if (ResourceTypes.MANIFEST.equals(aType)) {
-                        info.freelibrary.iiif.presentation.v2.Manifest.fromJSON(aJsonObj);
+                        Manifest.fromJSON(aJsonObj);
                     } else if (ResourceTypes.COLLECTION.equals(aType)) {
-                        info.freelibrary.iiif.presentation.v2.Collection.fromJSON(aJsonObj);
+                        Collection.fromJSON(aJsonObj);
                     } else {
                         throw new ValidationException(aType, LOGGER.getMessage(MessageCodes.MFS_181, JsonKeys.V2_TYPE));
                     }
 
                     break; // It's valid
                 case "http://iiif.io/api/presentation/3/context.json":
+                    final Manifestor manifestor = new Manifestor();
+
                     if (ResourceTypes.MANIFEST.equals(aType)) {
-                        JSON.readValue(aJsonObj.encode(), info.freelibrary.iiif.presentation.v3.Manifest.class);
+                        manifestor.readManifest(aJsonObj.encode());
                     } else if (ResourceTypes.COLLECTION.equals(aType)) {
-                        JSON.readValue(aJsonObj.encode(), info.freelibrary.iiif.presentation.v3.Collection.class);
+                        manifestor.readCollection(aJsonObj.encode());
                     } else {
                         throw new ValidationException(aType, LOGGER.getMessage(MessageCodes.MFS_181, JsonKeys.TYPE));
                     }
@@ -156,7 +159,7 @@ abstract class AbstractFesterHandler implements Handler<RoutingContext> {
                 default:
                     throw new ValidationException(aType, LOGGER.getMessage(MessageCodes.MFS_181, JsonKeys.CONTEXT));
             }
-        } catch (final DecodeException | IllegalArgumentException | NullPointerException details) {
+        } catch (final RuntimeException details) {
             throw new ValidationException(aType, details);
         }
     }

@@ -7,8 +7,7 @@ import java.nio.file.Paths;
 
 import org.junit.Test;
 
-import info.freelibrary.util.Logger;
-import info.freelibrary.util.LoggerFactory;
+import info.freelibrary.iiif.presentation.v3.MediaType;
 
 import edu.ucla.library.iiif.fester.Config;
 import edu.ucla.library.iiif.fester.Constants;
@@ -28,11 +27,8 @@ import io.vertx.ext.web.codec.BodyCodec;
  */
 public class PostZipHandlerTest extends AbstractFesterHandlerTest {
 
-    /** A logger for the PostZipHandlerTest. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(PostZipHandlerTest.class, Constants.MESSAGES);
-
     /** The collection test artifact. */
-    private static final String COLLECTION_ZIP = "src/test/resources/zip/jbu-collection.zip";
+    private static final String COLLECTION_ZIP = "src/test/resources/zip/layers-choice.zip";
 
     /** The test endpoint. */
     private static final String ENDPOINT = "/package";
@@ -51,7 +47,8 @@ public class PostZipHandlerTest extends AbstractFesterHandlerTest {
         final BodyCodec<String> codec = BodyCodec.string();
 
         webClient.post(port, Constants.UNSPECIFIED_HOST, ENDPOINT).expect(ResponsePredicate.SC_SUCCESS).as(codec)
-                .putHeader(Constants.CONTENT_TYPE, Constants.ZIP_MEDIA_TYPE).sendBuffer(zipBuffer, request -> {
+                .putHeader(Constants.CONTENT_TYPE, MediaType.APPLICATION_ZIP.toString())
+                .sendBuffer(zipBuffer, request -> {
                     if (request.succeeded()) {
                         final HttpResponse<String> response = request.result();
 

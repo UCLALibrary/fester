@@ -33,6 +33,7 @@ RUN mkdir -p /var/log/${project.artifactId} /var/cache/${project.artifactId} \
 
 USER ${project.artifactId}
 ENTRYPOINT ["docker-entrypoint.sh"]
+ENV AWS_JAVA_V1_DISABLE_DEPRECATION_ANNOUNCEMENT="true"
 ENV CACHE_DIR="-Dvertx.cacheDirBase=/tmp"
 ENV CONFIG_FILE="-Dvertx-config-path=/etc/${project.artifactId}/${project.artifactId}.properties"
 ENV JAVA_TOOL_OPTIONS="${jdwp.client.config}"

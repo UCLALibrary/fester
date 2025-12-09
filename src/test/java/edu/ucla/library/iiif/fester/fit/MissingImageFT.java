@@ -1,6 +1,9 @@
 
 package edu.ucla.library.iiif.fester.fit;
 
+import static edu.ucla.library.iiif.fester.Constants.POST_CSV_ROUTE;
+import static edu.ucla.library.iiif.fester.Constants.UNSPECIFIED_HOST;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -32,6 +35,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.multipart.MultipartForm;
 
@@ -142,22 +146,23 @@ public class MissingImageFT extends BaseFesterFT {
      * @param aPromise A promise that the ingest happens
      */
     private void ingestCSV(final MultipartForm aForm, final Promise<Void> aPromise) {
-        myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE).sendMultipartForm(aForm,
-                post -> {
-                    if (post.succeeded()) {
-                        final HttpResponse<Buffer> response = post.result();
-                        final int statusCode = response.statusCode();
+        final HttpRequest<Buffer> request = myWebClient.post(FESTER_PORT, UNSPECIFIED_HOST, POST_CSV_ROUTE);
 
-                        if (statusCode == HTTP.CREATED) {
-                            aPromise.complete();
-                        } else {
-                            final String statusMessage = response.statusMessage();
-                            aPromise.fail(LOGGER.getMessage(MessageCodes.MFS_039, statusCode, statusMessage));
-                        }
-                    } else {
-                        aPromise.fail(post.cause());
-                    }
-                });
+        request.sendMultipartForm(aForm, post -> {
+            if (post.succeeded()) {
+                final HttpResponse<Buffer> response = post.result();
+                final int statusCode = response.statusCode();
+
+                if (statusCode == HTTP.CREATED) {
+                    aPromise.complete();
+                } else {
+                    final String statusMessage = response.statusMessage();
+                    aPromise.fail(LOGGER.getMessage(MessageCodes.MFS_039, statusCode, statusMessage));
+                }
+            } else {
+                aPromise.fail(post.cause());
+            }
+        });
     }
 
     /**

@@ -1,6 +1,9 @@
 
 package edu.ucla.library.iiif.fester.fit;
 
+import static edu.ucla.library.iiif.fester.Constants.POST_CSV_ROUTE;
+import static edu.ucla.library.iiif.fester.Constants.UNSPECIFIED_HOST;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.junit.Test;
@@ -18,6 +21,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.HttpResponse;
 
 /**
@@ -35,25 +39,23 @@ public class BatchIngestFfOffT extends BaseFesterFfT {
      * @param aContext A testing context
      */
     @Test
-    @SuppressWarnings("checkstyle:indentation") // Checkstyle doesn't handle lambda indentations well
     public final void testCsvPostEndpoint(final TestContext aContext) {
         final Async asyncTask = aContext.async();
+        final HttpRequest<Buffer> httpRequest = myWebClient.post(FESTER_PORT, UNSPECIFIED_HOST, POST_CSV_ROUTE);
 
-        myWebClient.post(FESTER_PORT, Constants.UNSPECIFIED_HOST, Constants.POST_CSV_ROUTE)
-                .sendMultipartForm(CSV_UPLOAD_FORM, request -> {
-                    if (request.succeeded()) {
-                        final HttpResponse<Buffer> response = request.result();
-                        final String expectedStatusMessage =
-                                LOGGER.getMessage(MessageCodes.MFS_085, BATCH_INGEST_FEATURE);
+        httpRequest.sendMultipartForm(CSV_UPLOAD_FORM, request -> {
+            if (request.succeeded()) {
+                final HttpResponse<Buffer> response = request.result();
+                final String expectedStatusMessage = LOGGER.getMessage(MessageCodes.MFS_085, BATCH_INGEST_FEATURE);
 
-                        aContext.assertEquals(HTTP.SERVICE_UNAVAILABLE, response.statusCode());
-                        aContext.assertEquals(expectedStatusMessage, response.statusMessage());
+                aContext.assertEquals(HTTP.SERVICE_UNAVAILABLE, response.statusCode());
+                aContext.assertEquals(expectedStatusMessage, response.statusMessage());
 
-                        TestUtils.complete(asyncTask);
-                    } else {
-                        aContext.fail(request.cause());
-                    }
-                });
+                TestUtils.complete(asyncTask);
+            } else {
+                aContext.fail(request.cause());
+            }
+        });
     }
 
     /**
