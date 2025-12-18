@@ -38,10 +38,6 @@ jobs:
         with:
           maven-version: 3.6.3
 
-      - name: Set Jar deployment config
-        if: env.SKIP_JAR_DEPLOYMENT == null
-        run: echo "SKIP_JAR_DEPLOYMENT=false" >> $GITHUB_ENV
-
       - name: Optionally, login to Docker repository
         uses: docker/login-action@f3364599c6aa293cdc2b8391b1b56d0c30e45c8a # v1.8.0
         env:
@@ -59,8 +55,7 @@ jobs:
           MAVEN_GPG_KEY: ${{ secrets.BUILD_KEY }}
         run: |
           mvn -U -ntp clean deploy -Prelease -Drevision=${{ github.event.release.tag_name }} \
-            -DlogLevel=DEBUG -DtestLogLevel=DEBUG \
-            -DskipNexusStagingDeployMojo="${{ env.SKIP_JAR_DEPLOYMENT }}" \
+            -DlogLevel=DEBUG -DtestLogLevel=DEBUG -Dcentral.skip=true \
             -Ddocker.registry.username="${{ secrets.DOCKER_USERNAME }}" \
             -Ddocker.registry.account="${{ secrets.DOCKER_REGISTRY_ACCOUNT}}" \
             -Ddocker.registry.password="${{ secrets.DOCKER_PASSWORD }}" \
