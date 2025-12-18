@@ -54,7 +54,7 @@ jobs:
           MAVEN_GPG_KEY: ${{ secrets.BUILD_KEY }}
         run: |
           mvn -s .maven/settings.xml -U -ntp clean deploy -Prelease -Drevision=${{ github.event.release.tag_name }} \
-            -DlogLevel=DEBUG -DtestLogLevel=DEBUG \
+            -DlogLevel=DEBUG -DtestLogLevel=DEBUG -DskipPublishing=true \
             -Ddocker.registry.username="${{ secrets.DOCKER_USERNAME }}" \
             -Ddocker.registry.account="${{ secrets.DOCKER_REGISTRY_ACCOUNT}}" \
             -Ddocker.registry.password="${{ secrets.DOCKER_PASSWORD }}" \
