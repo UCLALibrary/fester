@@ -27,7 +27,6 @@ jobs:
           cache: maven
           distribution: 'temurin'
           java-version: 21
-          server-id: github
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
 
@@ -55,7 +54,7 @@ jobs:
           MAVEN_GPG_KEY: ${{ secrets.BUILD_KEY }}
         run: |
           mvn -U -ntp clean deploy -Prelease -Drevision=${{ github.event.release.tag_name }} \
-            -DlogLevel=DEBUG -DtestLogLevel=DEBUG -Dcentral.skip=true \
+            -DlogLevel=DEBUG -DtestLogLevel=DEBUG -DskipPublishing=true \
             -Ddocker.registry.username="${{ secrets.DOCKER_USERNAME }}" \
             -Ddocker.registry.account="${{ secrets.DOCKER_REGISTRY_ACCOUNT}}" \
             -Ddocker.registry.password="${{ secrets.DOCKER_PASSWORD }}" \
