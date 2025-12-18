@@ -27,6 +27,7 @@ jobs:
           cache: maven
           distribution: 'temurin'
           java-version: 21
+          server-id: central
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
 
