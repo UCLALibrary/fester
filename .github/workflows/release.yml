@@ -57,7 +57,7 @@ jobs:
           MAVEN_GPG_PASSPHRASE: ${{ secrets.BUILD_PASSPHRASE }}
           MAVEN_GPG_KEY: ${{ secrets.BUILD_KEY }}
         run: |
-          mvn -U -ntp clean verify \
+          mvn -U -ntp clean -Prelease deploy \
             -Drevision=${{ github.event.release.tag_name }} \
             -ntp -Dorg.slf4j.simpleLogger.log.net.sourceforge.pmd=error -DlogLevel=DEBUG -DtestLogLevel=DEBUG \
             -DskipNexusStagingDeployMojo="${{ env.SKIP_JAR_DEPLOYMENT }}" \
