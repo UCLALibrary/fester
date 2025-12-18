@@ -1,0 +1,20 @@
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+  <servers>
+    <!-- Sonatype Central publishing plugin expects this id -->
+    <server>
+      <id>central</id>
+      <username>${env.MAVEN_CENTRAL_USERNAME}</username>
+      <password>${env.MAVEN_CENTRAL_PASSWORD}</password>
+    </server>
+
+    <!-- GitHub Packages snapshot repo for jiiify-presentation -->
+    <server>
+      <id>github</id>
+      <username>${env.MAVEN_GITHUB_USERNAME}</username>
+      <password>${env.MAVEN_GITHUB_TOKEN}</password>
+    </server>
+  </servers>
+</settings>

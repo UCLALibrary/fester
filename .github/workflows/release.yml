@@ -27,9 +27,6 @@ jobs:
           cache: maven
           distribution: 'temurin'
           java-version: 21
-          server-id: github
-          server-username: MAVEN_USERNAME
-          server-password: MAVEN_PASSWORD
 
       # If running locally in act, install Maven
       - name: Set up Maven if needed
@@ -37,10 +34,6 @@ jobs:
         uses: stCarolas/setup-maven@1d56b37995622db66cce1214d81014b09807fb5a # v4
         with:
           maven-version: 3.6.3
-
-      - name: Set Jar deployment config
-        if: env.SKIP_JAR_DEPLOYMENT == null
-        run: echo "SKIP_JAR_DEPLOYMENT=false" >> $GITHUB_ENV
 
       - name: Optionally, login to Docker repository
         uses: docker/login-action@f3364599c6aa293cdc2b8391b1b56d0c30e45c8a # v1.8.0
@@ -53,14 +46,15 @@ jobs:
 
       - name: Release with Maven
         env:
-          MAVEN_USERNAME: ${{ secrets.JPV3_GH_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.JPV3_GH_PAT }}
+          MAVEN_GITHUB_USERNAME: ${{ secrets.JPV3_GH_USERNAME }}
+          MAVEN_GITHUB_PASSWORD: ${{ secrets.JPV3_GH_PAT }}
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          MAVEN_CENTRAL_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.BUILD_PASSPHRASE }}
           MAVEN_GPG_KEY: ${{ secrets.BUILD_KEY }}
         run: |
-          mvn -U -ntp clean deploy -Prelease -Drevision=${{ github.event.release.tag_name }} \
+          mvn -s .maven/settings.xml -U -ntp clean deploy -Prelease -Drevision=${{ github.event.release.tag_name }} \
             -DlogLevel=DEBUG -DtestLogLevel=DEBUG \
-            -DskipNexusStagingDeployMojo="${{ env.SKIP_JAR_DEPLOYMENT }}" \
             -Ddocker.registry.username="${{ secrets.DOCKER_USERNAME }}" \
             -Ddocker.registry.account="${{ secrets.DOCKER_REGISTRY_ACCOUNT}}" \
             -Ddocker.registry.password="${{ secrets.DOCKER_PASSWORD }}" \
