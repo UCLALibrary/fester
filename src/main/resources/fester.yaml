@@ -75,10 +75,11 @@ paths:
       operationId: patchZip
       requestBody:
         required: true
-        application/zip:
-          schema:
-          type: string
-          format: binary
+        content:
+          application/zip:
+            schema:
+              type: string
+              format: binary
       responses:
         '200':
           description: Successfully processed the uploaded Zip file
