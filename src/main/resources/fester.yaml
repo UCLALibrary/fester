@@ -67,6 +67,34 @@ paths:
                   type: string
                   example: The status request failed because the slithy toves did gyre
   /package:
+    patch:
+      tags: [Collection, Manifest]
+      summary: Patch a Zip file containing Collections and Manifests
+      description: "This endpoing accepts a Zip file containing JSON files (i.e., Collections and Manifests) to be
+        compared against existing Collections and Manifests"
+      operationId: patchZip
+      requestBody:
+        required: true
+        content:
+          application/zip:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '200':
+          description: Successfully processed the uploaded Zip file
+          content:
+            text/html:
+              schema:
+                type: string
+                format: binary
+        '500':
+          description: There was an internal server error
+          content:
+            text/html:
+              schema:
+                type: string
+                format: binary
     post:
       tags: [Collection, Manifest]
       summary: Post a Zip file containing Collections and Manifests

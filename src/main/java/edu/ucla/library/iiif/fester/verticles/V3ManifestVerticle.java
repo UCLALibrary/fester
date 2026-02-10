@@ -1,8 +1,12 @@
 
 package edu.ucla.library.iiif.fester.verticles;
 
+import static edu.ucla.library.iiif.fester.Constants.EMPTY;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -313,6 +317,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         final Map<String, List<String[]>> worksMap = new ObjectMapper().readValue(worksJSON, type);
         final SortedSet<Collection.Item> sortedCollectionItemSet = new TreeSet<>(new V3CollectionItemLabelComparator());
         final Map<String, Collection.Item> collectionItemMap = new HashMap<>(); // Using to eliminate duplicates
+        final String collectionID = URLDecoder.decode(collection.getID().replaceFirst(".*collections/", EMPTY), UTF_8);
         final DeliveryOptions options = new DeliveryOptions();
         final JsonObject message = new JsonObject();
 
@@ -321,9 +326,10 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         collectionItemMap.putAll(stream.collect(Collectors.toMap(Collection.Item::getID, manifest -> manifest)));
 
         // Next, add the new manifests to the map, replacing any that already exist
-        worksMap.get(IDUtils.getResourceID(collection.getID())).stream().forEach(workArray -> {
+        worksMap.get(collectionID).stream().forEach(workArray -> {
             final String manifestURI = URI.create(workArray[0]).toString();
             final Label label = new Label(workArray[1]);
+
             collectionItemMap.put(manifestURI, new Collection.Item(new Manifest(manifestURI, label)));
         });
 
