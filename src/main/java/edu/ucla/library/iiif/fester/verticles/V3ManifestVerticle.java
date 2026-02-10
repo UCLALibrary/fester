@@ -1,8 +1,12 @@
 
 package edu.ucla.library.iiif.fester.verticles;
 
+import static edu.ucla.library.iiif.fester.Constants.EMPTY;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -320,10 +324,15 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         final Stream<Collection.Item> stream = collection.getItems().stream();
         collectionItemMap.putAll(stream.collect(Collectors.toMap(Collection.Item::getID, manifest -> manifest)));
 
+        final String collectionID = URLDecoder.decode(collection.getID().replaceFirst(".*collections/", EMPTY), UTF_8);
+
+        worksMap.forEach((k, v) -> System.out.println(k));
+
         // Next, add the new manifests to the map, replacing any that already exist
-        worksMap.get(IDUtils.getResourceID(collection.getID())).stream().forEach(workArray -> {
+        worksMap.get(collectionID).stream().forEach(workArray -> {
             final String manifestURI = URI.create(workArray[0]).toString();
             final Label label = new Label(workArray[1]);
+
             collectionItemMap.put(manifestURI, new Collection.Item(new Manifest(manifestURI, label)));
         });
 
