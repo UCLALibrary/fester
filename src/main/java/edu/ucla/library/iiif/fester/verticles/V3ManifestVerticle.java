@@ -317,16 +317,13 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         final Map<String, List<String[]>> worksMap = new ObjectMapper().readValue(worksJSON, type);
         final SortedSet<Collection.Item> sortedCollectionItemSet = new TreeSet<>(new V3CollectionItemLabelComparator());
         final Map<String, Collection.Item> collectionItemMap = new HashMap<>(); // Using to eliminate duplicates
+        final String collectionID = URLDecoder.decode(collection.getID().replaceFirst(".*collections/", EMPTY), UTF_8);
         final DeliveryOptions options = new DeliveryOptions();
         final JsonObject message = new JsonObject();
 
         // First, add the old manifests to the map
         final Stream<Collection.Item> stream = collection.getItems().stream();
         collectionItemMap.putAll(stream.collect(Collectors.toMap(Collection.Item::getID, manifest -> manifest)));
-
-        final String collectionID = URLDecoder.decode(collection.getID().replaceFirst(".*collections/", EMPTY), UTF_8);
-
-        worksMap.forEach((k, v) -> System.out.println(k));
 
         // Next, add the new manifests to the map, replacing any that already exist
         worksMap.get(collectionID).stream().forEach(workArray -> {
