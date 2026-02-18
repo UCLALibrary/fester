@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Script ENVs
 S3_BUCKET="prod-iiif-fester-source"
-BUCKET_TYPE="collections"
+RECORD_TYPE="collections"
 HOST_UUID="b1dbe4a0-443c-479f-bf0a-25c352df0d8f"
 
 # Output usage information
@@ -46,7 +46,7 @@ s3_path="$(id_to_s3_path "$1")"
 
 # Build an array of all the files in the S3 bucket directory by relying on S3's expected output format
 mapfile -t files < <(
-  aws s3 ls "s3://${S3_BUCKET}/${BUCKET_TYPE}/${s3_path}" | awk '{ $1=$2=$3=""; sub(/^ +/,""); print }'
+  aws s3 ls "s3://${S3_BUCKET}/${RECORD_TYPE}/${s3_path}" | awk '{ $1=$2=$3=""; sub(/^ +/,""); print }'
 )
 
 # Create a tmp directory to use as a scratch space and clean it up automatically
@@ -56,7 +56,7 @@ trap 'rm -rf "$tmpdir"' EXIT
 # Download the files to be updated, update them, and re-upload the files
 for file_name in "${files[@]}"; do
   # Before copying, trim the last directory in the S3 path since we don't seem to have used it
-  aws s3 cp "s3://${S3_BUCKET}/${BUCKET_TYPE}/${s3_path%/*}/${file_name}" "${tmpdir}/${file_name}" \
+  aws s3 cp "s3://${S3_BUCKET}/${RECORD_TYPE}/${s3_path%/*}/${file_name}" "${tmpdir}/${file_name}" \
     --only-show-errors --no-progress
 
   if sed --version >/dev/null 2>&1; then
@@ -68,7 +68,7 @@ for file_name in "${files[@]}"; do
   fi
 
   # Destructive write back into S3
-  aws s3 cp "${tmpdir}/${file_name}" "s3://${S3_BUCKET}/${BUCKET_TYPE}/${s3_path%/*}/${file_name}" \
+  aws s3 cp "${tmpdir}/${file_name}" "s3://${S3_BUCKET}/${RECORD_TYPE}/${s3_path%/*}/${file_name}" \
     --only-show-errors --no-progress
 done
 
