@@ -123,10 +123,8 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                 LOGGER.error(details, details.getMessage());
                 message.fail(HTTP.INTERNAL_SERVER_ERROR, details.getMessage());
             } catch (final RuntimeException details) {
-                System.err.println("============================================");
-                details.printStackTrace();
-                System.err.println(message.body().encodePrettily());
-                System.err.println("============================================");
+                LOGGER.error(details, details.getMessage());
+                message.fail(HTTP.INTERNAL_SERVER_ERROR, details.getMessage());
             }
         });
 
