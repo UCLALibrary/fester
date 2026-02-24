@@ -62,6 +62,11 @@ public final class Op {
     public static final String POST_ZIP = "postZip";
 
     /**
+     * Patch a Zip file to Fester for the update of existing manifests and collections.
+     */
+    public static final String PATCH_ZIP = "patchZip";
+
+    /**
      * Get S3 endpoints status.
      */
     public static final String CHECK_ENDPOINTS = "checkEndpoints";
