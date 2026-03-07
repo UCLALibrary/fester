@@ -72,7 +72,7 @@
     <ubuntu.tag>22.04</ubuntu.tag>
     <jdk.version>21.0.10+7-1~22.04</jdk.version>
     <python3.version>3.10.6-1~22.04.1</python3.version>
-    <curl.version>7.81.0-1ubuntu1.21</curl.version>
+    <curl.version>7.81.0-1ubuntu1.22</curl.version>
 
     <!-- Application dependencies -->
     <vertx.version>3.9.16</vertx.version>
@@ -1280,7 +1280,7 @@
   <parent>
     <artifactId>freelib-parent</artifactId>
     <groupId>info.freelibrary</groupId>
-    <version>13.0.0</version>
+    <version>14.0.2</version>
   </parent>
 </project>
 
