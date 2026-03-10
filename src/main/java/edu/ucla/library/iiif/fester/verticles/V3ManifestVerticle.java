@@ -5,7 +5,9 @@ import static edu.ucla.library.iiif.fester.Constants.EMPTY;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -574,12 +576,14 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                         width = Integer.parseInt(mediaWidth.get());
                         height = Integer.parseInt(mediaHeight.get());
                         image = new ImageContent(accessURI).setWidthHeight(width, height);
-                    } else {
+                    } else if (isValidURL(pageURI)) {
                         final ImageInfoLookup infoLookup = new ImageInfoLookup(pageURI);
 
                         width = infoLookup.getWidth();
                         height = infoLookup.getHeight();
                         image = new ImageContent(resourceURI).setServices(new ImageService2(pageURI));
+                    } else {
+                        throw new ImageNotFoundException(pageURI);
                     }
 
                     canvas.setWidthHeight(width, height).setThumbnails(new ImageContent(thumbnail));
@@ -587,7 +591,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                 } catch (final ImageNotFoundException | IOException details) {
                     LOGGER.info(MessageCodes.MFS_078, pageID);
 
-                    if (aPlaceholderImage != null) {
+                    if (aPlaceholderImage != null && isValidURL(aPlaceholderImage)) {
                         try {
                             final ImageInfoLookup placeholderLookup = new ImageInfoLookup(aPlaceholderImage);
                             final int size;
@@ -641,6 +645,21 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
         }
 
         return canvases.toArray(new Canvas[] {});
+    }
+
+    /**
+     * Check for a valid URL.
+     *
+     * @param aURL A string which might be a valid URL
+     * @return True if the supplied string is a URL; else, false
+     */
+    private static boolean isValidURL(String aURL) {
+        try {
+            new URI(aURL).toURL();
+            return true;
+        } catch (MalformedURLException | URISyntaxException details) {
+            return false;
+        }
     }
 
     private VideoContent[] getVideoContent(final String aResourceURI) {
