@@ -178,7 +178,7 @@ public class PostZipHandler extends AbstractFesterHandler {
             message.put(Constants.MANIFEST_ID, id);
             options.addHeader(Constants.ACTION, Op.PUT_MANIFEST);
         } else {
-            promise.fail(new I18nRuntimeException(MessageCodes.BUNDLE, MessageCodes.MFS_188));
+            promise.fail(new I18nRuntimeException(MessageCodes.BUNDLE, MessageCodes.MFS_188, aType));
         }
 
         // Send the resource to the S3 verticle for it to do the upload

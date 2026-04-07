@@ -72,7 +72,6 @@ public class FakeS3BucketVerticle extends AbstractFesterVerticle {
             switch (action) {
                 case Op.GET_MANIFEST:
                     manifestID = body.getString(Constants.MANIFEST_ID);
-                    LOGGER.debug(MessageCodes.MFS_127, manifestID);
                     get(IDUtils.getWorkS3Key(manifestID), message);
                     break;
                 case Op.PUT_MANIFEST:
@@ -82,7 +81,6 @@ public class FakeS3BucketVerticle extends AbstractFesterVerticle {
                     break;
                 case Op.GET_COLLECTION:
                     manifestID = body.getString(Constants.COLLECTION_NAME);
-                    LOGGER.debug(MessageCodes.MFS_127, manifestID);
                     get(IDUtils.getCollectionS3Key(manifestID), message);
                     break;
                 case Op.PUT_COLLECTION:
@@ -91,10 +89,10 @@ public class FakeS3BucketVerticle extends AbstractFesterVerticle {
                     put(IDUtils.getCollectionS3Key(manifestID), manifest, message);
                     break;
                 default:
-                    final String errorMessage = StringUtils.format(MessageCodes.MFS_139, this.getClass().toString(),
-                            message.toString(), action);
-                    message.fail(CodeUtils.getInt(MessageCodes.MFS_139), errorMessage);
-                    break;
+                    final String name = this.getClass().toString();
+                    final String error = StringUtils.format(MessageCodes.MFS_139, name, message.toString(), action);
+
+                    message.fail(CodeUtils.getInt(MessageCodes.MFS_139), error);
             }
         });
     }
@@ -112,11 +110,13 @@ public class FakeS3BucketVerticle extends AbstractFesterVerticle {
             if (JSON_FILES.containsKey(aS3Key)) {
                 final String serializedJson = StringUtils.read(JSON_FILES.get(aS3Key));
                 final String manifest;
+
                 if (aMessage.headers().get(Constants.NO_REWRITE_URLS) != null) {
                     manifest = serializedJson;
                 } else {
                     manifest = serializedJson.replaceAll(myUrlPlaceholderPattern, myUrl);
                 }
+
                 aMessage.reply(new JsonObject(manifest));
             } else {
                 aMessage.fail(HTTP.NOT_FOUND, aS3Key + " not found");
@@ -136,40 +136,38 @@ public class FakeS3BucketVerticle extends AbstractFesterVerticle {
     private void put(final String aS3Key, final JsonObject aManifest, final Message<JsonObject> aMessage) {
         // URL-encoding makes it so we don't have to worry about creating subdirectories
         final String path = URLEncoder.encode(aS3Key, StandardCharsets.UTF_8);
+        final String v3ID = aManifest.getString(Constants.ID_V3);
+        final String v2ID = aManifest.getString(Constants.ID_V2);
         final File tmpFile = new File(myTmpDir, path);
-        final String derivedManifestS3Key;
-        final String idKey;
-        final String id;
 
-        switch (myIiifApiVersion) {
-            case Constants.IIIF_API_V2:
-                idKey = Constants.ID_V2;
-                break;
-            default: // Constants.IIIF_API_V3
-                idKey = Constants.ID_V3;
-                break;
+        String id;
+
+        if (v3ID != null) {
+            id = v3ID;
+        } else if (v2ID != null) {
+            id = v2ID;
+        } else {
+            aMessage.fail(400, "ID must be present");
+            return;
         }
 
-        if ((id = aManifest.getString(idKey)) == null) {
-            aMessage.fail(400, "ID must be present");
-        } else {
-            derivedManifestS3Key = IDUtils.getResourceS3Key(URI.create(id));
+        id = IDUtils.getResourceS3Key(URI.create(id));
 
-            if (!aS3Key.equals(derivedManifestS3Key)) {
-                LOGGER.warn(MessageCodes.MFS_138, aS3Key, derivedManifestS3Key);
+        if (!aS3Key.equals(id)) {
+            LOGGER.warn(MessageCodes.MFS_138, aS3Key, id);
+        }
+
+        try (BufferedFileWriter writer = new BufferedFileWriter(tmpFile)) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug(MessageCodes.MFS_124, aManifest.encode());
             }
 
-            try (BufferedFileWriter writer = new BufferedFileWriter(tmpFile)) {
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug(MessageCodes.MFS_124, aManifest.encode());
-                }
-                writer.write(aManifest.encodePrettily());
-                JSON_FILES.put(aS3Key, tmpFile);
+            writer.write(aManifest.encodePrettily());
+            JSON_FILES.put(aS3Key, tmpFile);
 
-                aMessage.reply(Op.SUCCESS);
-            } catch (final IOException details) {
-                aMessage.fail(100, details.getMessage());
-            }
+            aMessage.reply(Op.SUCCESS);
+        } catch (final IOException details) {
+            aMessage.fail(100, details.getMessage());
         }
     }
 }

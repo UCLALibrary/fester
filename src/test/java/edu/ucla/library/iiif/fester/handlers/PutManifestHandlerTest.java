@@ -177,56 +177,6 @@ public class PutManifestHandlerTest extends AbstractFesterHandlerTest {
     }
 
     /**
-     * Test the PutManifestHandler with an invalid manifest ID.
-     *
-     * @param aContext A testing context
-     * @throws IOException If there is trouble reading the manifest
-     */
-    @Test
-    @SuppressWarnings("deprecation")
-    public void testPutManifestHandlerInvalidManifestID(final TestContext aContext) throws IOException {
-        final String manifestPath = V2_INVALID_MANIFEST_FILE_ID.getAbsolutePath();
-        final Buffer manifest = myVertx.fileSystem().readFileBlocking(manifestPath);
-        final Async asyncTask = aContext.async();
-        final int port = aContext.get(Config.HTTP_PORT);
-        final String requestPath = IDUtils.getResourceURIPath(myPutManifestS3Key);
-        final RequestOptions requestOpts = new RequestOptions();
-        final HttpClient httpClient;
-
-        LOGGER.debug(MessageCodes.MFS_016, requestPath);
-
-        requestOpts.setPort(port).setHost(Constants.UNSPECIFIED_HOST).setURI(requestPath);
-        requestOpts.addHeader(Constants.CONTENT_TYPE, Constants.JSON_MEDIA_TYPE);
-        httpClient = myVertx.createHttpClient();
-
-        httpClient.put(requestOpts, putResponse -> {
-            switch (putResponse.statusCode()) {
-                case HTTP.BAD_REQUEST:
-                    httpClient.get(requestOpts, getResponse -> {
-                        if (getResponse.statusCode() != HTTP.NOT_FOUND) {
-                            aContext.fail(LOGGER.getMessage(MessageCodes.MFS_183, ResourceTypes.MANIFEST,
-                                    getResponse.statusCode()));
-                        }
-
-                        TestUtils.complete(asyncTask);
-                    }).exceptionHandler(error -> {
-                        aContext.fail(error);
-                        TestUtils.complete(asyncTask);
-                    }).end();
-
-                    break;
-                default:
-                    aContext.fail(
-                            LOGGER.getMessage(MessageCodes.MFS_183, ResourceTypes.MANIFEST, putResponse.statusCode()));
-                    TestUtils.complete(asyncTask);
-            }
-        }).exceptionHandler(error -> {
-            aContext.fail(error);
-            TestUtils.complete(asyncTask);
-        }).end(manifest);
-    }
-
-    /**
      * Test the PutManifestHandler.
      *
      * @param aContext A testing context

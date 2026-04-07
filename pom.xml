@@ -197,6 +197,9 @@
     
     <!-- Temporary so we can use jpv3 snapshot -->
     <enforcer.skip>true</enforcer.skip>
+
+    <!-- Ignore the AWS S3 API v1 deprecation warning -->
+    <disable.deprecation.warning>true</disable.deprecation.warning>
   </properties>
 
   <dependencyManagement>
@@ -1078,6 +1081,7 @@
                 <fester.url>${fester.url}</fester.url>
                 <fester.http.port>${test.http.port}</fester.http.port>
                 <vertx-config-path>${project.basedir}/target/test-classes/test-config.properties</vertx-config-path>
+                <aws.java.v1.disableDeprecationAnnouncement>${disable.deprecation.warning}</aws.java.v1.disableDeprecationAnnouncement>
               </systemPropertyVariables>
               <argLine>${jacoco.agent.arg}</argLine>
               <skipTests>${skipUTs}</skipTests>

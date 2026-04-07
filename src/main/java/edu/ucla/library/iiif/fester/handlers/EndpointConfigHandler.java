@@ -162,7 +162,7 @@ public class EndpointConfigHandler implements Handler<AsyncResult<OpenAPI3Router
             final PostZipHandler zipHandler = new PostZipHandler(myVertx, aConfig);
             final BodyHandler bodyHandlerZip = BodyHandler.create().setDeleteUploadedFilesOnEnd(true);
 
-            final PostZipHandler zipPatchHandler = new PostZipHandler(myVertx, aConfig);
+            final PatchZipHandler zipPatchHandler = new PatchZipHandler(myVertx, aConfig);
             final BodyHandler bodyHandlerZipPatch = BodyHandler.create().setDeleteUploadedFilesOnEnd(true);
 
             aFactory.addHandlerByOperationId(Op.POST_CSV, postHandler).setBodyHandler(bodyHandlerCSV);
