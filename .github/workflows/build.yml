@@ -43,6 +43,7 @@ jobs:
         env:
           MAVEN_USERNAME: ${{ secrets.JPV3_GH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.JPV3_GH_PAT }}
+          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
         run: |
           mvn -U -ntp clean verify \
             -Dfester.s3.access_key="${{ secrets.AWS_ACCESS_KEY }}" -Dsurefire.skipAfterFailureCount=1 \
