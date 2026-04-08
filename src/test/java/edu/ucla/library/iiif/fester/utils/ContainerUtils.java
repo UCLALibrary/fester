@@ -31,10 +31,13 @@ import edu.ucla.library.iiif.fester.TestConstants;
  */
 public final class ContainerUtils {
 
-    /* The endpoint host used from within the Fester container */
+    /* The endpoint host used from within the Fester container. */
     public static final String HOST = "http://" + S3_ALIAS + ":{}";
 
-    /* Logger for the container utilities */
+    /** The constant for the LocalStack token. */
+    private static final String LOCALSTACK_AUTH_TOKEN = "LOCALSTACK_AUTH_TOKEN";
+
+    /* Logger for the container utilities. */
     private static final Logger LOGGER = LoggerFactory.getLogger(ContainerUtils.class, MessageCodes.BUNDLE);
 
     private ContainerUtils() {
@@ -98,7 +101,8 @@ public final class ContainerUtils {
         final DockerImageName localstackImage = DockerImageName.parse("localstack/localstack");
         final LocalStackContainer s3Container = new LocalStackContainer(localstackImage);
 
-        s3Container.withServices(Service.S3).withNetwork(Network.SHARED).withNetworkAliases(S3_ALIAS).start();
+        s3Container.withServices(Service.S3).withNetwork(Network.SHARED).withNetworkAliases(S3_ALIAS)
+                .withEnv(LOCALSTACK_AUTH_TOKEN, System.getenv(LOCALSTACK_AUTH_TOKEN)).start();
 
         return s3Container;
     }
