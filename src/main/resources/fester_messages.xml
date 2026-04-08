@@ -198,5 +198,6 @@
   <entry key="MFS-185">Upload did not contain a ZIP file</entry>
   <entry key="MFS-186">Uploaded zips must only contain IIIF files</entry>
   <entry key="MFS-187">Uploaded zips must only contain JSON files</entry>
-  <entry key="MFS-188">Unexpected resource type</entry>
+  <entry key="MFS-188">Unexpected resource type: {}</entry>
+  <entry key="MFS-189">Patched JSON file: {}</entry>
 </properties>

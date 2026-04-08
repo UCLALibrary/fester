@@ -72,7 +72,7 @@
     <ubuntu.tag>22.04</ubuntu.tag>
     <jdk.version>21.0.10+7-1~22.04</jdk.version>
     <python3.version>3.10.6-1~22.04.1</python3.version>
-    <curl.version>7.81.0-1ubuntu1.22</curl.version>
+    <curl.version>7.81.0-1ubuntu1.23</curl.version>
 
     <!-- Application dependencies -->
     <vertx.version>3.9.16</vertx.version>
@@ -197,6 +197,9 @@
     
     <!-- Temporary so we can use jpv3 snapshot -->
     <enforcer.skip>true</enforcer.skip>
+
+    <!-- Ignore the AWS S3 API v1 deprecation warning -->
+    <disable.deprecation.warning>true</disable.deprecation.warning>
   </properties>
 
   <dependencyManagement>
@@ -1078,6 +1081,7 @@
                 <fester.url>${fester.url}</fester.url>
                 <fester.http.port>${test.http.port}</fester.http.port>
                 <vertx-config-path>${project.basedir}/target/test-classes/test-config.properties</vertx-config-path>
+                <aws.java.v1.disableDeprecationAnnouncement>${disable.deprecation.warning}</aws.java.v1.disableDeprecationAnnouncement>
               </systemPropertyVariables>
               <argLine>${jacoco.agent.arg}</argLine>
               <skipTests>${skipUTs}</skipTests>

@@ -31,10 +31,10 @@ import edu.ucla.library.iiif.fester.TestConstants;
  */
 public final class ContainerUtils {
 
-    /* The endpoint host used from within the Fester container */
+    /* The endpoint host used from within the Fester container. */
     public static final String HOST = "http://" + S3_ALIAS + ":{}";
 
-    /* Logger for the container utilities */
+    /* Logger for the container utilities. */
     private static final Logger LOGGER = LoggerFactory.getLogger(ContainerUtils.class, MessageCodes.BUNDLE);
 
     private ContainerUtils() {
@@ -95,7 +95,8 @@ public final class ContainerUtils {
      * @return A local S3-compatible container
      */
     public static LocalStackContainer getS3Container() {
-        final DockerImageName localstackImage = DockerImageName.parse("localstack/localstack");
+        // LocalStack 4.4.0 is the last version that doesn't require the auth so we pin that version
+        final DockerImageName localstackImage = DockerImageName.parse("localstack/localstack:4.4.0");
         final LocalStackContainer s3Container = new LocalStackContainer(localstackImage);
 
         s3Container.withServices(Service.S3).withNetwork(Network.SHARED).withNetworkAliases(S3_ALIAS).start();
