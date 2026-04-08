@@ -98,7 +98,7 @@ public final class ContainerUtils {
      * @return A local S3-compatible container
      */
     public static LocalStackContainer getS3Container() {
-        final DockerImageName localstackImage = DockerImageName.parse("localstack/localstack");
+        final DockerImageName localstackImage = DockerImageName.parse("localstack/localstack:4.4.0");
         final LocalStackContainer s3Container = new LocalStackContainer(localstackImage);
 
         s3Container.withServices(Service.S3).withNetwork(Network.SHARED).withNetworkAliases(S3_ALIAS)
