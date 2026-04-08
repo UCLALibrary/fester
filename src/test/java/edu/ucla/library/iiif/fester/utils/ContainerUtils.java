@@ -34,9 +34,6 @@ public final class ContainerUtils {
     /* The endpoint host used from within the Fester container. */
     public static final String HOST = "http://" + S3_ALIAS + ":{}";
 
-    /** The constant for the LocalStack token. */
-    private static final String LOCALSTACK_AUTH_TOKEN = "LOCALSTACK_AUTH_TOKEN";
-
     /* Logger for the container utilities. */
     private static final Logger LOGGER = LoggerFactory.getLogger(ContainerUtils.class, MessageCodes.BUNDLE);
 
@@ -98,11 +95,11 @@ public final class ContainerUtils {
      * @return A local S3-compatible container
      */
     public static LocalStackContainer getS3Container() {
+        // LocalStack 4.4.0 is the last version that doesn't require the auth so we pin that version
         final DockerImageName localstackImage = DockerImageName.parse("localstack/localstack:4.4.0");
         final LocalStackContainer s3Container = new LocalStackContainer(localstackImage);
 
-        s3Container.withServices(Service.S3).withNetwork(Network.SHARED).withNetworkAliases(S3_ALIAS)
-                .withEnv(LOCALSTACK_AUTH_TOKEN, System.getenv(LOCALSTACK_AUTH_TOKEN)).start();
+        s3Container.withServices(Service.S3).withNetwork(Network.SHARED).withNetworkAliases(S3_ALIAS).start();
 
         return s3Container;
     }
