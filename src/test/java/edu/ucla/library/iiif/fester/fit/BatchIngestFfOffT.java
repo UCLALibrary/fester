@@ -5,6 +5,7 @@ import static edu.ucla.library.iiif.fester.Constants.POST_CSV_ROUTE;
 import static edu.ucla.library.iiif.fester.Constants.UNSPECIFIED_HOST;
 
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Element;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
