@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
@@ -39,11 +40,11 @@ public class ImageInfoLookup {
      * @throws ImageNotFoundException If the requested image cannot be found
      */
     public ImageInfoLookup(final String aURL) throws MalformedURLException, IOException, ImageNotFoundException {
-        final URI uri;
+        final URL url;
 
         // Check to make sure our URL is valid
         try {
-            uri = URI.create(aURL);
+            url = URI.create(aURL).toURL();
             LOGGER.debug(MessageCodes.MFS_072, aURL);
         } catch (IllegalArgumentException details) {
             LOGGER.error(details, MessageCodes.MFS_190, aURL);
@@ -55,7 +56,7 @@ public class ImageInfoLookup {
             myHeight = 1000;
             myWidth = 1000;
         } else {
-            final HttpURLConnection connection = (HttpURLConnection) uri.toURL().openConnection();
+            final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             final int responseCode;
 
             connection.setReadTimeout(CANTALOUPE_TIMEOUT);
