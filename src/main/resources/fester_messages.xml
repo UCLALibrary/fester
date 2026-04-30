@@ -200,4 +200,5 @@
   <entry key="MFS-187">Uploaded zips must only contain JSON files</entry>
   <entry key="MFS-188">Unexpected resource type: {}</entry>
   <entry key="MFS-189">Patched JSON file: {}</entry>
+  <entry key="MFS-190">Image info lookup failed because of a malformed URL: {}</entry>
 </properties>

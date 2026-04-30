@@ -39,14 +39,23 @@ public class ImageInfoLookup {
      * @throws ImageNotFoundException If the requested image cannot be found
      */
     public ImageInfoLookup(final String aURL) throws MalformedURLException, IOException, ImageNotFoundException {
-        LOGGER.debug(MessageCodes.MFS_072, aURL);
+        final URI uri;
+
+        // Check to make sure our URL is valid
+        try {
+            uri = URI.create(aURL);
+            LOGGER.debug(MessageCodes.MFS_072, aURL);
+        } catch (IllegalArgumentException details) {
+            LOGGER.error(details, MessageCodes.MFS_190, aURL);
+            throw new MalformedURLException(aURL);
+        }
 
         // If our images are using an unspecified host, we're running in test mode and will use fake values
         if (aURL.contains(Constants.UNSPECIFIED_HOST) || aURL.startsWith(FAKE_IIIF_SERVER)) {
             myHeight = 1000;
             myWidth = 1000;
         } else {
-            final HttpURLConnection connection = (HttpURLConnection) URI.create(aURL).toURL().openConnection();
+            final HttpURLConnection connection = (HttpURLConnection) uri.toURL().openConnection();
             final int responseCode;
 
             connection.setReadTimeout(CANTALOUPE_TIMEOUT);
