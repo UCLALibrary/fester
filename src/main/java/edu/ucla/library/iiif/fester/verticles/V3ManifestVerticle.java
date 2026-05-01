@@ -73,7 +73,6 @@ import edu.ucla.library.iiif.fester.utils.V3CollectionItemLabelComparator;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -119,10 +118,10 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                         message.fail(HTTP.INTERNAL_SERVER_ERROR, LOGGER.getMessage(MessageCodes.MFS_153, action));
                         break;
                 }
-            } catch (final JsonProcessingException | DecodeException details) {
-                LOGGER.error(details, details.getMessage());
-                message.fail(HTTP.INTERNAL_SERVER_ERROR, details.getMessage());
-            } catch (final RuntimeException details) {
+            } catch (final ImageNotFoundException details) {
+                // We logged this earlier in the ImageInfoLookup class
+                message.fail(HTTP.BAD_REQUEST, details.getMessage());
+            } catch (final JsonProcessingException | RuntimeException details) {
                 LOGGER.error(details, details.getMessage());
                 message.fail(HTTP.INTERNAL_SERVER_ERROR, details.getMessage());
             }
@@ -203,8 +202,9 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
      *
      * @param aMessage Information needed to create a work manifest
      * @throws JsonProcessingException If there is trouble deserializing shared information
+     * @throws ImageNotFoundException If the image from the CSV data couldn't be found or was bad data
      */
-    private void createWork(final Message<JsonObject> aMessage) throws JsonProcessingException {
+    private void createWork(final Message<JsonObject> aMessage) throws JsonProcessingException, ImageNotFoundException {
         final JsonObject body = aMessage.body();
         final ObjectMapper mapper = new ObjectMapper();
         final CsvHeaders csvHeaders = CsvHeaders.fromJSON(body.getJsonObject(Constants.CSV_HEADERS));
@@ -429,8 +429,10 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
      *
      * @param aMessage A message with information about the page updates
      * @throws JsonProcessingException If there is trouble deserializing message components
+     * @throws ImageNotFoundException If the image from the CSV data couldn't be found or was bad data
      */
-    private void updatePages(final Message<JsonObject> aMessage) throws JsonProcessingException {
+    private void updatePages(final Message<JsonObject> aMessage)
+            throws JsonProcessingException, ImageNotFoundException {
         final JsonObject body = aMessage.body();
         final String workID = body.getString(Constants.MANIFEST_ID);
         final String imageHost = body.getString(Constants.IIIF_HOST);
@@ -478,9 +480,11 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
      * @param aSequence A sequence to add pages to
      * @param aImageHost An image host for image links
      * @param aMinter An ID minter
+     * @throws ImageNotFoundException If the image from the CSV data couldn't be found or was bad data
      */
     private Canvas[] createCanvases(final CsvHeaders aCsvHeaders, final List<String[]> aPageList,
-            final String aImageHost, final String aPlaceholderImage, final Minter aMinter) {
+            final String aImageHost, final String aPlaceholderImage, final Minter aMinter)
+            throws ImageNotFoundException {
         final Iterator<String[]> iterator = aPageList.iterator();
         final List<Canvas> canvases = new ArrayList<>();
 
@@ -584,7 +588,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
 
                     canvas.setWidthHeight(width, height).setThumbnails(new ImageContent(thumbnail));
                     canvas.paintWith(image);
-                } catch (final ImageNotFoundException | IOException details) {
+                } catch (final IOException details) {
                     LOGGER.info(MessageCodes.MFS_078, pageID);
 
                     if (aPlaceholderImage != null) {
@@ -608,7 +612,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                             // Create a canvas using the width and height of the placeholder image
                             canvas.setWidthHeight(width, height).setThumbnails(new ImageContent(thumbnail));
                             canvas.paintWith(image);
-                        } catch (final ImageNotFoundException | IOException lookupDetails) {
+                        } catch (final IOException lookupDetails) {
                             // We couldn't find the placeholder image so we create an empty canvas
                             LOGGER.error(lookupDetails, lookupDetails.getMessage());
 

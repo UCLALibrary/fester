@@ -1,6 +1,3 @@
-/**
- *
- */
 
 package edu.ucla.library.iiif.fester.utils;
 

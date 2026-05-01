@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 import info.freelibrary.util.StringUtils;
+import info.freelibrary.util.ThrowingConsumer;
 
 import info.freelibrary.iiif.presentation.v2.Canvas;
 import info.freelibrary.iiif.presentation.v2.Collection;
@@ -107,6 +108,9 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
                         message.fail(HTTP.INTERNAL_SERVER_ERROR, LOGGER.getMessage(MessageCodes.MFS_153, action));
                         break;
                 }
+            } catch (final ImageNotFoundException details) {
+                LOGGER.error(details, details.getMessage());
+                message.fail(HTTP.BAD_REQUEST, details.getMessage());
             } catch (final JsonProcessingException | DecodeException details) {
                 LOGGER.error(details, details.getMessage());
                 message.fail(HTTP.INTERNAL_SERVER_ERROR, details.getMessage());
@@ -190,8 +194,9 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
      *
      * @param aMessage Information needed to create a work manifest
      * @throws JsonProcessingException If there is trouble deserializing shared information
+     * @throws ImageNotFoundException If an image URL from the CSV data is bad or an empty URL
      */
-    private void createWork(final Message<JsonObject> aMessage) throws JsonProcessingException {
+    private void createWork(final Message<JsonObject> aMessage) throws JsonProcessingException, ImageNotFoundException {
         final JsonObject body = aMessage.body();
         final ObjectMapper mapper = new ObjectMapper();
         final CsvHeaders csvHeaders = CsvHeaders.fromJSON(body.getJsonObject(Constants.CSV_HEADERS));
@@ -251,13 +256,15 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
             pageList.sort(new ItemSequenceComparator(csvHeaders.getItemSequenceIndex()));
             sequence.addCanvas(createCanvases(csvHeaders, pageList, imageHost, placeholderImage, encodedWorkID));
         } else {
-            CsvParser.getMetadata(workRow, csvHeaders.getContentAccessUrlIndex()).ifPresent(accessURL -> {
-                final List<String[]> pageList = new ArrayList<>(1);
+            CsvParser.getMetadata(workRow, csvHeaders.getContentAccessUrlIndex())
+                    .ifPresent(ThrowingConsumer.sneaky(accessURL -> {
+                        final List<String[]> pageList = new ArrayList<>(1);
 
-                pageList.add(workRow);
-                manifest.addSequence(sequence);
-                sequence.addCanvas(createCanvases(csvHeaders, pageList, imageHost, placeholderImage, encodedWorkID));
-            });
+                        pageList.add(workRow);
+                        manifest.addSequence(sequence);
+                        sequence.addCanvas(
+                                createCanvases(csvHeaders, pageList, imageHost, placeholderImage, encodedWorkID));
+                    }));
         }
 
         jsonManifest = manifest.toJSON();
@@ -399,8 +406,10 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
      *
      * @param aMessage A message with information about the page updates
      * @throws JsonProcessingException If there is trouble deserializing message components
+     * @throws ImageNotFoundException If the canvas' image couldn't be found
      */
-    private void updatePages(final Message<JsonObject> aMessage) throws JsonProcessingException {
+    private void updatePages(final Message<JsonObject> aMessage)
+            throws JsonProcessingException, ImageNotFoundException {
         final JsonObject body = aMessage.body();
         final String workID = body.getString(Constants.MANIFEST_ID);
         final String imageHost = body.getString(Constants.IIIF_HOST);
@@ -460,11 +469,12 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
      * @param aImageHost An image host for image links
      * @param aWorkID A URL encoded work ID
      * @return An array of canvases
-     * @throws IOException If there is trouble adding a page
+     * @throws ImageNotFoundException If the canvas' image couldn't be found
      */
     @SuppressWarnings({ "PMD.CyclomaticComplexity", "PMD.NcssCount" })
     private Canvas[] createCanvases(final CsvHeaders aCsvHeaders, final List<String[]> aPageList,
-            final String aImageHost, final String aPlaceholderImage, final String aWorkID) {
+            final String aImageHost, final String aPlaceholderImage, final String aWorkID)
+            throws ImageNotFoundException {
         final Iterator<String[]> iterator = aPageList.iterator();
         final List<Canvas> canvases = new ArrayList<>();
 
