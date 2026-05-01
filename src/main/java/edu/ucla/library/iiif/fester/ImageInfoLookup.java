@@ -48,7 +48,7 @@ public class ImageInfoLookup {
             LOGGER.debug(MessageCodes.MFS_072, aURL);
         } catch (IllegalArgumentException details) {
             LOGGER.error(details, MessageCodes.MFS_190, aURL);
-            throw new MalformedURLException(aURL);
+            throw new ImageNotFoundException(MessageCodes.MFS_190, aURL);
         }
 
         // If our images are using an unspecified host, we're running in test mode and will use fake values
