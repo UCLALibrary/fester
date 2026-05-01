@@ -406,6 +406,7 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
      *
      * @param aMessage A message with information about the page updates
      * @throws JsonProcessingException If there is trouble deserializing message components
+     * @throws ImageNotFoundException If the canvas' image couldn't be found
      */
     private void updatePages(final Message<JsonObject> aMessage)
             throws JsonProcessingException, ImageNotFoundException {
