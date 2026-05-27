@@ -490,13 +490,13 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
 
         while (iterator.hasNext()) {
             final String[] columns = iterator.next();
-            final String pageID = columns[aCsvHeaders.getItemArkIndex()];
+            final String pageID = columns[aCsvHeaders.getItemArkIndex()]; // Get the Item ARK
             final Label pageLabel = new Label(columns[aCsvHeaders.getTitleIndex()]);
             final Optional<String> format = CsvParser.getMetadata(columns, aCsvHeaders.getMediaFormatIndex());
 
             final String imageThumbnailSize = StringUtils.trimTo(
                     config().getString(Config.DEFAULT_IMAGE_THUMBNAIL_SIZE), Constants.DEFAULT_IMAGE_THUMBNAIL_SIZE);
-            final String encodedPageID = URLEncoder.encode(pageID, StandardCharsets.UTF_8);
+            final String encodedPageID = URLEncoder.encode(pageID, StandardCharsets.UTF_8); // Encode Item ARK
             final Optional<String> thumbnailOpt = CsvParser.getMetadata(columns, aCsvHeaders.getThumbnailIndex());
             final Canvas canvas = new Canvas(aMinter, pageLabel);
 
@@ -558,7 +558,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                 String resourceURI;
                 ImageContent image;
 
-                pageURI = StringUtils.format(SIMPLE_URI, aImageHost, encodedPageID);
+                pageURI = StringUtils.format(SIMPLE_URI, aImageHost, encodedPageID); // Get page URI from encoded ID
                 resourceURI = StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, pageURI, Constants.DEFAULT_SAMPLE_SIZE);
 
                 if (thumbnailOpt.isPresent()) {
@@ -579,7 +579,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                         height = Integer.parseInt(mediaHeight.get());
                         image = new ImageContent(accessURI).setWidthHeight(width, height);
                     } else {
-                        final ImageInfoLookup infoLookup = new ImageInfoLookup(pageURI);
+                        final ImageInfoLookup infoLookup = new ImageInfoLookup(pageURI); // Look up w/h for page URI
 
                         width = infoLookup.getWidth();
                         height = infoLookup.getHeight();

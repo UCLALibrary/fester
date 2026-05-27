@@ -42,12 +42,14 @@ public class ImageInfoLookup {
     public ImageInfoLookup(final String aURL) throws MalformedURLException, IOException, ImageNotFoundException {
         final URL url;
 
+        LOGGER.info(MessageCodes.MFS_191, aURL.isBlank() ? "[MISSING]" : aURL);
+
         // Check to make sure our URL is valid
         try {
             url = URI.create(aURL).toURL();
             LOGGER.debug(MessageCodes.MFS_072, aURL);
         } catch (IllegalArgumentException details) {
-            LOGGER.error(details, MessageCodes.MFS_190, aURL);
+            LOGGER.error(details, MessageCodes.MFS_190, aURL.isBlank() ? "[MISSING]" : aURL);
             throw new ImageNotFoundException(MessageCodes.MFS_190, aURL);
         }
 
