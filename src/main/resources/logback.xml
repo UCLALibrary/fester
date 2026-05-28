@@ -1,64 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration debug="false">
-  <property file="/etc/fester/fester.properties" />
 
-  <include resource="logback-appenders-fluentd.xml" />
-  <include resource="logback-appenders-stdout.xml" />
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>[%level] %logger{0}:%X{line} %d{yyyy-MM-dd_HH:mm:ss.SSS} | %msg%n</pattern>
+    </encoder>
+  </appender>
 
-  <logger name="io.netty" level="WARN" additivity="true">
-    <appender-ref ref="STDOUT" />
-    <if condition='property("fluency.enabled").equals("true")'>
-      <then>
-        <appender-ref ref="FLUENCY" />
-      </then>
-    </if>
-  </logger>
+  <logger name="io.netty" level="WARN" />
+  <logger name="io.vertx" level="INFO" />
+  <logger name="info.freelibrary.util.I18nException" level="WARN" />
+  <logger name="info.freelibrary.iiif.presentation.v2.ServiceImage" level="ERROR" />
 
-  <logger name="io.vertx" level="INFO" additivity="true">
-    <appender-ref ref="STDOUT" />
-    <if condition='property("fluency.enabled").equals("true")'>
-      <then>
-        <appender-ref ref="FLUENCY" />
-      </then>
-    </if>
-  </logger>
+  <logger name="edu.ucla.library.iiif.fester" level="${logLevel}" />
 
-  <logger name="info.freelibrary.util.I18nException" level="WARN" additivity="true">
-    <appender-ref ref="STDOUT" />
-    <if condition='property("fluency.enabled").equals("true")'>
-      <then>
-        <appender-ref ref="FLUENCY" />
-      </then>
-    </if>
-  </logger>
-
-  <logger name="info.freelibrary.iiif.presentation.v2.ServiceImage" level="ERROR">
-    <appender-ref ref="STDOUT" />
-    <if condition='property("fluency.enabled").equals("true")'>
-      <then>
-        <appender-ref ref="FLUENCY" />
-      </then>
-    </if>
-  </logger>
-
-  <!-- Loggers for our application -->
-  <logger name="edu.ucla.library.iiif.fester" level="${logLevel}" additivity="true">
-    <appender-ref ref="STDOUT" />
-    <if condition='property("fluency.enabled").equals("true")'>
-      <then>
-        <appender-ref ref="FLUENCY" />
-      </then>
-    </if>
-  </logger>
-
-  <!-- Default logging level for everything else -->
   <root level="WARN">
     <appender-ref ref="STDOUT" />
-    <if condition='property("fluency.enabled").equals("true")'>
-      <then>
-        <appender-ref ref="FLUENCY" />
-      </then>
-    </if>
   </root>
 
 </configuration>
