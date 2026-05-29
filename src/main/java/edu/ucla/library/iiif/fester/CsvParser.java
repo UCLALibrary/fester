@@ -2,7 +2,6 @@
 package edu.ucla.library.iiif.fester;
 
 import static edu.ucla.library.iiif.fester.Constants.EMPTY;
-import static edu.ucla.library.iiif.fester.Constants.SPACE;
 
 import java.io.IOException;
 import java.net.URI;
@@ -380,7 +379,6 @@ public class CsvParser {
                 throw new CsvParsingException(MessageCodes.MFS_169, format, rowId, aPath);
             }
 
-            LOGGER.info("Media Format: " + primaryType + SPACE + format + SPACE + myCsvHeaders.getMediaFormatIndex());
             switch (primaryType) {
                 case "video": {
                     if (mediaWidth.isEmpty() || mediaHeight.isEmpty() || mediaDuration.isEmpty() ||
@@ -409,13 +407,7 @@ public class CsvParser {
 
                     break;
                 }
-                default: {
-                    // We'll assume anything without a format is image and we don't _require_ w/h for that
-                }
             }
-        } else if (mediaWidth.isPresent() || mediaHeight.isPresent() || mediaDuration.isPresent() ||
-                audioVideoAccessUrl.isPresent() && audioVideoAccessUrl.toString().contains(aAVUrlString)) {
-            throw new CsvParsingException(MessageCodes.MFS_172, rowId, aPath);
         }
 
         return aRow;
