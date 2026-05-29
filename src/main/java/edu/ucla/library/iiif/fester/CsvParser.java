@@ -409,12 +409,8 @@ public class CsvParser {
 
                     break;
                 }
-                case "image": {
-                    // Do nothing for now? This just accepts it as one of the types we process.
-                    break;
-                }
                 default: {
-                    throw new CsvParsingException(MessageCodes.MFS_171, primaryType, rowId, aPath);
+                    // We'll assume anything without a format is image and we don't _require_ w/h for that
                 }
             }
         } else if (mediaWidth.isPresent() || mediaHeight.isPresent() || mediaDuration.isPresent() ||
