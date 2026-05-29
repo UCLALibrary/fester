@@ -379,6 +379,7 @@ public class CsvParser {
                 throw new CsvParsingException(MessageCodes.MFS_169, format, rowId, aPath);
             }
 
+            LOGGER.info("Media Format: " + primaryType + " " + format + " " + myCsvHeaders.getMediaFormatIndex());
             switch (primaryType) {
                 case "video": {
                     if (mediaWidth.isEmpty() || mediaHeight.isEmpty() || mediaDuration.isEmpty() ||
