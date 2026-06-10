@@ -64,6 +64,8 @@
                 "id": "https://test.example.com/iiif/ark%3A%2F21198%2Fzz000bjffn/full/600,/0/default.jpg",
                 "type": "Image",
                 "format": "image/jpeg",
+                "width": 1000,
+                "height": 1000,
                 "service": [
                   {
                     "@id": "https://test.example.com/iiif/ark%3A%2F21198%2Fzz000bjffn",
