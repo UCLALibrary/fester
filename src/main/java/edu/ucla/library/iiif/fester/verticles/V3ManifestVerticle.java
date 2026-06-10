@@ -577,15 +577,16 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                     if (mediaWidth.isPresent() && mediaHeight.isPresent()) {
                         width = Integer.parseInt(mediaWidth.get());
                         height = Integer.parseInt(mediaHeight.get());
-                        image = new ImageContent(accessURI).setWidthHeight(width, height);
+                        image = new ImageContent(accessURI);
                     } else {
                         final ImageInfoLookup infoLookup = new ImageInfoLookup(pageURI); // Look up w/h for page URI
 
                         width = infoLookup.getWidth();
                         height = infoLookup.getHeight();
-                        image = new ImageContent(resourceURI).setServices(new ImageService2(pageURI));
+                        image = new ImageContent(resourceURI);
                     }
 
+                    image.setWidthHeight(width, height).setServices(new ImageService2(pageURI));
                     canvas.setWidthHeight(width, height).setThumbnails(new ImageContent(thumbnail));
                     canvas.paintWith(image);
                 } catch (final IOException details) {
