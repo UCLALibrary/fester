@@ -121,8 +121,8 @@
     <vertx.plugin.version>1.0.27</vertx.plugin.version>
     <codacy.plugin.version>1.2.0</codacy.plugin.version>
     <xml.maven.plugin.version>1.0.2</xml.maven.plugin.version>
-    <docker.maven.plugin.version>0.48.0</docker.maven.plugin.version>
-    <localstack.version>1.21.3</localstack.version>
+    <docker.maven.plugin.version>0.48.1</docker.maven.plugin.version>
+    <localstack.version>1.21.3</localstack.version> <!-- Pinned, do not advance -->
 
     <!-- Name of the main Vert.x verticle -->
     <main.verticle>edu.ucla.library.iiif.fester.verticles.MainVerticle</main.verticle>
@@ -194,9 +194,6 @@
     <pmd.skip>true</pmd.skip>
     <cpd.skip>true</cpd.skip>
     <checkstyle.skip>true</checkstyle.skip>
-    
-    <!-- Temporary so we can use jpv3 snapshot -->
-    <enforcer.skip>true</enforcer.skip>
 
     <!-- Ignore the AWS S3 API v1 deprecation warning -->
     <disable.deprecation.warning>true</disable.deprecation.warning>
@@ -565,6 +562,45 @@
       <!-- Enforcer enforces some basic characteristics of the project -->
       <plugin>
         <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>enforce-no-snapshots</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <failFast>true</failFast>
+              <rules>
+                <requireReleaseDeps>
+                  <onlyWhenRelease>false</onlyWhenRelease>
+                  <failWhenParentIsSnapshot>false</failWhenParentIsSnapshot>
+                  <excludes>
+                    <!-- Temporarily allow the jpv3 snapshot/WIP release -->
+                    <exclude>info.freelibrary:jiiify-presentation-v3</exclude>
+                  </excludes>
+                  <message>
+                    <![CDATA[Sorry, dependency snapshots are not allowed! To temporarily ignore this]]>
+                    <![CDATA[restriction add the following to the command line: -Denforcer.skip=true]]>
+                  </message>
+                </requireReleaseDeps>
+              </rules>
+              <fail>true</fail>
+            </configuration>
+          </execution>
+          <execution>
+            <id>enforce-java</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireJavaVersion>
+                  <version>[21,22)</version>
+                </requireJavaVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
 
       <!-- Maven dependency helps freelib-resources copy files into the project -->
