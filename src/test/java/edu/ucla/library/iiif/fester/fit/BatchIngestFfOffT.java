@@ -67,7 +67,7 @@ public class BatchIngestFfOffT extends BaseFesterFfT {
     public final void testCsvUploadPage(final TestContext aContext) {
         final Async asyncTask = aContext.async();
 
-        myWebClient.get(FESTER_PORT, Constants.UNSPECIFIED_HOST, UPLOAD_FORM_PATH).send(request -> {
+        myWebClient.get(FESTER_PORT, UNSPECIFIED_HOST, UPLOAD_FORM_PATH).send(request -> {
             if (request.succeeded()) {
                 final String html = request.result().bodyAsString();
                 final Element h1 = Jsoup.parse(html).selectFirst("h1");
