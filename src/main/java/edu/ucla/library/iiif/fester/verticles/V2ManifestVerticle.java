@@ -490,12 +490,13 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
             final String accessURI = StringUtils.trimToNull(columns[aCsvHeaders.getContentAccessUrlIndex()]);
             final Optional<String> thumbnail = CsvParser.getMetadata(columns, aCsvHeaders.getThumbnailIndex());
 
-            String resourceURI =
-                    StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, pageURI, Constants.DEFAULT_SAMPLE_SIZE);
             boolean staticImage = false;
+            String resourceURI;
             ImageResource imageResource;
             ImageContent imageContent;
             Canvas canvas;
+
+            resourceURI = StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, pageURI, Constants.DEFAULT_SAMPLE_SIZE);
 
             try {
                 final Optional<String> width = CsvParser.getMetadata(columns, aCsvHeaders.getMediaWidthIndex());
@@ -509,9 +510,10 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
                         mediaWidth = Integer.parseInt(width.get());
                         mediaHeight = Integer.parseInt(height.get());
 
-                        imageResource = new ImageResource(accessURI);
+                        imageResource = new ImageResource(resourceURI);
                         imageResource.setWidth(mediaWidth);
                         imageResource.setHeight(mediaHeight);
+                        imageResource.setService(new ImageInfoService(APIComplianceLevel.TWO, pageURI));
                         staticImage = true;
                     } else {
                         // If we don't have both width and height in the CSV, we can also try to look it up
