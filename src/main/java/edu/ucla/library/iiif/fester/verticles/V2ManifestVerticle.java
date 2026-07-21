@@ -513,8 +513,12 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
                         imageResource = new ImageResource(resourceURI);
                         imageResource.setWidth(mediaWidth);
                         imageResource.setHeight(mediaHeight);
-                        imageResource.setService(new ImageInfoService(APIComplianceLevel.TWO, pageURI));
-                        staticImage = true;
+
+                        if (!accessURI.matches("^.+\\.[^.]+$")) { // Does the URI have a file extension?
+                            imageResource.setService(new ImageInfoService(APIComplianceLevel.TWO, pageURI));
+                        } else {
+                            staticImage = true;
+                        }
                     } else {
                         // If we don't have both width and height in the CSV, we can also try to look it up
                         final ImageInfoLookup infoLookup = new ImageInfoLookup(pageURI);
