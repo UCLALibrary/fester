@@ -579,7 +579,8 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                         height = Integer.parseInt(mediaHeight.get());
                         image = new ImageContent(resourceURI);
 
-                        if (!accessURI.matches("^.+\\.[^.]+$")) { // Does the URI have a file extension?
+                        // Does the URI have a file extension?
+                        if (!isStaticFile(accessURI)) {
                             image.setServices(new ImageService2(pageURI));
                         }
                     } else {

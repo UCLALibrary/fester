@@ -514,7 +514,8 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
                         imageResource.setWidth(mediaWidth);
                         imageResource.setHeight(mediaHeight);
 
-                        if (!accessURI.matches("^.+\\.[^.]+$")) { // Does the URI have a file extension?
+                        // Does the URI have a file extension?
+                        if (!isStaticFile(accessURI)) {
                             imageResource.setService(new ImageInfoService(APIComplianceLevel.TWO, pageURI));
                         } else {
                             staticImage = true;

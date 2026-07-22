@@ -1,6 +1,9 @@
 
 package edu.ucla.library.iiif.fester.verticles;
 
+import java.util.Set;
+
+import info.freelibrary.util.FileUtils;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
@@ -24,6 +27,8 @@ import io.vertx.core.shareddata.LocalMap;
 public abstract class AbstractFesterVerticle extends AbstractVerticle {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFesterVerticle.class, Constants.MESSAGES);
+
+    private static final Set<String> WEB_IMAGE_EXTENSIONS = Set.of("jpg", "jpeg", "png", "gif", "webp", "svg");
 
     @Override
     public void start() throws Exception {
@@ -111,5 +116,15 @@ public abstract class AbstractFesterVerticle extends AbstractVerticle {
             LOGGER.error(aThrowable, log);
             aMessage.fail(HTTP.INTERNAL_SERVER_ERROR, log);
         }
+    }
+
+    /**
+     * Checks whether the supplied URI ends with a known/supported image extension.
+     *
+     * @param aURI A URI to check
+     * @return True is the static image file extension is found; else, false
+     */
+    protected boolean isStaticFile(final String aURI) {
+        return WEB_IMAGE_EXTENSIONS.contains(FileUtils.getExt(aURI)); // Returns EMPTY if none, which won't match
     }
 }
