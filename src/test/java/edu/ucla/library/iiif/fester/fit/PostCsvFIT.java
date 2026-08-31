@@ -127,7 +127,7 @@ public class PostCsvFIT {
      * Functional tests for the CSV upload feature.
      */
     @RunWith(VertxUnitRunner.class)
-    public static class PostCsvFT extends BaseFesterFT {
+    public static class PostCsvFT extends BaseFesterFfT {
 
         @Override
         @Before
@@ -910,6 +910,7 @@ public class PostCsvFIT {
                         } else {
                             aContext.fail(LOGGER.getMessage(MessageCodes.MFS_154, ALL_IN_ONE_CSV));
                         }
+
                         TestUtils.complete(asyncTask);
                     } else {
                         aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, statusCode, statusMessage));

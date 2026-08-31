@@ -490,18 +490,24 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
 
         while (iterator.hasNext()) {
             final String[] columns = iterator.next();
-            final String pageID = columns[aCsvHeaders.getItemArkIndex()]; // Get the Item ARK
             final Label pageLabel = new Label(columns[aCsvHeaders.getTitleIndex()]);
             final Optional<String> format = CsvParser.getMetadata(columns, aCsvHeaders.getMediaFormatIndex());
 
             final String imageThumbnailSize = StringUtils.trimTo(
                     config().getString(Config.DEFAULT_IMAGE_THUMBNAIL_SIZE), Constants.DEFAULT_IMAGE_THUMBNAIL_SIZE);
-            final String encodedPageID = URLEncoder.encode(pageID, StandardCharsets.UTF_8); // Encode Item ARK
             final Optional<String> thumbnailOpt = CsvParser.getMetadata(columns, aCsvHeaders.getThumbnailIndex());
             final Canvas canvas = new Canvas(aMinter, pageLabel);
 
+            final String pageID = StringUtils.trimToNull(columns[aCsvHeaders.getItemArkIndex()]); // Never null
+            final String pageURI = StringUtils.format(SIMPLE_URI, aImageHost, URLEncoder.encode(pageID, UTF_8));
+            final String accessURI = StringUtils.trimToNull(columns[aCsvHeaders.getContentAccessUrlIndex()]);
+
+            final String serviceURI = accessURI == null ? pageURI : accessURI;
+            final String resourceURI = accessURI == null
+                    ? StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, pageURI, Constants.DEFAULT_SAMPLE_SIZE)
+                    : StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, accessURI, Constants.DEFAULT_SAMPLE_SIZE);
+
             final String thumbnail;
-            final String pageURI;
             final float duration;
 
             int width;
@@ -509,8 +515,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
 
             // We've already validated the MIME type in CsvParser, so it's fine to just check for a substring here
             if (format.isPresent() && format.get().contains("video/")) {
-                final String resourceURI = CsvParser.getMetadata(columns, aCsvHeaders.getContentAccessUrlIndex()).get();
-                final VideoContent[] videos = getVideoContent(resourceURI);
+                final VideoContent[] videos = getVideoContent(accessURI);
 
                 if (thumbnailOpt.isPresent()) {
                     thumbnail = thumbnailOpt.get();
@@ -527,8 +532,7 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                 canvas.setWidthHeight(width, height).setDuration(duration).setThumbnails(new ImageContent(thumbnail));
                 canvas.paintWith(true, videos);
             } else if (format.isPresent() && format.get().contains("audio/")) {
-                final String resourceURI = CsvParser.getMetadata(columns, aCsvHeaders.getContentAccessUrlIndex()).get();
-                final SoundContent[] audios = getSoundContent(resourceURI);
+                final SoundContent[] audios = getSoundContent(accessURI);
 
                 if (thumbnailOpt.isPresent()) {
                     thumbnail = thumbnailOpt.get();
@@ -553,18 +557,13 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                     anno.setSeeAlsoRefs(waveform);
                 });
             } else {
-                final String accessURI = StringUtils.trimToNull(columns[aCsvHeaders.getContentAccessUrlIndex()]);
-
-                String resourceURI;
                 ImageContent image;
-
-                pageURI = StringUtils.format(SIMPLE_URI, aImageHost, encodedPageID); // Get page URI from encoded ID
-                resourceURI = StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, pageURI, Constants.DEFAULT_SAMPLE_SIZE);
 
                 if (thumbnailOpt.isPresent()) {
                     thumbnail = thumbnailOpt.get();
                 } else {
-                    thumbnail = StringUtils.format(Constants.IIIF_THUMBNAIL_URI_TEMPLATE, pageURI, imageThumbnailSize);
+                    thumbnail =
+                            StringUtils.format(Constants.IIIF_THUMBNAIL_URI_TEMPLATE, serviceURI, imageThumbnailSize);
                 }
 
                 // Try to look up the w/h but on failure, fall back to a placeholder image
@@ -580,15 +579,15 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                         image = new ImageContent(resourceURI);
 
                         // Does the URI have a file extension?
-                        if (!isStaticFile(accessURI)) {
-                            image.setServices(new ImageService2(pageURI));
+                        if (!isStaticFile(serviceURI)) {
+                            image.setServices(new ImageService2(serviceURI));
                         }
                     } else {
-                        final ImageInfoLookup infoLookup = new ImageInfoLookup(pageURI); // Look up w/h for page URI
+                        final ImageInfoLookup infoLookup = new ImageInfoLookup(accessURI); // Look up w/h for page URI
 
                         width = infoLookup.getWidth();
                         height = infoLookup.getHeight();
-                        image = new ImageContent(resourceURI).setServices(new ImageService2(pageURI));
+                        image = new ImageContent(resourceURI).setServices(new ImageService2(serviceURI));
                     }
 
                     image.setWidthHeight(width, height);
@@ -612,8 +611,9 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
                             }
 
                             // If placeholder image found, use its URL for image resource and service
-                            resourceURI = StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, aPlaceholderImage, size);
-                            image = new ImageContent(resourceURI).setServices(new ImageService2(aPlaceholderImage));
+                            image = new ImageContent(
+                                    StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, aPlaceholderImage, size))
+                                    .setServices(new ImageService2(aPlaceholderImage));
 
                             // Create a canvas using the width and height of the placeholder image
                             canvas.setWidthHeight(width, height).setThumbnails(new ImageContent(thumbnail));
