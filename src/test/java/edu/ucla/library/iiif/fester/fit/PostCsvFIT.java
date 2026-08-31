@@ -127,7 +127,7 @@ public class PostCsvFIT {
      * Functional tests for the CSV upload feature.
      */
     @RunWith(VertxUnitRunner.class)
-    public static class PostCsvFT extends BaseFesterFfT {
+    public static class PostCsvFT extends BaseFesterFT {
 
         @Override
         @Before
