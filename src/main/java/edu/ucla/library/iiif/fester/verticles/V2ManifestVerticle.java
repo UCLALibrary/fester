@@ -491,12 +491,14 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
             final Optional<String> thumbnail = CsvParser.getMetadata(columns, aCsvHeaders.getThumbnailIndex());
 
             boolean staticImage = false;
-            String resourceURI;
             ImageResource imageResource;
             ImageContent imageContent;
             Canvas canvas;
 
-            resourceURI = StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, pageURI, Constants.DEFAULT_SAMPLE_SIZE);
+            final String serviceURI = accessURI == null ? pageURI : accessURI;
+            final String resourceURI = accessURI == null
+                    ? StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, pageURI, Constants.DEFAULT_SAMPLE_SIZE)
+                    : StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, accessURI, Constants.DEFAULT_SAMPLE_SIZE);
 
             try {
                 final Optional<String> width = CsvParser.getMetadata(columns, aCsvHeaders.getMediaWidthIndex());
@@ -515,30 +517,30 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
                         imageResource.setHeight(mediaHeight);
 
                         // Does the URI have a file extension?
-                        if (!isStaticFile(accessURI)) {
-                            imageResource.setService(new ImageInfoService(APIComplianceLevel.TWO, pageURI));
+                        if (!isStaticFile(serviceURI)) {
+                            imageResource.setService(new ImageInfoService(APIComplianceLevel.TWO, serviceURI));
                         } else {
                             staticImage = true;
                         }
                     } else {
                         // If we don't have both width and height in the CSV, we can also try to look it up
-                        final ImageInfoLookup infoLookup = new ImageInfoLookup(pageURI);
+                        final ImageInfoLookup infoLookup = new ImageInfoLookup(serviceURI);
 
                         mediaWidth = infoLookup.getWidth();
                         mediaHeight = infoLookup.getHeight();
 
                         imageResource = new ImageResource(resourceURI);
-                        imageResource.setService(new ImageInfoService(APIComplianceLevel.TWO, pageURI));
+                        imageResource.setService(new ImageInfoService(APIComplianceLevel.TWO, serviceURI));
                     }
                 } catch (final NumberFormatException details) {
                     // If we don't have a valid information w/h in the CSV, we can also try to look it up
-                    final ImageInfoLookup infoLookup = new ImageInfoLookup(pageURI);
+                    final ImageInfoLookup infoLookup = new ImageInfoLookup(serviceURI);
 
                     mediaWidth = infoLookup.getWidth();
                     mediaHeight = infoLookup.getHeight();
 
                     imageResource = new ImageResource(resourceURI);
-                    imageResource.setService(new ImageInfoService(APIComplianceLevel.TWO, pageURI));
+                    imageResource.setService(new ImageInfoService(APIComplianceLevel.TWO, serviceURI));
                 }
 
                 // Create a canvas using the width and height of the related image
@@ -552,7 +554,7 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
                     canvas.setThumbnail(thumbnail.get());
                 } else if (staticImage) {
                     // Fallback to using the original image as thumbnail and let browser resize
-                    canvas.setThumbnail(accessURI);
+                    canvas.setThumbnail(serviceURI);
                 }
             } catch (final ImageNotFoundException | IOException details) {
                 LOGGER.info(MessageCodes.MFS_078, pageID);
@@ -571,8 +573,8 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
                         }
 
                         // If placeholder image found, use its URL for image resource and service
-                        resourceURI = StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, aPlaceholderImage, size);
-                        imageResource = new ImageResource(resourceURI,
+                        imageResource = new ImageResource(
+                                StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, aPlaceholderImage, size),
                                 new ImageInfoService(APIComplianceLevel.TWO, aPlaceholderImage));
 
                         // Create a canvas using the width and height of the placeholder image

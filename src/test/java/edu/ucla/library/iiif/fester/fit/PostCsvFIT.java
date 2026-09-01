@@ -910,6 +910,7 @@ public class PostCsvFIT {
                         } else {
                             aContext.fail(LOGGER.getMessage(MessageCodes.MFS_154, ALL_IN_ONE_CSV));
                         }
+
                         TestUtils.complete(asyncTask);
                     } else {
                         aContext.fail(LOGGER.getMessage(MessageCodes.MFS_039, statusCode, statusMessage));
