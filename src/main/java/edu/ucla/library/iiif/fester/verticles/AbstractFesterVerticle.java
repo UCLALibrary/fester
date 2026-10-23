@@ -2,10 +2,12 @@
 package edu.ucla.library.iiif.fester.verticles;
 
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import info.freelibrary.util.FileUtils;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
+import info.freelibrary.util.StringUtils;
 
 import edu.ucla.library.iiif.fester.Constants;
 import edu.ucla.library.iiif.fester.HTTP;
@@ -30,6 +32,8 @@ public abstract class AbstractFesterVerticle extends AbstractVerticle {
 
     private static final Set<String> WEB_IMAGE_EXTENSIONS = Set.of("jpg", "jpeg", "png", "gif", "webp", "svg");
 
+    private static final Pattern EXT_PATTERN = Pattern.compile("\\.[A-Za-z0-9]{3}\\z");
+
     @Override
     public void start() throws Exception {
         LOGGER.debug(MessageCodes.MFS_110, getClass().getName(), deploymentID());
@@ -52,6 +56,17 @@ public abstract class AbstractFesterVerticle extends AbstractVerticle {
     @Override
     public void stop() {
         LOGGER.debug(MessageCodes.MFS_100, getClass().getName(), deploymentID());
+    }
+
+    /**
+     * Formats the access URI, if necessary.
+     *
+     * @param aAccessURI A supplied IIIF access URI
+     * @return A formatted access URI
+     */
+    protected String formatAccessURI(final String aAccessURI) {
+        return EXT_PATTERN.matcher(aAccessURI).find() ? aAccessURI // If we have an extension, it's a static URI
+                : StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, aAccessURI, Constants.DEFAULT_SAMPLE_SIZE);
     }
 
     /**

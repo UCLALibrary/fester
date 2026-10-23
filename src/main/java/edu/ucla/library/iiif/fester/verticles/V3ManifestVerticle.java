@@ -503,9 +503,8 @@ public class V3ManifestVerticle extends AbstractFesterVerticle {
             final String accessURI = StringUtils.trimToNull(columns[aCsvHeaders.getContentAccessUrlIndex()]);
 
             final String serviceURI = accessURI == null ? pageURI : accessURI;
-            final String resourceURI = accessURI == null
-                    ? StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, pageURI, Constants.DEFAULT_SAMPLE_SIZE)
-                    : StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, accessURI, Constants.DEFAULT_SAMPLE_SIZE);
+            final String resourceURI = accessURI != null ? formatAccessURI(accessURI)
+                    : StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, pageURI, Constants.DEFAULT_SAMPLE_SIZE);
 
             final String thumbnail;
             final float duration;
