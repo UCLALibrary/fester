@@ -44,6 +44,10 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Install Local Libs with Maven
+        run: |
+          mvn -U -ntp validate
+          
       - name: Release with Maven
         env:
           MAVEN_GITHUB_USERNAME: ${{ secrets.JPV3_GH_USERNAME }}
