@@ -1323,24 +1323,6 @@
     </profile>
   </profiles>
 
-  <!-- Configuration for a SNAPSHOTs repository -->
-  <repositories>
-    <!--
-      GitHub periodically removes SNAPSHOTs so build may fail if the jiiify-presentation SNAPSHOT hasn't been built
-      in awhile. When this happens the jiiify-presentation project needs a SNAPSHOT deployment to generate the jar.
-    -->
-    <repository>
-      <id>github</id>
-      <url>https://maven.pkg.github.com/freelibrary/jiiify-presentation</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-    </repository>
-  </repositories>
-
   <parent>
     <artifactId>freelib-parent</artifactId>
     <groupId>info.freelibrary</groupId>
