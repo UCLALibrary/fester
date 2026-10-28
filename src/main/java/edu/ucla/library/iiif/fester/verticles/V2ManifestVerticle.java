@@ -257,7 +257,7 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
             sequence.addCanvas(createCanvases(csvHeaders, pageList, imageHost, placeholderImage, encodedWorkID));
         } else {
             CsvParser.getMetadata(workRow, csvHeaders.getContentAccessUrlIndex())
-                    .ifPresent(ThrowingConsumer.sneaky(accessURL -> {
+                    .ifPresent(ThrowingConsumer.uncheck(accessURL -> {
                         final List<String[]> pageList = new ArrayList<>(1);
 
                         pageList.add(workRow);
@@ -496,9 +496,8 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
             Canvas canvas;
 
             final String serviceURI = accessURI == null ? pageURI : accessURI;
-            final String resourceURI = accessURI == null
-                    ? StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, pageURI, Constants.DEFAULT_SAMPLE_SIZE)
-                    : StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, accessURI, Constants.DEFAULT_SAMPLE_SIZE);
+            final String resourceURI = accessURI != null ? formatAccessURI(accessURI)
+                    : StringUtils.format(Constants.SAMPLE_URI_TEMPLATE, pageURI, Constants.DEFAULT_SAMPLE_SIZE);
 
             try {
                 final Optional<String> width = CsvParser.getMetadata(columns, aCsvHeaders.getMediaWidthIndex());

@@ -39,6 +39,10 @@ jobs:
         with:
           maven-version: 3.6.3
 
+      - name: Install Local Libs with Maven
+        run: |
+          mvn -U -ntp validate
+          
       - name: Build with Maven
         env:
           MAVEN_USERNAME: ${{ secrets.JPV3_GH_USERNAME }}
