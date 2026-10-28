@@ -257,7 +257,7 @@ public class V2ManifestVerticle extends AbstractFesterVerticle {
             sequence.addCanvas(createCanvases(csvHeaders, pageList, imageHost, placeholderImage, encodedWorkID));
         } else {
             CsvParser.getMetadata(workRow, csvHeaders.getContentAccessUrlIndex())
-                    .ifPresent(ThrowingConsumer.sneaky(accessURL -> {
+                    .ifPresent(ThrowingConsumer.uncheck(accessURL -> {
                         final List<String[]> pageList = new ArrayList<>(1);
 
                         pageList.add(workRow);
